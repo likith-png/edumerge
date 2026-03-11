@@ -19,7 +19,8 @@ function initTables() {
       email TEXT UNIQUE NOT NULL,
       role TEXT NOT NULL,
       department TEXT NOT NULL,
-      joining_date TEXT
+      joining_date TEXT,
+      salary REAL DEFAULT 0
     )`);
 
     // Exits Table
@@ -176,6 +177,27 @@ function initTables() {
       FOREIGN KEY (exit_id) REFERENCES exits (id)
     )`);
 
+    // Research Publications Table
+    db.run(`CREATE TABLE IF NOT EXISTS research_publications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      employee_id INTEGER NOT NULL,
+      title TEXT NOT NULL,
+      type TEXT NOT NULL, -- Journal, Conference, Book, Book Chapter
+      journal_name TEXT,
+      impact_factor REAL,
+      authorship TEXT NOT NULL, -- Principal, Corresponding, Co-Author
+      date TEXT NOT NULL,
+      status TEXT DEFAULT 'Pending Approval', -- Draft, Pending Approval, Approved, Rejected
+      reviewer_comments TEXT,
+      submission_mode TEXT DEFAULT 'Online', -- Online, Offline
+      attachment_path TEXT,
+      approved_by INTEGER,
+      approved_at TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (employee_id) REFERENCES employees (id)
+    )`);
+
     // Assets Table (Mock Asset Management Module)
     db.run(`CREATE TABLE IF NOT EXISTS assets (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -195,13 +217,13 @@ function initTables() {
       }
       if (row.count === 0) {
         console.log("Seeding dummy employees...");
-        const stmt = db.prepare("INSERT INTO employees (name, email, role, department, joining_date, status, designation) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        stmt.run("Ms. Reshma Binu Prasad", "reshma@example.com", "Faculty", "Computer Science", "2024-01-10", "Probation", "Asst. Professor");
-        stmt.run("Ms. Sanchaiyata Majumdar", "sanchaiyata@example.com", "Faculty", "Computer Science", "2024-01-15", "Probation", "Lecturer");
-        stmt.run("Dr. R Sedhunivas", "sedhunivas@example.com", "Admin", "Administration", "2023-11-20", "Probation", "Registrar");
-        stmt.run("Dr. Ranjita Saikia", "ranjita@example.com", "Faculty", "Science", "2023-10-01", "Probation", "Professor");
-        stmt.run("Mr. Manjit Singh", "manjit@example.com", "Faculty", "Physical Education", "2024-02-01", "Probation", "Instructor");
-        stmt.run("Mr. Edwin Vimal A", "edwin@example.com", "Faculty", "Mathematics", "2023-12-15", "Probation", "Lecturer");
+        const stmt = db.prepare("INSERT INTO employees (name, email, role, department, joining_date, status, designation, salary) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        stmt.run("Ms. Reshma Binu Prasad", "reshma@example.com", "Faculty", "Computer Science", "2024-01-10", "Probation", "Asst. Professor", 75000);
+        stmt.run("Ms. Sanchaiyata Majumdar", "sanchaiyata@example.com", "Faculty", "Computer Science", "2024-01-15", "Probation", "Lecturer", 55000);
+        stmt.run("Dr. R Sedhunivas", "sedhunivas@example.com", "Admin", "Administration", "2023-11-20", "Probation", "Registrar", 95000);
+        stmt.run("Dr. Ranjita Saikia", "ranjita@example.com", "Faculty", "Science", "2023-10-01", "Probation", "Professor", 120000);
+        stmt.run("Mr. Manjit Singh", "manjit@example.com", "Faculty", "Physical Education", "2024-02-01", "Probation", "Instructor", 45000);
+        stmt.run("Mr. Edwin Vimal A", "edwin@example.com", "Faculty", "Mathematics", "2023-12-15", "Probation", "Lecturer", 55000);
         stmt.finalize();
 
         // Seed Assets for first employee (Ms. Reshma Binu Prasad, id = 1)
@@ -324,7 +346,8 @@ function initTables() {
     const employeeMigration = [
       "ALTER TABLE employees ADD COLUMN status TEXT DEFAULT 'Active'",
       "ALTER TABLE employees ADD COLUMN designation TEXT",
-      "ALTER TABLE employees ADD COLUMN institution TEXT"
+      "ALTER TABLE employees ADD COLUMN institution TEXT",
+      "ALTER TABLE employees ADD COLUMN salary REAL DEFAULT 0"
     ];
 
     employeeMigration.forEach(sql => {
@@ -360,6 +383,18 @@ function initTables() {
       decision_date TEXT DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (employee_id) REFERENCES employees (id)
     )`);
+
+    // Seed dummy research data
+    db.get("SELECT count(*) as count FROM research_publications", (err, row: any) => {
+      if (!err && row.count === 0) {
+        console.log("Seeding dummy research publications...");
+        const stmt = db.prepare("INSERT INTO research_publications (employee_id, title, type, journal_name, impact_factor, authorship, date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        stmt.run(1, "Deep Learning in Predictive Analytics", "Journal", "IEEE Transactions", 4.2, "Principal", "2024-01-15", "Approved");
+        stmt.run(1, "Edge Computing for Smart Cities", "Conference", "ICCE 2023", 0, "Co-Author", "2023-11-20", "Approved");
+        stmt.run(2, "AI for Sustainable Energy", "Journal", "Renewable Energy Focus", 3.5, "Principal", "2024-02-10", "Pending Approval");
+        stmt.finalize();
+      }
+    });
 
   });
 }

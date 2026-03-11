@@ -17,7 +17,8 @@ import {
     Users,
     BrainCircuit,
     PieChart,
-    Calendar
+    Calendar,
+    XCircle
 } from 'lucide-react';
 import { usePersona } from '../contexts/PersonaContext';
 import EmployeeDashboard from './EmployeeDashboard';
@@ -172,9 +173,21 @@ const categories = [
 const Dashboard: React.FC = () => {
     const navigate = useNavigate();
     const { role, user } = usePersona();
+    const [searchQuery, setSearchQuery] = React.useState("");
 
     const isEmployee = role === 'EMPLOYEE';
     const isManager = role === 'MANAGER';
+
+    const filteredCategories = searchQuery 
+        ? categories.map(cat => ({
+            ...cat,
+            modules: cat.modules.filter(mod => 
+                mod.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                mod.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                cat.name.toLowerCase().includes(searchQuery.toLowerCase())
+            )
+        })).filter(cat => cat.modules.length > 0)
+        : categories;
 
     return (
         <Layout
@@ -194,12 +207,35 @@ const Dashboard: React.FC = () => {
                         <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-600 rounded-full blur-3xl opacity-10 -ml-32 -mb-32"></div>
 
                         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                            <div>
+                            <div className="flex-1 w-full md:w-auto text-left">
                                 <h2 className="text-3xl font-black tracking-tight mb-2">Welcome Back, HR Team</h2>
-                                <p className="text-slate-400 font-medium max-w-md">
-                                    You have 4 pending approvals and 12 upcoming onboarding sessions this week.
+                                <p className="text-slate-400 font-medium max-w-md mb-6">
                                     Let's streamline your workforce operations.
                                 </p>
+
+                                {/* Module Search */}
+                                <div className="max-w-md relative group">
+                                    <div className="absolute inset-y-0 left-0 pl-1.5 flex items-center pointer-events-none transition-all group-focus-within:pl-4">
+                                        <div className="p-2 rounded-lg bg-white/5 border border-white/10">
+                                            <Network className="h-4 w-4 text-slate-400" />
+                                        </div>
+                                    </div>
+                                    <input
+                                        type="text"
+                                        placeholder="Search modules or submodules..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="block w-full bg-white/5 border border-white/10 rounded-2xl py-3.5 pl-14 pr-4 text-sm font-bold placeholder:text-slate-500 transition-all focus:bg-white/10 focus:ring-2 focus:ring-blue-500/50 outline-none"
+                                    />
+                                    {searchQuery && (
+                                        <button 
+                                            onClick={() => setSearchQuery("")}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-full bg-white/10 hover:bg-white/20 text-slate-400"
+                                        >
+                                            <XCircle className="w-4 h-4" />
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10">
                                 <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1 text-center md:text-left">Current System Status</div>
@@ -219,7 +255,15 @@ const Dashboard: React.FC = () => {
                     </div>
 
                     {/* Categorized Modules */}
-                    {categories.map((category) => (
+                    {filteredCategories.length === 0 ? (
+                        <div className="text-center py-20 bg-slate-50 rounded-[3rem] border border-dashed border-slate-200">
+                             <div className="p-4 rounded-3xl bg-white shadow-sm inline-block mb-4">
+                                <Network className="w-8 h-8 text-slate-300" />
+                             </div>
+                             <h4 className="font-black text-slate-800 tracking-tight">No modules found</h4>
+                             <p className="text-sm text-slate-500 font-medium">Try searching for something else, like "Onboarding" or "Academics"</p>
+                        </div>
+                    ) : filteredCategories.map((category) => (
                         <div key={category.name} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                             <div className="flex items-center gap-3 mb-6">
                                 <div className={`p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-slate-200`}>

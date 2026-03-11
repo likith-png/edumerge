@@ -1,6 +1,6 @@
 // Calculate settlement for an exit
 export const calculateSettlement = async (exitId: number, overrides?: any) => {
-    const response = await fetch(`/api/exits/${exitId}/settlement/calculate`, {
+    const response = await fetch(`/api/exit/${exitId}/settlement/calculate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(overrides || {})
@@ -11,14 +11,14 @@ export const calculateSettlement = async (exitId: number, overrides?: any) => {
 
 // Get settlement details for an exit
 export const getSettlementDetails = async (exitId: number) => {
-    const response = await fetch(`/api/exits/${exitId}/settlement`);
+    const response = await fetch(`/api/exit/${exitId}/settlement`);
     if (!response.ok) throw new Error('Settlement not found');
     return response.json();
 };
 
 // Update settlement values (HR can modify)
 export const updateSettlement = async (exitId: number, data: any) => {
-    const response = await fetch(`/api/exits/${exitId}/settlement`, {
+    const response = await fetch(`/api/exit/${exitId}/settlement`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -29,7 +29,7 @@ export const updateSettlement = async (exitId: number, data: any) => {
 
 // Approve settlement
 export const approveSettlement = async (exitId: number, approvedBy?: number) => {
-    const response = await fetch(`/api/exits/${exitId}/settlement/approve`, {
+    const response = await fetch(`/api/exit/${exitId}/settlement/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ approved_by: approvedBy || 1 })
@@ -40,7 +40,7 @@ export const approveSettlement = async (exitId: number, approvedBy?: number) => 
 
 // Process payment (mark as paid)
 export const processPayment = async (exitId: number, paymentReference: string) => {
-    const response = await fetch(`/api/exits/${exitId}/settlement/process`, {
+    const response = await fetch(`/api/exit/${exitId}/settlement/process`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ payment_reference: paymentReference })
@@ -51,7 +51,7 @@ export const processPayment = async (exitId: number, paymentReference: string) =
 
 // Send settlement notification to employee
 export const sendSettlementNotification = async (exitId: number) => {
-    const response = await fetch(`/api/exits/${exitId}/settlement/notify`, {
+    const response = await fetch(`/api/exit/${exitId}/settlement/notify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
     });

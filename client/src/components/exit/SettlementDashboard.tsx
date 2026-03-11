@@ -237,6 +237,7 @@ const SettlementDashboard: React.FC<SettlementDashboardProps> = ({ exitId, viewM
                     <CardContent className="p-6">
                         <div className="space-y-4">
                             {[
+                                { label: 'Salary Due', value: settlement.salary_due, detail: 'Pro-rata salary' },
                                 { label: 'Leave Encashment', value: settlement.leave_encashment, detail: `${settlement.pending_leaves || 0} days` },
                                 { label: 'Bonus', value: settlement.bonus, detail: settlement.bonus_remarks },
                                 { label: 'Gratuity', value: settlement.gratuity, detail: settlement.gratuity_eligible ? `${settlement.years_of_service} years` : 'Not eligible' },

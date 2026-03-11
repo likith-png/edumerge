@@ -672,35 +672,6 @@ router.get('/analytics/dashboard', (req, res) => {
 
 // --- Final Settlement APIs ---
 
-// Get Settlement Details
-router.get('/:id/settlement', (req, res) => {
-    const exitId = req.params.id;
-    db.get(`SELECT * FROM final_settlements WHERE exit_id = ?`, [exitId], (err, row) => {
-        if (err) return res.status(500).json({ error: err.message });
-
-        if (!row) {
-            // Create initial mock settlement
-            // For demo, we'll calculate random dues
-            const dummySettlement = {
-                salary_due: 45000,
-                leave_encashment: 12000,
-                bonus: 5000,
-                deductions: 0,
-                net_payable: 62000
-            };
-            const insertSql = `INSERT INTO final_settlements (exit_id, salary_due, leave_encashment, bonus, deductions, net_payable) VALUES (?, ?, ?, ?, ?, ?)`;
-            db.run(insertSql, [exitId, dummySettlement.salary_due, dummySettlement.leave_encashment, dummySettlement.bonus, dummySettlement.deductions, dummySettlement.net_payable], function (err) {
-                if (err) return res.status(500).json({ error: err.message });
-                // Return the newly created row
-                db.get(`SELECT * FROM final_settlements WHERE id = ?`, [this.lastID], (err, newRow) => {
-                    res.json({ data: newRow });
-                });
-            });
-        } else {
-            res.json({ data: row });
-        }
-    });
-});
 
 // Update Settlement
 router.patch('/settlement/:id', (req, res) => {
@@ -788,10 +759,15 @@ router.patch('/:id/waiver-approve', (req, res) => {
 
 // Helper function to calculate settlement
 function calculateSettlementAmounts(employee: any, exit: any, inputData: any = {}) {
-    const monthlySalary = inputData.monthly_salary || 50000; // Default or from employee record
+    const monthlySalary = inputData.monthly_salary || employee.salary || 50000;
     const joiningDate = new Date(employee.joining_date || new Date());
     const exitDate = new Date(exit.lwd_approved || exit.lwd_proposed);
     const yearsOfService = (exitDate.getTime() - joiningDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+
+    // 0. Salary Due (Pro-rata for the last month)
+    const lastDayOfMonth = new Date(exitDate.getFullYear(), exitDate.getMonth() + 1, 0).getDate();
+    const daysWorkedInLastMonth = exitDate.getDate();
+    const salaryDue = (monthlySalary / lastDayOfMonth) * daysWorkedInLastMonth;
 
     // 1. Leave Encashment
     const pendingLeaves = inputData.pending_leaves || 0;
@@ -799,7 +775,11 @@ function calculateSettlementAmounts(employee: any, exit: any, inputData: any = {
     const leaveEncashment = pendingLeaves * dailyRate;
 
     // 2. Bonus (Pro-rated for current financial year)
-    const fiscalYearStart = new Date(exitDate.getFullYear(), 3, 1); // April 1st
+    let fiscalYearStart = new Date(exitDate.getFullYear(), 3, 1); // April 1st of current year
+    if (exitDate < fiscalYearStart) {
+        // If exitDate is before April 1st, fiscal year started previous year
+        fiscalYearStart = new Date(exitDate.getFullYear() - 1, 3, 1);
+    }
     const monthsWorked = inputData.months_worked || Math.min(
         12,
         Math.floor((exitDate.getTime() - fiscalYearStart.getTime()) / (1000 * 60 * 60 * 24 * 30))
@@ -826,14 +806,14 @@ function calculateSettlementAmounts(employee: any, exit: any, inputData: any = {
 
     // 6. Deductions
     let noticeShortfallDeduction = 0;
-    if (exit.waiver_approved !== 1 && exit.shortfall_days > 0) {
-        noticeShortfallDeduction = (exit.shortfall_days / 30) * monthlySalary;
+    if (exit.waiver_approved !== 1 && (exit.shortfall_days || 0) > 0) {
+        noticeShortfallDeduction = ((exit.shortfall_days || 0) / 30) * monthlySalary;
     }
     const advanceDeductions = inputData.advance_deductions || 0;
     const otherDeductions = inputData.other_deductions || 0;
 
     // 7. Calculate Totals
-    const grossSettlement = leaveEncashment + bonus + gratuity + pfAmount + esiAmount + otherDues;
+    const grossSettlement = salaryDue + leaveEncashment + bonus + gratuity + pfAmount + esiAmount + otherDues;
     const totalDeductions = noticeShortfallDeduction + advanceDeductions + otherDeductions;
     const netSettlement = grossSettlement - totalDeductions;
 
@@ -841,6 +821,7 @@ function calculateSettlementAmounts(employee: any, exit: any, inputData: any = {
         monthly_salary: monthlySalary,
         years_of_service: parseFloat(yearsOfService.toFixed(2)),
         joining_date: employee.joining_date,
+        salary_due: parseFloat(salaryDue.toFixed(2)),
         pending_leaves: pendingLeaves,
         leave_encashment: parseFloat(leaveEncashment.toFixed(2)),
         bonus: parseFloat(bonus.toFixed(2)),
@@ -893,7 +874,8 @@ router.post('/:id/settlement/calculate', (req, res) => {
                     other_dues = ?, other_dues_remarks = ?,
                     notice_shortfall_deduction = ?, advance_deductions = ?,
                     other_deductions = ?, deduction_remarks = ?,
-                    gross_settlement = ?, total_deductions = ?, net_settlement = ?,
+                    gross_settlement = ?, total_deductions = ?, net_settlement = ?, net_payable = ?,
+                    salary_due = ?,
                     calculated_by = ?, calculated_date = ?, status = 'Calculated',
                     updated_at = ?
                     WHERE exit_id = ?`;
@@ -907,7 +889,8 @@ router.post('/:id/settlement/calculate', (req, res) => {
                     calculated.other_dues, calculated.other_dues_remarks,
                     calculated.notice_shortfall_deduction, calculated.advance_deductions,
                     calculated.other_deductions, calculated.deduction_remarks,
-                    calculated.gross_settlement, calculated.total_deductions, calculated.net_settlement,
+                    calculated.gross_settlement, calculated.total_deductions, calculated.net_settlement, calculated.net_settlement,
+                    calculated.salary_due,
                     calculatedBy, currentDate, currentDate, id
                 ];
 
@@ -927,9 +910,10 @@ router.post('/:id/settlement/calculate', (req, res) => {
                     other_dues, other_dues_remarks,
                     notice_shortfall_deduction, advance_deductions,
                     other_deductions, deduction_remarks,
-                    gross_settlement, total_deductions, net_settlement,
+                    gross_settlement, total_deductions, net_settlement, net_payable,
+                    salary_due,
                     status, calculated_by, calculated_date, created_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Calculated', ?, ?, ?)`;
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Calculated', ?, ?, ?)`;
 
                 const params = [
                     id, record.employee_id,
@@ -941,7 +925,8 @@ router.post('/:id/settlement/calculate', (req, res) => {
                     calculated.other_dues, calculated.other_dues_remarks,
                     calculated.notice_shortfall_deduction, calculated.advance_deductions,
                     calculated.other_deductions, calculated.deduction_remarks,
-                    calculated.gross_settlement, calculated.total_deductions, calculated.net_settlement,
+                    calculated.gross_settlement, calculated.total_deductions, calculated.net_settlement, calculated.net_settlement,
+                    calculated.salary_due,
                     calculatedBy, currentDate, currentDate
                 ];
 

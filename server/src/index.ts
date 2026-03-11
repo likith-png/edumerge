@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import apiRoutes from './routes/api';
 import exitRoutes from './routes/exit';
 import employeeRoutes from './routes/employee';
+import researchRoutes from './routes/research';
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ import probationRoutes from './routes/probation';
 app.use('/api', apiRoutes);
 app.use('/api/exit', exitRoutes);
 app.use('/api/employee', employeeRoutes);
+app.use('/api/research', researchRoutes);
 app.use('/api/onboarding', onboardingRoutes);
 app.use('/api/talent', talentRoutes);
 app.use('/api/probation', probationRoutes);
