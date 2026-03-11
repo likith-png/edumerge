@@ -130,14 +130,14 @@ export const getTalentStats = async (viewMode: string, startDate?: string, endDa
         exit: exitStats,
         overview: {
             // High level KPIs
-            totalEmployees: Math.round((isGroup ? 1250 : 250) * factor),
-            genderRatio: isGroup ? '60:40' : '55:45',
+            totalEmployees: isGroup ? Math.round(1250 * factor) : 842, // Specific number for standalone
+            genderRatio: isGroup ? '60:40' : '52:48',
             avgAge: 32,
             hiringVsAttrition: [
-                { month: 'Jan', hiring: Math.round(10 * factor), attrition: Math.round(2 * factor) },
-                { month: 'Feb', hiring: Math.round(15 * factor), attrition: Math.round(3 * factor) },
-                { month: 'Mar', hiring: Math.round(12 * factor), attrition: Math.round(1 * factor) },
-                { month: 'Apr', hiring: Math.round(20 * factor), attrition: Math.round(4 * factor) }
+                { month: 'Jan', hiring: isGroup ? 10 : 2, attrition: isGroup ? 2 : 0 },
+                { month: 'Feb', hiring: isGroup ? 15 : 4, attrition: isGroup ? 3 : 1 },
+                { month: 'Mar', hiring: isGroup ? 12 : 5, attrition: isGroup ? 1 : 0 },
+                { month: 'Apr', hiring: isGroup ? 20 : 6, attrition: isGroup ? 4 : 2 }
             ]
         }
     };

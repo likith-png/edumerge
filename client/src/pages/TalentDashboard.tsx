@@ -106,6 +106,12 @@ const TalentDashboard: React.FC = () => {
                                     </h1>
                                     <p className="text-xs text-slate-500">Strategic insights into acquisition & retention</p>
                                 </div>
+                                {viewMode === 'Group' && (
+                                    <div className="hidden lg:flex items-center gap-2 bg-amber-50 border border-amber-200 px-4 py-2 rounded-xl h-fit self-center ml-4">
+                                        <Sparkles className="w-4 h-4 text-amber-500" />
+                                        <span className="text-xs font-bold text-amber-700">Note: This is seed data for the demo account</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
 

@@ -573,8 +573,8 @@ const ProbationDashboard: React.FC = () => {
                                                                     style={{ width: (emp.review_status === 'Confirmed' || emp.review_status === 'Terminated') ? '100%' : `${(empStages.findIndex((s: any) => s.id === emp.currentStageId) / empStages.length) * 100}%` }}
                                                                 />
                                                             </div>
-                                                            <p className={`text-[10px] font-bold text-right uppercase tracking-widest ${emp.review_status === 'Terminated' ? 'text-rose-500' : 'text-slate-400'}`}>
-                                                                {emp.review_status === 'Confirmed' ? 'Converted' : emp.review_status === 'Terminated' ? 'Failed' : 'In Probation'}
+                                                            <p className={`text-[10px] font-bold text-right uppercase tracking-widest ${emp.review_status === 'Terminated' || emp.status === 'Separated' ? 'text-rose-500' : 'text-slate-400'}`}>
+                                                                {emp.review_status === 'Confirmed' ? 'Converted' : emp.review_status === 'Terminated' || emp.status === 'Separated' ? 'Moved to Exit Mgmt' : 'In Probation'}
                                                             </p>
                                                         </div>
 
@@ -587,25 +587,32 @@ const ProbationDashboard: React.FC = () => {
                                                             >
                                                                 Full Profiler
                                                             </Button>
-                                                            <Button
-                                                                className="rounded-2xl bg-slate-900 hover:bg-black text-white font-black text-[10px] uppercase tracking-widest h-12 shadow-xl shadow-slate-100"
-                                                                onClick={() => {
-                                                                    setSelectedEmployee(emp);
-                                                                    const currentConfigs = stageConfigs || {};
-                                                                    // Dynamic stage key - fallback to 'kpi' if not found but prefer actual stage ID
-                                                                    const stageKey = emp.currentStageId || 'kpi';
-                                                                    const points = currentConfigs[stageKey]?.points || [];
+                                                            {emp.review_status === 'Terminated' || emp.status === 'Separated' ? (
+                                                                <Button
+                                                                    className="rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-[10px] uppercase tracking-widest h-12 shadow-xl shadow-rose-100"
+                                                                    onClick={() => alert('Redirecting to Exit Management Module...')}
+                                                                >
+                                                                    Exit Management
+                                                                </Button>
+                                                            ) : (
+                                                                <Button
+                                                                    className="rounded-2xl bg-slate-900 hover:bg-black text-white font-black text-[10px] uppercase tracking-widest h-12 shadow-xl shadow-slate-100"
+                                                                    onClick={() => {
+                                                                        setSelectedEmployee(emp);
+                                                                        const currentConfigs = stageConfigs || {};
+                                                                        const stageKey = emp.currentStageId || 'kpi';
+                                                                        const points = currentConfigs[stageKey]?.points || [];
 
-                                                                    // Initialize ratings
-                                                                    const initialRatings: Record<string, string> = {};
-                                                                    points.forEach((p: any) => initialRatings[p.id] = '3');
+                                                                        const initialRatings: Record<string, string> = {};
+                                                                        points.forEach((p: any) => initialRatings[p.id] = '3');
 
-                                                                    setReviewForm({ feedback: '', ratings: initialRatings });
-                                                                    setActionType('Review');
-                                                                }}
-                                                            >
-                                                                Record Review
-                                                            </Button>
+                                                                        setReviewForm({ feedback: '', ratings: initialRatings });
+                                                                        setActionType('Review');
+                                                                    }}
+                                                                >
+                                                                    Record Review
+                                                                </Button>
+                                                            )}
                                                         </div>
                                                     </CardContent>
                                                 </Card>

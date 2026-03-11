@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Plus, Home } from 'lucide-react';
+import { ArrowLeft, Home } from 'lucide-react';
 import { Button } from './ui/button';
 import { useNavigate } from 'react-router-dom';
 
@@ -66,11 +66,8 @@ const Layout: React.FC<LayoutProps> = ({
                             </div>
                         </div>
 
-                        {/* Action buttons - Placeholder for now */}
+                        {/* Action buttons - Hidden by design request */}
                         <div className="flex items-center gap-2">
-                            <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-                                <Plus className="h-3.5 w-3.5 mr-1.5" />New Action
-                            </Button>
                         </div>
                     </div>
                 </div>

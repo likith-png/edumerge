@@ -7,7 +7,7 @@ import {
     Home, Users, FileText, ShieldCheck, AlertTriangle,
     CheckCircle, Clock, Plus, Search,
     Bell, BookOpen, Settings, BarChart2,
-    ChevronDown, ChevronRight, Zap,
+    ChevronDown, ChevronRight, Zap, GripVertical, Trash2, Edit3, Save,
     UserPlus, XCircle, Eye, X
 } from 'lucide-react';
 import CandidateDetailPanel from './CandidateDetailPanel';
@@ -304,8 +304,22 @@ const OrientationTab: React.FC = () => {
     );
 };
 
-const BGVTab: React.FC = () => (
-    <div className="space-y-4">
+const BGVTab: React.FC<{ candidates: Candidate[] }> = ({ candidates }) => {
+    const initiatedFromList = candidates
+        .filter(c => c.bgvStatus !== 'Pending')
+        .map(c => ({
+            id: c.id,
+            name: c.name,
+            type: 'Direct (Self)',
+            status: c.bgvStatus === 'In Progress' ? 'In Progress' : c.bgvStatus === 'Cleared' ? 'Cleared' : 'Flagged',
+            checks: ['Identity', 'Education'],
+            submitted: new Date().toISOString().split('T')[0]
+        }));
+
+    const allBgv = [...initiatedFromList, ...bgvCandidates];
+
+    return (
+        <div className="space-y-4">
         <div className="grid grid-cols-3 gap-4 mb-6">
             {[{ label: 'Cleared', count: 1, color: 'text-emerald-600 bg-emerald-50' }, { label: 'In Progress', count: 2, color: 'text-amber-600 bg-amber-50' }, { label: 'Flagged', count: 1, color: 'text-rose-600 bg-rose-50' }].map(s => (
                 <Card key={s.label} className="border-none shadow-sm">
@@ -322,7 +336,7 @@ const BGVTab: React.FC = () => (
             </CardHeader>
             <CardContent className="p-0">
                 <div className="divide-y divide-slate-50">
-                    {bgvCandidates.map(c => (
+                    {allBgv.map(c => (
                         <div key={c.id} className="p-4 flex items-start gap-4 hover:bg-slate-50/80 transition-colors">
                             <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600 shrink-0">{c.name.charAt(0)}</div>
                             <div className="flex-1">
@@ -346,7 +360,8 @@ const BGVTab: React.FC = () => (
             </CardContent>
         </Card>
     </div>
-);
+    );
+};
 
 const SLATab: React.FC = () => (
     <div className="space-y-4">
@@ -391,6 +406,9 @@ const ConfigTab: React.FC = () => {
     const [wfStages, setWfStages] = useState([
         'Offer Accepted', 'Details & Documentation', 'Orientation Program', 'Operational Checklist', 'Background Verification', 'Onboarding Sign-Off', 'Probation Activation'
     ]);
+    const [editingIndex, setEditingIndex] = useState<number | null>(null);
+    const [editValue, setEditValue] = useState('');
+    const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
     const [slaValues, setSlaValues] = useState({ 
         documentation: 7, orientation: 14, checklist: 5, bgv: 14, signoff: 3,
         l1Escalation: 2, l2Escalation: 5 
@@ -399,26 +417,98 @@ const ConfigTab: React.FC = () => {
     const [bgvEnabled, setBgvEnabled] = useState(true);
     const [bgvMode, setBgvMode] = useState<'manual' | 'api'>('api');
 
+    const handleDragStart = (index: number) => setDraggedIndex(index);
+    const handleDragOver = (e: React.DragEvent) => e.preventDefault();
+    const handleDrop = (index: number) => {
+        if (draggedIndex === null) return;
+        const newStages = [...wfStages];
+        const [removed] = newStages.splice(draggedIndex, 1);
+        newStages.splice(index, 0, removed);
+        setWfStages(newStages);
+        setDraggedIndex(null);
+    };
+
+    const addStage = () => {
+        const name = prompt('Enter stage name:');
+        if (name) setWfStages([...wfStages, name]);
+    };
+
+    const deleteStage = (index: number) => {
+        if (confirm('Delete this stage?')) {
+            setWfStages(wfStages.filter((_, i) => i !== index));
+        }
+    };
+
+    const startEdit = (index: number) => {
+        setEditingIndex(index);
+        setEditValue(wfStages[index]);
+    };
+
+    const saveEdit = () => {
+        if (editingIndex !== null) {
+            const newStages = [...wfStages];
+            newStages[editingIndex] = editValue;
+            setWfStages(newStages);
+            setEditingIndex(null);
+        }
+    };
+
     return (
         <div className="space-y-6">
             {/* Workflow Engine */}
             <Card className="border-none shadow-sm bg-white/80 backdrop-blur-xl">
-                <CardHeader className="pb-3 border-b border-slate-100">
+                <CardHeader className="pb-3 border-b border-slate-100 flex flex-row items-center justify-between">
                     <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2"><Zap className="w-4 h-4 text-indigo-500" /> Custom Workflow Engine</CardTitle>
+                    <Button size="sm" variant="outline" onClick={addStage} className="h-8 text-xs gap-1 border-dashed">
+                        <Plus className="w-3 h-3" /> Add Stage
+                    </Button>
                 </CardHeader>
                 <CardContent className="p-4">
                     <div className="flex flex-col gap-2">
                         {wfStages.map((s, i) => (
-                            <div key={i} className="flex items-center gap-3 bg-slate-50 rounded-xl px-4 py-2.5 group">
+                            <div 
+                                key={i} 
+                                draggable 
+                                onDragStart={() => handleDragStart(i)}
+                                onDragOver={handleDragOver}
+                                onDrop={() => handleDrop(i)}
+                                className={`flex items-center gap-3 bg-slate-50 rounded-xl px-4 py-2.5 group transition-all border ${draggedIndex === i ? 'opacity-40 border-indigo-300' : 'border-transparent hover:border-slate-200 shadow-sm hover:shadow'}`}
+                            >
+                                <div className="cursor-grab active:cursor-grabbing text-slate-400 group-hover:text-indigo-500 transition-colors">
+                                    <GripVertical className="w-4 h-4" />
+                                </div>
                                 <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-black shrink-0">{i + 1}</div>
-                                <span className="flex-1 text-sm font-semibold text-slate-800">{s}</span>
+                                
+                                {editingIndex === i ? (
+                                    <input 
+                                        autoFocus
+                                        className="flex-1 text-sm font-semibold text-slate-800 bg-white px-2 py-1 rounded border border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                                        value={editValue}
+                                        onChange={e => setEditValue(e.target.value)}
+                                        onKeyDown={e => e.key === 'Enter' && saveEdit()}
+                                    />
+                                ) : (
+                                    <span className="flex-1 text-sm font-semibold text-slate-800">{s}</span>
+                                )}
+
                                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {i > 0 && <button className="text-slate-400 hover:text-indigo-600 text-xs px-1" onClick={() => { const a = [...wfStages];[a[i - 1], a[i]] = [a[i], a[i - 1]]; setWfStages(a); }}>↑</button>}
-                                    {i < wfStages.length - 1 && <button className="text-slate-400 hover:text-indigo-600 text-xs px-1" onClick={() => { const a = [...wfStages];[a[i], a[i + 1]] = [a[i + 1], a[i]]; setWfStages(a); }}>↓</button>}
+                                    {editingIndex === i ? (
+                                        <button className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg" onClick={saveEdit}>
+                                            <Save className="w-3.5 h-3.5" />
+                                        </button>
+                                    ) : (
+                                        <button className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-white rounded-lg" onClick={() => startEdit(i)}>
+                                            <Edit3 className="w-3.5 h-3.5" />
+                                        </button>
+                                    )}
+                                    <button className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-white rounded-lg" onClick={() => deleteStage(i)}>
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
                                 </div>
                             </div>
                         ))}
                     </div>
+                    <p className="text-[10px] text-slate-500 mt-4 text-center italic">Drag and drop sequences to reorganize the onboarding lifecycle</p>
                 </CardContent>
             </Card>
 
@@ -674,7 +764,7 @@ const OnboardingProDashboard: React.FC = () => {
                 {/* Active Tab Content */}
                 {activeTab === 'overview' && <OverviewTab candidates={filtered} onInitiate={() => setShowInitiate(true)} onSelectCandidate={setSelectedCandidate} onStageFilter={setStageFilter} onStageFilterCurrent={stageFilter} />}
                 {activeTab === 'orientation' && <OrientationTab />}
-                {activeTab === 'bgv' && <BGVTab />}
+                {activeTab === 'bgv' && <BGVTab candidates={candidates} />}
                 {activeTab === 'sla' && <SLATab />}
                 {activeTab === 'config' && <ConfigTab />}
             </div>

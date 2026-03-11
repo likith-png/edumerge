@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
     Building2, Map, Bus, BedDouble, AlertTriangle,
     Plus, ArrowRight, Search, Filter,
-    Activity, Zap
+    Activity, Zap, X
 } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 
@@ -35,6 +35,7 @@ const maintenanceAlerts = [
 const InfraSpaceModule: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'academic' | 'residential' | 'transport'>('academic');
     const [searchQuery, setSearchQuery] = useState('');
+    const [selectedHostel, setSelectedHostel] = useState<any>(null);
 
     const renderAcademicSpace = () => (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -176,7 +177,7 @@ const InfraSpaceModule: React.FC = () => {
 
                                 <div className="pt-2 border-t border-slate-100 flex justify-between items-center">
                                     <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded">{hostel.gender}</span>
-                                    <button onClick={() => alert("Opening Hostel Details...")} className="text-sm font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                                    <button onClick={() => setSelectedHostel(hostel)} className="text-sm font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                                         Details <ArrowRight className="w-4 h-4" />
                                     </button>
                                 </div>
@@ -307,6 +308,135 @@ const InfraSpaceModule: React.FC = () => {
                             </button>
                             {/* Decorative grid pattern */}
                             <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none opacity-20"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Modal Overlay */}
+            {selectedHostel && (
+                <HostelDetailsModal 
+                    hostel={selectedHostel} 
+                    onClose={() => setSelectedHostel(null)} 
+                />
+            )}
+        </div>
+    );
+};
+
+// ─── Shared Components ────────────────────────────────────────────────────────
+
+const HostelDetailsModal: React.FC<{ hostel: any; onClose: () => void }> = ({ hostel, onClose }) => {
+    if (!hostel) return null;
+
+    const rooms = [
+        { type: 'Single Room', total: 50, occupied: 48, rate: '₹1,20,000/yr' },
+        { type: 'Double Sharing', total: 100, occupied: 105, rate: '₹85,000/yr' },
+        { type: 'Triple Sharing', total: 80, occupied: 80, rate: '₹65,000/yr' },
+        { type: 'Studio Apartment', total: 20, occupied: 15, rate: '₹1,80,000/yr' }
+    ];
+
+    const residents = [
+        { id: 'STU101', name: 'Arjun Kumar', room: 'A-201', dept: 'B.Tech CS', status: 'In' },
+        { id: 'STU102', name: 'Sneha Reddy', room: 'B-105', dept: 'BBA', status: 'Out' },
+        { id: 'STU103', name: 'Rahul Verma', room: 'A-304', dept: 'MBA', status: 'In' },
+        { id: 'STU104', name: 'Priya Singh', room: 'C-212', dept: 'B.Arch', status: 'In' }
+    ];
+
+    return (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-300 p-4">
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300">
+                {/* Header */}
+                <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-indigo-600 text-white">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
+                            <BedDouble className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-bold">{hostel.name} - Unit Intelligence</h3>
+                            <p className="text-indigo-100 text-xs font-medium uppercase tracking-widest">{hostel.gender} Resident Focus</p>
+                        </div>
+                    </div>
+                    <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-xl transition-colors">
+                        <X className="w-6 h-6" />
+                    </button>
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto p-8 grid grid-cols-1 lg:grid-cols-3 gap-8 bg-slate-50/50">
+                    {/* Column 1: Capacity & Rates */}
+                    <div className="space-y-6">
+                        <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">Occupancy Breakdown</h4>
+                        <div className="space-y-3">
+                            {rooms.map((r, i) => (
+                                <div key={i} className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div className="font-bold text-slate-800 text-sm">{r.type}</div>
+                                        <div className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">{r.rate}</div>
+                                    </div>
+                                    <div className="flex justify-between text-xs text-slate-500 mb-1">
+                                        <span>Utilized: {r.occupied} / {r.total}</span>
+                                        <span className={r.occupied > r.total ? 'text-red-500 font-bold' : ''}>{Math.round((r.occupied / r.total) * 100)}%</span>
+                                    </div>
+                                    <div className="w-full bg-slate-100 rounded-full h-1.5">
+                                        <div className={`h-1.5 rounded-full ${r.occupied > r.total ? 'bg-red-500' : 'bg-indigo-500'}`} style={{ width: `${Math.min((r.occupied / r.total) * 100, 100)}%` }}></div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Column 2: Resident Logs */}
+                    <div className="lg:col-span-2 space-y-6">
+                        <div className="flex justify-between items-center">
+                            <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">Active Residents (Current Batch)</h4>
+                            <div className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                <span className="text-[10px] font-bold text-slate-500 uppercase">324 In Campus</span>
+                            </div>
+                        </div>
+                        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                            <table className="w-full text-sm text-left">
+                                <thead className="bg-slate-50 text-slate-500 uppercase text-[10px] font-black tracking-widest border-b border-slate-200">
+                                    <tr>
+                                        <th className="px-4 py-3">Student Name</th>
+                                        <th className="px-4 py-3">ID / Room</th>
+                                        <th className="px-4 py-3">Department</th>
+                                        <th className="px-4 py-3 text-right">Gate Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                    {residents.map((res, i) => (
+                                        <tr key={i} className="hover:bg-slate-50 transition-colors">
+                                            <td className="px-4 py-3">
+                                                <div className="font-bold text-slate-800">{res.name}</div>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <div className="text-slate-600 font-medium">{res.id}</div>
+                                                <div className="text-[10px] text-indigo-500 font-bold">Room {res.room}</div>
+                                            </td>
+                                            <td className="px-4 py-3 text-slate-500 text-xs">{res.dept}</td>
+                                            <td className="px-4 py-3 text-right">
+                                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${res.status === 'In' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                                                    {res.status}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div className="flex gap-4">
+                            <div className="flex-1 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
+                                <div className="p-2 bg-amber-50 text-amber-600 rounded-xl"><AlertTriangle className="w-5 h-5" /></div>
+                                <div>
+                                    <div className="text-xs font-bold text-slate-800">12 Pending Maintenance Issues</div>
+                                    <p className="text-[10px] text-slate-500">Electricity & Plumbing reported in Unit A</p>
+                                </div>
+                            </div>
+                            <button className="px-6 bg-slate-900 text-white rounded-2xl font-bold text-xs hover:bg-black transition-colors">
+                                View Master Register
+                            </button>
                         </div>
                     </div>
                 </div>

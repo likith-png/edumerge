@@ -224,7 +224,7 @@ const ReportsDashboard: React.FC = () => {
                                 <FileText className="w-6 h-6" />
                             </div>
                             <div>
-                                <div className="text-2xl font-black text-slate-800">42</div>
+                                <div className="text-2xl font-black text-slate-800">128</div>
                                 <div className="text-xs font-medium text-slate-500">Reports Generated Today</div>
                             </div>
                         </CardContent>
@@ -235,7 +235,7 @@ const ReportsDashboard: React.FC = () => {
                                 <Sheet className="w-6 h-6" />
                             </div>
                             <div>
-                                <div className="text-2xl font-black text-slate-800">128</div>
+                                <div className="text-2xl font-black text-slate-800">{mockReports.length}</div>
                                 <div className="text-xs font-medium text-slate-500">Total Predefined Templates</div>
                             </div>
                         </CardContent>

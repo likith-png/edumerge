@@ -141,6 +141,10 @@ const CandidateDetailPanel: React.FC<Props> = ({ candidate, onClose, onUpdate })
     // New Document Verification State
     const [showDocsModal, setShowDocsModal] = useState(false);
     const [docStatuses, setDocStatuses] = useState({ aadhar: false, degree: false, photos: false });
+    const [showDocViewer, setShowDocViewer] = useState<string | null>(null);
+    const [showLndModal, setShowLndModal] = useState(false);
+    const [showChecklistModal, setShowChecklistModal] = useState(false);
+    const [showBgvReportModal, setShowBgvReportModal] = useState(false);
 
     const logAction = (label: string) => {
         const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
@@ -261,18 +265,15 @@ const CandidateDetailPanel: React.FC<Props> = ({ candidate, onClose, onUpdate })
                                                     if (action.label === 'Review Pending') {
                                                         setShowDocsModal(true);
                                                         return;
-                                                    } else if (action.label === 'Approve Docs') {
-                                                        updated.stageNum = 3; updated.stage = 'Orientation'; updated.status = 'On Track'; updated.docsPending = 0;
-                                                    } else if (action.label === 'Mark Attendance') {
-                                                        updated.stageNum = 4; updated.stage = 'Operational Checklist'; updated.status = 'On Track';
-                                                    } else if (action.label === 'Mark Complete') {
-                                                        updated.stageNum = 5; updated.stage = 'BGV'; updated.status = 'On Track';
-                                                    } else if (action.label === 'Initiate BGV') {
-                                                        updated.bgvStatus = 'In Progress';
-                                                    } else if (action.label === 'Flag Issue') {
-                                                        updated.bgvStatus = 'Flagged';
-                                                    } else if (action.label === 'Approve Sign-Off') {
-                                                        updated.stageNum = 7; updated.stage = 'Probation Activation'; updated.status = 'On Track';
+                                                    } else if (action.label === 'Assign Program') {
+                                                        setShowLndModal(true);
+                                                        return;
+                                                    } else if (action.label === 'View Checklist') {
+                                                        setShowChecklistModal(true);
+                                                        return;
+                                                    } else if (action.label === 'View Report') {
+                                                        setShowBgvReportModal(true);
+                                                        return;
                                                     } else if (action.label === 'Activate Probation') {
                                                         setShowProbationModal(true);
                                                         return; // Don't trigger onUpdate yet
@@ -422,12 +423,21 @@ const CandidateDetailPanel: React.FC<Props> = ({ candidate, onClose, onUpdate })
                                             <div className="p-2 bg-white rounded-lg border border-slate-200"><FileText className="w-4 h-4 text-slate-400" /></div>
                                             <span className="text-sm font-semibold text-slate-700">{doc.label}</span>
                                         </div>
-                                        <button 
-                                            onClick={() => setDocStatuses(p => ({ ...p, [doc.key]: !isVerified }))}
-                                            className={`px-3 py-1 text-xs font-bold rounded-full transition-colors ${isVerified ? 'bg-emerald-100 text-emerald-700' : 'bg-white border border-slate-300 text-slate-600 hover:bg-slate-50'}`}
-                                        >
-                                            {isVerified ? 'Verified' : 'Verify'}
-                                        </button>
+                                        <div className="flex items-center gap-2">
+                                            <button 
+                                                onClick={() => setShowDocViewer(doc.label)}
+                                                className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-400 hover:text-indigo-600 transition-colors"
+                                                title="View Document"
+                                            >
+                                                <Eye className="w-4 h-4" />
+                                            </button>
+                                            <button 
+                                                onClick={() => setDocStatuses(p => ({ ...p, [doc.key]: !isVerified }))}
+                                                className={`px-3 py-1 text-xs font-bold rounded-full transition-colors ${isVerified ? 'bg-emerald-100 text-emerald-700' : 'bg-white border border-slate-300 text-slate-600 hover:bg-slate-50'}`}
+                                            >
+                                                {isVerified ? 'Verified' : 'Verify'}
+                                            </button>
+                                        </div>
                                     </div>
                                 );
                             })}
@@ -446,6 +456,117 @@ const CandidateDetailPanel: React.FC<Props> = ({ candidate, onClose, onUpdate })
                         >
                             Approve All & Complete Stage
                         </Button>
+                    </div>
+                </div>
+            )}
+
+            {/* L&D / Orientation Program Modal */}
+            {showLndModal && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-8 animate-in slide-in-from-bottom-4 duration-300">
+                        <div className="flex items-center justify-between mb-6">
+                            <div>
+                                <h2 className="text-lg font-black text-slate-900">Assign Learning Program</h2>
+                                <p className="text-sm text-slate-500">Linked to Learning & Development Module</p>
+                            </div>
+                            <button onClick={() => setShowLndModal(false)} className="p-2 hover:bg-slate-100 rounded-xl"><X className="w-5 h-5 text-slate-400" /></button>
+                        </div>
+                        <div className="space-y-4">
+                            <div className="bg-indigo-50 border border-indigo-100 p-4 rounded-2xl">
+                                <h4 className="text-xs font-black text-indigo-700 uppercase tracking-widest mb-3">Available L&D Paths</h4>
+                                <div className="space-y-2">
+                                    {['Teaching Excellence Framework', 'Institutional Compliance 101', 'Advanced Pedagogy', 'Security & Ethics'].map(prog => (
+                                        <div key={prog} className="flex items-center gap-3 bg-white p-3 rounded-xl border border-indigo-100 group cursor-pointer hover:bg-indigo-600 hover:text-white transition-all">
+                                            <BookOpen className="w-4 h-4 text-indigo-500 group-hover:text-white" />
+                                            <span className="text-sm font-bold">{prog}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <Button className="w-full bg-indigo-600" onClick={() => {
+                                setShowLndModal(false);
+                                logAction('L&D Program Assigned');
+                                if (onUpdate) onUpdate({ ...candidate, tags: [...candidate.tags, 'L&D Assigned'] });
+                            }}>Confirm Selection</Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Operational Checklist Modal */}
+            {showChecklistModal && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 animate-in slide-in-from-bottom-4 duration-300">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-lg font-black text-slate-900">Operational Checklist</h2>
+                            <button onClick={() => setShowChecklistModal(false)} className="p-2 hover:bg-slate-100 rounded-xl"><X className="w-5 h-5 text-slate-400" /></button>
+                        </div>
+                        <div className="space-y-4 mb-6">
+                            {['ID Card Issued', 'IT Assets Allocated', 'Workstation Setup', 'Biometric Enrollment', 'Bank Account Linked'].map(item => (
+                                <div key={item} className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                    <span className="text-sm font-semibold text-slate-700">{item}</span>
+                                    <div className="w-5 h-5 rounded-md border-2 border-slate-300 bg-white"></div>
+                                </div>
+                            ))}
+                        </div>
+                        <Button className="w-full bg-indigo-600" onClick={() => setShowChecklistModal(false)}>Save Progress</Button>
+                    </div>
+                </div>
+            )}
+
+            {/* BGV Report Modal */}
+            {showBgvReportModal && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 animate-in slide-in-from-bottom-4 duration-300">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-lg font-black text-slate-900">BGV Report Summary</h2>
+                            <button onClick={() => setShowBgvReportModal(false)} className="p-2 hover:bg-slate-100 rounded-xl"><X className="w-5 h-5 text-slate-400" /></button>
+                        </div>
+                        <div className="space-y-6">
+                            <div className="flex justify-center">
+                                <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center">
+                                    <ShieldCheck className="w-10 h-10" />
+                                </div>
+                            </div>
+                            <div className="text-center">
+                                <h3 className="font-bold text-slate-900">Verification Cleared</h3>
+                                <p className="text-sm text-slate-500">Report generated by Befise API on 10/03/2026</p>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-center">
+                                    <div className="text-[10px] font-black text-slate-400 uppercase">Education</div>
+                                    <div className="text-xs font-bold text-emerald-600">Verified</div>
+                                </div>
+                                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-center">
+                                    <div className="text-[10px] font-black text-slate-400 uppercase">Criminal</div>
+                                    <div className="text-xs font-bold text-emerald-600">No Records</div>
+                                </div>
+                            </div>
+                            <Button className="w-full bg-slate-900" onClick={() => setShowBgvReportModal(false)}>Download Full PDF</Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Doc Viewer Mock Modal */}
+            {showDocViewer && (
+                <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-md animate-in fade-in duration-300 p-8">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl h-full flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
+                        <div className="p-4 border-b flex justify-between items-center bg-slate-900 text-white">
+                            <h3 className="font-bold">{showDocViewer} - Document Preview</h3>
+                            <button onClick={() => setShowDocViewer(null)} className="p-2 hover:bg-white/10 rounded-xl"><X className="w-5 h-5" /></button>
+                        </div>
+                        <div className="flex-1 bg-slate-100 flex items-center justify-center p-12">
+                            <div className="bg-white p-12 shadow-inner border border-slate-200 aspect-[1/1.4] h-full flex flex-col items-center justify-center text-center">
+                                <FileText className="w-24 h-24 text-slate-200 mb-6" />
+                                <h4 className="text-xl font-black text-slate-800 mb-2">Authenticated Copy</h4>
+                                <p className="text-slate-500 text-sm max-w-xs mx-auto">This document has been retrieved from the candidate's self-onboarding portal.</p>
+                                <div className="mt-12 py-3 px-6 bg-slate-50 rounded-2xl border border-dashed border-slate-300">
+                                    <div className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-1">Electronic Signature</div>
+                                    <div className="font-serif italic text-xl text-indigo-900">{candidate.name}</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
