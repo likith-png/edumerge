@@ -50,7 +50,7 @@ import { PersonaProvider } from './contexts/PersonaContext';
 function App() {
   return (
     <PersonaProvider>
-      <Router>
+      <Router basename="/V2/HRMS_Demo">
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/onboarding-pro" element={<OnboardingProDashboard />} />
