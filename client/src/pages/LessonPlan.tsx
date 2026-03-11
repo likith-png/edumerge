@@ -299,7 +299,7 @@ const LessonPlanningTab: React.FC = () => {
     };
 
     // Chapter → session-level drilldown data
-    const chapterSessions: Record<string, { session: number; topic: string; method: string; date: string; status: SessionStatus }[]> = {
+    const [sessionsState, setSessionsState] = useState<Record<string, { session: number; topic: string; method: string; date: string; status: SessionStatus }[]>>({
         'Ch 1': [
             { session: 1, topic: 'Introduction to Real Numbers', method: 'Lecture', date: '5 Jun', status: 'Completed' },
             { session: 2, topic: "Euclid's Division Lemma", method: 'Worked examples', date: '7 Jun', status: 'Completed' },
@@ -349,6 +349,26 @@ const LessonPlanningTab: React.FC = () => {
             { session: 4, topic: 'Application word problems', method: 'Group work', date: '27 Mar', status: 'Pending' },
             { session: 5, topic: 'Unit quiz – Statistics & Probability', method: 'Assessment', date: '28 Mar', status: 'Pending' },
         ],
+    });
+
+    const [showAddSession, setShowAddSession] = useState<string | null>(null);
+    const [newSessionForm, setNewSessionForm] = useState({ topic: '', method: '', date: '' });
+
+    const handleAddSession = (chKey: string) => {
+        if (!newSessionForm.topic || !newSessionForm.date) return;
+        setSessionsState(prev => {
+            const list = prev[chKey] || [];
+            const newSession = {
+                session: list.length + 1,
+                topic: newSessionForm.topic,
+                method: newSessionForm.method || 'Lecture',
+                date: new Date(newSessionForm.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
+                status: 'Pending' as SessionStatus
+            };
+            return { ...prev, [chKey]: [...list, newSession] };
+        });
+        setNewSessionForm({ topic: '', method: '', date: '' });
+        setShowAddSession(null);
     };
 
     const annualUnits = [
@@ -494,7 +514,7 @@ const LessonPlanningTab: React.FC = () => {
                                                     {u.chapterList.map((ch, ci) => {
                                                         const chKey = ch.ch;
                                                         const chOpen = expandedChapter === `${i}-${ci}`;
-                                                        const sessions = chapterSessions[chKey] || [];
+                                                        const sessions = sessionsState[chKey] || [];
                                                         return (
                                                             <div key={ci} className="rounded-xl border border-slate-100 overflow-hidden">
                                                                 {/* Chapter clickable header */}
@@ -511,11 +531,38 @@ const LessonPlanningTab: React.FC = () => {
                                                                     <Badge className={`border-none text-[9px] font-bold mx-2 ${ch.done ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
                                                                         {ch.done ? 'Completed' : 'Pending'}
                                                                     </Badge>
-                                                                    <ChevronRight className={`h-3.5 w-3.5 flex-shrink-0 transition-transform duration-200 ${chOpen ? 'rotate-90 text-indigo-500' : 'text-slate-300'}`} />
+                                                                    <div className="flex items-center gap-3 space-x-2">
+                                                                        <Button 
+                                                                            size="sm" 
+                                                                            variant="ghost" 
+                                                                            onClick={e => { e.stopPropagation(); setShowAddSession(showAddSession === chKey ? null : chKey); }}
+                                                                            className="h-6 px-2 text-[10px] font-bold text-indigo-600 hover:bg-indigo-100/50"
+                                                                        >
+                                                                            <Plus className="h-3 w-3 mr-1" /> Add Session
+                                                                        </Button>
+                                                                        <ChevronRight className={`h-3.5 w-3.5 flex-shrink-0 transition-transform duration-200 ${chOpen ? 'rotate-90 text-indigo-500' : 'text-slate-300'}`} />
+                                                                    </div>
                                                                 </div>
                                                                 {/* Session-level drilldown */}
                                                                 {chOpen && (
                                                                     <div className="border-t border-slate-100 bg-slate-50/80 px-4 py-3 space-y-2">
+                                                                        {showAddSession === chKey && (
+                                                                            <div className="bg-indigo-50/60 border border-indigo-100 rounded-lg p-3 mb-3" onClick={e => e.stopPropagation()}>
+                                                                                <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-2">Add New Session</p>
+                                                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                                                                                    <input type="text" placeholder="Session Topic" className="text-xs p-2 rounded border border-slate-200"
+                                                                                        value={newSessionForm.topic} onChange={e => setNewSessionForm(prev => ({ ...prev, topic: e.target.value }))} />
+                                                                                    <input type="text" placeholder="Methodology (e.g. Lecture)" className="text-xs p-2 rounded border border-slate-200"
+                                                                                        value={newSessionForm.method} onChange={e => setNewSessionForm(prev => ({ ...prev, method: e.target.value }))} />
+                                                                                    <input type="date" className="text-xs p-2 rounded border border-slate-200 text-slate-500"
+                                                                                        value={newSessionForm.date} onChange={e => setNewSessionForm(prev => ({ ...prev, date: e.target.value }))} />
+                                                                                </div>
+                                                                                <div className="flex gap-2 justify-end">
+                                                                                    <Button variant="outline" size="sm" className="h-7 text-[10px]" onClick={() => setShowAddSession(null)}>Cancel</Button>
+                                                                                    <Button size="sm" className="h-7 text-[10px] bg-indigo-600 text-white hover:bg-indigo-700" onClick={() => handleAddSession(chKey)}>Save Session</Button>
+                                                                                </div>
+                                                                            </div>
+                                                                        )}
                                                                         {sessions.length > 0 ? sessions.map((s, si) => {
                                                                             const sKey = `${chKey}-${si}`;
                                                                             const currentStatus = getSessionStatus(chKey, si, s.status);
@@ -1014,9 +1061,22 @@ const BacklogMonitoringTab: React.FC = () => {
     const [notifyingTeacherId, setNotifyingTeacherId] = useState<number | null>(null);
     const [notifyComment, setNotifyComment] = useState('');
     const [notifiedTeachers, setNotifiedTeachers] = useState<number[]>([]);
+    
+    // New states for detailed modal and notification logs
+    const [selectedAlertTeacher, setSelectedAlertTeacher] = useState<Teacher | null>(null);
+    const [notificationLogs, setNotificationLogs] = useState<Record<number, {time: string, comment: string}[]>>({});
 
     const handleNotifySubmit = (id: number) => {
         setNotifiedTeachers(prev => [...prev, id]);
+        
+        // Log the notification
+        const now = new Date();
+        const timeStr = `${now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} ${now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
+        setNotificationLogs(prev => ({
+            ...prev,
+            [id]: [{ time: timeStr, comment: notifyComment }, ...(prev[id] || [])]
+        }));
+        
         setNotifyingTeacherId(null);
         setNotifyComment('');
     };
@@ -1060,7 +1120,15 @@ const BacklogMonitoringTab: React.FC = () => {
                     const missed = t.planned - t.completed;
                     const backlogPct = Math.round((missed / t.planned) * 100);
                     return (
-                        <Card key={t.id} className={`border-none shadow-sm ${t.status === 'Critical Risk' ? 'ring-2 ring-red-200' : ''}`}>
+                        <Card 
+                            key={t.id} 
+                            onClick={(e) => {
+                                // Prevent card click if we are clicking inside the notify forms/buttons
+                                if ((e.target as HTMLElement).closest('.notify-section')) return;
+                                setSelectedAlertTeacher(t);
+                            }}
+                            className={`border-none shadow-sm cursor-pointer hover:shadow-md transition-all ${t.status === 'Critical Risk' ? 'ring-2 ring-red-200 shadow-md' : 'hover:ring-2 ring-orange-200'}`}
+                        >
                             <CardContent className="p-5">
                                 <div className="flex items-start gap-4">
                                     <div className={`h-10 w-10 rounded-xl ${t.status === 'Critical Risk' ? 'bg-red-50' : 'bg-orange-50'} flex items-center justify-center flex-shrink-0 mt-1`}>
@@ -1082,7 +1150,7 @@ const BacklogMonitoringTab: React.FC = () => {
                                                 <span>{t.completed}/{t.planned} lessons completed. </span>
                                                 <span className="font-bold text-red-600">{missed} missed · {backlogPct}% backlog</span>
                                             </div>
-                                            <div>
+                                            <div className="notify-section" onClick={e => e.stopPropagation()}>
                                                 {notifiedTeachers.includes(t.id) ? (
                                                     <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md">
                                                         <CheckCircle2 className="h-3 w-3" /> Notified
@@ -1103,7 +1171,7 @@ const BacklogMonitoringTab: React.FC = () => {
                                     </div>
                                 </div>
                                 {notifyingTeacherId === t.id && (
-                                    <div className="mt-4 pt-4 border-t border-slate-100 pl-14">
+                                    <div className="mt-4 pt-4 border-t border-slate-100 pl-14 notify-section" onClick={e => e.stopPropagation()}>
                                         <p className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1.5 mb-2">
                                             <Send className="h-3 w-3" /> Send Communication
                                         </p>
@@ -1138,6 +1206,98 @@ const BacklogMonitoringTab: React.FC = () => {
                     );
                 })}
             </div>
+
+            {/* Slide-over Panel for Detailed Alert View */}
+            {selectedAlertTeacher && (
+                <div className="fixed inset-0 z-[60] flex justify-end">
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onClick={() => setSelectedAlertTeacher(null)} />
+                    <div className="relative w-full max-w-lg bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+                        {/* Header */}
+                        <div className={`p-6 bg-gradient-to-br ${selectedAlertTeacher.status === 'Critical Risk' ? 'from-red-600 to-rose-700' : 'from-orange-500 to-amber-600'} text-white shadow-md flex-shrink-0 z-10`}>
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="flex items-center gap-4">
+                                    <div className="h-12 w-12 rounded-2xl bg-white/20 flex items-center justify-center font-black text-xl backdrop-blur-md shadow-inner">
+                                        {selectedAlertTeacher.name.charAt(0)}
+                                    </div>
+                                    <div>
+                                        <h2 className="text-xl font-black tracking-tight">{selectedAlertTeacher.name}</h2>
+                                        <p className="text-white/80 text-sm font-medium flex items-center gap-1.5 mt-0.5">
+                                            <BookOpen className="h-3.5 w-3.5" />
+                                            {selectedAlertTeacher.subject} · {selectedAlertTeacher.grade}
+                                        </p>
+                                    </div>
+                                </div>
+                                <button onClick={() => setSelectedAlertTeacher(null)} className="p-2 hover:bg-white/20 rounded-full transition-colors text-white mt-1 shrink-0">
+                                    <X className="h-5 w-5" />
+                                </button>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-3 mt-6">
+                                <div className="bg-black/20 rounded-xl p-3 border border-white/10">
+                                    <p className="text-[10px] uppercase tracking-widest text-white/70 font-bold mb-1">Status</p>
+                                    <p className="text-sm font-black flex items-center gap-1.5 tracking-tight">
+                                        <AlertTriangle className="h-4 w-4" />
+                                        {selectedAlertTeacher.status}
+                                    </p>
+                                </div>
+                                <div className="bg-black/20 rounded-xl p-3 border border-white/10">
+                                    <p className="text-[10px] uppercase tracking-widest text-white/70 font-bold mb-1">Backlog Extent</p>
+                                    <p className="text-sm font-black tracking-tight">
+                                        {selectedAlertTeacher.planned - selectedAlertTeacher.completed} Sessions Missed
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Scrollable Content */}
+                        <div className="flex-1 overflow-y-auto bg-slate-50/50">
+                            {/* Missing Sessions Block */}
+                            <div className="p-6">
+                                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Delayed Sessions Detail</h3>
+                                <div className="space-y-3">
+                                    {[1, 2, 3].map((_, i) => (
+                                        i < (selectedAlertTeacher.planned - selectedAlertTeacher.completed) && (
+                                            <div key={i} className="bg-white border text-sm border-slate-200 rounded-xl p-3 flex justify-between items-center shadow-sm">
+                                                <div>
+                                                    <p className="font-bold text-slate-800">Chapter {i + 2}: Core Principles</p>
+                                                    <p className="text-[10px] text-slate-500 mt-0.5">Session {i + 1} — Originally due{(new Date(Date.now() - (i + 1) * 86400000 * 2)).toLocaleDateString('en-GB')}</p>
+                                                </div>
+                                                <Badge className="bg-rose-50 text-rose-600 border-none font-bold">Overdue</Badge>
+                                            </div>
+                                        )
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Activity Log */}
+                            <div className="p-6 border-t border-slate-100 bg-white min-h-[50%]">
+                                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 flex justify-between items-center">
+                                    <span>Notification Log</span>
+                                    <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded flex items-center font-bold text-[9px]"><Bell className="h-3 w-3 mr-1"/> History</span>
+                                </h3>
+
+                                <div className="space-y-4 relative border-l-2 border-slate-100 ml-3">
+                                    {notificationLogs[selectedAlertTeacher.id]?.map((log, i) => (
+                                        <div key={i} className="relative pl-5 font-sans">
+                                            {/* dot */}
+                                            <div className="absolute -left-[5px] top-1.5 h-2 w-2 rounded-full bg-indigo-500 shadow-[0_0_0_4px_white]" />
+                                            <p className="text-xs font-black text-indigo-900 mb-0.5">{log.time}</p>
+                                            <p className="text-xs font-medium text-slate-600 bg-slate-50 rounded-lg p-2.5 mt-1 border border-slate-100">
+                                                {log.comment || <span className="italic opacity-60">System generated alert</span>}
+                                            </p>
+                                        </div>
+                                    ))}
+                                    {(!notificationLogs[selectedAlertTeacher.id] || notificationLogs[selectedAlertTeacher.id].length === 0) && (
+                                        <div className="pl-4 py-2">
+                                            <p className="text-xs text-slate-400 italic">No notifications sent yet.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
@@ -1751,6 +1911,12 @@ const ClassroomObservationTab: React.FC = () => {
 const TeacherPerformanceTab: React.FC = () => {
     const [expandedTeacher, setExpandedTeacher] = useState<number | null>(null);
     const [appraisalInitiated, setAppraisalInitiated] = useState<number[]>([]);
+    const [showReportDropdown, setShowReportDropdown] = useState<number | null>(null);
+
+    const handleDownload = (type: string, teacherName: string) => {
+        alert(`Generating ${type} report for ${teacherName}...`);
+        setShowReportDropdown(null);
+    };
 
     const performanceData = teachers.map(t => {
         const obs = observations.find(o => o.teacher === t.name && o.status === 'Completed');
@@ -1877,9 +2043,32 @@ const TeacherPerformanceTab: React.FC = () => {
                                                     <Star className="h-3.5 w-3.5" />
                                                     {hasAppraisal ? '✓ Appraisal Initiated' : 'Initiate Appraisal'}
                                                 </Button>
-                                                <Button variant="outline" className="h-9 text-xs font-bold rounded-xl px-4 gap-2 border-slate-200 text-slate-600">
-                                                    <FileText className="h-3.5 w-3.5" />Generate Report
-                                                </Button>
+                                                <div className="relative">
+                                                    <Button 
+                                                        variant="outline" 
+                                                        className="h-9 w-full text-xs font-bold rounded-xl px-4 gap-2 border-slate-200 text-slate-600 justify-center"
+                                                        onClick={() => setShowReportDropdown(showReportDropdown === t.id ? null : t.id)}
+                                                    >
+                                                        <FileText className="h-3.5 w-3.5" />
+                                                        Generate Report
+                                                    </Button>
+                                                    {showReportDropdown === t.id && (
+                                                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-20 py-1 animate-in fade-in zoom-in-95 duration-200">
+                                                            <button 
+                                                                className="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors"
+                                                                onClick={() => handleDownload('PDF', t.name)}
+                                                            >
+                                                                Download as PDF
+                                                            </button>
+                                                            <button 
+                                                                className="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors"
+                                                                onClick={() => handleDownload('Excel', t.name)}
+                                                            >
+                                                                Download as Excel
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

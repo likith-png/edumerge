@@ -8,7 +8,7 @@ import {
     CheckCircle, Clock, Plus, Search,
     Bell, BookOpen, Settings, BarChart2,
     ChevronDown, ChevronRight, Zap,
-    UserPlus, XCircle, Eye
+    UserPlus, XCircle, Eye, X
 } from 'lucide-react';
 import CandidateDetailPanel from './CandidateDetailPanel';
 import type { Candidate } from './CandidateDetailPanel';
@@ -16,6 +16,13 @@ import type { Candidate } from './CandidateDetailPanel';
 // ─── Mock Data ────────────────────────────────────────────────────────────────
 
 const INITIAL_CANDIDATES: Candidate[] = [
+    {
+        id: 0, name: 'Mr. Arvind Sharma', role: 'Mathematics Teacher', dept: 'Mathematics',
+        stage: 'Offer Accepted', stageNum: 1, status: 'Completed', mode: 'Self',
+        joinDate: '2026-04-01', slaDay: 1, slaDue: 3, docsPending: 5,
+        bgvStatus: 'Pending', buddy: 'Dr. Ramesh K.', tags: ['New Joiner'],
+        avatar: 'AS', avatarColor: 'bg-indigo-100 text-indigo-700'
+    },
     {
         id: 1, name: 'Ms. Reshma Binu Prasad', role: 'Assistant Professor', dept: 'Computer Science',
         stage: 'Documentation', stageNum: 2, status: 'In Progress', mode: 'Self',
@@ -127,7 +134,13 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
 
-const OverviewTab: React.FC<{ candidates: Candidate[]; onInitiate: () => void; onSelectCandidate: (c: Candidate) => void }> = ({ candidates, onInitiate, onSelectCandidate }) => (
+const OverviewTab: React.FC<{ 
+    candidates: Candidate[]; 
+    onInitiate: () => void; 
+    onSelectCandidate: (c: Candidate) => void;
+    onStageFilter: (stage: string | null) => void;
+    onStageFilterCurrent: string | null;
+}> = ({ candidates, onInitiate, onSelectCandidate, onStageFilter, onStageFilterCurrent }) => (
     <div className="space-y-6">
         {/* Funnel */}
         <Card className="border-none shadow-sm bg-white/80 backdrop-blur-xl">
@@ -139,7 +152,11 @@ const OverviewTab: React.FC<{ candidates: Candidate[]; onInitiate: () => void; o
             <CardContent>
                 <div className="flex items-end gap-3 h-32">
                     {funnelStages.map((s, i) => (
-                        <div key={i} className="flex-1 flex flex-col items-center gap-1 group cursor-pointer">
+                        <div 
+                            key={i} 
+                            onClick={() => onStageFilter(onStageFilterCurrent === s.label ? null : s.label)}
+                            className={`flex-1 flex flex-col items-center gap-1 group cursor-pointer ${onStageFilterCurrent === s.label ? 'ring-2 ring-indigo-400 ring-offset-2 rounded-lg' : ''}`}
+                        >
                             <span className="text-[10px] font-bold text-slate-700 opacity-0 group-hover:opacity-100 transition-opacity">{s.count}</span>
                             <div className={`w-full rounded-t-lg ${s.color} transition-all group-hover:opacity-90`} style={{ height: `${(s.count / 8) * 100}%`, minHeight: '12px' }} />
                             <span className="text-[9px] font-bold text-slate-500 text-center leading-tight">{s.label}</span>
@@ -155,6 +172,7 @@ const OverviewTab: React.FC<{ candidates: Candidate[]; onInitiate: () => void; o
                 <div className="flex justify-between items-center">
                     <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
                         <Users className="w-4 h-4 text-indigo-500" /> Active Candidates ({candidates.length})
+                        {onStageFilterCurrent && <span className="ml-2 px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full text-[10px] uppercase">{onStageFilterCurrent} Filter</span>}
                     </CardTitle>
                     <Button size="sm" onClick={onInitiate} className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs h-8 gap-1.5">
                         <Plus className="w-3 h-3" /> Initiate Onboarding
@@ -194,8 +212,9 @@ const OverviewTab: React.FC<{ candidates: Candidate[]; onInitiate: () => void; o
 
 const OrientationTab: React.FC = () => {
     const [expanded, setExpanded] = useState<number | null>(null);
+    const [showLDModal, setShowLDModal] = useState(false);
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 relative">
             <div className="flex justify-between items-center">
                 <h3 className="font-bold text-slate-900">Orientation Programs</h3>
                 <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs h-8 gap-1"><Plus className="w-3 h-3" /> Add Program</Button>
@@ -227,13 +246,60 @@ const OrientationTab: React.FC = () => {
                                 ))}
                             </div>
                             <div className="flex gap-2 mt-4">
-                                <Button size="sm" variant="outline" className="text-xs h-7">Edit Program</Button>
-                                <Button size="sm" variant="outline" className="text-xs h-7">Assign Candidates</Button>
+                                <Button size="sm" variant="outline" className="text-xs h-7" onClick={() => setShowLDModal(true)}>Edit Program</Button>
+                                <Button size="sm" variant="outline" className="text-xs h-7" onClick={() => setShowLDModal(true)}>Assign Candidates</Button>
                             </div>
                         </CardContent>
                     )}
                 </Card>
             ))}
+
+            {/* L&D Integration Modal */}
+            {showLDModal && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-8 animate-in slide-in-from-bottom-4 duration-300">
+                        <div className="flex items-center justify-between mb-6">
+                            <div>
+                                <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                                    <BookOpen className="w-5 h-5 text-indigo-500" />
+                                    Learning & Development
+                                </h2>
+                                <p className="text-sm text-slate-500">Configure or assign external LMS modules</p>
+                            </div>
+                            <button onClick={() => setShowLDModal(false)} className="p-2 hover:bg-slate-100 rounded-xl">
+                                <X className="w-5 h-5 text-slate-400" />
+                            </button>
+                        </div>
+                        
+                        <div className="space-y-4 mb-6">
+                            <div className="bg-amber-50 rounded-xl p-4 border border-amber-100">
+                                <p className="text-xs text-amber-800 flex items-start gap-2">
+                                    <AlertTriangle className="w-4 h-4 shrink-0" />
+                                    <strong>L&D Connection Required:</strong> This orientation program is managed via the standalone Learning & Development module. Direct assignment is locked from Onboarding Pro.
+                                </p>
+                            </div>
+
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Available L&D Paths</p>
+                            <div className="border border-slate-100 rounded-xl overflow-hidden divide-y divide-slate-100 shadow-sm">
+                                {[
+                                    { title: 'Academic Excellence Onboarding', modules: 12 },
+                                    { title: 'Code of Conduct & Ethics', modules: 3 },
+                                    { title: 'Campus Security & Systems', modules: 5 }
+                                ].map((path, i) => (
+                                    <div key={i} className="flex justify-between items-center bg-slate-50 hover:bg-slate-100 transition-colors p-3 cursor-pointer">
+                                        <div className="text-slate-700 font-semibold text-sm">{path.title}</div>
+                                        <div className="text-xs text-slate-500 bg-white border border-slate-200 px-2 py-0.5 rounded-full">{path.modules} Modules</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" onClick={() => setShowLDModal(false)}>
+                            Sync Policies with L&D
+                        </Button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
@@ -325,7 +391,10 @@ const ConfigTab: React.FC = () => {
     const [wfStages, setWfStages] = useState([
         'Offer Accepted', 'Details & Documentation', 'Orientation Program', 'Operational Checklist', 'Background Verification', 'Onboarding Sign-Off', 'Probation Activation'
     ]);
-    const [slaValues, setSlaValues] = useState({ documentation: 7, orientation: 14, checklist: 5, bgv: 14, signoff: 3 });
+    const [slaValues, setSlaValues] = useState({ 
+        documentation: 7, orientation: 14, checklist: 5, bgv: 14, signoff: 3,
+        l1Escalation: 2, l2Escalation: 5 
+    });
     const [docSettings, setDocSettings] = useState({ collectOriginals: true, storeOriginals: true, trackReturn: false });
     const [bgvEnabled, setBgvEnabled] = useState(true);
     const [bgvMode, setBgvMode] = useState<'manual' | 'api'>('api');
@@ -361,7 +430,9 @@ const ConfigTab: React.FC = () => {
                 <CardContent className="p-4 grid grid-cols-2 md:grid-cols-3 gap-4">
                     {Object.entries(slaValues).map(([key, val]) => (
                         <div key={key}>
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider capitalize block mb-1">{key}</label>
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                                {key === 'l1Escalation' ? 'L1 Escalation (Days)' : key === 'l2Escalation' ? 'L2 Escalation (Days)' : key.charAt(0).toUpperCase() + key.slice(1)}
+                            </label>
                             <input type="number" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-400" value={val} onChange={e => setSlaValues(p => ({ ...p, [key]: +e.target.value }))} />
                         </div>
                     ))}
@@ -443,7 +514,7 @@ const InitiateModal: React.FC<{ onClose: () => void; onAdd: (c: Candidate) => vo
             dept: form.dept.trim(),
             stage: 'Offer Accepted',
             stageNum: 1,
-            status: 'On Track',
+            status: 'Completed',
             mode: form.mode === 'self' ? 'Self' : 'Manual',
             joinDate: form.joinDate || 'TBD',
             slaDay: 0,
@@ -524,11 +595,13 @@ const OnboardingProDashboard: React.FC = () => {
     const [search, setSearch] = useState('');
     const [candidates, setCandidates] = useState<Candidate[]>(INITIAL_CANDIDATES);
     const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
+    const [stageFilter, setStageFilter] = useState<string | null>(null);
 
-    const filtered = candidates.filter(c =>
-        c.name.toLowerCase().includes(search.toLowerCase()) ||
-        c.dept.toLowerCase().includes(search.toLowerCase())
-    );
+    const filtered = candidates.filter(c => {
+        const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase()) || c.dept.toLowerCase().includes(search.toLowerCase());
+        const matchesStage = stageFilter ? c.stage === stageFilter : true;
+        return matchesSearch && matchesStage;
+    });
 
     const slaBreaches = candidates.filter(c => c.status === 'SLA Breach').length;
     const pendingDocs = candidates.reduce((acc, c) => acc + c.docsPending, 0);
@@ -599,7 +672,7 @@ const OnboardingProDashboard: React.FC = () => {
                 </div>
 
                 {/* Active Tab Content */}
-                {activeTab === 'overview' && <OverviewTab candidates={filtered} onInitiate={() => setShowInitiate(true)} onSelectCandidate={setSelectedCandidate} />}
+                {activeTab === 'overview' && <OverviewTab candidates={filtered} onInitiate={() => setShowInitiate(true)} onSelectCandidate={setSelectedCandidate} onStageFilter={setStageFilter} onStageFilterCurrent={stageFilter} />}
                 {activeTab === 'orientation' && <OrientationTab />}
                 {activeTab === 'bgv' && <BGVTab />}
                 {activeTab === 'sla' && <SLATab />}
@@ -607,7 +680,16 @@ const OnboardingProDashboard: React.FC = () => {
             </div>
 
             {showInitiate && <InitiateModal onClose={() => setShowInitiate(false)} onAdd={c => setCandidates(prev => [...prev, c])} />}
-            {selectedCandidate && <CandidateDetailPanel candidate={selectedCandidate} onClose={() => setSelectedCandidate(null)} />}
+            {selectedCandidate && (
+                <CandidateDetailPanel
+                    candidate={selectedCandidate}
+                    onClose={() => setSelectedCandidate(null)}
+                    onUpdate={(updatedCand) => {
+                        setCandidates(prev => prev.map(c => c.id === updatedCand.id ? updatedCand : c));
+                        setSelectedCandidate(updatedCand);
+                    }}
+                />
+            )}
         </div>
     );
 };

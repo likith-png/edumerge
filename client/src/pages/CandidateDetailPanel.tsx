@@ -39,10 +39,7 @@ interface StageInfo {
 const STAGES: StageInfo[] = [
     {
         num: 1, label: 'Offer Accepted', icon: Mail, color: 'indigo',
-        actions: [
-            { label: 'Send Welcome Email', icon: Send, variant: 'primary' },
-            { label: 'View Offer Letter', icon: Eye, variant: 'outline' },
-        ],
+        actions: [],
         fields: [
             { label: 'Join Date', value: c => c.joinDate },
             { label: 'Mode', value: c => c.mode },
@@ -131,11 +128,19 @@ const lightMap: Record<string, string> = {
 interface Props {
     candidate: Candidate;
     onClose: () => void;
+    onUpdate?: (c: Candidate) => void;
 }
 
-const CandidateDetailPanel: React.FC<Props> = ({ candidate, onClose }) => {
+const CandidateDetailPanel: React.FC<Props> = ({ candidate, onClose, onUpdate }) => {
     const [actionLog, setActionLog] = useState<{ time: string; text: string }[]>([]);
     const [expandedStage, setExpandedStage] = useState<number>(candidate.stageNum);
+    const [showProbationModal, setShowProbationModal] = useState(false);
+    const [successMsg, setSuccessMsg] = useState('');
+    const [probationForm, setProbationForm] = useState({ policy: 'Standard Academic Probation', manager: '' });
+
+    // New Document Verification State
+    const [showDocsModal, setShowDocsModal] = useState(false);
+    const [docStatuses, setDocStatuses] = useState({ aadhar: false, degree: false, photos: false });
 
     const logAction = (label: string) => {
         const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
@@ -249,10 +254,35 @@ const CandidateDetailPanel: React.FC<Props> = ({ candidate, onClose }) => {
                                         <div className="flex flex-wrap gap-2">
                                             {stage.actions.map(action => {
                                                 const AIcon = action.icon;
+                                                const handleActionClick = () => {
+                                                    logAction(`${action.label} for ${candidate.name}`);
+                                                    if (!onUpdate) return;
+                                                    let updated = { ...candidate };
+                                                    if (action.label === 'Review Pending') {
+                                                        setShowDocsModal(true);
+                                                        return;
+                                                    } else if (action.label === 'Approve Docs') {
+                                                        updated.stageNum = 3; updated.stage = 'Orientation'; updated.status = 'On Track'; updated.docsPending = 0;
+                                                    } else if (action.label === 'Mark Attendance') {
+                                                        updated.stageNum = 4; updated.stage = 'Operational Checklist'; updated.status = 'On Track';
+                                                    } else if (action.label === 'Mark Complete') {
+                                                        updated.stageNum = 5; updated.stage = 'BGV'; updated.status = 'On Track';
+                                                    } else if (action.label === 'Initiate BGV') {
+                                                        updated.bgvStatus = 'In Progress';
+                                                    } else if (action.label === 'Flag Issue') {
+                                                        updated.bgvStatus = 'Flagged';
+                                                    } else if (action.label === 'Approve Sign-Off') {
+                                                        updated.stageNum = 7; updated.stage = 'Probation Activation'; updated.status = 'On Track';
+                                                    } else if (action.label === 'Activate Probation') {
+                                                        setShowProbationModal(true);
+                                                        return; // Don't trigger onUpdate yet
+                                                    }
+                                                    onUpdate(updated);
+                                                };
                                                 return (
                                                     <button
                                                         key={action.label}
-                                                        onClick={() => logAction(`${action.label} for ${candidate.name}`)}
+                                                        onClick={handleActionClick}
                                                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${action.variant === 'primary'
                                                             ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
                                                             : action.variant === 'danger'
@@ -298,6 +328,127 @@ const CandidateDetailPanel: React.FC<Props> = ({ candidate, onClose }) => {
                     <Button size="sm" variant="outline" onClick={onClose} className="text-xs h-8">Close</Button>
                 </div>
             </div>
+
+            {/* Probation Linking Modal */}
+            {showProbationModal && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 animate-in slide-in-from-bottom-4 duration-300">
+                        <div className="flex items-center justify-between mb-6">
+                            <div>
+                                <h2 className="text-lg font-black text-slate-900">Activate Probation</h2>
+                                <p className="text-sm text-slate-500">Link candidate to Staff Portfolio</p>
+                            </div>
+                            <button onClick={() => setShowProbationModal(false)} className="p-2 hover:bg-slate-100 rounded-xl"><X className="w-5 h-5 text-slate-400" /></button>
+                        </div>
+                        
+                        {successMsg ? (
+                            <div className="text-center py-6">
+                                <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <CheckCircle className="w-8 h-8" />
+                                </div>
+                                <h3 className="font-bold text-slate-900 mb-2">Activation Successful!</h3>
+                                <p className="text-sm text-slate-600 mb-6">{successMsg}</p>
+                                <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" onClick={() => {
+                                    setShowProbationModal(false);
+                                    if (onUpdate) onUpdate({ ...candidate, stageNum: 8, stage: 'Completed', status: 'Completed' });
+                                    onClose(); // Auto close the panel as they are fully onboarded
+                                }}>Go to Staff Portfolio</Button>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Select Probation Policy</label>
+                                    <select 
+                                        className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
+                                        value={probationForm.policy}
+                                        onChange={e => setProbationForm(p => ({ ...p, policy: e.target.value }))}
+                                    >
+                                        <option value="Standard Academic Probation (12 Months)">Standard Academic Probation (12 Months)</option>
+                                        <option value="Standard Admin Probation (6 Months)">Standard Admin Probation (6 Months)</option>
+                                        <option value="Leadership Probation (6 Months)">Leadership Probation (6 Months)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Assign Reporting Manager</label>
+                                    <input type="text" placeholder="Search staff database..."
+                                        className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                                        value={probationForm.manager} onChange={e => setProbationForm(p => ({ ...p, manager: e.target.value }))} />
+                                </div>
+                                
+                                <div className="bg-indigo-50 text-indigo-700 p-3 rounded-xl text-xs flex items-start gap-2 mt-4">
+                                    <Briefcase className="w-4 h-4 shrink-0 mt-0.5" />
+                                    <p>Upon activation, the profile will be created in the <strong>Staff Portfolio</strong> module, and tracked within the <strong>Probation Dashboard</strong> automatically.</p>
+                                </div>
+
+                                <div className="flex gap-3 mt-6">
+                                    <Button variant="outline" className="flex-1" onClick={() => setShowProbationModal(false)}>Cancel</Button>
+                                    <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white gap-2" 
+                                        onClick={() => {
+                                            setSuccessMsg(`Profile for ${candidate.name} has been created in Staff Portfolio and added to the selected Probation Policy.`);
+                                        }}>
+                                        <CheckCircle className="w-4 h-4" /> Finalize Setup
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Document Review Modal */}
+            {showDocsModal && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 animate-in slide-in-from-bottom-4 duration-300">
+                        <div className="flex items-center justify-between mb-6">
+                            <div>
+                                <h2 className="text-lg font-black text-slate-900">Document Review</h2>
+                                <p className="text-sm text-slate-500">Verify uploaded records from {candidate.name}</p>
+                            </div>
+                            <button onClick={() => setShowDocsModal(false)} className="p-2 hover:bg-slate-100 rounded-xl">
+                                <X className="w-5 h-5 text-slate-400" />
+                            </button>
+                        </div>
+                        
+                        <div className="space-y-4 mb-6">
+                            {[
+                                { key: 'aadhar', label: 'Aadhar Card / Gov ID' },
+                                { key: 'degree', label: 'PG Degree Certificate' },
+                                { key: 'photos', label: 'Passport Photos (x4)' }
+                            ].map(doc => {
+                                const isVerified = docStatuses[doc.key as keyof typeof docStatuses];
+                                return (
+                                    <div key={doc.key} className="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 bg-white rounded-lg border border-slate-200"><FileText className="w-4 h-4 text-slate-400" /></div>
+                                            <span className="text-sm font-semibold text-slate-700">{doc.label}</span>
+                                        </div>
+                                        <button 
+                                            onClick={() => setDocStatuses(p => ({ ...p, [doc.key]: !isVerified }))}
+                                            className={`px-3 py-1 text-xs font-bold rounded-full transition-colors ${isVerified ? 'bg-emerald-100 text-emerald-700' : 'bg-white border border-slate-300 text-slate-600 hover:bg-slate-50'}`}
+                                        >
+                                            {isVerified ? 'Verified' : 'Verify'}
+                                        </button>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        
+                        <Button 
+                            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50" 
+                            disabled={!Object.values(docStatuses).every(Boolean)}
+                            onClick={() => {
+                                setShowDocsModal(false);
+                                logAction('All Documents Verified manually');
+                                if (onUpdate) {
+                                    onUpdate({ ...candidate, stageNum: 3, stage: 'Orientation', status: 'On Track', docsPending: 0 });
+                                }
+                            }}
+                        >
+                            Approve All & Complete Stage
+                        </Button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
