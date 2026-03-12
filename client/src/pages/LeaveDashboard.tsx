@@ -29,9 +29,21 @@ const LeaveDashboard = () => {
     useEffect(() => {
         const stored = localStorage.getItem('edumerge_leave_types');
         const types: LeaveType[] = stored ? JSON.parse(stored) : defaultLeaveTypes;
-        setLeaveTypes(types);
+        
+        // Mock User Joining Date (e.g., joined on 6th of current month to test rule)
+        const joiningDate = new Date();
+        joiningDate.setDate(6); // Joined on 6th -> No CL for first month
+        const isFirstMonth = new Date().getMonth() === joiningDate.getMonth() && new Date().getFullYear() === joiningDate.getFullYear();
+        const joiningDay = joiningDate.getDate();
 
-        const generatedBalances = types.map((t, idx) => {
+        const filteredTypes = types.filter(t => {
+            if (t.id === 'CL' && isFirstMonth && joiningDay > 5) return false;
+            return true;
+        });
+
+        setLeaveTypes(filteredTypes);
+
+        const generatedBalances = filteredTypes.map((t, idx) => {
             const numMatch = t.teachingPerm.match(/\d+/);
             const total = numMatch ? parseInt(numMatch[0]) : 0;
             const taken = total > 0 ? Math.floor(total * 0.3) : 0; // Mock taken
@@ -42,7 +54,9 @@ const LeaveDashboard = () => {
                 { color: 'text-amber-600', bg: 'bg-amber-50' },
                 { color: 'text-rose-600', bg: 'bg-rose-50' },
                 { color: 'text-indigo-600', bg: 'bg-indigo-50' },
-                { color: 'text-slate-600', bg: 'bg-slate-50' }
+                { color: 'text-slate-600', bg: 'bg-slate-50' },
+                { color: 'text-orange-600', bg: 'bg-orange-50' },
+                { color: 'text-cyan-600', bg: 'bg-cyan-50' }
             ];
             const theme = colors[idx % colors.length];
 
@@ -64,12 +78,63 @@ const LeaveDashboard = () => {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
 
+    const isHoliday = (date: Date) => {
+        const day = date.getDay();
+        const d = date.getDate();
+        const weekNum = Math.ceil(d / 7);
+        const dateString = date.toISOString().split('T')[0];
+        
+        const publicHolidays = ['2024-05-01', '2024-08-15', '2024-10-02', '2024-12-25'];
+        
+        // Weekly off: Sundays and 1st/3rd Saturdays
+        if (day === 0) return true;
+        if (day === 6 && [1, 3].includes(weekNum)) return true;
+        if (publicHolidays.includes(dateString)) return true;
+        
+        return false;
+    };
+
     const calculateDays = () => {
         if (!startDate || !endDate) return 0;
         const start = new Date(startDate);
         const end = new Date(endDate);
+        
+        // Basic count
         const diffTime = Math.abs(end.getTime() - start.getTime());
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // inclusive
+        let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+        if (leaveType.includes('Casual Leave (CL)')) {
+            const beforeStart = new Date(start);
+            beforeStart.setDate(beforeStart.getDate() - 1);
+            const afterEnd = new Date(end);
+            afterEnd.setDate(afterEnd.getDate() + 1);
+
+            const isBeforeHoliday = isHoliday(beforeStart);
+            const isAfterHoliday = isHoliday(afterEnd);
+
+            // 1. Sandwich Rule: If CL appears both before and after a holiday
+            // (In this context, if the leave spans across a holiday, or starts and ends around one)
+            let holidaysInBetween = 0;
+            let current = new Date(start);
+            while (current <= end) {
+                if (isHoliday(current)) holidaysInBetween++;
+                current.setDate(current.getDate() + 1);
+            }
+
+            // If it's a CL and it's on both sides of a holiday (either within the range or prefix/suffix)
+            if (isBeforeHoliday && isAfterHoliday) {
+                diffDays += 1; // Penalty for prefix & suffix combo
+            } else if (isBeforeHoliday || isAfterHoliday) {
+                if (diffDays === 1) diffDays = 2; // Prefix/Suffix to non-working day counts as 2
+            }
+        }
+
+        // Special rule: 5th Saturday is a full day
+        if (end.getDay() === 6 && Math.ceil(end.getDate() / 7) === 5) {
+            // Note: This rule is informative for payroll typically, 
+            // but we ensure it's not accidentally counted as a holiday/half-day if those were options.
+        }
+
         return diffDays;
     };
 
@@ -84,7 +149,7 @@ const LeaveDashboard = () => {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                     <div>
                         <h2 className="text-xl font-black text-slate-800 tracking-tight mb-1">Leave Balances for 2024</h2>
-                        <p className="text-sm text-slate-500">Your entitlements calculate based on 'Teaching (Permanent)' policy rules.</p>
+                        <p className="text-sm text-slate-500 font-medium italic">Accrual Logic: Casual Leave split Jan/July; Vacation Leave per Semester.</p>
                     </div>
                     <div className="flex gap-3">
                         {role === 'HR_ADMIN' && (
@@ -225,7 +290,14 @@ const LeaveDashboard = () => {
                                                     <option key={t.id} value={t.name}>{t.name}</option>
                                                 ))}
                                             </select>
-                                            <p className="text-xs text-slate-500 mt-1">Available balance: <span className="font-bold text-slate-700">{balances.find(b => b.type === leaveType)?.balance || 0} days</span></p>
+                                            <div className="flex justify-between mt-1">
+                                                <p className="text-xs text-slate-500">Available balance: <span className="font-bold text-slate-700">{balances.find(b => b.type === leaveType)?.balance || 0} days</span></p>
+                                                {leaveType === 'Loss of Pay (LOP)' && (balances.find(b => b.type === 'Loss of Pay (LOP)')?.taken || 0) >= 5 && (
+                                                    <p className="text-xs text-rose-600 font-bold flex items-center gap-1 animate-pulse">
+                                                        <AlertCircle className="w-3 h-3" /> Max LOP (5 days) reached!
+                                                    </p>
+                                                )}
+                                            </div>
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-4">
@@ -250,12 +322,19 @@ const LeaveDashboard = () => {
                                         </div>
 
                                         {requestedDays > 0 && (
-                                            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-center justify-between">
-                                                <div className="flex items-center gap-3">
-                                                    <Clock className="w-5 h-5 text-blue-600" />
-                                                    <span className="text-sm font-bold text-blue-900">Total Duration Calculated</span>
+                                            <div className="space-y-3">
+                                                <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-center justify-between">
+                                                    <div className="flex items-center gap-3">
+                                                        <Clock className="w-5 h-5 text-blue-600" />
+                                                        <span className="text-sm font-bold text-blue-900">Total Duration Calculated</span>
+                                                    </div>
+                                                    <span className="text-lg font-black text-blue-700">{requestedDays} Days</span>
                                                 </div>
-                                                <span className="text-lg font-black text-blue-700">{requestedDays} Days</span>
+                                                {endDate && new Date(endDate).getDay() === 6 && Math.ceil(new Date(endDate).getDate() / 7) === 5 && (
+                                                    <div className="text-[10px] font-bold text-blue-600 uppercase tracking-widest bg-blue-50/50 px-3 py-1.5 rounded-lg border border-blue-100/50 flex items-center gap-2">
+                                                        <Check className="w-3 h-3" /> 5th Saturday Rule: Applied as Full Working Day
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
 

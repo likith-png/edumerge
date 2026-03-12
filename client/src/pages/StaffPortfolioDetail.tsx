@@ -7,7 +7,7 @@ import { Badge } from '../components/ui/badge';
 import {
     User, TrendingUp, GraduationCap, Calendar, FileText,
     CheckCircle, ArrowLeft, BookOpen, Trophy, Heart, Sparkles, Star, Lightbulb, Users, Award, Shield, Clock, AlertTriangle, Target,
-    ExternalLink, X
+    ExternalLink, X, Edit, Plus, Upload, Menu
 } from 'lucide-react';
 import { getStaffPortfolio } from '../services/staffPortfolioService';
 import { Dialog, DialogContent, DialogTitle } from '../components/ui/dialog';
@@ -17,6 +17,12 @@ const StaffPortfolioDetail: React.FC = () => {
     const navigate = useNavigate();
     const portfolio = getStaffPortfolio(staffId || '');
     const [selectedHighlight, setSelectedHighlight] = useState<any>(null);
+    const [isEditingBasic, setIsEditingBasic] = useState(false);
+    const [editForm, setEditForm] = useState<any>(portfolio?.member || {});
+    const [isEditingEducation, setIsEditingEducation] = useState(false);
+    const [selectedEdu, setSelectedEdu] = useState<any>(null);
+    const [isEditingExperience, setIsEditingExperience] = useState(false);
+    const [selectedExp, setSelectedExp] = useState<any>(null);
 
     if (!portfolio) {
         return (
@@ -44,6 +50,16 @@ const StaffPortfolioDetail: React.FC = () => {
             icon={User}
             showBack
         >
+            {/* Action Bar */}
+            <div className="flex justify-end mb-4">
+                <Button 
+                    onClick={() => setIsEditingBasic(true)} 
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg rounded-xl flex items-center gap-2"
+                >
+                    <Edit className="w-4 h-4" /> Edit Profile
+                </Button>
+            </div>
+
             {/* Header Profile Card */}
             <Card className="mb-6 border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50">
                 <CardContent className="pt-6">
@@ -102,6 +118,141 @@ const StaffPortfolioDetail: React.FC = () => {
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Educational Qualification Details Table */}
+            <Card className="mb-6 overflow-hidden border-slate-200">
+                <CardHeader className="bg-slate-50 border-b py-3 flex flex-row items-center justify-between">
+                    <CardTitle className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                        <Menu className="w-4 h-4" /> Educational Qualification Details
+                    </CardTitle>
+                    <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-indigo-600 hover:text-indigo-700 font-bold text-xs gap-1"
+                        onClick={() => { setSelectedEdu(null); setIsEditingEducation(true); }}
+                    >
+                        <Plus className="w-3 h-3" /> Add Detail
+                    </Button>
+                </CardHeader>
+                <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-slate-50 border-b border-slate-200">
+                                    <th className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-slate-100">Education</th>
+                                    <th className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-slate-100">Course</th>
+                                    <th className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-slate-100">Specialization</th>
+                                    <th className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-slate-100">School / Institute</th>
+                                    <th className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-slate-100">Board/ University</th>
+                                    <th className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-slate-100">Course Type</th>
+                                    <th className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-slate-100">Class</th>
+                                    <th className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-slate-100 text-center">% / CGPA</th>
+                                    <th className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-slate-100 text-center">Passing Year</th>
+                                    <th className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-slate-100 text-center">File</th>
+                                    <th className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {portfolio.educationDetails.map((edu, i) => (
+                                    <tr key={i} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                                        <td className="px-4 py-3 text-xs font-bold text-slate-700 border-r border-slate-100">{edu.level}</td>
+                                        <td className="px-4 py-3 text-xs text-slate-600 border-r border-slate-100">{edu.course}</td>
+                                        <td className="px-4 py-3 text-xs text-slate-600 border-r border-slate-100">{edu.specialization}</td>
+                                        <td className="px-4 py-3 text-xs text-slate-600 border-r border-slate-100">{edu.institute}</td>
+                                        <td className="px-4 py-3 text-xs text-slate-600 border-r border-slate-100">{edu.board}</td>
+                                        <td className="px-4 py-3 text-xs text-slate-600 border-r border-slate-100">{edu.courseType}</td>
+                                        <td className="px-4 py-3 text-xs text-slate-600 border-r border-slate-100">{edu.class}</td>
+                                        <td className="px-4 py-3 text-xs font-bold text-slate-700 border-r border-slate-100 text-center">{edu.percentage}%</td>
+                                        <td className="px-4 py-3 text-xs font-bold text-slate-700 border-r border-slate-100 text-center">{edu.passingYear}</td>
+                                        <td className="px-4 py-3 border-r border-slate-100 text-center">
+                                            <Button variant="link" className="h-auto p-0 text-[10px] font-black text-blue-600 uppercase">View</Button>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <div className="flex items-center justify-center gap-3">
+                                                <button onClick={() => { setSelectedEdu(edu); setIsEditingEducation(true); }} className="text-slate-400 hover:text-indigo-600 transition-colors">
+                                                    <Edit className="w-3.5 h-3.5" />
+                                                </button>
+                                                <button className="text-slate-400 hover:text-rose-600 transition-colors">
+                                                    <X className="w-3.5 h-3.5 text-blue-900 border border-blue-900/10 rounded" />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Experience Details Table */}
+            <Card className="mb-6 overflow-hidden border-slate-200 text-xs shadow-sm">
+                <CardHeader className="bg-slate-100/50 border-b py-3 flex flex-row items-center justify-between">
+                    <CardTitle className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                        <Menu className="w-4 h-4 text-slate-500" /> Experience Details
+                    </CardTitle>
+                    <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-indigo-600 hover:text-indigo-700 font-bold text-xs gap-1"
+                        onClick={() => { setSelectedExp(null); setIsEditingExperience(true); }}
+                    >
+                        <Plus className="w-3 h-3" /> Add Detail
+                    </Button>
+                </CardHeader>
+                <CardContent className="p-0">
+                    <div className="p-4 bg-white border-b border-slate-100">
+                        <p className="text-[11px] font-black text-rose-600 uppercase tracking-tight">
+                            NOTE:- In Edit mode, Dates to be Entered manually in dd/mm/yyyy format
+                        </p>
+                    </div>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-slate-50 border-b border-slate-200">
+                                    <th className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-slate-100">Org. Name</th>
+                                    <th className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-slate-100">Designation</th>
+                                    <th className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-slate-100">Nature of Job</th>
+                                    <th className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-slate-100 text-center">Job Type</th>
+                                    <th className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-slate-100 text-center">From</th>
+                                    <th className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-slate-100 text-center">To</th>
+                                    <th className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-slate-100 text-center">Total Exp.</th>
+                                    <th className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-slate-100 text-right">Last Drawn</th>
+                                    <th className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-slate-100 text-center">Upload Doc.</th>
+                                    <th className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {portfolio.experienceDetails.map((exp, i) => (
+                                    <tr key={i} className="border-b border-slate-100 hover:bg-slate-50 transition-colors text-xs font-bold text-slate-700">
+                                        <td className="px-4 py-3 border-r border-slate-100">{exp.orgName}</td>
+                                        <td className="px-4 py-3 border-r border-slate-100 text-slate-600 uppercase font-black">{exp.designation}</td>
+                                        <td className="px-4 py-3 border-r border-slate-100 text-slate-600 font-medium">{exp.natureOfJob}</td>
+                                        <td className="px-4 py-3 border-r border-slate-100 text-center text-slate-600 font-medium">{exp.jobType}</td>
+                                        <td className="px-4 py-3 border-r border-slate-100 text-center text-slate-600 font-medium">{exp.fromDate}</td>
+                                        <td className="px-4 py-3 border-r border-slate-100 text-center text-slate-600 font-medium">{exp.toDate}</td>
+                                        <td className="px-4 py-3 border-r border-slate-100 text-center text-slate-600 font-medium">{exp.totalExp}</td>
+                                        <td className="px-4 py-3 border-r border-slate-100 text-right text-slate-600 font-medium">{exp.lastDrawn}</td>
+                                        <td className="px-4 py-3 border-r border-slate-100 text-center">
+                                            <Button variant="link" className="h-auto p-0 text-[10px] font-black text-blue-600 uppercase">View</Button>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <div className="flex items-center justify-center gap-3">
+                                                <button onClick={() => { setSelectedExp(exp); setIsEditingExperience(true); }} className="text-slate-400 hover:text-indigo-600 transition-colors">
+                                                    <Edit className="w-3.5 h-3.5" />
+                                                </button>
+                                                <button className="text-slate-400 hover:text-rose-600 transition-colors">
+                                                    <X className="w-3.5 h-3.5 text-blue-900 border border-blue-900/10 rounded" />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </CardContent>
             </Card>
@@ -607,6 +758,141 @@ const StaffPortfolioDetail: React.FC = () => {
                     Back to Staff List
                 </Button>
             </div>
+
+            {/* Basic Info Edit Modal */}
+            <Dialog open={isEditingBasic} onOpenChange={setIsEditingBasic}>
+                <DialogContent className="max-w-2xl p-0 overflow-hidden border-none rounded-[32px] shadow-2xl">
+                    <div className="bg-indigo-600 h-24 w-full flex items-end p-8 relative">
+                        <button onClick={() => setIsEditingBasic(false)} className="absolute top-6 right-6 text-white/70 hover:text-white transition-all"><X className="w-5 h-5" /></button>
+                        <DialogTitle className="text-2xl font-black text-white">Edit Basic Information</DialogTitle>
+                    </div>
+                    <div className="p-8 bg-white grid grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Full Name</label>
+                            <input 
+                                type="text" value={editForm.name} 
+                                onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                                className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-bold"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Designation</label>
+                            <input 
+                                type="text" value={editForm.designation} 
+                                onChange={(e) => setEditForm({...editForm, designation: e.target.value})}
+                                className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-bold"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Department</label>
+                            <input 
+                                type="text" value={editForm.department} 
+                                onChange={(e) => setEditForm({...editForm, department: e.target.value})}
+                                className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-bold"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Email Address</label>
+                            <input 
+                                type="email" value={editForm.email} 
+                                onChange={(e) => setEditForm({...editForm, email: e.target.value})}
+                                className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-bold"
+                            />
+                        </div>
+                        <div className="col-span-2 pt-6 border-t border-slate-100 flex justify-end gap-3">
+                            <Button variant="outline" onClick={() => setIsEditingBasic(false)} className="rounded-2xl px-6 h-12 font-black uppercase text-[10px]">Cancel</Button>
+                            <Button onClick={() => setIsEditingBasic(false)} className="bg-indigo-600 text-white rounded-2xl px-8 h-12 font-black uppercase text-[10px]">Save Changes</Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Education Edit Modal */}
+            <Dialog open={isEditingEducation} onOpenChange={setIsEditingEducation}>
+                <DialogContent className="max-w-3xl p-0 overflow-hidden border-none rounded-[32px] shadow-2xl">
+                    <div className="bg-blue-700 h-24 w-full flex items-end p-8 relative">
+                        <button onClick={() => setIsEditingEducation(false)} className="absolute top-6 right-6 text-white/70 hover:text-white transition-all"><X className="w-5 h-5" /></button>
+                        <DialogTitle className="text-2xl font-black text-white">Update Education Detail</DialogTitle>
+                    </div>
+                    <div className="p-8 bg-white grid grid-cols-3 gap-6">
+                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Education</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedEdu?.level} /></div>
+                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Course</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedEdu?.course} /></div>
+                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Specialization</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedEdu?.specialization} /></div>
+                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">School / Institute</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedEdu?.institute} /></div>
+                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Board / University</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedEdu?.board} /></div>
+                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Course Type</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedEdu?.courseType} /></div>
+                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Class</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedEdu?.class} /></div>
+                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Percentage</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedEdu?.percentage} /></div>
+                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Passing Year</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedEdu?.passingYear} /></div>
+                        
+                        <div className="col-span-3 pt-6 border-t border-slate-100 flex items-center justify-between">
+                            <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                                <Upload className="w-4 h-4 text-slate-400" />
+                                <span className="text-[10px] font-black text-slate-400 uppercase">Update Document</span>
+                            </div>
+                            <div className="flex gap-3">
+                                <Button variant="outline" onClick={() => setIsEditingEducation(false)} className="rounded-2xl px-6 h-12 font-black uppercase text-[10px]">Cancel</Button>
+                                <Button onClick={() => setIsEditingEducation(false)} className="bg-blue-600 text-white rounded-2xl px-8 h-12 font-black uppercase text-[10px]">Update Detail</Button>
+                            </div>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Experience Edit Modal */}
+            <Dialog open={isEditingExperience} onOpenChange={setIsEditingExperience}>
+                <DialogContent className="max-w-4xl p-0 overflow-hidden border-none rounded-[32px] shadow-2xl">
+                    <div className="bg-slate-800 h-24 w-full flex items-end p-8 relative">
+                        <button onClick={() => setIsEditingExperience(false)} className="absolute top-6 right-6 text-white/70 hover:text-white transition-all"><X className="w-5 h-5" /></button>
+                        <DialogTitle className="text-2xl font-black text-white">Update Experience Detail</DialogTitle>
+                    </div>
+                    <div className="p-8 bg-white grid grid-cols-4 gap-6">
+                        <div className="space-y-2 col-span-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Organization Name</label>
+                            <input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedExp?.orgName} />
+                        </div>
+                        <div className="space-y-2 col-span-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Designation</label>
+                            <input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedExp?.designation} />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nature of Job</label>
+                            <input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedExp?.natureOfJob} />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Job Type</label>
+                            <input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedExp?.jobType} />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">From Date (dd/mm/yyyy)</label>
+                            <input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedExp?.fromDate} />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">To Date (dd/mm/yyyy)</label>
+                            <input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedExp?.toDate} />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Experience</label>
+                            <input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedExp?.totalExp} />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Last Drawn Salary</label>
+                            <input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedExp?.lastDrawn} />
+                        </div>
+                        
+                        <div className="col-span-4 pt-6 border-t border-slate-100 flex items-center justify-between">
+                            <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                                <Upload className="w-4 h-4 text-slate-400" />
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Upload Experience Document</span>
+                            </div>
+                            <div className="flex gap-3">
+                                <Button variant="outline" onClick={() => setIsEditingExperience(false)} className="rounded-2xl px-6 h-12 font-black uppercase text-[10px]">Cancel</Button>
+                                <Button onClick={() => setIsEditingExperience(false)} className="bg-slate-900 text-white rounded-2xl px-8 h-12 font-black uppercase text-[10px]">Save Details</Button>
+                            </div>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </Layout>
     );
 };

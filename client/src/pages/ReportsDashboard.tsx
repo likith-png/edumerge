@@ -20,9 +20,10 @@ const mockReports = [
     { id: 10, title: 'Monthly Availed Leave Report', module: 'Leave Management', type: 'Excel', lastRun: 'Today', icon: Calendar, color: 'text-rose-600', bg: 'bg-rose-50' },
     { id: 11, title: 'Yearly Leave Book Details', module: 'Leave Management', type: 'Excel', lastRun: '2 days ago', icon: Calendar, color: 'text-amber-600', bg: 'bg-amber-50' },
     { id: 12, title: 'Staff Salary Details', module: 'Payroll', type: 'Excel', lastRun: 'Last week', icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { id: 13, title: 'Monthly Biometric Attendance Report', module: 'Attendance', type: 'Excel', lastRun: 'Just now', icon: Activity, color: 'text-blue-700', bg: 'bg-blue-100' },
 ];
 
-const mockModules = ['Onboarding', 'Appraisal', 'Exit Management', 'Capacity Intelligence', 'Staff Portfolio', 'Talent Acquisition', 'Leave Management', 'Payroll'];
+const mockModules = ['Onboarding', 'Appraisal', 'Exit Management', 'Capacity Intelligence', 'Staff Portfolio', 'Talent Acquisition', 'Leave Management', 'Payroll', 'Attendance'];
 const mockColumns = [
     'SlNo', 'StaffCode', 'Name', 'Designation', 'DOB', 'Qualification',
     'Experience', 'DOJ', 'Basic', 'DA', 'HRA', 'CCA', 'Others',
@@ -194,6 +195,22 @@ const ReportsDashboard: React.FC = () => {
                         { 'SlNo': 8, 'StaffCode': 'NH-0017', 'Name': 'ahdhjka', 'Designation': 'Professor & HOD', 'DOB': '1972-01-05', 'Qualification': 'Ph.D', 'Experience': '25.4 Yrs', 'DOJ': '2008-05-10', 'Basic': 65000, 'DA': 7313, 'HRA': 26000, 'CCA': 600, 'Others': 82587, 'Conv.All': 1250, 'AGP(Ind)': 10000, 'PF Amnt': 0, 'Variable Pay': 25000, 'Gross': 217750 },
                         { 'SlNo': 9, 'StaffCode': 'NH-0018', 'Name': 'ahdhjka', 'Designation': 'Sr. Assistant Professor & HOD', 'DOB': '1984-04-18', 'Qualification': 'MBA, MPhil', 'Experience': '14.1 Yrs', 'DOJ': '2013-06-01', 'Basic': 32400, 'DA': 3645, 'HRA': 12960, 'CCA': 600, 'Others': 41045, 'Conv.All': 1250, 'AGP(Ind)': 8000, 'PF Amnt': 1800, 'Variable Pay': 0, 'Gross': 101700 },
                         { 'SlNo': 10, 'StaffCode': 'NH-0019', 'Name': 'ahdhjka', 'Designation': 'Librarian', 'DOB': '1986-12-30', 'Qualification': 'MLISc, KSET', 'Experience': '12.3 Yrs', 'DOJ': '2016-03-22', 'Basic': 25000, 'DA': 2813, 'HRA': 10000, 'CCA': 600, 'Others': 31587, 'Conv.All': 1250, 'AGP(Ind)': 0, 'PF Amnt': 0, 'Variable Pay': 0, 'Gross': 71250 }
+                    ]
+                };
+            case 'Monthly Biometric Attendance Report':
+                return {
+                    columns: ['EMPCODE', 'EMPLOYEENAME', ...Array.from({ length: 31 }, (_, i) => `DAY${i + 1}`), 'Present', 'Absent', 'Leave', 'Total'],
+                    data: [
+                        {
+                            'EMPCODE': 'NH-0001', 'EMPLOYEENAME': 'V Manjula',
+                            ...Object.fromEntries(Array.from({ length: 31 }, (_, i) => [`DAY${i + 1}`, i % 7 === 0 ? 'WO' : 'P'])),
+                            'Present': 22, 'Absent': 0, 'Leave': 4, 'Total': 31
+                        },
+                        {
+                            'EMPCODE': 'NH-0212', 'EMPLOYEENAME': 'Bindu Menon',
+                            ...Object.fromEntries(Array.from({ length: 31 }, (_, i) => [`DAY${i + 1}`, i % 7 === 0 ? 'WO' : 'P'])),
+                            'Present': 21, 'Absent': 1, 'Leave': 4, 'Total': 31
+                        }
                     ]
                 };
             default:

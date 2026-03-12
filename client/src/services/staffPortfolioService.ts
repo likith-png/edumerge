@@ -32,6 +32,31 @@ export interface CareerMilestone {
     afterIncrementSalary?: string;
 }
 
+export interface EducationalQualification {
+    level: string; // e.g., 10th / SSLC, UG, PG, Ph. D
+    course: string;
+    specialization: string;
+    institute: string;
+    board: string;
+    courseType: string; // e.g., Regular, Part-time, Correspondence
+    class: string;
+    percentage: string;
+    passingYear: string;
+    fileUrl?: string;
+}
+
+export interface ExperienceDetail {
+    orgName: string;
+    designation: string;
+    natureOfJob: string;
+    jobType: string;
+    fromDate: string;
+    toDate: string;
+    totalExp: string;
+    lastDrawn: string;
+    fileUrl?: string;
+}
+
 export interface StaffPortfolioData {
     member: StaffMember;
     performanceHistory: PerformanceRecord[];
@@ -95,7 +120,10 @@ export interface StaffPortfolioData {
         noticePeriod: string;
         nocStatus: string;
         exitInterviewCompleted: boolean;
+        exitInterviewFeedback?: string;
     };
+    educationDetails: EducationalQualification[];
+    experienceDetails: ExperienceDetail[];
 }
 
 // Mock staff data
@@ -402,7 +430,22 @@ export function getStaffPortfolio(staffId: string): StaffPortfolioData | null {
             noticePeriod: '2 months',
             nocStatus: 'Pending',
             exitInterviewCompleted: false
-        } : undefined
+        } : undefined,
+        educationDetails: [
+            { level: '10th / SSLC', course: 'SSC', specialization: '-', institute: 'ZP Urdu High School', board: 'Board of Secondary E', courseType: 'Regular', class: 'First class', percentage: '63.8', passingYear: '1996' },
+            { level: '12th / PUC', course: '12th', specialization: 'Maths Physics Chemistry', institute: 'PVRR MNR Jr College', board: 'Board of Intermediate', courseType: 'Regular', class: 'First class', percentage: '71.1', passingYear: '1998' },
+            { level: 'UG', course: 'B.Sc', specialization: 'Maths Physics Chemistry', institute: 'Govt. Arts College', board: 'SV University', courseType: 'Regular', class: 'First class', percentage: '65', passingYear: '2001' },
+            { level: 'PG', course: 'M.Sc', specialization: 'Mathematics', institute: 'SVU PG Centre', board: 'SV University', courseType: 'Regular', class: 'Second class', percentage: '57.5', passingYear: '2003' },
+            { level: 'Ph. D', course: 'Ph.D', specialization: 'Fluid Dynamics', institute: 'JNTUA', board: 'JNTUA', courseType: 'PartTime', class: '-', percentage: '72', passingYear: '2019' },
+            { level: 'M. Phil', course: 'M.Phill', specialization: 'Mathematics', institute: 'MK University', board: 'MK University', courseType: 'Correspondence', class: 'Second class', percentage: '55', passingYear: '2005' }
+        ],
+        experienceDetails: [
+            { orgName: 'CMRIT', designation: 'Asst Prof and Director-PGEDM', natureOfJob: 'Teaching', jobType: 'Full Time', fromDate: '17/08/2009', toDate: '20/07/2011', totalExp: '1.10', lastDrawn: '52000.00' },
+            { orgName: 'SILICON CITY COLLEGE', designation: 'DEAN DIRECTOR-ACADEMICS', natureOfJob: 'Teaching', jobType: 'Full Time', fromDate: '30/08/2011', toDate: '30/06/2013', totalExp: '1.09', lastDrawn: '75000.00' },
+            { orgName: 'JYOTI NIVAS COLLEGE', designation: 'DEAN DIRECTOR-ACADEMICS', natureOfJob: 'Teaching', jobType: 'Full Time', fromDate: '05/08/2013', toDate: '30/11/2015', totalExp: '2.03', lastDrawn: '92000.00' },
+            { orgName: 'SILICON CITY COLLEGE', designation: 'DIRECTOR-RESEARCH', natureOfJob: 'Research', jobType: 'Full Time', fromDate: '10/06/2016', toDate: '29/09/2021', totalExp: '5.03', lastDrawn: '75000.00' },
+            { orgName: 'SURANA COLLEGE', designation: 'Prof and HOD', natureOfJob: 'Teaching', jobType: 'Full Time', fromDate: '20/08/2005', toDate: '12/08/2009', totalExp: '3.11', lastDrawn: '35000.00' }
+        ]
     };
 }
 

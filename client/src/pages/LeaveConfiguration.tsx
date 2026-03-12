@@ -28,14 +28,25 @@ export interface ApprovalWorkflow {
     level2: string;
 }
 
+export interface QuotaRecord {
+    id: string;
+    leaveCode: string;
+    staffCategory: string;
+    permanentQuota: string;
+    probationerQuota: string;
+    distributionLogic: string;
+    prorationRule: string;
+}
+
 export const defaultLeaveTypes: LeaveType[] = [
-    { id: 'CL', name: 'Casual Leave (CL)', teachingPerm: '12 / year', teachingProb: '1 / month (Prorated)', nonTeachingPerm: '12 / year', nonTeachingProb: '1 / month (Prorated)' },
-    { id: 'VL', name: 'Vacation (VL)', teachingPerm: '28 days / yr', teachingProb: '14 days / yr', nonTeachingPerm: '14 days\nOr 6 days', nonTeachingProb: '6 days / yr' },
+    { id: 'CL', name: 'Casual Leave (CL)', teachingPerm: '12 / year (6 Jan + 6 July)', teachingProb: '1 / month (Prorated)', nonTeachingPerm: '12 / year (6 Jan + 6 July)', nonTeachingProb: '1 / month (Prorated)' },
+    { id: 'VL', name: 'Vacation (VL)', teachingPerm: 'Total 28 days / year\n(14 each semester)', teachingProb: 'N/A', nonTeachingPerm: 'Cat 1: 14 days / yr\nCat 2: 6 days / yr', nonTeachingProb: 'N/A' },
     { id: 'OED', name: 'On Exam Duty (OED)', teachingPerm: '14 / year', teachingProb: '14 / year', nonTeachingPerm: 'N/A', nonTeachingProb: 'N/A' },
     { id: 'OOD', name: 'On Official Duty (OOD)', teachingPerm: 'Eng: 10 / yr\nDegree: 7 / yr', teachingProb: 'Eng: 10 / yr\nDegree: 7 / yr', nonTeachingPerm: '7 / year', nonTeachingProb: '7 / year' },
+    { id: 'CO', name: 'Comp Off (CO)', teachingPerm: 'Accrues on work on\nHoliday/1st/3rd Sat', teachingProb: 'Accrues on work on\nHoliday/1st/3rd Sat', nonTeachingPerm: 'Accrues on work on\nHoliday/1st/3rd Sat', nonTeachingProb: 'Accrues on work on\nHoliday/1st/3rd Sat' },
     { id: 'EL', name: 'Earned Leave (EL)', teachingPerm: 'Heads Only: 21 / yr', teachingProb: 'N/A', nonTeachingPerm: 'Heads Only: 21 / yr', nonTeachingProb: 'N/A' },
-    { id: 'LOP', name: 'Loss of Pay (LOP)', teachingPerm: 'As per approval', teachingProb: 'As per approval', nonTeachingPerm: 'As per approval', nonTeachingProb: 'As per approval' },
-    { id: 'COMP', name: 'Comp Off', teachingPerm: 'Based on extra days', teachingProb: 'Based on extra days', nonTeachingPerm: 'Based on extra days', nonTeachingProb: 'Based on extra days' }
+    { id: 'LOP', name: 'Loss of Pay (LOP)', teachingPerm: 'Cap: 5 days / year', teachingProb: 'Cap: 5 days / year', nonTeachingPerm: 'Cap: 5 days / year', nonTeachingProb: 'Cap: 5 days / year' },
+    { id: 'LOPNR', name: 'LOP - Not Regularised', teachingPerm: 'Unapproved absence penalty', teachingProb: 'Unapproved absence penalty', nonTeachingPerm: 'Unapproved absence penalty', nonTeachingProb: 'Unapproved absence penalty' }
 ];
 
 export const defaultStaffBalances: StaffBalance[] = [
@@ -51,7 +62,114 @@ export const defaultWorkflows: ApprovalWorkflow[] = [
     { id: '1', roleGroup: 'Teaching Staff', level1: 'HOD', level2: 'HR Admin' },
     { id: '2', roleGroup: 'HODs (Academic)', level1: 'Principal', level2: 'HR Admin' },
     { id: '3', roleGroup: 'Non-Academic Heads', level1: 'Chairman', level2: 'HR Admin' },
+    { id: '4', roleGroup: 'Non-Teaching Staff', level1: 'HOD', level2: 'HR Admin' },
 ];
+
+export const defaultQuotaConfig: QuotaRecord[] = [
+    { id: '1', leaveCode: 'CL', staffCategory: 'Teaching / NT / Tech', permanentQuota: '12 / Year', probationerQuota: '1 / Month', distributionLogic: 'RULE:SEMI_ANNUAL|SPLIT:6,6', prorationRule: 'DOJ <= 5th for Month 1' },
+    { id: '2', leaveCode: 'VL', staffCategory: 'Teaching', permanentQuota: '28 / Year', probationerQuota: 'N/A', distributionLogic: 'RULE:SEMESTER|SPLIT:14,14', prorationRule: 'Principal office cutoff' },
+    { id: '3', leaveCode: 'VL', staffCategory: 'Non-Teaching (Cat 1)', permanentQuota: '14 / Year', probationerQuota: 'N/A', distributionLogic: 'RULE:SEMESTER|SPLIT:7,7', prorationRule: 'Principal office cutoff' },
+    { id: '4', leaveCode: 'VL', staffCategory: 'Non-Teaching (Cat 2)', permanentQuota: '6 / Year', probationerQuota: 'N/A', distributionLogic: 'RULE:SEMESTER|SPLIT:3,3', prorationRule: 'Principal office cutoff' },
+    { id: '5', leaveCode: 'OED', staffCategory: 'Teaching Staff', permanentQuota: '14 / Year', probationerQuota: '14 / Year', distributionLogic: 'RULE:ANNUAL', prorationRule: 'Fixed allotment' },
+    { id: '6', leaveCode: 'OOD', staffCategory: 'Engineering Staff', permanentQuota: '10 / Year', probationerQuota: '10 / Year', distributionLogic: 'RULE:ANNUAL', prorationRule: 'Fixed allotment' },
+    { id: '7', leaveCode: 'OOD', staffCategory: 'Degree College Staff', permanentQuota: '7 / Year', probationerQuota: '7 / Year', distributionLogic: 'RULE:ANNUAL', prorationRule: 'Fixed allotment' },
+    { id: '8', leaveCode: 'EL', staffCategory: 'Academic/Non-Acad Heads', permanentQuota: '21 / Year', probationerQuota: 'N/A', distributionLogic: 'RULE:ANNUAL', prorationRule: 'Heads only' },
+    { id: '9', leaveCode: 'LOP', staffCategory: 'All Staff', permanentQuota: '5 / Year (Max)', probationerQuota: '5 / Year (Max)', distributionLogic: 'RULE:CAP|MAX:5', prorationRule: 'No proration' }
+];
+
+const formatDistributionRule = (rule: string) => {
+    if (!rule || !rule.startsWith('RULE:')) return rule || 'Not Set';
+    
+    const [main, ...rest] = rule.replace('RULE:', '').split('|');
+    const params: Record<string, string> = {};
+    rest.forEach(p => {
+        const [k, v] = p.split(':');
+        if (k && v) params[k] = v;
+    });
+
+    switch (main) {
+        case 'ANNUAL': return 'Annual (Full Allotment)';
+        case 'SEMI_ANNUAL': return `Semi-Annual (${params.SPLIT?.replace(',', '+') || '6+6'})`;
+        case 'SEMESTER': return `Semester (${params.SPLIT?.replace(',', '+') || '14+14'})`;
+        case 'MONTHLY': return `Monthly (${params.MAX || '1'} per Month)`;
+        case 'CAP': return `Annual Cap (Max ${params.MAX || '5'} Days)`;
+        default: return main.toLowerCase().replace('_', ' ');
+    }
+};
+
+const StructuredDistributionInput = ({ value, onChange }: { value: string, onChange: (val: string) => void }) => {
+    const parse = (val: string) => {
+        if (!val || !val.startsWith('RULE:')) return { type: 'ANNUAL', split1: '6', split2: '6', max: '5' };
+        const [main, ...rest] = val.replace('RULE:', '').split('|');
+        const params: Record<string, string> = {};
+        rest.forEach(p => {
+            const [k, v] = p.split(':');
+            if (k && v) params[k] = v;
+        });
+        
+        const splits = params.SPLIT?.split(',') || ['6', '6'];
+        return {
+            type: main,
+            split1: splits[0] || '6',
+            split2: splits[1] || '6',
+            max: params.MAX || '5'
+        };
+    };
+
+    const [state, setState] = useState(parse(value));
+    useEffect(() => { setState(parse(value)); }, [value]);
+
+    const update = (patch: any) => {
+        const next = { ...state, ...patch };
+        setState(next);
+        
+        let rule = `RULE:${next.type}`;
+        if (next.type === 'SEMI_ANNUAL' || next.type === 'SEMESTER') {
+            rule += `|SPLIT:${next.split1},${next.split2}`;
+        } else if (next.type === 'MONTHLY' || next.type === 'CAP') {
+            rule += `|MAX:${next.max}`;
+        }
+        onChange(rule);
+    };
+
+    return (
+        <div className="flex flex-col gap-2 bg-slate-50/50 p-3 rounded-xl border border-slate-100">
+            <select
+                value={state.type}
+                onChange={(e) => update({ type: e.target.value })}
+                className="w-full bg-white border border-slate-200 rounded-lg py-2 px-3 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold text-slate-700"
+            >
+                <option value="ANNUAL">Annual (Fixed Allotment)</option>
+                <option value="SEMI_ANNUAL">Semi-Annual (Jan/July Split)</option>
+                <option value="SEMESTER">Semester Based Split</option>
+                <option value="MONTHLY">Monthly Accrual</option>
+                <option value="CAP">Annual Usage Cap</option>
+            </select>
+
+            {(state.type === 'SEMI_ANNUAL' || state.type === 'SEMESTER') && (
+                <div className="flex items-center gap-2 mt-1">
+                    <div className="flex-1 space-y-1">
+                        <label className="text-[10px] font-black text-slate-400 uppercase">Part 1</label>
+                        <input type="number" value={state.split1} onChange={(e) => update({ split1: e.target.value })} className="w-full bg-white border border-slate-200 rounded-lg py-1.5 px-3 text-sm font-bold" />
+                    </div>
+                    <div className="pt-4 font-bold text-slate-300">+</div>
+                    <div className="flex-1 space-y-1">
+                        <label className="text-[10px] font-black text-slate-400 uppercase">Part 2</label>
+                        <input type="number" value={state.split2} onChange={(e) => update({ split2: e.target.value })} className="w-full bg-white border border-slate-200 rounded-lg py-1.5 px-3 text-sm font-bold" />
+                    </div>
+                </div>
+            )}
+
+            {(state.type === 'MONTHLY' || state.type === 'CAP') && (
+                <div className="flex items-center gap-2 mt-1">
+                    <label className="text-xs font-bold text-slate-500">Maximum Limit:</label>
+                    <input type="number" value={state.max} onChange={(e) => update({ max: e.target.value })} className="w-20 bg-white border border-slate-200 rounded-lg py-1.5 px-3 text-sm font-bold" />
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">Days</span>
+                </div>
+            )}
+        </div>
+    );
+};
 
 const StructuredEntitlementInput = ({ value, onChange }: { value: string, onChange: (val: string) => void }) => {
     const parseValue = (val: string) => {
@@ -129,12 +247,13 @@ const StructuredEntitlementInput = ({ value, onChange }: { value: string, onChan
 };
 
 const LeaveConfiguration = () => {
-    const [activeTab, setActiveTab] = useState<'policies' | 'balances' | 'rules' | 'workflows'>('policies');
+    const [activeTab, setActiveTab] = useState<'policies' | 'balances' | 'rules' | 'workflows' | 'quota'>('policies');
 
     // Core states
     const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
     const [staffBalances, setStaffBalances] = useState<StaffBalance[]>([]);
     const [workflows, setWorkflows] = useState<ApprovalWorkflow[]>([]);
+    const [quotaConfig, setQuotaConfig] = useState<QuotaRecord[]>([]);
 
     // Toast state
     const [isSaving, setIsSaving] = useState(false);
@@ -156,6 +275,13 @@ const LeaveConfiguration = () => {
     const [editingWorkflow, setEditingWorkflow] = useState<ApprovalWorkflow | null>(null);
     const [workflowForm, setWorkflowForm] = useState<ApprovalWorkflow>({ id: '', roleGroup: '', level1: '', level2: '' });
 
+    // Quota Modal state
+    const [showQuotaModal, setShowQuotaModal] = useState(false);
+    const [editingQuota, setEditingQuota] = useState<QuotaRecord | null>(null);
+    const [quotaForm, setQuotaForm] = useState<QuotaRecord>({
+        id: '', leaveCode: '', staffCategory: '', permanentQuota: '', probationerQuota: '', distributionLogic: '', prorationRule: ''
+    });
+
     useEffect(() => {
         const storedPolicies = localStorage.getItem('edumerge_leave_types');
         if (storedPolicies) setLeaveTypes(JSON.parse(storedPolicies));
@@ -168,6 +294,10 @@ const LeaveConfiguration = () => {
         const storedWorkflows = localStorage.getItem('edumerge_approval_workflows');
         if (storedWorkflows) setWorkflows(JSON.parse(storedWorkflows));
         else { setWorkflows(defaultWorkflows); localStorage.setItem('edumerge_approval_workflows', JSON.stringify(defaultWorkflows)); }
+
+        const storedQuota = localStorage.getItem('edumerge_leave_quota');
+        if (storedQuota) setQuotaConfig(JSON.parse(storedQuota));
+        else { setQuotaConfig(defaultQuotaConfig); localStorage.setItem('edumerge_leave_quota', JSON.stringify(defaultQuotaConfig)); }
     }, []);
 
     const handleSaveConfig = () => {
@@ -175,6 +305,7 @@ const LeaveConfiguration = () => {
         localStorage.setItem('edumerge_leave_types', JSON.stringify(leaveTypes));
         localStorage.setItem('edumerge_staff_balances', JSON.stringify(staffBalances));
         localStorage.setItem('edumerge_approval_workflows', JSON.stringify(workflows));
+        localStorage.setItem('edumerge_leave_quota', JSON.stringify(quotaConfig));
         setTimeout(() => {
             setIsSaving(false);
             setShowToast(true);
@@ -225,6 +356,22 @@ const LeaveConfiguration = () => {
         if (confirm('Delete this workflow?')) setWorkflows(workflows.filter(w => w.id !== id));
     };
 
+    // ----- Quota Handlers -----
+    const openQuotaModal = (quota?: QuotaRecord) => {
+        if (quota) { setEditingQuota(quota); setQuotaForm(quota); }
+        else { setEditingQuota(null); setQuotaForm({ id: Date.now().toString(), leaveCode: '', staffCategory: '', permanentQuota: '', probationerQuota: '', distributionLogic: '', prorationRule: '' }); }
+        setShowQuotaModal(true);
+    };
+    const saveQuota = () => {
+        if (!quotaForm.leaveCode || !quotaForm.staffCategory) return alert('Leave Code and Staff Category are required');
+        let updated = editingQuota ? quotaConfig.map(q => q.id === editingQuota.id ? quotaForm : q) : [...quotaConfig, quotaForm];
+        setQuotaConfig(updated);
+        setShowQuotaModal(false);
+    };
+    const deleteQuota = (id: string) => {
+        if (confirm('Delete this quota entry?')) setQuotaConfig(quotaConfig.filter(q => q.id !== id));
+    };
+
     return (
         <Layout title="Leave Configuration" description="Configure leave types, allocations, and approval workflows" icon={Settings} showBack>
             {showToast && (
@@ -255,6 +402,9 @@ const LeaveConfiguration = () => {
                     </button>
                     <button onClick={() => setActiveTab('workflows')} className={`py-3 px-6 font-bold text-sm transition-all border-b-2 flex items-center gap-2 ${activeTab === 'workflows' ? 'border-blue-600 text-blue-600 bg-blue-50/50 rounded-t-lg' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}>
                         <Users className="w-4 h-4" /> Approval Workflows
+                    </button>
+                    <button onClick={() => setActiveTab('quota')} className={`py-3 px-6 font-bold text-sm transition-all border-b-2 flex items-center gap-2 ${activeTab === 'quota' ? 'border-blue-600 text-blue-600 bg-blue-50/50 rounded-t-lg' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}>
+                        <FileText className="w-4 h-4" /> Quota Configuration
                     </button>
                     <button onClick={() => setActiveTab('rules')} className={`py-3 px-6 font-bold text-sm transition-all border-b-2 flex items-center gap-2 ${activeTab === 'rules' ? 'border-blue-600 text-blue-600 bg-blue-50/50 rounded-t-lg' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}>
                         <Shield className="w-4 h-4" /> Global Rules
@@ -397,6 +547,53 @@ const LeaveConfiguration = () => {
                                         ))
                                     )}
                                 </CardContent>
+                            </Card>
+                        </div>
+                    )}
+
+                    {/* QUOTA CONFIGURATION TAB */}
+                    {activeTab === 'quota' && (
+                        <div className="space-y-6">
+                            <Card className="border-none shadow-sm ring-1 ring-slate-100 overflow-hidden">
+                                <div className="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                                    <h3 className="font-bold text-slate-800">Quota Configuration Matrix</h3>
+                                    <Button onClick={() => openQuotaModal()} variant="outline" size="sm" className="text-xs h-8 bg-white hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200">
+                                        <Plus className="w-4 h-4 mr-1" /> Add Quota Entry
+                                    </Button>
+                                </div>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-sm text-center">
+                                        <thead className="bg-white text-slate-500 font-bold border-b border-slate-200 text-xs uppercase tracking-wider">
+                                            <tr>
+                                                <th className="px-6 py-4 text-left border-r border-slate-100">Leave Code</th>
+                                                <th className="px-6 py-4 text-left border-r border-slate-100">Staff Category</th>
+                                                <th className="px-6 py-4 border-r border-slate-100">Permanent Quota</th>
+                                                <th className="px-6 py-4 border-r border-slate-100">Probationer Quota</th>
+                                                <th className="px-6 py-4 border-r border-slate-100">Distribution Logic</th>
+                                                <th className="px-6 py-4 border-r border-slate-100">Proration/Rule</th>
+                                                <th className="px-6 py-4">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-100">
+                                            {quotaConfig.map((q) => (
+                                                <tr key={q.id} className="hover:bg-slate-50 transition-colors group bg-white font-semibold text-slate-700">
+                                                    <td className="px-6 py-4 text-left font-black text-blue-600 border-r border-slate-100">{q.leaveCode}</td>
+                                                    <td className="px-6 py-4 text-left text-slate-800 border-r border-slate-100 uppercase text-[11px] font-black tracking-tight">{q.staffCategory}</td>
+                                                    <td className="px-6 py-4 border-r border-slate-100">{q.permanentQuota}</td>
+                                                    <td className="px-6 py-4 border-r border-slate-100">{q.probationerQuota}</td>
+                                                    <td className="px-6 py-4 border-r border-slate-100 text-[11px] text-slate-500 italic bg-blue-50/20">{formatDistributionRule(q.distributionLogic)}</td>
+                                                    <td className="px-6 py-4 border-r border-slate-100 text-[11px] text-slate-600 font-medium">{q.prorationRule}</td>
+                                                    <td className="px-6 py-4 text-right">
+                                                        <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <button onClick={() => openQuotaModal(q)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"><Edit className="w-4 h-4" /></button>
+                                                            <button onClick={() => deleteQuota(q.id)} className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </Card>
                         </div>
                     )}
@@ -615,6 +812,53 @@ const LeaveConfiguration = () => {
                         <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
                             <Button variant="outline" onClick={() => setShowWorkflowModal(false)} className="bg-white">Cancel</Button>
                             <Button onClick={saveWorkflow} className="bg-blue-600 hover:bg-blue-700 shadow-sm">Save Chain</Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Quota Edit Modal */}
+            {showQuotaModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-8">
+                        <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                            <div>
+                                <h3 className="font-black text-xl text-slate-800 tracking-tight">{editingQuota ? 'Edit Quota Configuration' : 'Add Quota Entry'}</h3>
+                                <p className="text-sm text-slate-500 mt-1">Configure staff-specific leave entitlements and distribution rules.</p>
+                            </div>
+                            <button onClick={() => setShowQuotaModal(false)} className="p-2 text-slate-400 hover:bg-slate-200 hover:text-slate-600 rounded-full transition-colors"><X className="w-5 h-5" /></button>
+                        </div>
+                        <div className="p-8 overflow-y-auto space-y-6">
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="space-y-1.5">
+                                    <label className="text-sm font-bold text-slate-700">Leave Code</label>
+                                    <input type="text" placeholder="e.g. CL" value={quotaForm.leaveCode} onChange={(e) => setQuotaForm({ ...quotaForm, leaveCode: e.target.value.toUpperCase() })} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-sm font-bold text-slate-700">Staff Category</label>
+                                    <input type="text" placeholder="e.g. Teaching" value={quotaForm.staffCategory} onChange={(e) => setQuotaForm({ ...quotaForm, staffCategory: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-sm font-bold text-slate-700">Permanent Quota</label>
+                                    <input type="text" placeholder="e.g. 12 / Year" value={quotaForm.permanentQuota} onChange={(e) => setQuotaForm({ ...quotaForm, permanentQuota: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-sm font-bold text-slate-700">Probationer Quota</label>
+                                    <input type="text" placeholder="e.g. 1 / Month" value={quotaForm.probationerQuota} onChange={(e) => setQuotaForm({ ...quotaForm, probationerQuota: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold" />
+                                </div>
+                                <div className="space-y-1.5 col-span-2">
+                                    <label className="text-sm font-bold text-slate-700">Distribution Logic</label>
+                                    <StructuredDistributionInput value={quotaForm.distributionLogic} onChange={(val) => setQuotaForm({ ...quotaForm, distributionLogic: val })} />
+                                </div>
+                                <div className="space-y-1.5 col-span-2">
+                                    <label className="text-sm font-bold text-slate-700">Proration / Rule</label>
+                                    <textarea rows={2} placeholder="e.g. DOJ <= 5th for Month 1" value={quotaForm.prorationRule} onChange={(e) => setQuotaForm({ ...quotaForm, prorationRule: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold resize-none" />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="px-8 py-5 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
+                            <Button variant="outline" onClick={() => setShowQuotaModal(false)} className="bg-white">Cancel</Button>
+                            <Button onClick={saveQuota} className="bg-blue-600 hover:bg-blue-700 shadow-sm">Save Configuration</Button>
                         </div>
                     </div>
                 </div>

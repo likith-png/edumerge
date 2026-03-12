@@ -533,8 +533,12 @@ const ProbationDashboard: React.FC = () => {
                                                                 </div>
                                                             </div>
                                                             <Badge className={`rounded-xl border-none font-black text-[9px] uppercase tracking-[0.15em] px-3 py-1 shadow-sm
-                                                            ${emp.risk_level === 'High' ? 'bg-rose-50 text-rose-500' : 'bg-slate-50 text-slate-400'}`}>
-                                                                {emp.risk_level || 'Safe'}
+                                                            ${(emp.review_status === 'Terminated' || emp.status === 'Separated') ? 'bg-rose-600 text-white' : 
+                                                              emp.risk_level === 'High' || (emp.performance_score !== undefined && emp.performance_score > 0 && emp.performance_score < 3) || emp.kpis?.some(k => k.status === 'Not Met') ? 'bg-rose-50 text-rose-500' : 
+                                                              emp.risk_level === 'Medium' ? 'bg-amber-50 text-amber-500' : 'bg-slate-50 text-slate-400'}`}>
+                                                                {emp.review_status === 'Terminated' || emp.status === 'Separated' ? 'Terminated' : 
+                                                                 (emp.performance_score !== undefined && emp.performance_score > 0 && emp.performance_score < 3) || emp.kpis?.some(k => k.status === 'Not Met') ? 'Risk' :
+                                                                 emp.risk_level || 'Safe'}
                                                             </Badge>
                                                         </div>
                                                     </CardHeader>
@@ -559,22 +563,35 @@ const ProbationDashboard: React.FC = () => {
                                                         </div>
 
                                                         {/* Mini Progress Bar */}
-                                                        <div className="space-y-3 mb-8">
+                                                <div className="space-y-3 mb-8">
                                                             <div className="flex justify-between items-end">
                                                                 <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] italic">Journey Progress</span>
                                                                 <span className="text-xs font-black text-slate-900">
-                                                                    {(emp.review_status === 'Confirmed' || emp.review_status === 'Terminated') ? '100%' : `${Math.round((empStages.findIndex((s: any) => s.id === emp.currentStageId) / empStages.length) * 100)}%`}
+                                                                    {(() => {
+                                                                        if (emp.review_status === 'Confirmed' || emp.review_status === 'Terminated' || emp.status === 'Separated' || emp.status === 'Confirmed') return '100%';
+                                                                        const idx = empStages.findIndex((s: any) => s.id === emp.currentStageId);
+                                                                        if (idx === -1) return '0%';
+                                                                        return `${Math.round((idx / (empStages.length - 1 || 1)) * 100)}%`;
+                                                                    })()}
                                                                 </span>
                                                             </div>
                                                             <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-100">
                                                                 <div
                                                                     className={`h-full rounded-full shadow-[0_0_10px_rgba(79,70,229,0.3)] transition-all duration-1000 
-                                                                    ${emp.review_status === 'Confirmed' ? 'bg-emerald-500' : emp.review_status === 'Terminated' ? 'bg-rose-500' : 'bg-indigo-600'}`}
-                                                                    style={{ width: (emp.review_status === 'Confirmed' || emp.review_status === 'Terminated') ? '100%' : `${(empStages.findIndex((s: any) => s.id === emp.currentStageId) / empStages.length) * 100}%` }}
+                                                                    ${emp.review_status === 'Confirmed' || emp.status === 'Confirmed' ? 'bg-emerald-500' : 
+                                                                      emp.review_status === 'Terminated' || emp.status === 'Separated' ? 'bg-rose-500' : 'bg-indigo-600'}`}
+                                                                    style={{ 
+                                                                        width: (() => {
+                                                                            if (emp.review_status === 'Confirmed' || emp.review_status === 'Terminated' || emp.status === 'Separated' || emp.status === 'Confirmed') return '100%';
+                                                                            const idx = empStages.findIndex((s: any) => s.id === emp.currentStageId);
+                                                                            if (idx === -1) return '0%';
+                                                                            return `${(idx / (empStages.length - 1 || 1)) * 100}%`;
+                                                                        })()
+                                                                    }}
                                                                 />
                                                             </div>
                                                             <p className={`text-[10px] font-bold text-right uppercase tracking-widest ${emp.review_status === 'Terminated' || emp.status === 'Separated' ? 'text-rose-500' : 'text-slate-400'}`}>
-                                                                {emp.review_status === 'Confirmed' ? 'Converted' : emp.review_status === 'Terminated' || emp.status === 'Separated' ? 'Moved to Exit Mgmt' : 'In Probation'}
+                                                                {emp.review_status === 'Confirmed' || emp.status === 'Confirmed' ? 'Converted' : emp.review_status === 'Terminated' || emp.status === 'Separated' ? 'Terminated' : 'In Probation'}
                                                             </p>
                                                         </div>
 
