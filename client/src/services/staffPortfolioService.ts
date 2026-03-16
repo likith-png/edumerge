@@ -15,6 +15,40 @@ export interface StaffMember {
     status: 'Active' | 'Probation' | 'Notice Period' | 'Resigned';
 }
 
+export interface PersonalDetails {
+    dob: string;
+    gender: string;
+    bloodGroup: string;
+    nationality: string;
+    religion: string;
+    maritalStatus: string;
+    aadharNumber: string;
+    panNumber: string;
+    pfNumber?: string;
+    esiNumber?: string;
+    fatherName: string;
+    motherName: string;
+    bankDetails: {
+        accountNumber: string;
+        ifscCode: string;
+        bankName: string;
+        branchName: string;
+    };
+    passportDetails?: {
+        number: string;
+        expiryDate: string;
+    };
+    permanentAddress: string;
+
+    currentAddress: string;
+    emergencyContact: {
+        name: string;
+        relation: string;
+        phone: string;
+    };
+}
+
+
 export interface PerformanceRecord {
     year: string;
     rating: number;
@@ -124,7 +158,9 @@ export interface StaffPortfolioData {
     };
     educationDetails: EducationalQualification[];
     experienceDetails: ExperienceDetail[];
+    personalDetails: PersonalDetails;
 }
+
 
 // Mock staff data
 const mockStaffMembers: StaffMember[] = [
@@ -445,9 +481,42 @@ export function getStaffPortfolio(staffId: string): StaffPortfolioData | null {
             { orgName: 'JYOTI NIVAS COLLEGE', designation: 'DEAN DIRECTOR-ACADEMICS', natureOfJob: 'Teaching', jobType: 'Full Time', fromDate: '05/08/2013', toDate: '30/11/2015', totalExp: '2.03', lastDrawn: '92000.00' },
             { orgName: 'SILICON CITY COLLEGE', designation: 'DIRECTOR-RESEARCH', natureOfJob: 'Research', jobType: 'Full Time', fromDate: '10/06/2016', toDate: '29/09/2021', totalExp: '5.03', lastDrawn: '75000.00' },
             { orgName: 'SURANA COLLEGE', designation: 'Prof and HOD', natureOfJob: 'Teaching', jobType: 'Full Time', fromDate: '20/08/2005', toDate: '12/08/2009', totalExp: '3.11', lastDrawn: '35000.00' }
-        ]
+        ],
+        personalDetails: {
+            dob: '1980-05-15',
+            gender: 'Female',
+            bloodGroup: 'B+',
+            nationality: 'Indian',
+            religion: 'Islam',
+            maritalStatus: 'Married',
+            aadharNumber: 'XXXX-XXXX-1234',
+            panNumber: 'ABCDE1234F',
+            pfNumber: 'KN/BAN/1234567/000/1234567',
+            esiNumber: '31-00-123456-000-1234',
+            fatherName: 'Binu Prasad Sr.',
+            motherName: 'Laxmi Prasad',
+            bankDetails: {
+                accountNumber: '123456789012',
+                ifscCode: 'ICIC0001234',
+                bankName: 'ICICI Bank',
+                branchName: 'Whitefield Branch'
+            },
+            passportDetails: {
+                number: 'Z1234567',
+                expiryDate: '2030-12-31'
+            },
+            permanentAddress: '123, Rose Gardens, Jayanagar, Bangalore, Karnataka - 560041',
+
+            currentAddress: '456, Lake View Apartments, Whitefield, Bangalore, Karnataka - 560066',
+            emergencyContact: {
+                name: 'Binu Prasad',
+                relation: 'Spouse',
+                phone: '+91 98765 00000'
+            }
+        }
     };
 }
+
 
 /**
  * Get performance summary for dashboard widget

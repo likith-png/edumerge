@@ -23,6 +23,12 @@ const StaffPortfolioDetail: React.FC = () => {
     const [selectedEdu, setSelectedEdu] = useState<any>(null);
     const [isEditingExperience, setIsEditingExperience] = useState(false);
     const [selectedExp, setSelectedExp] = useState<any>(null);
+    const [viewMode, setViewMode] = useState<'monthly' | 'yearly'>('monthly');
+    const [isPersonalOpen, setIsPersonalOpen] = useState(false);
+    const [experienceDetails, setExperienceDetails] = useState<any[]>(portfolio.experienceDetails);
+    const [expForm, setExpForm] = useState<any>({});
+
+
 
     if (!portfolio) {
         return (
@@ -43,6 +49,87 @@ const StaffPortfolioDetail: React.FC = () => {
         researchOutput, complianceRecords, careerTimeline, exitInfo,
         badges, kudos, highlights, probationData } = portfolio;
 
+    const calculateTotalExperience = (from: string, to: string) => {
+        if (!from || !to) return '';
+        try {
+            const [fDay, fMonth, fYear] = from.split('/').map(Number);
+            const [tDay, tMonth, tYear] = to.split('/').map(Number);
+            
+            const startDate = new Date(fYear, fMonth - 1, fDay);
+            const endDate = new Date(tYear, tMonth - 1, tDay);
+            
+            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return '';
+            
+            const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const years = (diffDays / 365.25).toFixed(2);
+            return years;
+        } catch (e) {
+            return '';
+        }
+    };
+
+    const handleSaveExperience = () => {
+        if (selectedExp) {
+            setExperienceDetails(prev => prev.map(exp => exp === selectedExp ? expForm : exp));
+        } else {
+            setExperienceDetails(prev => [...prev, expForm]);
+        }
+        setIsEditingExperience(false);
+    };
+
+    const handleExperienceChange = (field: string, value: string) => {
+        const updatedForm = { ...expForm, [field]: value };
+        if (field === 'fromDate' || field === 'toDate') {
+            const totalExp = calculateTotalExperience(
+                field === 'fromDate' ? value : expForm.fromDate,
+                field === 'toDate' ? value : expForm.toDate
+            );
+            updatedForm.totalExp = totalExp;
+        }
+        setExpForm(updatedForm);
+    };
+
+    const parseSalary = (salaryStr: string) => {
+        if (!salaryStr) return 0;
+        return Number(salaryStr.replace(/[^0-9.-]+/g, ""));
+    };
+
+    const formatSalary = (amount: number) => {
+        return new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            maximumFractionDigits: 0
+        }).format(amount);
+    };
+
+    const getDisplaySalary = (yearlySalaryStr: string) => {
+        const yearly = parseSalary(yearlySalaryStr);
+        if (viewMode === 'monthly') {
+            return formatSalary(Math.round(yearly / 12)) + " / mo";
+        }
+        return formatSalary(yearly) + " / yr";
+    };
+
+    const calculateServiceDuration = (toDate: string) => {
+        const start = new Date(member.joiningDate);
+        const end = new Date(toDate);
+        let years = end.getFullYear() - start.getFullYear();
+        let months = end.getMonth() - start.getMonth();
+        
+        if (months < 0) {
+            years--;
+            months += 12;
+        }
+        
+        const yrStr = years > 0 ? `${years} ${years === 1 ? 'yr' : 'yrs'}` : '';
+        const moStr = months > 0 ? `${months} ${months === 1 ? 'mo' : 'mos'}` : '';
+        
+        return [yrStr, moStr].filter(Boolean).join(' ') || 'Just Joined';
+    };
+
+
+
     return (
         <Layout
             title={member.name}
@@ -51,14 +138,41 @@ const StaffPortfolioDetail: React.FC = () => {
             showBack
         >
             {/* Action Bar */}
-            <div className="flex justify-end mb-4">
-                <Button 
+            <div className="flex justify-end mb-4 gap-3">
+                <div className="inline-flex items-center bg-slate-100 p-1 rounded-[16px] border border-slate-200 shadow-inner">
+                    <button
+                        onClick={() => setViewMode('monthly')}
+                        className={`px-4 py-2 rounded-[12px] text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'monthly'
+                            ? 'bg-white text-indigo-600 shadow-sm'
+                            : 'text-slate-400 hover:text-slate-600'
+                            }`}
+                    >
+                        Monthly
+                    </button>
+                    <button
+                        onClick={() => setViewMode('yearly')}
+                        className={`px-4 py-2 rounded-[12px] text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'yearly'
+                            ? 'bg-white text-indigo-600 shadow-sm'
+                            : 'text-slate-400 hover:text-slate-600'
+                            }`}
+                    >
+                        Yearly
+                    </button>
+                </div>
+                <Button
+                    onClick={() => setIsPersonalOpen(true)}
+                    className="bg-white hover:bg-slate-50 text-indigo-600 border border-indigo-100 shadow-lg rounded-xl flex items-center gap-2 font-bold"
+                >
+                    <User className="w-4 h-4" /> Personal Details
+                </Button>
+                <Button
                     onClick={() => setIsEditingBasic(true)} 
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg rounded-xl flex items-center gap-2"
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg rounded-xl flex items-center gap-2 font-bold"
                 >
                     <Edit className="w-4 h-4" /> Edit Profile
                 </Button>
             </div>
+
 
             {/* Header Profile Card */}
             <Card className="mb-6 border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -198,10 +312,15 @@ const StaffPortfolioDetail: React.FC = () => {
                         variant="ghost" 
                         size="sm" 
                         className="text-indigo-600 hover:text-indigo-700 font-bold text-xs gap-1"
-                        onClick={() => { setSelectedExp(null); setIsEditingExperience(true); }}
+                        onClick={() => { 
+                            setSelectedExp(null); 
+                            setExpForm({});
+                            setIsEditingExperience(true); 
+                        }}
                     >
                         <Plus className="w-3 h-3" /> Add Detail
                     </Button>
+
                 </CardHeader>
                 <CardContent className="p-0">
                     <div className="p-4 bg-white border-b border-slate-100">
@@ -226,7 +345,7 @@ const StaffPortfolioDetail: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {portfolio.experienceDetails.map((exp, i) => (
+                                {experienceDetails.map((exp, i) => (
                                     <tr key={i} className="border-b border-slate-100 hover:bg-slate-50 transition-colors text-xs font-bold text-slate-700">
                                         <td className="px-4 py-3 border-r border-slate-100">{exp.orgName}</td>
                                         <td className="px-4 py-3 border-r border-slate-100 text-slate-600 uppercase font-black">{exp.designation}</td>
@@ -241,10 +360,22 @@ const StaffPortfolioDetail: React.FC = () => {
                                         </td>
                                         <td className="px-4 py-3">
                                             <div className="flex items-center justify-center gap-3">
-                                                <button onClick={() => { setSelectedExp(exp); setIsEditingExperience(true); }} className="text-slate-400 hover:text-indigo-600 transition-colors">
+                                                <button 
+                                                    onClick={() => { 
+                                                        setSelectedExp(exp); 
+                                                        setExpForm(exp);
+                                                        setIsEditingExperience(true); 
+                                                    }} 
+                                                    className="text-slate-400 hover:text-indigo-600 transition-colors"
+                                                >
                                                     <Edit className="w-3.5 h-3.5" />
                                                 </button>
-                                                <button className="text-slate-400 hover:text-rose-600 transition-colors">
+                                                <button 
+                                                    onClick={() => {
+                                                        setExperienceDetails(prev => prev.filter(e => e !== exp));
+                                                    }}
+                                                    className="text-slate-400 hover:text-rose-600 transition-colors"
+                                                >
                                                     <X className="w-3.5 h-3.5 text-blue-900 border border-blue-900/10 rounded" />
                                                 </button>
                                             </div>
@@ -252,6 +383,7 @@ const StaffPortfolioDetail: React.FC = () => {
                                     </tr>
                                 ))}
                             </tbody>
+
                         </table>
                     </div>
                 </CardContent>
@@ -320,7 +452,12 @@ const StaffPortfolioDetail: React.FC = () => {
                                             )}
                                         </div>
                                         <div className="flex-1 pb-4">
-                                            <div className="text-xs text-slate-500">{new Date(milestone.date).toLocaleDateString()}</div>
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <div className="text-xs text-slate-500">{new Date(milestone.date).toLocaleDateString()}</div>
+                                                <Badge className="bg-slate-100 text-slate-600 text-[10px] border-none font-bold">
+                                                    {calculateServiceDuration(milestone.date)}
+                                                </Badge>
+                                            </div>
                                             <h4 className="font-semibold text-sm text-slate-900 mt-1">{milestone.title}</h4>
                                             <p className="text-xs text-slate-600 mt-1">{milestone.description}</p>
 
@@ -328,12 +465,12 @@ const StaffPortfolioDetail: React.FC = () => {
                                             {milestone.type === 'Increment' && milestone.beforeIncrementSalary && milestone.afterIncrementSalary && (
                                                 <div className="mt-3 bg-emerald-50 border border-emerald-100 rounded-xl p-3 flex flex-col gap-2 shadow-sm">
                                                     <div className="text-[10px] font-black uppercase tracking-widest text-emerald-600 flex items-center gap-1">
-                                                        <TrendingUp className="w-3 h-3" /> Salary Revision Details
+                                                        <TrendingUp className="w-3 h-3" /> Salary Revision Details ({viewMode === 'monthly' ? 'Monthly' : 'Yearly'})
                                                     </div>
                                                     <div className="flex items-center gap-3">
                                                         <div className="flex-1 bg-white border border-slate-100 rounded-lg p-2 text-center">
                                                             <div className="text-[10px] text-slate-400 font-bold uppercase mb-0.5">Before</div>
-                                                            <div className="font-bold text-slate-700 text-sm">{milestone.beforeIncrementSalary}</div>
+                                                            <div className="font-bold text-slate-700 text-sm">{getDisplaySalary(milestone.beforeIncrementSalary)}</div>
                                                         </div>
                                                         <div className="flex items-center justify-center">
                                                             <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
@@ -345,12 +482,13 @@ const StaffPortfolioDetail: React.FC = () => {
                                                                 <Star className="w-2.5 h-2.5 text-emerald-500" />
                                                             </div>
                                                             <div className="text-[10px] text-emerald-600 font-black uppercase mb-0.5">After</div>
-                                                            <div className="font-black text-emerald-700 text-sm">{milestone.afterIncrementSalary}</div>
+                                                            <div className="font-black text-emerald-700 text-sm">{getDisplaySalary(milestone.afterIncrementSalary)}</div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             )}
                                         </div>
+
                                     </div>
                                 ))}
                             </div>
@@ -849,35 +987,77 @@ const StaffPortfolioDetail: React.FC = () => {
                     <div className="p-8 bg-white grid grid-cols-4 gap-6">
                         <div className="space-y-2 col-span-2">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Organization Name</label>
-                            <input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedExp?.orgName} />
+                            <input 
+                                type="text" 
+                                className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" 
+                                value={expForm.orgName || ''} 
+                                onChange={(e) => handleExperienceChange('orgName', e.target.value)}
+                            />
                         </div>
                         <div className="space-y-2 col-span-2">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Designation</label>
-                            <input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedExp?.designation} />
+                            <input 
+                                type="text" 
+                                className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" 
+                                value={expForm.designation || ''} 
+                                onChange={(e) => handleExperienceChange('designation', e.target.value)}
+                            />
                         </div>
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nature of Job</label>
-                            <input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedExp?.natureOfJob} />
+                            <input 
+                                type="text" 
+                                className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" 
+                                value={expForm.natureOfJob || ''} 
+                                onChange={(e) => handleExperienceChange('natureOfJob', e.target.value)}
+                            />
                         </div>
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Job Type</label>
-                            <input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedExp?.jobType} />
+                            <input 
+                                type="text" 
+                                className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" 
+                                value={expForm.jobType || ''} 
+                                onChange={(e) => handleExperienceChange('jobType', e.target.value)}
+                            />
                         </div>
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">From Date (dd/mm/yyyy)</label>
-                            <input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedExp?.fromDate} />
+                            <input 
+                                type="text" 
+                                className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" 
+                                value={expForm.fromDate || ''} 
+                                onChange={(e) => handleExperienceChange('fromDate', e.target.value)}
+                                placeholder="dd/mm/yyyy"
+                            />
                         </div>
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">To Date (dd/mm/yyyy)</label>
-                            <input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedExp?.toDate} />
+                            <input 
+                                type="text" 
+                                className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" 
+                                value={expForm.toDate || ''} 
+                                onChange={(e) => handleExperienceChange('toDate', e.target.value)}
+                                placeholder="dd/mm/yyyy"
+                            />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Experience</label>
-                            <input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedExp?.totalExp} />
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Experience (Years)</label>
+                            <input 
+                                type="text" 
+                                className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold bg-slate-50 cursor-not-allowed" 
+                                value={expForm.totalExp || ''} 
+                                readOnly
+                            />
                         </div>
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Last Drawn Salary</label>
-                            <input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedExp?.lastDrawn} />
+                            <input 
+                                type="text" 
+                                className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" 
+                                value={expForm.lastDrawn || ''} 
+                                onChange={(e) => handleExperienceChange('lastDrawn', e.target.value)}
+                            />
                         </div>
                         
                         <div className="col-span-4 pt-6 border-t border-slate-100 flex items-center justify-between">
@@ -887,12 +1067,188 @@ const StaffPortfolioDetail: React.FC = () => {
                             </div>
                             <div className="flex gap-3">
                                 <Button variant="outline" onClick={() => setIsEditingExperience(false)} className="rounded-2xl px-6 h-12 font-black uppercase text-[10px]">Cancel</Button>
-                                <Button onClick={() => setIsEditingExperience(false)} className="bg-slate-900 text-white rounded-2xl px-8 h-12 font-black uppercase text-[10px]">Save Details</Button>
+                                <Button onClick={handleSaveExperience} className="bg-slate-900 text-white rounded-2xl px-8 h-12 font-black uppercase text-[10px]">Save Details</Button>
                             </div>
+                        </div>
+                    </div>
+
+                </DialogContent>
+            </Dialog>
+
+            {/* Personal Details Modal */}
+            <Dialog open={isPersonalOpen} onOpenChange={setIsPersonalOpen}>
+                <DialogContent className="max-w-3xl p-0 overflow-hidden border-none rounded-[40px] shadow-2xl">
+                    <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 h-32 w-full flex items-end p-10 relative">
+                        <button
+                            onClick={() => setIsPersonalOpen(false)}
+                            className="absolute top-8 right-8 w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/20 transition-all border border-white/20"
+                        >
+                            <X className="w-6 h-6" />
+                        </button>
+                        <div className="flex items-center gap-4 text-white">
+                            <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-md border border-white/20">
+                                <User className="w-8 h-8" />
+                            </div>
+                            <div>
+                                <h3 className="text-3xl font-black tracking-tight leading-none uppercase">Personal Information</h3>
+                                <p className="text-indigo-100 text-[10px] font-black uppercase tracking-[0.2em] mt-2 opacity-80">Confidential & Verified Records</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="p-10 space-y-10 bg-white max-h-[70vh] overflow-y-auto">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Date of Birth</label>
+                                <div className="text-sm font-bold text-slate-900 bg-slate-50 p-4 rounded-2xl border border-slate-100">{portfolio.personalDetails.dob}</div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Gender</label>
+                                <div className="text-sm font-bold text-slate-900 bg-slate-50 p-4 rounded-2xl border border-slate-100">{portfolio.personalDetails.gender}</div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Blood Group</label>
+                                <div className="text-sm font-bold text-slate-900 bg-slate-50 p-4 rounded-2xl border border-slate-100">{portfolio.personalDetails.bloodGroup}</div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nationality</label>
+                                <div className="text-sm font-bold text-slate-900 bg-slate-50 p-4 rounded-2xl border border-slate-100">{portfolio.personalDetails.nationality}</div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Religion</label>
+                                <div className="text-sm font-bold text-slate-900 bg-slate-50 p-4 rounded-2xl border border-slate-100">{portfolio.personalDetails.religion}</div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Marital Status</label>
+                                <div className="text-sm font-bold text-slate-900 bg-slate-50 p-4 rounded-2xl border border-slate-100">{portfolio.personalDetails.maritalStatus}</div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Father's Name</label>
+                                <div className="text-sm font-bold text-slate-900 bg-slate-50 p-4 rounded-2xl border border-slate-100">{portfolio.personalDetails.fatherName}</div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Mother's Name</label>
+                                <div className="text-sm font-bold text-slate-900 bg-slate-50 p-4 rounded-2xl border border-slate-100">{portfolio.personalDetails.motherName}</div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-slate-100">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                    <Shield className="w-3 h-3" /> Aadhar Number
+                                </label>
+                                <div className="text-sm font-black text-indigo-600 bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100/50">{portfolio.personalDetails.aadharNumber}</div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                    <Shield className="w-3 h-3" /> PAN Number
+                                </label>
+                                <div className="text-sm font-black text-indigo-600 bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100/50">{portfolio.personalDetails.panNumber}</div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                    <Shield className="w-3 h-3" /> PF Number
+                                </label>
+                                <div className="text-sm font-black text-indigo-600 bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100/50">{portfolio.personalDetails.pfNumber}</div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                    <Shield className="w-3 h-3" /> ESI Number
+                                </label>
+                                <div className="text-sm font-black text-indigo-600 bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100/50">{portfolio.personalDetails.esiNumber}</div>
+                            </div>
+                        </div>
+
+                        <div className="bg-slate-50 rounded-[32px] p-8 border border-slate-100">
+                            <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
+                                <Menu className="w-4 h-4 text-slate-400" /> Bank & Financial Details
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <div className="space-y-1">
+                                    <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Bank Name</div>
+                                    <div className="text-sm font-black text-slate-900">{portfolio.personalDetails.bankDetails.bankName}</div>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Branch</div>
+                                    <div className="text-sm font-bold text-slate-700">{portfolio.personalDetails.bankDetails.branchName}</div>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Account Number</div>
+                                    <div className="text-sm font-black text-indigo-700">{portfolio.personalDetails.bankDetails.accountNumber}</div>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">IFSC Code</div>
+                                    <div className="text-sm font-black text-slate-900">{portfolio.personalDetails.bankDetails.ifscCode}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {portfolio.personalDetails.passportDetails && (
+                            <div className="bg-indigo-50/30 rounded-[32px] p-8 border border-indigo-100/50">
+                                <h4 className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
+                                    <FileText className="w-4 h-4 text-indigo-400" /> Passport Details
+                                </h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-1">
+                                        <div className="text-[9px] font-black text-indigo-300 uppercase tracking-widest">Passport Number</div>
+                                        <div className="text-sm font-black text-slate-900">{portfolio.personalDetails.passportDetails.number}</div>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <div className="text-[9px] font-black text-indigo-300 uppercase tracking-widest">Expiry Date</div>
+                                        <div className="text-sm font-black text-slate-900">{portfolio.personalDetails.passportDetails.expiryDate}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+
+                        <div className="space-y-8 pt-8 border-t border-slate-100">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Current Address</label>
+                                <div className="text-sm font-medium text-slate-700 bg-slate-50 p-5 rounded-2xl border border-slate-100 leading-relaxed italic">
+                                    {portfolio.personalDetails.currentAddress}
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Permanent Address</label>
+                                <div className="text-sm font-medium text-slate-700 bg-slate-50 p-5 rounded-2xl border border-slate-100 leading-relaxed italic">
+                                    {portfolio.personalDetails.permanentAddress}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-rose-50 rounded-[32px] p-8 border border-rose-100">
+                            <h4 className="text-[10px] font-black text-rose-500 uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
+                                <Heart className="w-4 h-4" /> Emergency Contact Details
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="space-y-1">
+                                    <div className="text-[9px] font-black text-rose-300 uppercase tracking-widest">Contact Person</div>
+                                    <div className="text-sm font-black text-slate-900">{portfolio.personalDetails.emergencyContact.name}</div>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="text-[9px] font-black text-rose-300 uppercase tracking-widest">Relation</div>
+                                    <div className="text-sm font-bold text-slate-700 italic">{portfolio.personalDetails.emergencyContact.relation}</div>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="text-[9px] font-black text-rose-300 uppercase tracking-widest">Phone Number</div>
+                                    <div className="text-sm font-black text-rose-600 underline underline-offset-4">{portfolio.personalDetails.emergencyContact.phone}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="pt-6 flex justify-end">
+                            <Button
+                                onClick={() => setIsPersonalOpen(false)}
+                                className="bg-slate-900 text-white hover:bg-slate-800 rounded-2xl px-10 h-14 font-black uppercase tracking-widest text-xs"
+                            >
+                                Close Records
+                            </Button>
                         </div>
                     </div>
                 </DialogContent>
             </Dialog>
+
         </Layout>
     );
 };

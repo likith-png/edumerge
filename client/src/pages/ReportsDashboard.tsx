@@ -4,8 +4,9 @@ import { Card, CardContent } from '../components/ui/card';
 import {
     PieChart, FileText, Download, BarChart2, Filter,
     Settings, CheckCircle2, Plus, Sheet, Table,
-    Activity, UserPlus, LogOut, FileCheck, Eye, X, Briefcase, Calendar, DollarSign
+    Activity, UserPlus, LogOut, FileCheck, Eye, X, Briefcase, Calendar, DollarSign, Users
 } from 'lucide-react';
+import { Badge } from '../components/ui/badge';
 
 const mockReports = [
     { id: 1, title: 'New Joinee Summary', module: 'Onboarding', type: 'PDF/Excel', lastRun: '2 hours ago', icon: UserPlus, color: 'text-blue-600', bg: 'bg-blue-50' },
@@ -21,6 +22,7 @@ const mockReports = [
     { id: 11, title: 'Yearly Leave Book Details', module: 'Leave Management', type: 'Excel', lastRun: '2 days ago', icon: Calendar, color: 'text-amber-600', bg: 'bg-amber-50' },
     { id: 12, title: 'Staff Salary Details', module: 'Payroll', type: 'Excel', lastRun: 'Last week', icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50' },
     { id: 13, title: 'Monthly Biometric Attendance Report', module: 'Attendance', type: 'Excel', lastRun: 'Just now', icon: Activity, color: 'text-blue-700', bg: 'bg-blue-100' },
+    { id: 14, title: 'Departmental Staff Comprehensive Report', module: 'Staff Portfolio', type: 'Excel', lastRun: 'New', icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-50' },
 ];
 
 const mockModules = ['Onboarding', 'Appraisal', 'Exit Management', 'Capacity Intelligence', 'Staff Portfolio', 'Talent Acquisition', 'Leave Management', 'Payroll', 'Attendance'];
@@ -147,10 +149,45 @@ const ReportsDashboard: React.FC = () => {
                     data: filteredApplications.length > 0 ? filteredApplications : [{ 'App ID': '-', Name: 'No Applications Found matching the filters', Role: '-', Department: '-', Stage: '-', 'Applied Date': '-' }]
                 };
             case 'New Joinee Summary':
-            case 'Pending Onboarding Tasks':
+                const onboardingCandidates = [
+                    { id: 0, name: 'Mr. Arvind Sharma', role: 'Mathematics Teacher', dept: 'Mathematics', stage: 'Offer Accepted', status: 'Completed', joinDate: '2026-04-01' },
+                    { id: 1, name: 'Ms. Reshma Binu Prasad', role: 'Assistant Professor', dept: 'Computer Science', stage: 'Documentation', status: 'In Progress', joinDate: '2026-03-15' },
+                    { id: 2, name: 'Ms. Sanchaiyata Majumdar', role: 'Lab Instructor', dept: 'Physics', stage: 'Orientation', status: 'On Track', joinDate: '2026-03-10' },
+                    { id: 3, name: 'Dr. R Sedhunivas', role: 'Admin Officer', dept: 'Administration', stage: 'BGV', status: 'SLA Breach', joinDate: '2026-02-28' },
+                    { id: 4, name: 'Dr. Ranjita Saikia', role: 'Lecturer', dept: 'Mathematics', stage: 'Operational Checklist', status: 'On Track', joinDate: '2026-03-12' },
+                    { id: 5, name: 'Mr. Manjit Singh', role: 'Research Associate', dept: 'Chemistry', stage: 'Sign-Off', status: 'On Track', joinDate: '2026-03-01' },
+                ];
+                const joiners = onboardingCandidates.filter(c => c.stage === 'Sign-Off' || c.status === 'Completed');
                 return {
-                    columns: ['ID', 'Name', 'Department', 'Status', 'Stage'],
-                    data: [{ ID: '...', Name: 'Loading...', Department: '...', Status: '...', Stage: '...' }]
+                    columns: ['ID', 'Name', 'Department', 'Role', 'Join Date', 'Status'],
+                    data: joiners.length > 0 ? joiners.map(c => ({
+                        ID: `CAND-${c.id}`,
+                        Name: c.name,
+                        Department: c.dept,
+                        Role: c.role,
+                        'Join Date': c.joinDate,
+                        Status: c.status
+                    })) : [{ ID: '-', Name: 'No new joiners found', Department: '-', Role: '-', 'Join Date': '-', Status: '-' }]
+                };
+            case 'Pending Onboarding Tasks':
+                const pendingCandidates = [
+                    { id: 0, name: 'Mr. Arvind Sharma', role: 'Mathematics Teacher', dept: 'Mathematics', stage: 'Offer Accepted', status: 'Completed', joinDate: '2026-04-01' },
+                    { id: 1, name: 'Ms. Reshma Binu Prasad', role: 'Assistant Professor', dept: 'Computer Science', stage: 'Documentation', status: 'In Progress', joinDate: '2026-03-15' },
+                    { id: 2, name: 'Ms. Sanchaiyata Majumdar', role: 'Lab Instructor', dept: 'Physics', stage: 'Orientation', status: 'On Track', joinDate: '2026-03-10' },
+                    { id: 3, name: 'Dr. R Sedhunivas', role: 'Admin Officer', dept: 'Administration', stage: 'BGV', status: 'SLA Breach', joinDate: '2026-02-28' },
+                    { id: 4, name: 'Dr. Ranjita Saikia', role: 'Lecturer', dept: 'Mathematics', stage: 'Operational Checklist', status: 'On Track', joinDate: '2026-03-12' },
+                    { id: 5, name: 'Mr. Manjit Singh', role: 'Research Associate', dept: 'Chemistry', stage: 'Sign-Off', status: 'On Track', joinDate: '2026-03-01' },
+                ].filter(c => c.status !== 'Completed' && c.stage !== 'Sign-Off');
+                return {
+                    columns: ['ID', 'Name', 'Department', 'Current Stage', 'Status', 'SLA Status'],
+                    data: pendingCandidates.length > 0 ? pendingCandidates.map(c => ({
+                        ID: `CAND-${c.id}`,
+                        Name: c.name,
+                        Department: c.dept,
+                        'Current Stage': c.stage,
+                        Status: c.status,
+                        'SLA Status': c.status === 'SLA Breach' ? '⚠️ Breach' : '✅ On Track'
+                    })) : [{ ID: '-', Name: 'No pending tasks', Department: '-', 'Current Stage': '-', Status: '-', 'SLA Status': '-' }]
                 };
             case 'Organization Bell Curve':
             case 'Top Performers List':
@@ -210,6 +247,20 @@ const ReportsDashboard: React.FC = () => {
                             'EMPCODE': 'NH-0212', 'EMPLOYEENAME': 'Bindu Menon',
                             ...Object.fromEntries(Array.from({ length: 31 }, (_, i) => [`DAY${i + 1}`, i % 7 === 0 ? 'WO' : 'P'])),
                             'Present': 21, 'Absent': 1, 'Leave': 4, 'Total': 31
+                        }
+                    ]
+                };
+            case 'Departmental Staff Comprehensive Report':
+                return {
+                    columns: ['SlNo', 'StaffCode', 'Name', 'Designation', 'DOB', 'Qualification', 'Experience', 'DOJ', 'Basic', 'DA', 'HRA', 'CCA', 'Others', 'Conv.All', 'AGP(Ind)', 'PF Amnt', 'Variable Pay', 'Gross', 'OTHERS', 'UG', 'PG', 'DOCT.', 'Spec.', 'Teach', 'Ind', 'Res', 'NHCE', 'Tot'],
+                    data: [
+                        {
+                            'SlNo': 1, 'StaffCode': 'NH-0010', 'Name': 'ABC', 'Designation': 'Registrar', 'DOB': '1975-10-15', 'Qualification': 'SSLC, PUC, B. Com', 'Experience': '37.05 Yrs', 'DOJ': '2008-05-10', 'Basic': 64900, 'DA': 7301, 'HRA': 25960, 'CCA': 600, 'Others': 60111, 'Conv.All': 1250, 'AGP(Ind)': 0, 'PF Amnt': 0, 'Variable Pay': 15000, 'Gross': 175122,
+                            'OTHERS': '-', 'UG': 'SSLC, PUC', 'PG': 'B. Com', 'DOCT.': '-', 'Spec.': 'Administration', 'Teach': '37.05', 'Ind': '-', 'Res': '-', 'NHCE': '15.8', 'Tot': '37.05'
+                        },
+                        {
+                            'SlNo': 2, 'StaffCode': 'NH-0011', 'Name': 'DEF', 'Designation': 'Asst. Registrar', 'DOB': '1982-03-24', 'Qualification': 'SSLC, PUC, B.COM', 'Experience': '22.1 Yrs', 'DOJ': '2010-02-18', 'Basic': 20300, 'DA': 2284, 'HRA': 8120, 'CCA': 600, 'Others': 32772, 'Conv.All': 1250, 'AGP(Ind)': 0, 'PF Amnt': 0, 'Variable Pay': 0, 'Gross': 65326,
+                            'OTHERS': '-', 'UG': 'SSLC, PUC', 'PG': 'B.COM', 'DOCT.': '-', 'Spec.': 'Administration', 'Teach': '22.1', 'Ind': '-', 'Res': '-', 'NHCE': '14.1', 'Tot': '22.1'
                         }
                     ]
                 };
@@ -306,34 +357,42 @@ const ReportsDashboard: React.FC = () => {
                                 </div>
 
                                 {/* Reports Grid */}
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                     {mockReports.filter(r => filterModule === 'All' || r.module === filterModule).map(report => (
-                                        <div key={report.id} className="group border border-slate-200 hover:border-emerald-200 rounded-xl p-4 transition-all hover:shadow-md bg-white flex flex-col justify-between">
-                                            <div className="flex gap-4">
-                                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${report.bg} ${report.color}`}>
-                                                    <report.icon className="w-6 h-6" />
-                                                </div>
-                                                <div>
-                                                    <h4 className="font-bold text-slate-800 text-lg group-hover:text-emerald-700 transition-colors">{report.title}</h4>
-                                                    <div className="flex items-center gap-2 mt-1">
-                                                        <span className="text-xs font-semibold px-2 py-0.5 bg-slate-100 text-slate-600 rounded">{report.module}</span>
-                                                        <span className="text-xs text-slate-500 whitespace-nowrap">Last generation: {report.lastRun}</span>
+                                        <div key={report.id} className="p-6 rounded-[32px] bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-xl hover:shadow-slate-200/50 transition-all border-dashed hover:border-solid hover:border-indigo-200 group/report flex flex-col justify-between min-h-[220px]">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className="flex gap-4">
+                                                    <div className={`w-14 h-14 rounded-3xl flex items-center justify-center shrink-0 shadow-inner border border-white/50 bg-white group-hover/report:scale-110 transition-transform ${report.color}`}>
+                                                        <report.icon className="w-7 h-7" />
                                                     </div>
+                                                    <div className="space-y-1">
+                                                        <Badge className="bg-indigo-50 text-indigo-600 border-none font-black text-[9px] uppercase tracking-widest mb-1">
+                                                            {report.module}
+                                                        </Badge>
+                                                        <h4 className="text-xl font-black text-slate-900 uppercase tracking-tighter leading-none group-hover/report:text-indigo-600 transition-colors">
+                                                            {report.title}
+                                                        </h4>
+                                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                                                            Last: {report.lastRun}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-1 opacity-0 group-hover/report:opacity-100 transition-all">
+                                                    <button onClick={() => setViewReportModal(report)} className="w-9 h-9 rounded-xl bg-white border border-slate-100 shadow-sm flex items-center justify-center text-slate-400 hover:text-indigo-600 transition-all">
+                                                        <Eye className="w-4 h-4" />
+                                                    </button>
                                                 </div>
                                             </div>
 
-                                            <div className="mt-5 pt-4 border-t border-slate-100 flex gap-2">
-                                                <button onClick={() => setViewReportModal(report)} className="flex-1 flex items-center justify-center gap-2 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-lg text-sm font-bold transition-colors">
-                                                    <Eye className="w-4 h-4" /> View
-                                                </button>
+                                            <div className="mt-auto pt-4 border-t border-slate-200/50 flex gap-2">
                                                 {(report.type === 'PDF' || report.type === 'PDF/Excel') && (
-                                                    <button onClick={() => handleDownload('PDF', report.title)} disabled={isGenerating} className="flex-1 flex items-center justify-center gap-2 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-sm font-bold transition-colors disabled:opacity-50">
-                                                        <Download className="w-4 h-4" /> Download PDF
+                                                    <button onClick={() => handleDownload('PDF', report.title)} disabled={isGenerating} className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white border border-slate-200 hover:border-rose-200 hover:bg-rose-50 text-slate-600 hover:text-rose-700 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50">
+                                                        <Download className="w-3.5 h-3.5" /> PDF
                                                     </button>
                                                 )}
                                                 {(report.type === 'Excel' || report.type === 'PDF/Excel') && (
-                                                    <button onClick={() => handleDownload('Excel', report.title)} disabled={isGenerating} className="flex-1 flex items-center justify-center gap-2 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-sm font-bold transition-colors disabled:opacity-50">
-                                                        <Download className="w-4 h-4" /> Download Excel
+                                                    <button onClick={() => handleDownload('Excel', report.title)} disabled={isGenerating} className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-slate-900 text-white hover:bg-black rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-slate-200 disabled:opacity-50">
+                                                        <Download className="w-3.5 h-3.5" /> Excel
                                                     </button>
                                                 )}
                                             </div>
@@ -497,11 +556,21 @@ const ReportsDashboard: React.FC = () => {
                 {/* View Standard Report Modal */}
                 {viewReportModal && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in">
-                        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-8">
-                            <div className="p-6 border-b border-slate-100 flex flex-col gap-4 bg-slate-50">
-                                <div className="flex justify-between items-center">
-                                    <h3 className="font-black text-xl text-slate-800">{(viewReportModal as any).title}</h3>
-                                    <button onClick={() => setViewReportModal(null)} className="p-2 text-slate-400 hover:bg-slate-200 hover:text-slate-600 rounded-full transition-colors">
+                        <div className="bg-white rounded-[40px] shadow-2xl w-full max-w-6xl overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-8">
+                            <div className="p-8 border-b border-slate-100 flex flex-col gap-6 bg-slate-50/50">
+                                <div className="flex justify-between items-start">
+                                    <div className="flex items-center gap-4">
+                                        <div className={`w-14 h-14 rounded-3xl flex items-center justify-center bg-white shadow-xl shadow-slate-200/50 border border-white ${(viewReportModal as any).color}`}>
+                                            <viewReportModal.icon className="w-7 h-7" />
+                                        </div>
+                                        <div>
+                                            <Badge className="bg-indigo-50 text-indigo-600 border-none font-black text-[10px] uppercase tracking-[0.2em] mb-1">
+                                                {(viewReportModal as any).module}
+                                            </Badge>
+                                            <h3 className="font-[950] text-3xl text-slate-900 uppercase tracking-tighter">{(viewReportModal as any).title}</h3>
+                                        </div>
+                                    </div>
+                                    <button onClick={() => setViewReportModal(null)} className="w-10 h-10 rounded-full bg-white border border-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 shadow-sm transition-all hover:scale-110">
                                         <X className="w-5 h-5" />
                                     </button>
                                 </div>
@@ -557,24 +626,26 @@ const ReportsDashboard: React.FC = () => {
                                 {(() => {
                                     const repData = getReportData((viewReportModal as any).title);
                                     return (
-                                        <div className="overflow-x-auto border border-slate-200 rounded-xl">
-                                            <table className="w-full text-sm text-left">
-                                                <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                                        <div className="overflow-x-auto border-none rounded-3xl bg-slate-50/50 p-1">
+                                            <table className="w-full text-sm text-left border-separate border-spacing-y-2">
+                                                <thead className="bg-transparent text-slate-400 font-black uppercase text-[10px] tracking-widest">
                                                     <tr>
                                                         {repData.columns.map(col => (
-                                                            <th key={col} className="px-4 py-3 whitespace-nowrap">{col}</th>
+                                                            <th key={col} className="px-6 py-4 whitespace-nowrap">{col}</th>
                                                         ))}
                                                     </tr>
                                                 </thead>
-                                                <tbody className="divide-y divide-slate-100">
+                                                <tbody className="">
                                                     {repData.data.map((row, idx) => (
-                                                        <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                                                            {repData.columns.map(col => (
-                                                                <td key={col} className="px-4 py-3 text-slate-600">
+                                                        <tr key={idx} className="bg-white hover:bg-indigo-50/30 transition-all group overflow-hidden first:rounded-t-2xl last:rounded-b-2xl shadow-sm ring-1 ring-slate-100">
+                                                            {repData.columns.map((col, cIdx) => (
+                                                                <td key={col} className={`px-6 py-5 text-sm font-bold text-slate-600 ${cIdx === 0 ? 'rounded-l-2xl' : ''} ${cIdx === repData.columns.length - 1 ? 'rounded-r-2xl' : ''}`}>
                                                                     {col === 'Status' ? (
-                                                                        <span className={`px-2 py-1 text-xs rounded-full font-bold ${(row as any)[col] === 'Pending' || (row as any)[col] === 'Onboarding' ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                                                                        <Badge className={`px-3 py-1 text-[10px] rounded-full font-black uppercase tracking-widest border-none pointer-events-none ${(row as any)[col] === 'Pending' || (row as any)[col] === 'Onboarding' ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'}`}>
                                                                             {(row as any)[col]}
-                                                                        </span>
+                                                                        </Badge>
+                                                                    ) : col === 'Name' || col === 'Staff Name' || col === 'EmployeeName' ? (
+                                                                        <span className="text-slate-900 font-black uppercase tracking-tight">{(row as any)[col]}</span>
                                                                     ) : (
                                                                         (row as any)[col]
                                                                     )}
@@ -588,9 +659,9 @@ const ReportsDashboard: React.FC = () => {
                                     );
                                 })()}
                             </div>
-                            <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
-                                <button onClick={() => handleDownload('PDF', (viewReportModal as any).title)} className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-lg flex items-center gap-2 transition-colors"><Download className="w-4 h-4" /> Download PDF</button>
-                                <button onClick={() => handleDownload('Excel', (viewReportModal as any).title)} className="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded-lg flex items-center gap-2 transition-colors"><Download className="w-4 h-4" /> Download Excel</button>
+                            <div className="p-8 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-4">
+                                <button onClick={() => handleDownload('PDF', (viewReportModal as any).title)} className="px-8 py-4 bg-white border border-slate-200 hover:border-rose-200 hover:bg-rose-50 text-rose-700 font-black uppercase text-xs tracking-widest rounded-2xl flex items-center gap-2 transition-all shadow-sm"><Download className="w-4 h-4" /> Download PDF</button>
+                                <button onClick={() => handleDownload('Excel', (viewReportModal as any).title)} className="px-8 py-4 bg-slate-900 hover:bg-black text-white font-black uppercase text-xs tracking-widest rounded-2xl flex items-center gap-2 transition-all shadow-xl shadow-slate-200"><Download className="w-4 h-4" /> Download Excel</button>
                             </div>
                         </div>
                     </div>

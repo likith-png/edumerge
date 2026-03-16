@@ -3,11 +3,13 @@ import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button';
 import {
     Calendar, Clock, ChevronRight, FileText, AlertCircle, ArrowLeft,
-    TrendingUp, UserMinus, Activity, Filter, CheckCircle, LogOut, ShieldAlert, FileWarning, Send
+    TrendingUp, UserMinus, Activity, Filter, CheckCircle, LogOut, ShieldAlert, FileWarning, Send, BrainCircuit, Zap, Users2
 } from 'lucide-react';
-import { getAllExits } from '../services/exitService';
+import { getAllExits, getNOCRequests } from '../services/exitService';
+import { getAllEmployees } from '../services/employeeService';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '../components/ui/badge';
+
 // import { Progress } from '../components/ui/progress';
 
 const HRDashboard: React.FC = () => {
@@ -18,8 +20,10 @@ const HRDashboard: React.FC = () => {
         pendingApprovals: 0,
         nocDelays: 0,
         totalExitsMonth: 0,
-        attritionRate: 12.5 // Mock data
+        attritionRate: 0,
+        trends: [0, 0, 0, 0, 0, 0, 0] as number[]
     });
+
 
     useEffect(() => {
         fetchData();
@@ -27,28 +31,60 @@ const HRDashboard: React.FC = () => {
 
     const fetchData = async () => {
         try {
-            const response = await getAllExits();
-            const allExits = response.data || [];
+            const [exitResponse, employeeResponse, nocResponse] = await Promise.all([
+                getAllExits(),
+                getAllEmployees(),
+                getNOCRequests()
+            ]);
+
+            const allExits = exitResponse.data || [];
+            const allEmployees = employeeResponse.data || [];
+            const allNOCs = nocResponse.data || [];
+
             setExits(allExits);
 
             const pending = allExits.filter((e: any) => e.status === 'Pending').length;
             const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+            
             const totalMonth = allExits.filter((e: any) => {
                 const date = new Date(e.resignation_date);
-                return date.getMonth() === currentMonth;
+                return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
             }).length;
 
-            setStats(prev => ({
-                ...prev,
+            const overdueNOCs = allNOCs.filter((n: any) => n.status === 'Pending').length;
+
+            // Calculate Attrition Rate (Simplified: Last 12 months exits / headcount)
+            const oneYearAgo = new Date();
+            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+            const exitsLastYear = allExits.filter((e: any) => new Date(e.resignation_date) > oneYearAgo).length;
+            const attrition = allEmployees.length > 0 ? ((exitsLastYear / allEmployees.length) * 100).toFixed(1) : 0;
+
+            // Calculate Weekly Trends (Last 7 weeks)
+            const trends = Array(7).fill(0);
+            const now = new Date();
+            allExits.forEach((e: any) => {
+                const exitDate = new Date(e.resignation_date);
+                const diffWeeks = Math.floor((now.getTime() - exitDate.getTime()) / (7 * 24 * 60 * 60 * 1000));
+                if (diffWeeks >= 0 && diffWeeks < 7) {
+                    trends[6 - diffWeeks]++;
+                }
+            });
+
+            setStats({
                 pendingApprovals: pending,
-                totalExitsMonth: totalMonth
-            }));
+                nocDelays: overdueNOCs,
+                totalExitsMonth: totalMonth,
+                attritionRate: Number(attrition),
+                trends: trends
+            });
         } catch (error) {
             console.error("Failed to fetch dashboard data", error);
         } finally {
             setLoading(false);
         }
     };
+
 
     // Derived Data
     const upcomingExits = exits
@@ -240,8 +276,9 @@ const HRDashboard: React.FC = () => {
                                     <div className="w-2 h-2 rounded-full bg-amber-500"></div>
                                     <span className="text-sm font-bold text-slate-700">Overdue NOC Clearances</span>
                                 </div>
-                                <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-200 border-none">3</Badge>
+                                <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-200 border-none">{stats.nocDelays}</Badge>
                             </div>
+
                         </CardContent>
                     </Card>
 
@@ -290,7 +327,56 @@ const HRDashboard: React.FC = () => {
                             </div>
                         </CardContent>
                     </Card>
+
+                    {/* Capacity Intelligence (ICIS) - BETA */}
+                    <Card className="border-none shadow-lg bg-slate-900 overflow-hidden relative group">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500 rounded-full blur-3xl -mr-16 -mt-16 opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                        <div className="absolute bottom-0 left-0 w-24 h-24 bg-purple-500 rounded-full blur-2xl -ml-12 -mb-12 opacity-10 group-hover:opacity-30 transition-opacity"></div>
+                        
+                        <CardHeader className="relative z-10 pb-0 flex flex-row items-center justify-between">
+                            <CardTitle className="text-sm font-black text-white flex items-center gap-2 tracking-wider">
+                                <BrainCircuit className="w-5 h-5 text-indigo-400" /> CAPACITY INTELLIGENCE
+                            </CardTitle>
+                            <Badge className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white border-none text-[9px] font-black uppercase tracking-tighter px-2">BETA</Badge>
+                        </CardHeader>
+                        <CardContent className="relative z-10 p-6">
+                            <div className="flex items-center gap-3 mb-6 bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-sm">
+                                <div className="p-2 bg-indigo-500/20 rounded-xl">
+                                    <Zap className="w-4 h-4 text-indigo-300" />
+                                </div>
+                                <div className="flex-1">
+                                    <p className="text-[10px] font-bold text-indigo-200 uppercase tracking-widest leading-none mb-1">Current Surplus</p>
+                                    <h4 className="text-xl font-black text-white">ICIS: 84.2%</h4>
+                                </div>
+                                <div className="text-right">
+                                    <span className="text-[10px] font-black text-emerald-400">+4.2%</span>
+                                </div>
+                            </div>
+                            
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <Users2 className="w-3.5 h-3.5 text-slate-400" />
+                                        <span className="text-xs font-bold text-slate-300">Workforce Utilization</span>
+                                    </div>
+                                    <span className="text-xs font-black text-indigo-300">76%</span>
+                                </div>
+                                <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                                    <div className="h-full bg-indigo-500 w-[76%] rounded-full shadow-[0_0_8px_rgba(99,102,241,0.5)]"></div>
+                                </div>
+                                
+                                <p className="text-[10px] text-slate-400 font-medium leading-relaxed italic">
+                                    AI-powered analysis of organizational bandwidth and productivity gaps.
+                                </p>
+                            </div>
+
+                            <Button className="w-full mt-6 bg-white/10 hover:bg-white/20 border border-white/10 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all group-hover:bg-indigo-600 group-hover:border-indigo-500">
+                                ENTER ENGINE <ChevronRight className="w-3 h-3 ml-1 group-hover:translate-x-1 transition-transform" />
+                            </Button>
+                        </CardContent>
+                    </Card>
                 </div>
+
 
                 {/* Column 2: Visualizations */}
                 <div className="space-y-6">
@@ -307,22 +393,27 @@ const HRDashboard: React.FC = () => {
                             </div>
                         </CardHeader>
                         <CardContent className="flex-1 flex items-end justify-between gap-3 p-6 pt-0">
-                            {[45, 60, 35, 75, 50, 80, 55].map((h, i) => (
-                                <div key={i} className="flex-1 flex flex-col justify-end group cursor-pointer h-full">
-                                    <div className="relative w-full rounded-2xl bg-slate-100 overflow-hidden h-[85%]">
-                                        <div
-                                            className="absolute bottom-0 w-full bg-gradient-to-t from-indigo-500 to-purple-500 transition-all duration-500 ease-out group-hover:from-indigo-600 group-hover:to-purple-600 group-hover:shadow-lg group-hover:shadow-indigo-500/20 rounded-t-lg"
-                                            style={{ height: `${h}%` }}
-                                        >
-                                            <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded transition-opacity whitespace-nowrap z-10">
-                                                {h} Exits
+                            {stats.trends.map((h, i) => {
+                                const maxVal = Math.max(...stats.trends, 1);
+                                const heightPercentage = (h / maxVal) * 85; // Scale to max 85%
+                                return (
+                                    <div key={i} className="flex-1 flex flex-col justify-end group cursor-pointer h-full">
+                                        <div className="relative w-full rounded-2xl bg-slate-100 overflow-hidden h-[85%]">
+                                            <div
+                                                className="absolute bottom-0 w-full bg-gradient-to-t from-indigo-500 to-purple-500 transition-all duration-500 ease-out group-hover:from-indigo-600 group-hover:to-purple-600 group-hover:shadow-lg group-hover:shadow-indigo-500/20 rounded-t-lg"
+                                                style={{ height: `${heightPercentage}%` }}
+                                            >
+                                                <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded transition-opacity whitespace-nowrap z-10">
+                                                    {h} Exits
+                                                </div>
                                             </div>
                                         </div>
+                                        <span className="text-[10px] font-bold text-center text-slate-400 mt-3 uppercase tracking-wider">W{i + 1}</span>
                                     </div>
-                                    <span className="text-[10px] font-bold text-center text-slate-400 mt-3 uppercase tracking-wider">W{i + 1}</span>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </CardContent>
+
                     </Card>
                 </div>
 
