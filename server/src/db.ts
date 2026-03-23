@@ -28,7 +28,7 @@ function initTables() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       employee_id INTEGER NOT NULL,
       resignation_date TEXT NOT NULL,
-      resignation_type TEXT DEFAULT 'Voluntary', -- Voluntary, Contract End, Termination, Retirement
+      resignation_type TEXT DEFAULT 'Voluntary', -- Voluntary, Contract End, Termination, Retirement, Forced Resignation
       reason TEXT NOT NULL,
       lwd_proposed TEXT NOT NULL,
       lwd_approved TEXT,
@@ -74,6 +74,7 @@ function initTables() {
       "ALTER TABLE exits ADD COLUMN interview_mode TEXT DEFAULT 'Self'", // Self, HR, Hybrid
       "ALTER TABLE exits ADD COLUMN risk_rating TEXT DEFAULT 'Low'", // Low, Medium, High
       "ALTER TABLE exits ADD COLUMN hr_notes TEXT",
+      "ALTER TABLE exits ADD COLUMN meeting_status TEXT DEFAULT 'Pending'", // Pending, Completed, Waived
       // Settlement-related fields in exits table
       "ALTER TABLE exits ADD COLUMN settlement_eligible INTEGER DEFAULT 0",
       "ALTER TABLE exits ADD COLUMN settlement_status TEXT DEFAULT 'Not Started'", // Not Started, In Progress, Completed
@@ -274,8 +275,7 @@ function initTables() {
           noc: {
             enabled: true,
             departments: {
-              library: true, it: true, assets: true, inventory: true,
-              finance: true, hostel: false, transport: false
+              it: true, admin: true, finance: true, hod: true, library: true, payroll: true
             },
             slaDays: 2, autoClearNoAssets: true,
             systemBehavior: { autoCreateTasks: true, escalateOverdue: true }

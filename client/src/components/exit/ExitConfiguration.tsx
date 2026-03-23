@@ -6,11 +6,21 @@ import {
 } from 'lucide-react';
 
 import { Button } from '../ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Label } from '../ui/label';
 import { Separator } from '../ui/separator';
 
 import { getExitConfig, updateExitConfig } from '../../services/exitService';
+
+// Proxy UI components to apply Glassmorphism globally in this file
+const Card: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => (
+    <div className={`glass-card p-6 relative overflow-hidden group hover:shadow-xl transition-all duration-300 ${className || ''}`}>
+        <div className="absolute -top-10 -right-10 w-32 h-32 bg-indigo-200/20 rounded-full blur-2xl pointer-events-none group-hover:bg-indigo-300/30 transition-colors"></div>
+        <div className="relative z-10">{children}</div>
+    </div>
+);
+const CardHeader: React.FC<{ children: React.ReactNode }> = ({ children }) => <div className="mb-4">{children}</div>;
+const CardTitle: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => <h3 className={`text-base font-black text-indigo-950 drop-shadow-sm uppercase tracking-wider ${className || ''}`}>{children}</h3>;
+const CardContent: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => <div className={className}>{children}</div>;
 
 const ExitConfiguration: React.FC = () => {
     const [activeSection, setActiveSection] = useState('integrations'); // Default to new section
@@ -43,6 +53,7 @@ const ExitConfiguration: React.FC = () => {
         },
         workflow: {
             type: 'Sequential', // Sequential | Parallel
+            requireOneOnOne: true,
             approvalMatrix: {
                 teaching: ['HoD', 'Principal', 'HR'],
                 nonTeaching: ['Manager', 'HR']
@@ -73,13 +84,12 @@ const ExitConfiguration: React.FC = () => {
         noc: {
             enabled: true,
             departments: {
-                library: true,
                 it: true,
-                assets: true,
-                inventory: true,
+                admin: true,
                 finance: true,
-                hostel: false,
-                transport: false
+                hod: true,
+                library: true,
+                payroll: true
             },
             slaDays: 2,
             autoClearNoAssets: true,
@@ -435,6 +445,7 @@ const ExitConfiguration: React.FC = () => {
                                         <Badge>HR Manager</Badge>
                                     </div>
                                 </div>
+                                <ToggleItem label="Require 1:1 Exit Meeting" description="Manager must schedule and complete a 1:1 meeting before processing F&F." checked={config.workflow.requireOneOnOne} onChange={() => handleToggle('workflow', 'requireOneOnOne')} />
                             </CardContent>
                         </Card>
                         <Card>
@@ -480,13 +491,12 @@ const ExitConfiguration: React.FC = () => {
                             </CardHeader>
                             <CardContent className="space-y-3">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <CheckboxItem label="Library" checked={config.noc.departments.library} onChange={() => handleToggle('noc', 'departments', 'library')} />
                                     <CheckboxItem label="IT" checked={config.noc.departments.it} onChange={() => handleToggle('noc', 'departments', 'it')} />
-                                    <CheckboxItem label="Asset Management" checked={config.noc.departments.assets} onChange={() => handleToggle('noc', 'departments', 'assets')} />
-                                    <CheckboxItem label="Inventory / Stores" checked={config.noc.departments.inventory} onChange={() => handleToggle('noc', 'departments', 'inventory')} />
+                                    <CheckboxItem label="Admin" checked={config.noc.departments.admin} onChange={() => handleToggle('noc', 'departments', 'admin')} />
                                     <CheckboxItem label="Finance" checked={config.noc.departments.finance} onChange={() => handleToggle('noc', 'departments', 'finance')} />
-                                    <CheckboxItem label="Hostel" checked={config.noc.departments.hostel} onChange={() => handleToggle('noc', 'departments', 'hostel')} />
-                                    <CheckboxItem label="Transport" checked={config.noc.departments.transport} onChange={() => handleToggle('noc', 'departments', 'transport')} />
+                                    <CheckboxItem label="HOD/Dept" checked={config.noc.departments.hod} onChange={() => handleToggle('noc', 'departments', 'hod')} />
+                                    <CheckboxItem label="Library" checked={config.noc.departments.library} onChange={() => handleToggle('noc', 'departments', 'library')} />
+                                    <CheckboxItem label="Payroll" checked={config.noc.departments.payroll} onChange={() => handleToggle('noc', 'departments', 'payroll')} />
                                 </div>
                             </CardContent>
                         </Card>
@@ -788,56 +798,62 @@ const ExitConfiguration: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col md:flex-row h-full bg-slate-50/50 rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+        <div className="flex flex-col md:flex-row h-[calc(100vh-8rem)] bg-white/10 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/40 shadow-2xl relative">
+            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-400/20 rounded-full blur-[100px] pointer-events-none"></div>
+            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-400/20 rounded-full blur-[100px] pointer-events-none"></div>
+
             {/* Sidebar Navigation */}
-            <div className="w-full md:w-72 bg-white border-r border-slate-200 flex flex-col">
-                <div className="p-6 border-b border-slate-100">
-                    <h2 className="text-lg font-bold text-slate-800">Configuration</h2>
-                    <p className="text-xs text-slate-500 mt-1">Manage system-wide settings</p>
+            <div className="w-full md:w-80 bg-white/40 backdrop-blur-md border-r border-white/50 flex flex-col z-10">
+                <div className="p-6 border-b border-white/50 bg-white/20">
+                    <h2 className="text-xl font-black text-slate-800 drop-shadow-sm flex items-center gap-2">
+                        <Settings className="w-5 h-5 text-indigo-600" /> Configuration
+                    </h2>
+                    <p className="text-xs font-bold text-slate-500 mt-1 drop-shadow-sm">Manage system-wide exit policies</p>
                 </div>
-                <nav className="flex-1 overflow-y-auto p-4 space-y-1">
+                <nav className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
                     {sections.map(section => (
                         <button
                             key={section.id}
                             onClick={() => setActiveSection(section.id)}
-                            className={`w-full flex items-start gap-3 px-3 py-3 rounded-lg text-sm transition-all duration-200 group
+                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm transition-all duration-300 group
                                 ${activeSection === section.id
-                                    ? 'bg-indigo-50 text-indigo-700 font-semibold shadow-sm ring-1 ring-indigo-200'
-                                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                                    ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-lg shadow-indigo-200/50 scale-[1.02]'
+                                    : 'bg-white/40 text-slate-600 hover:bg-white/80 hover:scale-[1.01] hover:shadow-sm border border-white/50'}`}
                         >
-                            <div className={`p-1.5 rounded-md ${activeSection === section.id ? 'bg-white shadow-sm text-indigo-600' : 'bg-slate-100 text-slate-500 group-hover:bg-white group-hover:text-slate-700'}`}>
-                                <section.icon className="w-4 h-4" />
+                            <div className={`p-2 rounded-lg transition-colors ${activeSection === section.id ? 'bg-white/20 text-white shadow-inner' : 'bg-white shadow-sm text-indigo-500 group-hover:bg-indigo-50'}`}>
+                                <section.icon className="w-4 h-4 drop-shadow-sm" />
                             </div>
-                            <div className="text-left">
-                                <span className="block">{section.label}</span>
-                                <span className={`text-[10px] leading-tight line-clamp-1 ${activeSection === section.id ? 'text-indigo-400' : 'text-slate-400'}`}>
+                            <div className="text-left flex-1 min-w-0">
+                                <span className="block font-bold truncate">{section.label}</span>
+                                <span className={`text-[10px] uppercase font-bold tracking-wider block truncate mt-0.5 ${activeSection === section.id ? 'text-indigo-100' : 'text-slate-400'}`}>
                                     {section.description}
                                 </span>
                             </div>
+                            {activeSection === section.id && <ChevronRight className="w-4 h-4 opacity-70" />}
                         </button>
                     ))}
                 </nav>
             </div>
 
             {/* Main Content Area */}
-            <div className="flex-1 flex flex-col h-full bg-slate-50 overflow-hidden relative">
+            <div className="flex-1 flex flex-col h-full overflow-hidden relative z-10">
                 {/* Header Actions */}
-                <div className="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
+                <div className="bg-white/40 backdrop-blur-md border-b border-white/50 px-8 py-5 flex justify-between items-center sticky top-0 shadow-sm">
                     <div>
-                        <h2 className="text-lg font-bold text-slate-800">{sections.find(s => s.id === activeSection)?.label}</h2>
+                        <h2 className="text-xl font-black text-slate-800 tracking-tight drop-shadow-sm">{sections.find(s => s.id === activeSection)?.label}</h2>
                     </div>
-                    <div className="flex gap-3">
-                        <Button variant="outline" size="sm" className="h-9">
-                            <RotateCcw className="w-3.5 h-3.5 mr-2" /> Reset
+                    <div className="flex gap-4">
+                        <Button variant="outline" size="sm" className="h-10 bg-white/60 border-white/80 hover:bg-white text-slate-700 font-bold shadow-sm rounded-xl px-5 transition-all">
+                            <RotateCcw className="w-4 h-4 mr-2" /> Revert
                         </Button>
-                        <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 h-9 shadow-md shadow-indigo-200" onClick={handleSave} disabled={loading}>
-                            <Save className="w-3.5 h-3.5 mr-2" /> {loading ? 'Loading...' : 'Save Changes'}
+                        <Button size="sm" className="h-10 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-bold shadow-lg shadow-indigo-200/50 rounded-xl px-6 transition-all" onClick={handleSave} disabled={loading}>
+                            <Save className="w-4 h-4 mr-2 drop-shadow-sm" /> {loading ? 'Saving...' : 'Publish Rulebook'}
                         </Button>
                     </div>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-8">
+                <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
                     <div className="max-w-4xl mx-auto pb-20">
                         {renderContent()}
                     </div>
@@ -850,25 +866,28 @@ const ExitConfiguration: React.FC = () => {
 // --- Sub-components for Cleaner Code ---
 
 const SectionHeader: React.FC<{ title: string; description: string }> = ({ title, description }) => (
-    <div className="mb-6">
-        <h3 className="text-lg font-bold text-slate-800">{title}</h3>
-        <p className="text-sm text-slate-500">{description}</p>
+    <div className="mb-8 glass-panel p-5 border-l-4 border-l-indigo-500 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-100/30 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
+        <h3 className="text-xl font-black text-slate-900 drop-shadow-sm mb-1">{title}</h3>
+        <p className="text-sm font-medium text-slate-600">{description}</p>
     </div>
 );
 
 const ToggleItem: React.FC<{ label: string; description?: string; checked: boolean; onChange: () => void }> = ({ label, description, checked, onChange }) => (
-    <div className="flex items-center justify-between py-1">
-        <div className="space-y-0.5">
-            <Label className="text-base font-medium text-slate-800">{label}</Label>
-            {description && <p className="text-xs text-slate-500">{description}</p>}
+    <div className="flex items-center justify-between py-3 group">
+        <div className="space-y-1 pr-4">
+            <Label className="text-sm font-bold text-slate-800 drop-shadow-sm block">{label}</Label>
+            {description && <p className="text-xs font-medium text-slate-500 leading-relaxed">{description}</p>}
         </div>
         <div
             onClick={onChange}
-            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 ${checked ? 'bg-indigo-600' : 'bg-slate-200'}`}
+            className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-all duration-300 shadow-inner ${checked ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-indigo-300/50' : 'bg-slate-300 hover:bg-slate-400'}`}
         >
             <span
-                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${checked ? 'translate-x-5' : 'translate-x-0'}`}
-            />
+                className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-md ring-0 transition duration-300 ease-in-out flex items-center justify-center ${checked ? 'translate-x-5' : 'translate-x-0'}`}
+            >
+               {checked && <div className="w-2 h-2 rounded-full bg-indigo-500"></div>}
+            </span>
         </div>
     </div>
 );
@@ -876,17 +895,17 @@ const ToggleItem: React.FC<{ label: string; description?: string; checked: boole
 const CheckboxItem: React.FC<{ label: string; checked: boolean; onChange: () => void }> = ({ label, checked, onChange }) => (
     <div
         onClick={onChange}
-        className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-all duration-200 ${checked ? 'bg-indigo-50 border-indigo-200' : 'bg-white border-slate-200 hover:border-indigo-200'}`}
+        className={`flex items-center space-x-4 p-4 rounded-xl border border-white/60 shadow-sm cursor-pointer transition-all duration-300 hover:scale-[1.02] ${checked ? 'bg-indigo-50/80 backdrop-blur-md shadow-indigo-100/50' : 'bg-white/50 backdrop-blur-md hover:bg-white/80'}`}
     >
-        <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${checked ? 'bg-indigo-600 border-indigo-600' : 'bg-white border-slate-300'}`}>
-            {checked && <Check className="w-3.5 h-3.5 text-white" />}
+        <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors shadow-inner ${checked ? 'bg-indigo-600 border-indigo-600' : 'bg-white border-slate-300'}`}>
+            {checked && <Check className="w-4 h-4 text-white drop-shadow-sm" />}
         </div>
-        <span className={`text-sm font-medium ${checked ? 'text-indigo-900' : 'text-slate-700'}`}>{label}</span>
+        <span className={`text-sm font-bold transition-colors ${checked ? 'text-indigo-950' : 'text-slate-700'}`}>{label}</span>
     </div>
 );
 
 const Badge: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-xs font-semibold text-slate-700 shadow-sm">
+    <span className="inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50/80 backdrop-blur-sm px-3 py-1 text-xs font-black text-indigo-800 shadow-sm uppercase tracking-wider">
         {children}
     </span>
 );

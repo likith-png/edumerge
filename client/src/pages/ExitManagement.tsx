@@ -43,7 +43,7 @@ const ExitManagement: React.FC = () => {
         else if (role === 'MANAGER') setViewMode('Manager');
         else setViewMode('Faculty');
 
-        setActiveTab(role === 'HR_ADMIN' || role === 'ADMIN' ? 'analytics' : role === 'MANAGER' ? 'approvals' : 'dashboard');
+        setActiveTab('dashboard');
     }, [role]);
 
     // Helper to filter relevant exits for Admin dropdown
@@ -159,27 +159,29 @@ const ExitManagement: React.FC = () => {
 
     const currentTabs = allTabs.filter(tab => tab.roles.includes(viewMode));
     return (
-        <div className="flex flex-col h-screen bg-slate-50">
+        <div className="flex flex-col h-screen relative overflow-hidden">
+            <div className="background-gradient"></div>
+            
             {/* Top Navigation Bar */}
-            <div className="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-sm relative">
-                <div className="max-w-7xl auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex flex-col md:flex-row items-center justify-between py-4 space-y-4 md:space-y-0">
+            <div className="glass-panel mx-4 mt-4 mb-2 sticky top-4 z-20 px-2 py-2">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex flex-col md:flex-row items-center justify-between py-2 space-y-4 md:space-y-0">
                         <div className="flex items-center gap-6">
                             <button
                                 onClick={() => window.location.href = '/'}
-                                className="w-12 h-12 rounded-2xl bg-white shadow-xl shadow-slate-200/50 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:scale-110 transition-all border border-slate-50"
+                                className="w-12 h-12 rounded-2xl glass-card flex items-center justify-center text-slate-600 hover:text-indigo-600 transition-all"
                             >
                                 <Home className="w-5 h-5" />
                             </button>
                             <div className="flex items-center space-x-4">
-                                <div className="p-2 bg-indigo-100 rounded-lg">
-                                    <UserMinus className="w-6 h-6 text-indigo-600" />
+                                <div className="p-3 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl shadow-lg shadow-indigo-500/20">
+                                    <UserMinus className="w-6 h-6 text-white" />
                                 </div>
                                 <div>
-                                    <h1 className="text-xl font-bold text-slate-900">
+                                    <h1 className="text-xl font-bold text-slate-900 drop-shadow-sm">
                                         Exit Management
                                     </h1>
-                                    <p className="text-xs text-slate-500">
+                                    <p className="text-sm font-medium text-slate-600">
                                         {viewMode === 'Manager' ? 'Team Separation Hub' : 'Full-cycle separation portal'}
                                     </p>
                                 </div>
@@ -211,18 +213,18 @@ const ExitManagement: React.FC = () => {
                             <div className="h-6 w-px bg-slate-200 mx-2 hidden md:block"></div>
 
                             {/* Tabs */}
-                            <nav className="flex items-center space-x-1">
+                            <nav className="flex items-center p-1 bg-white/40 backdrop-blur-md rounded-full shadow-inner border border-white/60">
                                 {currentTabs.map((tab) => (
                                     <button
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
-                                        className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap
+                                        className={`flex items-center space-x-2 px-5 py-2 rounded-full text-sm font-bold transition-all duration-300 whitespace-nowrap
                                             ${activeTab === tab.id
-                                                ? 'bg-indigo-600 text-white shadow-md ring-1 ring-indigo-500 ring-offset-1'
-                                                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                                                ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-md shadow-indigo-500/20 translate-y-[-1px]'
+                                                : 'text-slate-600 hover:bg-white/60 hover:text-indigo-900'
                                             }`}
                                     >
-                                        <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-indigo-100' : 'text-slate-500'}`} />
+                                        <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-indigo-50' : 'text-slate-500'}`} />
                                         <span>{tab.label}</span>
                                     </button>
                                 ))}
@@ -233,7 +235,7 @@ const ExitManagement: React.FC = () => {
             </div>
 
             {/* Main Content Area */}
-            <main className="flex-1 overflow-y-auto bg-slate-50 p-6">
+            <main className="flex-1 overflow-y-auto relative z-10 p-6">
                 <div className="max-w-7xl mx-auto space-y-6">
 
                     <div className="p-4 md:p-8 max-w-7xl mx-auto">
@@ -252,12 +254,12 @@ const ExitManagement: React.FC = () => {
                         )}
                         {activeTab === 'configuration' && <ExitConfiguration />}
                         {activeTab === 'submit' && (
-                            <Card className="max-w-2xl mx-auto shadow-sm border-slate-200">
-                                <div className="bg-gradient-to-r from-blue-50 to-slate-50 px-6 py-4 border-b border-slate-200">
-                                    <h3 className="text-lg font-semibold text-slate-800">Resignation Form</h3>
-                                    <p className="text-xs text-slate-500">Initiate your exit process formally.</p>
+                            <div className="max-w-2xl mx-auto glass-card border-[rgba(255,255,255,0.8)] shadow-xl relative z-10">
+                                <div className="px-8 py-6 border-b border-white/40 bg-white/20">
+                                    <h3 className="text-2xl font-bold bg-gradient-to-r from-indigo-900 to-slate-800 bg-clip-text text-transparent">Formal Resignation</h3>
+                                    <p className="text-sm font-medium text-slate-600 mt-1">Initiate your separation journey smoothly and securely.</p>
                                 </div>
-                                <CardContent className="p-6">
+                                <div className="p-8">
                                     {exits.some(e => ['Pending', 'Approved'].includes(e.status)) ? (
                                         <div className="text-center py-8">
                                             <AlertCircle className="h-12 w-12 mx-auto text-yellow-500 mb-3" />
@@ -286,6 +288,7 @@ const ExitManagement: React.FC = () => {
                                                         required
                                                     >
                                                         <option value="Voluntary">Voluntary Resignation</option>
+                                                        <option value="Forced Resignation">Forced Resignation</option>
                                                         <option value="Contract End">End of Contract</option>
                                                         <option value="Retirement">Retirement</option>
                                                         <option value="Termination">Involuntary Termination</option>
@@ -322,7 +325,7 @@ const ExitManagement: React.FC = () => {
                                                         required
                                                     />
                                                     <p className="text-xs text-slate-500">
-                                                        Policy Notice: {formData.resignation_type === 'Retirement' ? '90 Days' : formData.resignation_type === 'Contract End' ? '30 Days' : formData.resignation_type === 'Termination' ? 'Immediate' : '60 Days'}
+                                                        Policy Notice: {formData.resignation_type === 'Retirement' ? '90 Days' : formData.resignation_type === 'Contract End' ? '30 Days' : ['Termination', 'Forced Resignation'].includes(formData.resignation_type) ? 'Immediate' : '60 Days'}
                                                     </p>
                                                 </div>
                                                 <div className="space-y-2">
@@ -356,8 +359,8 @@ const ExitManagement: React.FC = () => {
                                             </div>
                                         </form>
                                     )}
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </div>
                         )}
 
                         {activeTab === 'status' && (
@@ -460,12 +463,12 @@ const ExitManagement: React.FC = () => {
                             </>
                         )}
                         {activeTab === 'terminate' && viewMode === 'Admin' && (
-                            <Card className="max-w-2xl mx-auto shadow-sm border-slate-200">
-                                <div className="bg-gradient-to-r from-red-50 to-slate-50 px-6 py-4 border-b border-slate-200">
-                                    <h3 className="text-lg font-semibold text-red-800">Involuntary Termination</h3>
-                                    <p className="text-xs text-slate-500">Initiate immediate termination for a staff member.</p>
+                            <div className="max-w-2xl mx-auto glass-card border-[rgba(255,255,255,0.8)] shadow-xl relative z-10">
+                                <div className="bg-gradient-to-r from-red-500/10 to-red-400/5 px-8 py-6 border-b border-red-500/20">
+                                    <h3 className="text-2xl font-bold text-red-700">Involuntary Termination</h3>
+                                    <p className="text-sm font-medium text-slate-600 mt-1">Initiate immediate termination for a staff member.</p>
                                 </div>
-                                <CardContent className="p-6">
+                                <div className="p-8">
                                     <form onSubmit={handleTerminate} className="space-y-4">
                                         <div className="space-y-2">
                                             <Label htmlFor="employee">Select Staff Member</Label>
@@ -533,12 +536,12 @@ const ExitManagement: React.FC = () => {
                                             </div>
                                         </div>
 
-                                        <Button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white">
+                                        <Button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-500/30">
                                             Confirm Termination
                                         </Button>
                                     </form>
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </div>
                         )}
                         {activeTab === 'analytics' && <ExitAnalytics />}
                     </div>

@@ -78,8 +78,9 @@ router.post('/resign', (req, res) => {
                     current_approver_role = 'Head of Department';
                 }
 
-                const sql = `INSERT INTO exits (employee_id, resignation_date, reason, lwd_proposed, comments, resignation_type, notice_period_end, attachment_url, approval_stage, current_approver_role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-                const params = [employee_id, resignation_date, reason, lwd_proposed, comments, resignation_type || 'Voluntary', notice_period_end, attachment_url, approval_stage, current_approver_role];
+                const meeting_status = config.workflow?.requireOneOnOne ? 'Pending' : 'Waived';
+                const sql = `INSERT INTO exits (employee_id, resignation_date, reason, lwd_proposed, comments, resignation_type, notice_period_end, attachment_url, approval_stage, current_approver_role, meeting_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+                const params = [employee_id, resignation_date, reason, lwd_proposed, comments, resignation_type || 'Voluntary', notice_period_end, attachment_url, approval_stage, current_approver_role, meeting_status];
 
                 db.run(sql, params, function (err) {
                     if (err) {
@@ -96,13 +97,12 @@ router.post('/resign', (req, res) => {
                         // 1. Generate NOC Requests based on Config
                         if (config.noc && config.noc.enabled) {
                             const departments: string[] = [];
-                            if (config.noc.departments.library) departments.push('Library');
                             if (config.noc.departments.it) departments.push('IT');
-                            if (config.noc.departments.assets) departments.push('Asset Management');
-                            if (config.noc.departments.inventory) departments.push('Inventory / Stores');
+                            if (config.noc.departments.admin) departments.push('Admin');
                             if (config.noc.departments.finance) departments.push('Finance');
-                            if (config.noc.departments.hostel) departments.push('Hostel');
-                            if (config.noc.departments.transport) departments.push('Transport');
+                            if (config.noc.departments.hod) departments.push('HOD');
+                            if (config.noc.departments.library) departments.push('Library');
+                            if (config.noc.departments.payroll) departments.push('Payroll');
 
                             if (departments.length > 0 && config.noc.systemBehavior?.autoCreateTasks) {
                                 const nocStmt = db.prepare(`INSERT INTO noc_clearances (exit_id, department, status) VALUES (?, ?, 'Pending')`);
@@ -114,7 +114,7 @@ router.post('/resign', (req, res) => {
                         } else {
                             // Fallback if config disabled or missing
                             if (!configRow) {
-                                const defaultDepts = ['IT', 'Library', 'Finance', 'Admin'];
+                                const defaultDepts = ['IT', 'Admin', 'Finance', 'HOD', 'Library', 'Payroll'];
                                 const nocStmt = db.prepare(`INSERT INTO noc_clearances (exit_id, department, status) VALUES (?, ?, 'Pending')`);
                                 defaultDepts.forEach(dept => {
                                     nocStmt.run(exitId, dept);
@@ -206,7 +206,7 @@ router.post('/terminate', (req, res) => {
             db.get(`SELECT role FROM employees WHERE id = ?`, [employee_id], (err, emp: any) => {
                 if (err) return res.status(500).json({ error: err.message });
 
-                const sql = `INSERT INTO exits (employee_id, resignation_date, reason, lwd_proposed, lwd_approved, comments, resignation_type, notice_period_end, status, approval_stage, current_approver_role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+                const sql = `INSERT INTO exits (employee_id, resignation_date, reason, lwd_proposed, lwd_approved, comments, resignation_type, notice_period_end, status, approval_stage, current_approver_role, meeting_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Waived')`;
                 const params = [employee_id, resignation_date, reason, lwd_proposed, lwd_proposed, comments, resignation_type, notice_period_end, status, approval_stage, current_approver_role];
 
                 db.run(sql, params, function (err) {
@@ -219,7 +219,7 @@ router.post('/terminate', (req, res) => {
 
                     db.serialize(() => {
                         // 1. Generate NOC Requests
-                        const defaultDepts = ['IT', 'Library', 'Finance', 'Asset Management', 'Admin'];
+                        const defaultDepts = ['IT', 'Admin', 'Finance', 'HOD', 'Library', 'Payroll'];
                         const nocStmt = db.prepare(`INSERT INTO noc_clearances (exit_id, department, status) VALUES (?, ?, 'Pending')`);
                         defaultDepts.forEach(dept => nocStmt.run(exitId, dept));
                         nocStmt.finalize();

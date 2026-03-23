@@ -18,7 +18,7 @@ import type { Candidate } from './CandidateDetailPanel';
 const INITIAL_CANDIDATES: Candidate[] = [
     {
         id: 0, name: 'Mr. Arvind Sharma', role: 'Mathematics Teacher', dept: 'Mathematics',
-        stage: 'Offer Accepted', stageNum: 1, status: 'Completed', mode: 'Self',
+        stage: 'Documentation', stageNum: 2, status: 'In Progress', mode: 'Self',
         joinDate: '2026-04-01', slaDay: 1, slaDue: 3, docsPending: 5,
         bgvStatus: 'Pending', buddy: 'Dr. Ramesh K.', tags: ['New Joiner'],
         avatar: 'AS', avatarColor: 'bg-indigo-100 text-indigo-700'
@@ -602,14 +602,14 @@ const InitiateModal: React.FC<{ onClose: () => void; onAdd: (c: Candidate) => vo
             name: form.name.trim(),
             role: form.role.trim(),
             dept: form.dept.trim(),
-            stage: 'Offer Accepted',
-            stageNum: 1,
-            status: 'Completed',
+            stage: 'Documentation',
+            stageNum: 2,
+            status: 'In Progress',
             mode: form.mode === 'self' ? 'Self' : 'Manual',
             joinDate: form.joinDate || 'TBD',
             slaDay: 0,
             slaDue: 7,
-            docsPending: 0,
+            docsPending: 3, // Default some pending docs for stage 2
             bgvStatus: 'Pending',
             buddy: form.buddy.trim() || 'Unassigned',
             tags: [],
@@ -721,7 +721,7 @@ const OnboardingProDashboard: React.FC = () => {
                             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search candidates…"
                                 className="pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 w-52 bg-white" />
                         </div>
-                        <Button size="sm" variant="outline" className="gap-1.5 text-xs">
+                        <Button size="sm" variant="outline" className="gap-1.5 text-xs" onClick={() => setActiveTab('sla')}>
                             <Bell className="w-4 h-4" /> Alerts <Badge className="bg-rose-500 text-white text-[9px] px-1 ml-1">{slaBreaches}</Badge>
                         </Button>
                         <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 text-xs" onClick={() => navigate('/onboarding-pro/portal')}>

@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '../ui/card';
+
+const Card: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => (
+    <div className={`glass-card p-6 relative overflow-hidden group hover:shadow-xl transition-all duration-300 ${className || ''}`}>
+        <div className="absolute -top-10 -right-10 w-32 h-32 bg-indigo-200/20 rounded-full blur-2xl pointer-events-none group-hover:bg-indigo-300/30 transition-colors"></div>
+        <div className="relative z-10">{children}</div>
+    </div>
+);
+const CardHeader: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => <div className={`mb-4 ${className || ''}`}>{children}</div>;
+const CardTitle: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => <h3 className={`text-base font-black text-indigo-950 drop-shadow-sm uppercase tracking-wider flex items-center gap-2 ${className || ''}`}>{children}</h3>;
+const CardContent: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => <div className={className}>{children}</div>;
 import { Button } from '../ui/button';
 import {
     Banknote, CheckCircle, Clock, DollarSign,
