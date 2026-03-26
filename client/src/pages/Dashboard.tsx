@@ -18,7 +18,8 @@ import {
     BrainCircuit,
     PieChart,
     Calendar,
-    XCircle
+    XCircle,
+    Zap
 } from 'lucide-react';
 import { usePersona } from '../contexts/PersonaContext';
 import EmployeeDashboard from './EmployeeDashboard';
@@ -136,6 +137,12 @@ const categories = [
         color: "slate",
         modules: [
             {
+                title: "Control Tower",
+                description: "Real-time HRMS command centre — plug-and-play widgets, GOI view, payroll readiness, approvals and more.",
+                icon: Zap,
+                path: "/control-tower"
+            },
+            {
                 title: "Capacity Intelligence (ICIS)",
                 description: "Unified AI engine for academic, faculty, infra, and financial capacity.",
                 icon: BrainCircuit,
@@ -202,13 +209,13 @@ const Dashboard: React.FC = () => {
             ) : (
                 <div className="space-y-12 pb-10">
                     {/* Hero Greeting */}
-                    <div className="relative overflow-hidden rounded-3xl bg-slate-900 p-8 text-white shadow-2xl">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600 rounded-full blur-3xl opacity-20 -mr-32 -mt-32"></div>
-                        <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-600 rounded-full blur-3xl opacity-10 -ml-32 -mb-32"></div>
+                    <div className="relative overflow-hidden rounded-3xl p-8 text-white shadow-2xl" style={{ background: 'linear-gradient(135deg, #003f98 0%, #1a56be 100%)' }}>
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full blur-3xl opacity-10 -mr-32 -mt-32"></div>
+                        <div className="absolute bottom-0 left-0 w-64 h-64 bg-amber-400 rounded-full blur-3xl opacity-10 -ml-32 -mb-32"></div>
 
                         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                             <div className="flex-1 w-full md:w-auto text-left">
-                                <h2 className="text-3xl font-black tracking-tight mb-2">Welcome Back, HR Team</h2>
+                                <h2 className="text-3xl font-black tracking-tight mb-2" style={{ fontFamily: 'Manrope, sans-serif' }}>Welcome Back, HR Team</h2>
                                 <p className="text-slate-400 font-medium max-w-md mb-6">
                                     Let's streamline your workforce operations.
                                 </p>
@@ -237,20 +244,6 @@ const Dashboard: React.FC = () => {
                                     )}
                                 </div>
                             </div>
-                            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10">
-                                <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1 text-center md:text-left">Current System Status</div>
-                                <div className="flex items-center gap-4">
-                                    <div className="text-center">
-                                        <div className="text-xl font-black text-blue-400">98%</div>
-                                        <div className="text-[10px] text-slate-500 uppercase font-black">Attendance</div>
-                                    </div>
-                                    <div className="w-px h-8 bg-white/10"></div>
-                                    <div className="text-center">
-                                        <div className="text-xl font-black text-emerald-400">12</div>
-                                        <div className="text-[10px] text-slate-500 uppercase font-black">Active Tasks</div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
@@ -277,14 +270,14 @@ const Dashboard: React.FC = () => {
                                 {category.modules.map((module) => (
                                     <Card
                                         key={module.path}
-                                        className="group relative cursor-pointer overflow-hidden border-none bg-white transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-1"
+                                        className="group relative cursor-pointer overflow-hidden border-none bg-white transition-all duration-300 hover:shadow-2xl hover:shadow-blue-900/10 hover:-translate-y-1"
                                         onClick={() => navigate(module.path)}
                                     >
                                         <CardContent className="p-5">
                                             <div className="flex flex-col h-full gap-4">
                                                 <div className="flex justify-between items-start">
-                                                    <div className="p-3 rounded-2xl bg-slate-50 group-hover:bg-blue-50 transition-colors duration-300">
-                                                        <module.icon className="h-6 w-6 text-slate-400 group-hover:text-blue-600 transition-colors duration-300" />
+                                                    <div className="p-3 rounded-2xl bg-slate-50 group-hover:bg-blue-50 transition-colors duration-200">
+                                                        <module.icon className="h-6 w-6 text-slate-400 group-hover:text-blue-800 transition-colors duration-300" />
                                                     </div>
                                                     <div className="p-1 rounded-full bg-slate-100 opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <ChevronRight className="h-4 w-4 text-slate-400" />
@@ -292,7 +285,7 @@ const Dashboard: React.FC = () => {
                                                 </div>
 
                                                 <div>
-                                                    <h4 className="font-black text-slate-900 mb-1 group-hover:text-blue-600 transition-colors">{module.title}</h4>
+                                                    <h4 className="font-black text-slate-900 mb-1 group-hover:text-blue-800 transition-colors">{module.title}</h4>
                                                     <p className="text-xs font-medium text-slate-500 leading-relaxed line-clamp-2">
                                                         {module.description}
                                                     </p>
@@ -302,7 +295,7 @@ const Dashboard: React.FC = () => {
                                                 <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
                                             </div>
                                         </CardContent>
-                                        <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-blue-50 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                        <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-blue-100 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
                                     </Card>
                                 ))}
                             </div>

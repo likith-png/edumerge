@@ -44,6 +44,7 @@ import LeaveDashboard from './pages/LeaveDashboard';
 import LeaveApprovals from './pages/LeaveApprovals';
 import LeaveConfiguration from './pages/LeaveConfiguration';
 import ResearchPublication from './pages/ResearchPublication';
+import ControlTower from './pages/ControlTower';
 
 import { PersonaProvider } from './contexts/PersonaContext';
 
@@ -104,6 +105,9 @@ function App() {
 
           {/* Research & Publication */}
           <Route path="/research-publication" element={<ResearchPublication />} />
+
+          {/* HRMS Control Tower */}
+          <Route path="/control-tower" element={<ControlTower />} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />

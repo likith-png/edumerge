@@ -3,7 +3,6 @@ import Layout from '../components/Layout';
 import { BookOpen, FileText, Award, Plus, ChevronRight, BarChart3, CheckCircle2, XCircle, Clock, Eye, Users } from 'lucide-react';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { useNavigate } from 'react-router-dom';
 import { usePersona } from '../contexts/PersonaContext';
 import * as researchService from '../services/researchService';
 import type { Publication } from '../services/researchService';
