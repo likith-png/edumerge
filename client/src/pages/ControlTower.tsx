@@ -6,7 +6,7 @@ import {
   Building2, BookOpen, Target, Briefcase, LogOut, Bell, Search,
   Circle, Zap, Shield, FileCheck, Users2,
   LayoutGrid, Table2, Layers, MapPin,
-  AlertCircle, ArrowRight, Award, Flag, UserMinus, CalendarDays, BarChart3
+  AlertCircle, ArrowRight, Award, Flag, UserMinus, CalendarDays, BarChart3, Lock, Unlock
 } from 'lucide-react';
 import {
   LineChart as ReLineChart, Line,
@@ -59,7 +59,6 @@ const DS = {
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type DashboardRole = 'HR_MANAGER' | 'PRINCIPAL' | 'CHAIRMAN' | 'FINANCE';
-type ViewMode = 'zone' | 'grid';
 type Period = 'today' | 'mtd' | 'ytd';
 type WidgetCategory = 'workforce' | 'hr_ops' | 'talent' | 'goi' | 'utility';
 type ChartTypeOption = 'kpi_card' | 'horizontal_bar' | 'donut' | 'line' | 'area' | 'bar' | 'table' | 'step_tracker' | 'action_list' | 'heatmap' | 'funnel' | 'feed' | 'alert_banner' | 'status_matrix' | 'campus_table' | 'grouped_bar' | 'stacked_bar' | 'calendar';
@@ -151,6 +150,106 @@ const GOI_CAMPUS_DATA = [
   { name: 'Bishop Cotton', type: 'K-12', staff: 142, present: 118, onLeave: 19, lop: 7, payroll: 'Ready', health: 81 },
 ];
 
+const CAMPUS_DRILL_DATA: Record<string, {
+  attendance: { present: number; onLeave: number; ual: number; lop: number };
+  leaveBreakdown: { type: string; count: number; color: string }[];
+  payrollSteps: { label: string; status: 'done' | 'in_progress' | 'blocked' | 'waiting' }[];
+  topAbsentees: { name: string; dept: string; days: number }[];
+  staffByDept: { dept: string; count: number; present: number }[];
+  alerts: { msg: string; type: 'error' | 'warning' | 'info' }[];
+}> = {
+  "St. Xavier's": {
+    attendance: { present: 160, onLeave: 22, ual: 3, lop: 8 },
+    leaveBreakdown: [
+      { type: 'Casual', count: 8, color: '#003f98' }, { type: 'Sick', count: 6, color: '#1a7f4b' },
+      { type: 'Earned', count: 5, color: '#7c3aed' }, { type: 'LOP', count: 3, color: '#c62828' },
+    ],
+    payrollSteps: [
+      { label: 'Attendance locked', status: 'done' }, { label: 'Leave data synced', status: 'done' },
+      { label: 'LOP validated', status: 'done' }, { label: 'Statutory computation', status: 'done' },
+      { label: 'Finance approval', status: 'done' },
+    ],
+    topAbsentees: [{ name: 'Ravi Kumar', dept: 'Science', days: 4 }, { name: 'Priya Singh', dept: 'Admin', days: 3 }],
+    staffByDept: [
+      { dept: 'Science', count: 38, present: 34 }, { dept: 'Maths', count: 32, present: 29 },
+      { dept: 'English', count: 28, present: 26 }, { dept: 'Admin', count: 22, present: 21 }, { dept: 'PE', count: 12, present: 11 },
+    ],
+    alerts: [{ msg: '3 UAL staff — escalated to HR', type: 'error' }, { msg: 'Payroll ready for disbursement', type: 'info' }],
+  },
+  'Holy Cross': {
+    attendance: { present: 196, onLeave: 31, ual: 7, lop: 12 },
+    leaveBreakdown: [
+      { type: 'Casual', count: 12, color: '#003f98' }, { type: 'Sick', count: 9, color: '#1a7f4b' },
+      { type: 'LOP', count: 6, color: '#c62828' }, { type: 'UAL', count: 4, color: '#b45309' },
+    ],
+    payrollSteps: [
+      { label: 'Attendance locked', status: 'done' }, { label: 'Leave data synced', status: 'done' },
+      { label: 'LOP validated', status: 'in_progress' }, { label: 'Statutory computation', status: 'waiting' },
+      { label: 'Finance approval', status: 'blocked' },
+    ],
+    topAbsentees: [{ name: 'Suresh M', dept: 'Commerce', days: 7 }, { name: 'Deepa P', dept: 'Science', days: 5 }, { name: 'Anand R', dept: 'Admin', days: 4 }],
+    staffByDept: [
+      { dept: 'Science', count: 48, present: 41 }, { dept: 'Commerce', count: 42, present: 35 },
+      { dept: 'Maths', count: 36, present: 32 }, { dept: 'Admin', count: 28, present: 24 }, { dept: 'PE', count: 15, present: 14 },
+    ],
+    alerts: [{ msg: 'Payroll BLOCKED — finance approval pending', type: 'error' }, { msg: '7 UAL staff flagged this week', type: 'error' }, { msg: 'LOP validation incomplete — 12 cases', type: 'warning' }],
+  },
+  'Delhi Public': {
+    attendance: { present: 140, onLeave: 14, ual: 2, lop: 4 },
+    leaveBreakdown: [
+      { type: 'Casual', count: 5, color: '#003f98' }, { type: 'Sick', count: 4, color: '#1a7f4b' },
+      { type: 'Earned', count: 3, color: '#7c3aed' }, { type: 'LOP', count: 2, color: '#c62828' },
+    ],
+    payrollSteps: [
+      { label: 'Attendance locked', status: 'done' }, { label: 'Leave data synced', status: 'done' },
+      { label: 'LOP validated', status: 'done' }, { label: 'Statutory computation', status: 'done' },
+      { label: 'Finance approval', status: 'done' },
+    ],
+    topAbsentees: [{ name: 'Kavita N', dept: 'English', days: 3 }],
+    staffByDept: [
+      { dept: 'Science', count: 32, present: 30 }, { dept: 'Maths', count: 28, present: 26 },
+      { dept: 'English', count: 24, present: 22 }, { dept: 'Admin', count: 18, present: 17 },
+    ],
+    alerts: [{ msg: '2 UAL cases — warning issued', type: 'warning' }, { msg: 'Payroll ready', type: 'info' }],
+  },
+  'Presidency': {
+    attendance: { present: 244, onLeave: 42, ual: 8, lop: 14 },
+    leaveBreakdown: [
+      { type: 'Casual', count: 16, color: '#003f98' }, { type: 'Sick', count: 12, color: '#1a7f4b' },
+      { type: 'LOP', count: 8, color: '#c62828' }, { type: 'Earned', count: 6, color: '#7c3aed' },
+    ],
+    payrollSteps: [
+      { label: 'Attendance locked', status: 'done' }, { label: 'Leave data synced', status: 'in_progress' },
+      { label: 'LOP validated', status: 'waiting' }, { label: 'Statutory computation', status: 'waiting' },
+      { label: 'Finance approval', status: 'waiting' },
+    ],
+    topAbsentees: [{ name: 'Mohan D', dept: 'Admin', days: 8 }, { name: 'Sunita R', dept: 'Science', days: 6 }, { name: 'Anil K', dept: 'Commerce', days: 5 }],
+    staffByDept: [
+      { dept: 'Science', count: 62, present: 54 }, { dept: 'Commerce', count: 55, present: 46 },
+      { dept: 'Maths', count: 48, present: 42 }, { dept: 'Admin', count: 38, present: 32 }, { dept: 'PE', count: 20, present: 18 },
+    ],
+    alerts: [{ msg: '8 UAL staff — 3 escalated', type: 'error' }, { msg: 'Leave data sync in progress', type: 'warning' }, { msg: 'Payroll blocked till sync completes', type: 'warning' }],
+  },
+  'Bishop Cotton': {
+    attendance: { present: 118, onLeave: 19, ual: 4, lop: 7 },
+    leaveBreakdown: [
+      { type: 'Casual', count: 7, color: '#003f98' }, { type: 'Sick', count: 5, color: '#1a7f4b' },
+      { type: 'LOP', count: 4, color: '#c62828' }, { type: 'Earned', count: 3, color: '#7c3aed' },
+    ],
+    payrollSteps: [
+      { label: 'Attendance locked', status: 'done' }, { label: 'Leave data synced', status: 'done' },
+      { label: 'LOP validated', status: 'done' }, { label: 'Statutory computation', status: 'in_progress' },
+      { label: 'Finance approval', status: 'waiting' },
+    ],
+    topAbsentees: [{ name: 'Rajesh V', dept: 'Admin', days: 5 }, { name: 'Meena N', dept: 'Science', days: 3 }],
+    staffByDept: [
+      { dept: 'Science', count: 30, present: 26 }, { dept: 'Maths', count: 26, present: 23 },
+      { dept: 'English', count: 20, present: 18 }, { dept: 'Admin', count: 16, present: 14 },
+    ],
+    alerts: [{ msg: '4 UAL cases pending review', type: 'warning' }, { msg: 'Statutory computation in progress', type: 'info' }],
+  },
+};
+
 const ACTIVITY_FEED_DATA = [
   { id: 1, text: "Ravi Naik's leave approved by HOD", time: '2m ago', type: 'success' as const },
   { id: 2, text: 'Holy Cross payroll blocked — finance pending', time: '18m ago', type: 'error' as const },
@@ -174,6 +273,36 @@ const KPI_WIDGETS_DATA: Record<string, { value: string; delta: string; deltaType
   WGT_PAYROLL_SUMMARY: { value: '₹ 2.4 Cr', delta: '↓ 1.2% vs last month', deltaType: 'up', icon: DollarSign },
   WGT_OPEN_POSITIONS: { value: '18', delta: '5 urgent', deltaType: 'warn', icon: Users2 },
   WGT_ATTRITION_RATE: { value: '6.2%', delta: '↑ 0.8% YTD', deltaType: 'down', icon: TrendingDown },
+};
+
+const ROLE_KPI_OVERRIDES: Partial<Record<DashboardRole, Partial<typeof KPI_WIDGETS_DATA>>> = {
+  PRINCIPAL: {
+    WGT_HEADCOUNT:      { value: '187', delta: '↑ 2 this month', deltaType: 'up', icon: Users },
+    WGT_PRESENT_TODAY:  { value: '160', delta: '85.6% attendance', deltaType: 'up', icon: UserCheck },
+    WGT_ABSENT_TODAY:   { value: '27', delta: '↑ 3 vs yesterday', deltaType: 'down', icon: UserX },
+    WGT_LOP_MTD:        { value: '8 days', delta: '↑ 2 vs last month', deltaType: 'warn', icon: DollarSign },
+    WGT_PAYROLL_SUMMARY:{ value: '₹ 58.4 L', delta: '↓ 0.4% vs last month', deltaType: 'up', icon: DollarSign },
+    WGT_OPEN_POSITIONS: { value: '4', delta: '1 urgent', deltaType: 'warn', icon: Users2 },
+    WGT_ATTRITION_RATE: { value: '5.2%', delta: '↑ 0.3% YTD', deltaType: 'down', icon: TrendingDown },
+  },
+  CHAIRMAN: {
+    WGT_HEADCOUNT:      { value: '1,284', delta: '↑ 12 across all campuses', deltaType: 'up', icon: Users },
+    WGT_PRESENT_TODAY:  { value: '1,087', delta: '84.7% group attendance', deltaType: 'up', icon: UserCheck },
+    WGT_ABSENT_TODAY:   { value: '197', delta: '↑ 23 vs yesterday', deltaType: 'down', icon: UserX },
+    WGT_LOP_MTD:        { value: '47 days', delta: 'Across 5 campuses', deltaType: 'warn', icon: DollarSign },
+    WGT_PAYROLL_SUMMARY:{ value: '₹ 2.4 Cr', delta: 'Group total MTD', deltaType: 'up', icon: DollarSign },
+    WGT_OPEN_POSITIONS: { value: '18', delta: '5 urgent across campuses', deltaType: 'warn', icon: Users2 },
+    WGT_ATTRITION_RATE: { value: '6.2%', delta: 'Group avg YTD', deltaType: 'down', icon: TrendingDown },
+  },
+  FINANCE: {
+    WGT_HEADCOUNT:      { value: '1,284', delta: 'Active on payroll', deltaType: 'up', icon: Users },
+    WGT_PRESENT_TODAY:  { value: '1,087', delta: '84.7% billable today', deltaType: 'up', icon: UserCheck },
+    WGT_ABSENT_TODAY:   { value: '197', delta: 'Non-billable days', deltaType: 'down', icon: UserX },
+    WGT_LOP_MTD:        { value: '47 days', delta: '↑ ₹ 1.2L deduction', deltaType: 'warn', icon: DollarSign },
+    WGT_PAYROLL_SUMMARY:{ value: '₹ 2.4 Cr', delta: '↓ 1.2% vs last month', deltaType: 'up', icon: DollarSign },
+    WGT_OPEN_POSITIONS: { value: '18', delta: 'Open FTEs budgeted', deltaType: 'warn', icon: Users2 },
+    WGT_ATTRITION_RATE: { value: '6.2%', delta: 'Cost impact ₹ 18.4L', deltaType: 'down', icon: TrendingDown },
+  },
 };
 
 // ─── New spec data ─────────────────────────────────────────────────────────
@@ -492,59 +621,32 @@ const CAT_COLORS: Record<WidgetCategory, string> = {
   workforce: DS.primary, hr_ops: DS.teal, talent: DS.purple, goi: DS.amber, utility: DS.text3,
 };
 
-const DEFAULT_LAYOUTS: Record<string, string[]> = {
-  HR_MANAGER: [
-    'WGT_WORKFORCE_SNAPSHOT', 'WGT_HEADCOUNT', 'WGT_PRESENT_TODAY', 'WGT_ABSENT_TODAY', 'WGT_LOP_MTD',
-    'WGT_DEADLINE_CHECKLIST', 'WGT_ON_LEAVE_DEPT', 'WGT_LEAVE_MTD_BYTYPE',
-    'WGT_LEAVE_BREAKDOWN', 'WGT_ATT_TREND', 'WGT_PAYROLL_READINESS',
-    'WGT_ONBOARDING_PIPELINE', 'WGT_PROBATION_EXPIRY', 'WGT_ACTIVITY_FEED',
-  ],
-  PRINCIPAL: [
-    'WGT_PRESENT_TODAY', 'WGT_ABSENT_TODAY', 'WGT_PENDING_APPROVALS',
-    'WGT_DEPT_COVERAGE', 'WGT_UNSUBSTITUTED', 'WGT_DEPT_HEATMAP', 'WGT_PROBATION_EXPIRY', 'WGT_ACTIVITY_FEED',
-  ],
-  CHAIRMAN: [
-    'WGT_GROUP_KPI', 'WGT_HEADCOUNT', 'WGT_PRESENT_TODAY', 'WGT_LOP_MTD',
-    'WGT_PAYROLL_SUMMARY', 'WGT_ATTRITION_RATE', 'WGT_GOI_CAMPUS_TABLE',
-    'WGT_PAYROLL_MATRIX', 'WGT_APPRAISAL_CYCLE', 'WGT_ACTIVITY_FEED',
-  ],
-  FINANCE: [
-    'WGT_LOP_MTD', 'WGT_PAYROLL_SUMMARY', 'WGT_STATUTORY_STATUS',
-    'WGT_PAYROLL_READINESS', 'WGT_GOI_PAYROLL_STATUS', 'WGT_ATTRITION_RATE',
-  ],
+const DEFAULT_LAYOUTS: Record<DashboardRole, Record<Period, string[]>> = {
+  HR_MANAGER: {
+    today: ['WGT_WORKFORCE_SNAPSHOT', 'WGT_HEADCOUNT', 'WGT_PRESENT_TODAY', 'WGT_ABSENT_TODAY', 'WGT_UAL_TRACKER', 'WGT_ALERTS', 'WGT_ON_LEAVE_DEPT', 'WGT_PENDING_APPROVALS', 'WGT_LEAVE_VIOLATIONS'],
+    mtd: ['WGT_LEAVE_MTD_BYTYPE', 'WGT_LOP_MTD', 'WGT_TOP_LOP_STAFF', 'WGT_PAYROLL_READINESS', 'WGT_DEADLINE_CHECKLIST', 'WGT_ONBOARDING_SLA', 'WGT_FF_STATUS', 'WGT_194J_TRACKER', 'WGT_LEAVE_BREAKDOWN', 'WGT_STATUTORY_STATUS', 'WGT_ONBOARDING_PIPELINE'],
+    ytd: ['WGT_ATTRITION_TREND_12M', 'WGT_ATTRITION_RATE', 'WGT_HEADCOUNT_SUMMARY', 'WGT_OPEN_POSITIONS', 'WGT_TA_FUNNEL', 'WGT_APPRAISAL_PROGRESS', 'WGT_PROBATION_EXIT', 'WGT_ATT_TREND', 'WGT_APPRAISAL_CYCLE', 'WGT_LD_COMPLETION', 'WGT_EXIT_PIPELINE', 'WGT_ACTIVITY_FEED']
+  },
+  CHAIRMAN: {
+    today: ['WGT_GROUP_KPI', 'WGT_HEADCOUNT', 'WGT_PRESENT_TODAY', 'WGT_ALERTS', 'WGT_STAFF_MOVEMENT', 'WGT_HEADCOUNT_BUDGET'],
+    mtd: ['WGT_GOI_CAMPUS_TABLE', 'WGT_PAYROLL_MATRIX', 'WGT_PAYROLL_COST_SUMMARY', 'WGT_LOP_MTD', 'WGT_PAYROLL_SUMMARY', 'WGT_ACTIVITY_FEED'],
+    ytd: ['WGT_ATTRITION_TREND_12M', 'WGT_ATTRITION_RATE', 'WGT_ATTRITION_LEAGUE', 'WGT_PAYROLL_TREND_12M', 'WGT_PERFORMANCE_DIST', 'WGT_HIGH_PERFORMER_RISK', 'WGT_APPRAISAL_PROGRESS', 'WGT_APPRAISAL_CYCLE']
+  },
+  PRINCIPAL: {
+    today: ['WGT_PRESENT_TODAY', 'WGT_ABSENT_TODAY', 'WGT_UNSUBSTITUTED', 'WGT_TODAY_ABSENCES_CLASS', 'WGT_ALERTS', 'WGT_DEPT_COVERAGE'],
+    mtd: ['WGT_UPCOMING_LEAVE_7D', 'WGT_PENDING_APPROVALS', 'WGT_DEPT_HEATMAP', 'WGT_ON_LEAVE_DEPT', 'WGT_STAFF_STRENGTH', 'WGT_ACTIVITY_FEED'],
+    ytd: ['WGT_APPRAISAL_PROGRESS', 'WGT_APPRAISAL_CYCLE', 'WGT_PROBATION_EXIT', 'WGT_PROBATION_EXPIRY', 'WGT_LD_COMPLETION', 'WGT_LEAVE_BREAKDOWN', 'WGT_UAL_TRACKER']
+  },
+  FINANCE: {
+    today: ['WGT_HEADCOUNT', 'WGT_PRESENT_TODAY', 'WGT_ALERTS'],
+    mtd: ['WGT_PAYROLL_MATRIX', 'WGT_PAYROLL_COST_SUMMARY', 'WGT_LOP_MTD', 'WGT_PAYROLL_SUMMARY', 'WGT_ACTIVITY_FEED'],
+    ytd: ['WGT_PAYROLL_TREND_12M']
+  }
 };
 
-// ─── Utility ─────────────────────────────────────────────────────────────────
-function cs(...args: (string | boolean | undefined)[]): string {
-  return args.filter(Boolean).join(' ');
-}
 
-// ─── Widget Shell ─────────────────────────────────────────────────────────────
-function WidgetShell({ title, icon: Icon, meta, children, colSpan = 1, onRemove }: {
-  title: string; icon: React.ElementType; meta?: string; children: React.ReactNode;
-  colSpan?: number; onRemove?: () => void;
-}) {
-  return (
-    <div
-      className={cs('rounded-2xl flex flex-col overflow-hidden', colSpan === 3 ? 'col-span-3' : colSpan === 2 ? 'col-span-2' : 'col-span-1')}
-      style={{ background: DS.bgCard, boxShadow: DS.shadow, border: `1px solid ${DS.border}` }}
-    >
-      <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: `1px solid ${DS.border}` }}>
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: DS.bgLow }}>
-          <Icon className="w-3.5 h-3.5" style={{ color: DS.primary }} />
-        </div>
-        <span className="text-sm font-semibold flex-1 truncate" style={{ color: DS.text, fontFamily: 'Manrope, sans-serif' }}>{title}</span>
-        {meta && <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: DS.bgLow, color: DS.text3 }}>{meta}</span>}
-        {onRemove && (
-          <button onClick={onRemove} className="ml-1 w-5 h-5 flex items-center justify-center rounded hover:bg-red-50 transition-colors">
-            <X className="w-3 h-3" style={{ color: DS.text3 }} />
-          </button>
-        )}
-      </div>
-      <div className="flex-1 p-4">{children}</div>
-    </div>
-  );
-}
+
+
 
 // ─── KPI Card ─────────────────────────────────────────────────────────────────
 function KPICard({ label, value, delta, deltaType = 'up', icon: Icon }: {
@@ -567,10 +669,37 @@ function KPICard({ label, value, delta, deltaType = 'up', icon: Icon }: {
 }
 
 // ─── Widget Renderers ─────────────────────────────────────────────────────────
-function renderWidget(id: string, chartType: ChartTypeOption) {
-  const kpi = KPI_WIDGETS_DATA[id];
+function renderWidget(id: string, chartType: ChartTypeOption, role?: DashboardRole, callbacks?: { onCampusSelect?: (campus: string) => void }) {
+  const roleOverrides = role ? ROLE_KPI_OVERRIDES[role] : undefined;
+  const kpi = (roleOverrides && roleOverrides[id]) ? roleOverrides[id]! : KPI_WIDGETS_DATA[id];
 
   if (id === 'WGT_WORKFORCE_SNAPSHOT') {
+    if (chartType === 'table') {
+      return (
+        <div className="overflow-x-auto text-xs mt-2">
+          <table className="w-full text-left">
+            <thead>
+              <tr style={{ color: DS.text3, borderBottom: `1px solid ${DS.border}` }}>
+                <th className="pb-2 font-semibold">Type</th>
+                <th className="pb-2 font-semibold text-right">Count</th>
+                <th className="pb-2 font-semibold text-right">Active</th>
+                <th className="pb-2 font-semibold text-right">On Leave</th>
+              </tr>
+            </thead>
+            <tbody>
+              {WORKFORCE_BY_STAFF_TYPE.map((row) => (
+                <tr key={row.type} style={{ borderBottom: `1px dotted ${DS.border}` }}>
+                  <td className="py-2" style={{ color: DS.text }}>{row.type}</td>
+                  <td className="py-2 text-right font-bold">{row.count}</td>
+                  <td className="py-2 text-right font-medium" style={{ color: DS.success }}>{row.active}</td>
+                  <td className="py-2 text-right font-medium" style={{ color: DS.warning }}>{row.onLeave}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
     return (
       <div className="space-y-3">
         {WORKFORCE_BY_STAFF_TYPE.map((row) => (
@@ -615,6 +744,31 @@ function renderWidget(id: string, chartType: ChartTypeOption) {
 
   if (id === 'WGT_ON_LEAVE_DEPT') {
     const max = Math.max(...ON_LEAVE_BY_DEPT.map(d => d.count));
+    if (chartType === 'donut') {
+      const DONUT_COLORS = [DS.primary, DS.teal, DS.purple, DS.amber, DS.pink, DS.error];
+      const donutData = ON_LEAVE_BY_DEPT.map((d, i) => ({ name: d.dept, value: d.count, color: DONUT_COLORS[i % DONUT_COLORS.length] }));
+      return (
+        <div className="flex items-center gap-4 h-full pt-2">
+          <ResponsiveContainer width={100} height={100}>
+            <RePieChart>
+              <Pie data={donutData} cx="50%" cy="50%" innerRadius={24} outerRadius={44} dataKey="value" strokeWidth={0}>
+                {donutData.map((e, i) => <Cell key={i} fill={e.color} />)}
+              </Pie>
+              <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 10, fontSize: 11 }} />
+            </RePieChart>
+          </ResponsiveContainer>
+          <div className="space-y-1 flex-1">
+            {donutData.map(e => (
+              <div key={e.name} className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: e.color }} />
+                <span className="text-xs flex-1" style={{ color: DS.text2 }}>{e.name}</span>
+                <span className="text-xs font-bold" style={{ color: DS.text }}>{e.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="space-y-2.5">
         {ON_LEAVE_BY_DEPT.map((row) => (
@@ -632,6 +786,32 @@ function renderWidget(id: string, chartType: ChartTypeOption) {
   }
 
   if (id === 'WGT_LEAVE_MTD_BYTYPE') {
+    if (chartType === 'table') {
+      return (
+        <div className="overflow-x-auto text-xs mt-2">
+          <table className="w-full text-left">
+            <thead>
+              <tr style={{ color: DS.text3, borderBottom: `1px solid ${DS.border}` }}>
+                <th className="pb-2 font-semibold">Leave Type</th>
+                <th className="pb-2 font-semibold text-right" style={{ color: DS.primary }}>Teaching</th>
+                <th className="pb-2 font-semibold text-right" style={{ color: DS.teal }}>Non-Teaching</th>
+                <th className="pb-2 font-semibold text-right" style={{ color: DS.amber }}>Contract</th>
+              </tr>
+            </thead>
+            <tbody>
+              {LEAVE_CONSUMPTION_MTD.map((row) => (
+                <tr key={row.type} style={{ borderBottom: `1px dotted ${DS.border}` }}>
+                  <td className="py-2 font-medium" style={{ color: DS.text }}>{row.type}</td>
+                  <td className="py-2 text-right font-bold">{row.teaching}</td>
+                  <td className="py-2 text-right font-bold">{row.nonTeaching}</td>
+                  <td className="py-2 text-right font-bold">{row.contract}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
     return (
       <ResponsiveContainer width="100%" height={180}>
         <ReBarChart data={LEAVE_CONSUMPTION_MTD} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
@@ -709,6 +889,32 @@ function renderWidget(id: string, chartType: ChartTypeOption) {
   }
 
   if (id === 'WGT_DEPT_COVERAGE') {
+    if (chartType === 'table') {
+      return (
+        <div className="overflow-x-auto text-xs">
+          <table className="w-full text-left">
+            <thead><tr style={{ color: DS.text3, borderBottom: `1px solid ${DS.border}` }}>
+              <th className="pb-2 font-semibold">Dept</th>
+              <th className="pb-2 text-right font-semibold">Classes</th>
+              <th className="pb-2 text-right font-semibold">Subst.</th>
+              <th className="pb-2 text-right font-semibold" style={{ color: DS.error }}>Pending</th>
+              <th className="pb-2 text-right font-semibold">Coverage</th>
+            </tr></thead>
+            <tbody>
+              {DEPT_COVERAGE_DATA.map(row => (
+                <tr key={row.dept} style={{ borderBottom: `1px dotted ${DS.border}` }}>
+                  <td className="py-1.5" style={{ color: DS.text }}>{row.dept}</td>
+                  <td className="py-1.5 text-right">{row.classes}</td>
+                  <td className="py-1.5 text-right" style={{ color: DS.success }}>{row.substituted}</td>
+                  <td className="py-1.5 text-right font-bold" style={{ color: row.pending > 0 ? DS.error : DS.text3 }}>{row.pending}</td>
+                  <td className="py-1.5 text-right font-black" style={{ color: row.coverage === 100 ? DS.success : row.coverage >= 80 ? DS.amber : DS.error }}>{row.coverage}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
     return (
       <div className="space-y-2">
         {DEPT_COVERAGE_DATA.map((row) => (
@@ -750,13 +956,114 @@ function renderWidget(id: string, chartType: ChartTypeOption) {
     );
   }
 
-  // KPI widget
+  // KPI widget generic fallback
   if (kpi) {
+    if (chartType === 'donut' && id === 'WGT_PRESENT_TODAY') {
+      const d = [{name: 'Present', value: 1087, color: DS.success}, {name: 'Absent', value: 197, color: DS.error}];
+      return (
+        <div className="flex items-center gap-4 h-full pt-2">
+          <ResponsiveContainer width={80} height={80}>
+            <RePieChart>
+              <Pie data={d} cx="50%" cy="50%" innerRadius={20} outerRadius={36} dataKey="value" strokeWidth={0}>
+                {d.map((e, i) => <Cell key={i} fill={e.color} />)}
+              </Pie>
+            </RePieChart>
+          </ResponsiveContainer>
+          <div className="flex-1 space-y-2">
+            {d.map(e => (
+               <div key={e.name} className="flex justify-between items-center text-xs">
+                 <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full" style={{ background: e.color }}/> <span style={{ color: DS.text3 }}>{e.name}</span></div>
+                 <span className="font-bold" style={{ color: DS.text }}>{e.value}</span>
+               </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    if (chartType === 'action_list' && id === 'WGT_ABSENT_TODAY') {
+       return (
+         <div className="space-y-2 mt-2">
+           {[{n: 'Ravi Naik', r: 'Sick'}, {n: 'Priya Raj', r: 'Casual'}, {n: 'Anil Kumar', r: 'LOP'}].map((p, i) => (
+             <div key={i} className="flex justify-between items-center p-2 rounded-lg" style={{ background: DS.bgLow }}>
+               <span className="text-xs font-semibold" style={{ color: DS.text }}>{p.n}</span>
+               <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: DS.errorBg, color: DS.error }}>{p.r}</span>
+             </div>
+           ))}
+         </div>
+       );
+    }
+    if (chartType === 'line') {
+      const d = id === 'WGT_LOP_MTD' ? [{v: 10}, {v: 25}, {v: 15}, {v: 47}] : [{v: 4}, {v: 5}, {v: 5.8}, {v: 6.2}];
+      return (
+        <div className="h-full flex flex-col justify-end pt-3">
+          <div className="flex items-start justify-between mb-4">
+            <span className="text-2xl font-black" style={{ color: DS.text, fontFamily: 'Manrope, sans-serif' }}>{kpi.value}</span>
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: kpi.deltaType === 'down' ? DS.errorBg : DS.successBg, color: kpi.deltaType === 'down' ? DS.error : kpi.deltaType === 'up' ? DS.success : DS.warning }}>{kpi.delta}</span>
+          </div>
+          <ResponsiveContainer width="100%" height={45}>
+            <ReLineChart data={d}>
+               <Line type="monotone" dataKey="v" stroke={DS.primary} strokeWidth={2.5} dot={false} />
+            </ReLineChart>
+          </ResponsiveContainer>
+        </div>
+      );
+    }
     return <KPICard label={WIDGET_CATALOGUE.find(w => w.id === id)?.name || id} value={kpi.value} delta={kpi.delta} deltaType={kpi.deltaType} icon={kpi.icon} />;
   }
 
   if (id === 'WGT_LEAVE_BREAKDOWN') {
     const max = Math.max(...LEAVE_BREAKDOWN.map(l => l.count));
+    if (chartType === 'donut') {
+      return (
+        <div className="flex items-center gap-4 h-full pt-2">
+          <ResponsiveContainer width={100} height={100}>
+            <RePieChart>
+              <Pie data={LEAVE_BREAKDOWN} cx="50%" cy="50%" innerRadius={24} outerRadius={44} dataKey="count" strokeWidth={0}>
+                {LEAVE_BREAKDOWN.map((e, i) => <Cell key={i} fill={e.color} />)}
+              </Pie>
+              <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 10, fontSize: 11 }} formatter={(v: any) => [v, 'Days']} />
+            </RePieChart>
+          </ResponsiveContainer>
+          <div className="space-y-1.5 flex-1">
+            {LEAVE_BREAKDOWN.map(e => (
+              <div key={e.type} className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: e.color }} />
+                <span className="text-xs flex-1" style={{ color: DS.text2 }}>{e.type}</span>
+                <span className="text-xs font-bold" style={{ color: DS.text }}>{e.count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    if (chartType === 'table') {
+      return (
+        <div className="overflow-x-auto text-xs mt-1">
+          <table className="w-full text-left">
+            <thead>
+              <tr style={{ color: DS.text3, borderBottom: `1px solid ${DS.border}` }}>
+                <th className="pb-2 font-semibold">Leave Type</th>
+                <th className="pb-2 font-semibold text-right">Count</th>
+                <th className="pb-2 font-semibold text-right">Share</th>
+              </tr>
+            </thead>
+            <tbody>
+              {LEAVE_BREAKDOWN.map(l => (
+                <tr key={l.type} style={{ borderBottom: `1px dotted ${DS.border}` }}>
+                  <td className="py-1.5 flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: l.color }} />
+                    <span style={{ color: DS.text }}>{l.type}</span>
+                  </td>
+                  <td className="py-1.5 text-right font-bold" style={{ color: DS.text }}>{l.count}</td>
+                  <td className="py-1.5 text-right" style={{ color: DS.text3 }}>{Math.round(l.count / LEAVE_BREAKDOWN.reduce((s, x) => s + x.count, 0) * 100)}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
+    // default: horizontal_bar
     return (
       <div className="space-y-2">
         {LEAVE_BREAKDOWN.map((l) => (
@@ -773,6 +1080,34 @@ function renderWidget(id: string, chartType: ChartTypeOption) {
   }
 
   if (id === 'WGT_ATT_TREND') {
+    if (chartType === 'bar') {
+      return (
+        <ResponsiveContainer width="100%" height={160}>
+          <ReBarChart data={ATTENDANCE_TREND.slice(-14)} margin={{ top: 0, right: 0, left: -30, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+            <XAxis dataKey="day" tick={{ fontSize: 9, fill: DS.text3 }} />
+            <YAxis tick={{ fontSize: 9, fill: DS.text3 }} />
+            <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+            <Bar dataKey="present" fill={DS.primary} name="Present" radius={[2, 2, 0, 0]} />
+            <Bar dataKey="absent" fill={DS.error} name="Absent" radius={[2, 2, 0, 0]} />
+          </ReBarChart>
+        </ResponsiveContainer>
+      );
+    }
+    if (chartType === 'line') {
+      return (
+        <ResponsiveContainer width="100%" height={160}>
+          <ReLineChart data={ATTENDANCE_TREND.slice(-14)} margin={{ top: 0, right: 0, left: -30, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+            <XAxis dataKey="day" tick={{ fontSize: 9, fill: DS.text3 }} />
+            <YAxis tick={{ fontSize: 9, fill: DS.text3 }} />
+            <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+            <Line type="monotone" dataKey="present" stroke={DS.primary} strokeWidth={2} name="Present" dot={false} />
+            <Line type="monotone" dataKey="absent" stroke={DS.error} strokeWidth={2} name="Absent" dot={false} />
+          </ReLineChart>
+        </ResponsiveContainer>
+      );
+    }
     return (
       <ResponsiveContainer width="100%" height={160}>
         <AreaChart data={ATTENDANCE_TREND.slice(-14)} margin={{ top: 0, right: 0, left: -30, bottom: 0 }}>
@@ -803,6 +1138,29 @@ function renderWidget(id: string, chartType: ChartTypeOption) {
       if (pct < 0.5) return DS.warning;
       return DS.error;
     };
+    if (chartType === 'bar') {
+      // Flatten heatmap into bar chart data: total leave per dept
+      const barData = DEPT_HEATMAP_DATA.map(row => ({
+        dept: row.dept,
+        CL: row.CL, SL: row.SL, EL: row.EL, LOP: row.LOP, UAL: row.UAL,
+      }));
+      return (
+        <ResponsiveContainer width="100%" height={160}>
+          <ReBarChart data={barData} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+            <XAxis dataKey="dept" tick={{ fontSize: 9, fill: DS.text3 }} />
+            <YAxis tick={{ fontSize: 9, fill: DS.text3 }} />
+            <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+            <Legend wrapperStyle={{ fontSize: 9 }} />
+            <Bar dataKey="CL" name="CL" fill={DS.primary} stackId="a" radius={[0,0,0,0]} />
+            <Bar dataKey="SL" name="SL" fill={DS.success} stackId="a" />
+            <Bar dataKey="EL" name="EL" fill={DS.purple} stackId="a" />
+            <Bar dataKey="LOP" name="LOP" fill={DS.error} stackId="a" />
+            <Bar dataKey="UAL" name="UAL" fill={DS.amber} stackId="a" radius={[3,3,0,0]} />
+          </ReBarChart>
+        </ResponsiveContainer>
+      );
+    }
     return (
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
@@ -858,6 +1216,19 @@ function renderWidget(id: string, chartType: ChartTypeOption) {
 
   if (id === 'WGT_ONBOARDING_PIPELINE') {
     const max = Math.max(...ONBOARDING_STAGES.map(o => o.count));
+    if (chartType === 'bar') {
+      return (
+        <ResponsiveContainer width="100%" height={150}>
+          <ReBarChart data={ONBOARDING_STAGES} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+            <XAxis dataKey="stage" tick={{ fontSize: 8, fill: DS.text3 }} />
+            <YAxis tick={{ fontSize: 9, fill: DS.text3 }} />
+            <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+            <Bar dataKey="count" name="Joiners" fill={DS.teal} radius={[4, 4, 0, 0]} />
+          </ReBarChart>
+        </ResponsiveContainer>
+      );
+    }
     return (
       <div className="space-y-2">
         {ONBOARDING_STAGES.map((stage) => (
@@ -894,6 +1265,21 @@ function renderWidget(id: string, chartType: ChartTypeOption) {
   }
 
   if (id === 'WGT_EXIT_PIPELINE') {
+    if (chartType === 'bar') {
+      return (
+        <ResponsiveContainer width="100%" height={150}>
+          <ReBarChart data={EXIT_FUNNEL} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+            <XAxis dataKey="stage" tick={{ fontSize: 9, fill: DS.text3 }} />
+            <YAxis tick={{ fontSize: 9, fill: DS.text3 }} />
+            <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+            <Bar dataKey="count" name="Staff" radius={[4, 4, 0, 0]}>
+              {EXIT_FUNNEL.map((_e, i) => <Cell key={i} fill={[DS.pink, DS.error, DS.warning, DS.amber][i % 4]} />)}
+            </Bar>
+          </ReBarChart>
+        </ResponsiveContainer>
+      );
+    }
     const max = Math.max(...EXIT_FUNNEL.map(e => e.count));
     return (
       <div className="space-y-2">
@@ -911,6 +1297,21 @@ function renderWidget(id: string, chartType: ChartTypeOption) {
   }
 
   if (id === 'WGT_APPRAISAL_CYCLE') {
+    if (chartType === 'bar') {
+      return (
+        <ResponsiveContainer width="100%" height={130}>
+          <ReBarChart data={APPRAISAL_DONUT} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+            <XAxis dataKey="name" tick={{ fontSize: 9, fill: DS.text3 }} />
+            <YAxis tick={{ fontSize: 9, fill: DS.text3 }} />
+            <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} formatter={(v: any) => [`${v}%`]} />
+            <Bar dataKey="value" name="%" radius={[4, 4, 0, 0]}>
+              {APPRAISAL_DONUT.map((e, i) => <Cell key={i} fill={e.color} />)}
+            </Bar>
+          </ReBarChart>
+        </ResponsiveContainer>
+      );
+    }
     return (
       <div className="flex items-center gap-4">
         <ResponsiveContainer width={100} height={100}>
@@ -934,13 +1335,31 @@ function renderWidget(id: string, chartType: ChartTypeOption) {
   }
 
   if (id === 'WGT_LD_COMPLETION') {
+    if (chartType === 'horizontal_bar') {
+      return (
+        <ResponsiveContainer width="100%" height={150}>
+          <ReBarChart data={LD_COMPLETION} layout="vertical" margin={{ top: 0, right: 20, left: -10, bottom: 0 }}>
+            <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 9, fill: DS.text3 }} />
+            <YAxis dataKey="dept" type="category" tick={{ fontSize: 10, fill: DS.text3 }} width={55} />
+            <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+            <Bar dataKey="completed" fill={DS.primary} radius={[0, 4, 4, 0]} name="Completion %" />
+          </ReBarChart>
+        </ResponsiveContainer>
+      );
+    }
+    // default bar (vertical)
     return (
       <ResponsiveContainer width="100%" height={150}>
-        <ReBarChart data={LD_COMPLETION} layout="vertical" margin={{ top: 0, right: 20, left: -10, bottom: 0 }}>
-          <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 9, fill: DS.text3 }} />
-          <YAxis dataKey="dept" type="category" tick={{ fontSize: 10, fill: DS.text3 }} width={55} />
+        <ReBarChart data={LD_COMPLETION} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+          <XAxis dataKey="dept" tick={{ fontSize: 9, fill: DS.text3 }} />
+          <YAxis domain={[0, 100]} tick={{ fontSize: 9, fill: DS.text3 }} />
           <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
-          <Bar dataKey="completed" fill={DS.primary} radius={[0, 4, 4, 0]} name="Completion %" />
+          <Bar dataKey="completed" name="Completion %" radius={[4, 4, 0, 0]}>
+            {LD_COMPLETION.map((e, i) => (
+              <Cell key={i} fill={e.completed >= 80 ? DS.success : e.completed >= 60 ? DS.amber : DS.error} />
+            ))}
+          </Bar>
         </ReBarChart>
       </ResponsiveContainer>
     );
@@ -973,23 +1392,34 @@ function renderWidget(id: string, chartType: ChartTypeOption) {
     };
     return (
       <div className="overflow-x-auto">
+        {callbacks?.onCampusSelect && (
+          <p className="text-[10px] font-semibold mb-2" style={{ color: DS.text3 }}>
+            Click any campus row to drill down into individual campus metrics
+          </p>
+        )}
         <table className="w-full text-xs">
-          <thead><tr>{['Campus', 'Type', 'Staff', 'Present', 'On Leave', 'LOP', 'Payroll', 'Health'].map(h => (
+          <thead><tr>{['Campus', 'Type', 'Staff', 'Present', 'On Leave', 'LOP', 'Payroll', 'Health', ...(callbacks?.onCampusSelect ? [''] : [])].map(h => (
             <th key={h} className="text-left pb-2 pr-3 font-semibold" style={{ color: DS.text3 }}>{h}</th>
           ))}</tr></thead>
           <tbody>
             {GOI_CAMPUS_DATA.map((row) => {
               const p = payrollStyle(row.payroll);
+              const canDrill = !!callbacks?.onCampusSelect;
               return (
-                <tr key={row.name} style={{ borderTop: `1px solid ${DS.border}` }}>
-                  <td className="py-2 pr-3 font-semibold" style={{ color: DS.text }}>{row.name}</td>
+                <tr
+                  key={row.name}
+                  style={{ borderTop: `1px solid ${DS.border}`, cursor: canDrill ? 'pointer' : 'default', transition: 'background 0.15s' }}
+                  className={canDrill ? 'hover:bg-blue-50/50' : ''}
+                  onClick={canDrill ? () => callbacks?.onCampusSelect?.(row.name) : undefined}
+                >
+                  <td className="py-2 pr-3 font-semibold" style={{ color: DS.primary }}>{row.name}</td>
                   <td className="py-2 pr-3" style={{ color: DS.text3 }}>{row.type}</td>
                   <td className="py-2 pr-3 font-bold" style={{ color: DS.text }}>{row.staff}</td>
                   <td className="py-2 pr-3" style={{ color: DS.success }}>{row.present}</td>
                   <td className="py-2 pr-3" style={{ color: DS.warning }}>{row.onLeave}</td>
                   <td className="py-2 pr-3" style={{ color: DS.error }}>{row.lop}</td>
                   <td className="py-2 pr-3"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: p.bg, color: p.color }}>{row.payroll}</span></td>
-                  <td className="py-2">
+                  <td className="py-2 pr-3">
                     <div className="flex items-center gap-1.5">
                       <div className="w-16 h-1.5 rounded-full overflow-hidden" style={{ background: DS.bgLow }}>
                         <div className="h-full rounded-full" style={{ width: `${row.health}%`, background: row.health >= 80 ? DS.success : row.health >= 60 ? DS.amber : DS.error }} />
@@ -997,6 +1427,13 @@ function renderWidget(id: string, chartType: ChartTypeOption) {
                       <span className="font-bold" style={{ color: DS.text }}>{row.health}%</span>
                     </div>
                   </td>
+                  {canDrill && (
+                    <td className="py-2 pl-2">
+                      <span className="text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1 whitespace-nowrap" style={{ background: DS.primaryGrad, color: 'white' }}>
+                        Drill Down →
+                      </span>
+                    </td>
+                  )}
                 </tr>
               );
             })}
@@ -1085,6 +1522,30 @@ function renderWidget(id: string, chartType: ChartTypeOption) {
   }
 
   if (id === 'WGT_HEADCOUNT_SUMMARY') {
+    if (chartType === 'table') {
+      return (
+        <div className="overflow-x-auto text-xs">
+          <table className="w-full text-left">
+            <thead><tr style={{ color: DS.text3, borderBottom: `1px solid ${DS.border}` }}>
+              <th className="pb-2 font-semibold">Staff Type</th>
+              <th className="pb-2 font-semibold text-right">Sanctioned</th>
+              <th className="pb-2 font-semibold text-right">Actual</th>
+              <th className="pb-2 font-semibold text-right" style={{ color: DS.error }}>Gap</th>
+            </tr></thead>
+            <tbody>
+              {HEADCOUNT_SUMMARY_DATA.map(r => (
+                <tr key={r.type} style={{ borderBottom: `1px dotted ${DS.border}` }}>
+                  <td className="py-1.5" style={{ color: DS.text }}>{r.type}</td>
+                  <td className="py-1.5 text-right font-bold" style={{ color: DS.text }}>{r.sanctioned}</td>
+                  <td className="py-1.5 text-right font-bold" style={{ color: DS.success }}>{r.actual}</td>
+                  <td className="py-1.5 text-right font-black" style={{ color: DS.error }}>{r.gap}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
     return (
       <div>
         <ResponsiveContainer width="100%" height={160}>
@@ -1107,6 +1568,21 @@ function renderWidget(id: string, chartType: ChartTypeOption) {
 
   if (id === 'WGT_TA_FUNNEL') {
     const max = TA_FUNNEL_DATA[0].count;
+    if (chartType === 'bar') {
+      return (
+        <ResponsiveContainer width="100%" height={150}>
+          <ReBarChart data={TA_FUNNEL_DATA} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+            <XAxis dataKey="stage" tick={{ fontSize: 8, fill: DS.text3 }} />
+            <YAxis tick={{ fontSize: 9, fill: DS.text3 }} />
+            <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+            <Bar dataKey="count" name="Count" radius={[4, 4, 0, 0]}>
+              {TA_FUNNEL_DATA.map((e, i) => <Cell key={i} fill={e.color} />)}
+            </Bar>
+          </ReBarChart>
+        </ResponsiveContainer>
+      );
+    }
     return (
       <div className="space-y-2">
         {TA_FUNNEL_DATA.map((stage, i) => (
@@ -1124,12 +1600,32 @@ function renderWidget(id: string, chartType: ChartTypeOption) {
   }
 
   if (id === 'WGT_194J_TRACKER') {
+    if (chartType === 'status_matrix') {
+      return (
+        <div className="space-y-2">
+          {VISITING_194J_DATA.map((row, i) => {
+            const s = row.compliance === 'ok' ? { color: DS.success, bg: DS.successBg, label: 'Compliant' } : row.compliance === 'warn' ? { color: DS.warning, bg: DS.warningBg, label: 'Partial' } : { color: DS.error, bg: DS.errorBg, label: 'Non-Compliant' };
+            return (
+              <div key={i} className="flex items-center gap-2 p-2 rounded-xl" style={{ background: s.bg }}>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold truncate" style={{ color: DS.text }}>{row.name} <span style={{ color: DS.text3 }}>· {row.subject}</span></p>
+                  <p className="text-[10px]" style={{ color: DS.text3 }}>{row.sessions} sessions</p>
+                </div>
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: row.tdsDeducted ? DS.successBg : DS.errorBg, color: row.tdsDeducted ? DS.success : DS.error }}>TDS</span>
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: row.form26Q ? DS.successBg : DS.errorBg, color: row.form26Q ? DS.success : DS.error }}>26Q</span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'white', color: s.color }}>{s.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
     return (
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
             <tr style={{ borderBottom: `1px solid ${DS.border}` }}>
-              {['Faculty', 'Subject', 'Sessions', 'TDS Deducted', 'Form 26Q', 'Status'].map(h => (
+              {['Faculty', 'Subject', 'Sessions', 'TDS', 'Form 26Q', 'Status'].map(h => (
                 <th key={h} className="text-left pb-2 pr-3 font-semibold" style={{ color: DS.text3 }}>{h}</th>
               ))}
             </tr>
@@ -1142,8 +1638,8 @@ function renderWidget(id: string, chartType: ChartTypeOption) {
                   <td className="py-1.5 pr-3 font-semibold" style={{ color: DS.text }}>{row.name}</td>
                   <td className="py-1.5 pr-3" style={{ color: DS.text3 }}>{row.subject}</td>
                   <td className="py-1.5 pr-3 font-bold" style={{ color: DS.text }}>{row.sessions}</td>
-                  <td className="py-1.5 pr-3">{row.tdsDeducted ? <span style={{ color: DS.success }}>✓ Yes</span> : <span style={{ color: DS.error }}>✗ No</span>}</td>
-                  <td className="py-1.5 pr-3">{row.form26Q ? <span style={{ color: DS.success }}>✓ Filed</span> : <span style={{ color: DS.error }}>✗ Pending</span>}</td>
+                  <td className="py-1.5 pr-3">{row.tdsDeducted ? <span style={{ color: DS.success }}>✓</span> : <span style={{ color: DS.error }}>✗</span>}</td>
+                  <td className="py-1.5 pr-3">{row.form26Q ? <span style={{ color: DS.success }}>✓</span> : <span style={{ color: DS.error }}>✗</span>}</td>
                   <td className="py-1.5"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: s.bg, color: s.color }}>{s.label}</span></td>
                 </tr>
               );
@@ -1190,6 +1686,21 @@ function renderWidget(id: string, chartType: ChartTypeOption) {
   }
 
   if (id === 'WGT_ATTRITION_TREND_12M') {
+    if (chartType === 'bar') {
+      return (
+        <ResponsiveContainer width="100%" height={170}>
+          <ReBarChart data={ATTRITION_TREND_12M} margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+            <XAxis dataKey="month" tick={{ fontSize: 10, fill: DS.text3 }} />
+            <YAxis tick={{ fontSize: 10, fill: DS.text3 }} domain={[0, 10]} />
+            <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+            <Legend wrapperStyle={{ fontSize: 10 }} />
+            <Bar dataKey="voluntary" name="Voluntary %" fill={DS.amber} stackId="a" />
+            <Bar dataKey="involuntary" name="Involuntary %" fill={DS.error} stackId="a" radius={[3,3,0,0]} />
+          </ReBarChart>
+        </ResponsiveContainer>
+      );
+    }
     return (
       <ResponsiveContainer width="100%" height={170}>
         <ReLineChart data={ATTRITION_TREND_12M} margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
@@ -1243,12 +1754,28 @@ function renderWidget(id: string, chartType: ChartTypeOption) {
   }
 
   if (id === 'WGT_PAYROLL_COST_SUMMARY') {
+    if (chartType === 'bar') {
+      return (
+        <ResponsiveContainer width="100%" height={180}>
+          <ReBarChart data={PAYROLL_COST_SUMMARY_DATA} margin={{ top: 0, right: 0, left: -10, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+            <XAxis dataKey="campus" tick={{ fontSize: 8, fill: DS.text3 }} />
+            <YAxis tick={{ fontSize: 9, fill: DS.text3 }} unit="L" />
+            <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+            <Legend wrapperStyle={{ fontSize: 9 }} />
+            <Bar dataKey="gross" name="Gross" fill={DS.primary} radius={[4,4,0,0]} />
+            <Bar dataKey="net" name="Net" fill={DS.success} radius={[4,4,0,0]} />
+            <Bar dataKey="lop" name="LOP Ded." fill={DS.error} radius={[4,4,0,0]} />
+          </ReBarChart>
+        </ResponsiveContainer>
+      );
+    }
     return (
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
             <tr style={{ borderBottom: `1px solid ${DS.border}` }}>
-              {['Campus', 'Gross (₹L)', 'Net (₹L)', 'LOP Deduction', 'Budget (₹L)', 'vs Budget', 'Cost/Emp'].map(h => (
+              {['Campus', 'Gross (₹L)', 'Net (₹L)', 'LOP Ded.', 'Budget (₹L)', 'vs Budget', 'Cost/Emp'].map(h => (
                 <th key={h} className="text-left pb-2 pr-3 font-semibold" style={{ color: DS.text3 }}>{h}</th>
               ))}
             </tr>
@@ -1277,6 +1804,30 @@ function renderWidget(id: string, chartType: ChartTypeOption) {
   }
 
   if (id === 'WGT_STAFF_MOVEMENT') {
+    if (chartType === 'table') {
+      return (
+        <div className="overflow-x-auto text-xs">
+          <table className="w-full text-left">
+            <thead><tr style={{ color: DS.text3, borderBottom: `1px solid ${DS.border}` }}>
+              <th className="pb-2 font-semibold">Campus</th>
+              <th className="pb-2 text-right font-semibold" style={{ color: DS.success }}>Joiners</th>
+              <th className="pb-2 text-right font-semibold" style={{ color: DS.error }}>Exits</th>
+              <th className="pb-2 text-right font-semibold">Net</th>
+            </tr></thead>
+            <tbody>
+              {STAFF_MOVEMENT_DATA.map(r => (
+                <tr key={r.campus} style={{ borderBottom: `1px dotted ${DS.border}` }}>
+                  <td className="py-1.5" style={{ color: DS.text }}>{r.campus}</td>
+                  <td className="py-1.5 text-right font-bold" style={{ color: DS.success }}>+{r.joiners}</td>
+                  <td className="py-1.5 text-right font-bold" style={{ color: DS.error }}>-{r.exits}</td>
+                  <td className="py-1.5 text-right font-black" style={{ color: r.net >= 0 ? DS.success : DS.error }}>{r.net >= 0 ? '+' : ''}{r.net}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
     return (
       <div>
         <ResponsiveContainer width="100%" height={150}>
@@ -1302,6 +1853,21 @@ function renderWidget(id: string, chartType: ChartTypeOption) {
   }
 
   if (id === 'WGT_ATTRITION_LEAGUE') {
+    if (chartType === 'bar') {
+      return (
+        <ResponsiveContainer width="100%" height={150}>
+          <ReBarChart data={ATTRITION_LEAGUE_DATA} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+            <XAxis dataKey="campus" tick={{ fontSize: 8, fill: DS.text3 }} />
+            <YAxis tick={{ fontSize: 9, fill: DS.text3 }} />
+            <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+            <Legend wrapperStyle={{ fontSize: 9 }} />
+            <Bar dataKey="voluntary" name="Voluntary %" fill={DS.amber} stackId="a" />
+            <Bar dataKey="involuntary" name="Involuntary %" fill={DS.error} stackId="a" radius={[3,3,0,0]} />
+          </ReBarChart>
+        </ResponsiveContainer>
+      );
+    }
     return (
       <div className="space-y-2">
         {ATTRITION_LEAGUE_DATA.map((row) => (
@@ -1317,6 +1883,30 @@ function renderWidget(id: string, chartType: ChartTypeOption) {
   }
 
   if (id === 'WGT_HEADCOUNT_BUDGET') {
+    if (chartType === 'table') {
+      return (
+        <div className="overflow-x-auto text-xs">
+          <table className="w-full text-left">
+            <thead><tr style={{ color: DS.text3, borderBottom: `1px solid ${DS.border}` }}>
+              <th className="pb-2 font-semibold">Campus</th>
+              <th className="pb-2 text-right font-semibold">Sanctioned</th>
+              <th className="pb-2 text-right font-semibold">Actual</th>
+              <th className="pb-2 text-right font-semibold" style={{ color: DS.error }}>Gap</th>
+            </tr></thead>
+            <tbody>
+              {HEADCOUNT_BUDGET_DATA.map(r => (
+                <tr key={r.campus} style={{ borderBottom: `1px dotted ${DS.border}` }}>
+                  <td className="py-1.5" style={{ color: DS.text }}>{r.campus}</td>
+                  <td className="py-1.5 text-right font-bold">{r.sanctioned}</td>
+                  <td className="py-1.5 text-right font-bold" style={{ color: DS.primary }}>{r.actual}</td>
+                  <td className="py-1.5 text-right font-black" style={{ color: DS.error }}>{r.gap}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
     return (
       <ResponsiveContainer width="100%" height={160}>
         <ReBarChart data={HEADCOUNT_BUDGET_DATA} margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
@@ -1333,6 +1923,24 @@ function renderWidget(id: string, chartType: ChartTypeOption) {
   }
 
   if (id === 'WGT_PAYROLL_TREND_12M') {
+    if (chartType === 'bar') {
+      return (
+        <ResponsiveContainer width="100%" height={180}>
+          <ReBarChart data={PAYROLL_TREND_12M_DATA} margin={{ top: 0, right: 10, left: -10, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+            <XAxis dataKey="month" tick={{ fontSize: 10, fill: DS.text3 }} />
+            <YAxis tick={{ fontSize: 10, fill: DS.text3 }} unit="L" />
+            <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+            <Legend wrapperStyle={{ fontSize: 10 }} />
+            <Bar dataKey="xavier" name="St. Xavier's" fill={DS.primary} stackId="a" />
+            <Bar dataKey="holyCross" name="Holy Cross" fill={DS.error} stackId="a" />
+            <Bar dataKey="delhi" name="Delhi Public" fill={DS.teal} stackId="a" />
+            <Bar dataKey="presidency" name="Presidency" fill={DS.amber} stackId="a" />
+            <Bar dataKey="bishop" name="Bishop Cotton" fill={DS.purple} stackId="a" radius={[3,3,0,0]} />
+          </ReBarChart>
+        </ResponsiveContainer>
+      );
+    }
     return (
       <ResponsiveContainer width="100%" height={180}>
         <ReLineChart data={PAYROLL_TREND_12M_DATA} margin={{ top: 0, right: 10, left: -10, bottom: 0 }}>
@@ -1352,6 +1960,29 @@ function renderWidget(id: string, chartType: ChartTypeOption) {
   }
 
   if (id === 'WGT_PERFORMANCE_DIST') {
+    if (chartType === 'table') {
+      return (
+        <div className="overflow-x-auto text-xs">
+          <table className="w-full text-left">
+            <thead><tr style={{ color: DS.text3, borderBottom: `1px solid ${DS.border}` }}>
+              {['Campus','Outstanding','Good','Average','Below Avg','Poor'].map(h => <th key={h} className="pb-2 pr-2 font-semibold">{h}</th>)}
+            </tr></thead>
+            <tbody>
+              {PERFORMANCE_DIST_DATA.map(r => (
+                <tr key={r.campus} style={{ borderBottom: `1px dotted ${DS.border}` }}>
+                  <td className="py-1.5 pr-2 font-semibold" style={{ color: DS.text }}>{r.campus}</td>
+                  <td className="py-1.5 pr-2 font-bold" style={{ color: DS.success }}>{r.outstanding}%</td>
+                  <td className="py-1.5 pr-2" style={{ color: DS.teal }}>{r.good}%</td>
+                  <td className="py-1.5 pr-2" style={{ color: DS.primary }}>{r.average}%</td>
+                  <td className="py-1.5 pr-2" style={{ color: DS.amber }}>{r.belowAvg}%</td>
+                  <td className="py-1.5" style={{ color: DS.error }}>{r.poor}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
     return (
       <ResponsiveContainer width="100%" height={180}>
         <ReBarChart data={PERFORMANCE_DIST_DATA} margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
@@ -1518,237 +2149,179 @@ function renderWidget(id: string, chartType: ChartTypeOption) {
   return <div className="flex items-center justify-center h-16 text-xs" style={{ color: DS.text3 }}>Widget data loading…</div>;
 }
 
-// ─── Zone Header ──────────────────────────────────────────────────────────────
-function ZoneHeader({ zone, title, subtitle, color, bg, refresh }: {
-  zone: number; title: string; subtitle: string; color: string; bg: string; refresh: string;
-}) {
+
+
+// ─── Campus Drill-Down Panel (Chairman GOI → Individual Campus) ───────────────
+function CampusDrillPanel({ campus, onClose }: { campus: string; onClose: () => void }) {
+  const data = CAMPUS_DRILL_DATA[campus];
+  const goiRow = GOI_CAMPUS_DATA.find(r => r.name === campus);
+  if (!data || !goiRow) return null;
+
+  const stepIcon = (s: string) => {
+    if (s === 'done') return { icon: '✓', bg: DS.successBg, color: DS.success };
+    if (s === 'in_progress') return { icon: '…', bg: DS.warningBg, color: DS.warning };
+    if (s === 'blocked') return { icon: '✗', bg: DS.errorBg, color: DS.error };
+    return { icon: '–', bg: DS.bgLow, color: DS.text3 };
+  };
+  const attendancePct = Math.round((data.attendance.present / goiRow.staff) * 100);
+  const alertTypeColor = (t: string) => t === 'error' ? { bg: DS.errorBg, color: DS.error } : t === 'warning' ? { bg: DS.warningBg, color: DS.warning } : { bg: DS.blueBg, color: DS.blue };
+
   return (
-    <div className="rounded-2xl px-5 py-4 mb-4 flex items-center justify-between" style={{ background: bg, borderLeft: `4px solid ${color}` }}>
-      <div className="flex items-center gap-3">
-        <span className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-black" style={{ background: color, color: 'white' }}>Z{zone}</span>
-        <div>
-          <h3 className="text-sm font-black" style={{ color, fontFamily: 'Manrope, sans-serif' }}>{title}</h3>
-          <p className="text-xs font-medium" style={{ color: DS.text3 }}>{subtitle}</p>
+    <div className="fixed inset-0 z-50 flex" style={{ background: 'rgba(11,28,48,0.32)', backdropFilter: 'blur(6px)' }}>
+      {/* Click-away */}
+      <div className="flex-1" onClick={onClose} />
+      {/* Panel */}
+      <div
+        className="w-[520px] h-full overflow-y-auto flex flex-col animate-in slide-in-from-right-8 duration-300"
+        style={{ background: DS.bg, borderLeft: `1px solid ${DS.border}`, boxShadow: '-8px 0 40px rgba(11,28,48,0.12)' }}
+      >
+        {/* Header */}
+        <div className="sticky top-0 z-10 px-6 py-5 flex items-center justify-between" style={{ background: DS.bgCard, borderBottom: `1px solid ${DS.border}` }}>
+          <div>
+            <div className="flex items-center gap-2 mb-0.5">
+              <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full" style={{ background: DS.bgLow, color: DS.text3 }}>Campus Drill-Down</span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: goiRow.type === 'K-12' ? DS.amberBg : DS.blueBg, color: goiRow.type === 'K-12' ? DS.amber : DS.blue }}>{goiRow.type}</span>
+            </div>
+            <h2 className="text-xl font-black" style={{ color: DS.text, fontFamily: 'Manrope, sans-serif' }}>{campus}</h2>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="text-center">
+              <div className="text-xl font-black" style={{ color: goiRow.health >= 80 ? DS.success : goiRow.health >= 60 ? DS.amber : DS.error, fontFamily: 'Manrope, sans-serif' }}>{goiRow.health}%</div>
+              <div className="text-[9px] font-semibold" style={{ color: DS.text3 }}>Health Score</div>
+            </div>
+            <button onClick={onClose} className="w-9 h-9 rounded-xl flex items-center justify-center transition-colors hover:bg-red-50" style={{ background: DS.bgLow }}>
+              <X className="w-4 h-4" style={{ color: DS.text3 }} />
+            </button>
+          </div>
+        </div>
+
+        <div className="flex-1 p-6 space-y-5">
+          {/* KPI Row */}
+          <div className="grid grid-cols-4 gap-3">
+            {[
+              { label: 'Total Staff', value: goiRow.staff, icon: Users, color: DS.primary, bg: DS.bgLow },
+              { label: 'Present', value: `${data.attendance.present} (${attendancePct}%)`, icon: UserCheck, color: DS.success, bg: DS.successBg },
+              { label: 'On Leave', value: data.attendance.onLeave, icon: Calendar, color: DS.warning, bg: DS.warningBg },
+              { label: 'UAL / LOP', value: `${data.attendance.ual} / ${data.attendance.lop}`, icon: AlertTriangle, color: DS.error, bg: DS.errorBg },
+            ].map(kp => (
+              <div key={kp.label} className="rounded-2xl p-3 text-center" style={{ background: kp.bg }}>
+                <div className="w-7 h-7 rounded-xl mx-auto mb-1.5 flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.6)' }}>
+                  <kp.icon className="w-3.5 h-3.5" style={{ color: kp.color }} />
+                </div>
+                <div className="text-sm font-black leading-tight" style={{ color: DS.text, fontFamily: 'Manrope, sans-serif' }}>{kp.value}</div>
+                <div className="text-[9px] font-medium mt-0.5" style={{ color: DS.text3 }}>{kp.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Alerts */}
+          {data.alerts.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="text-xs font-black uppercase tracking-wider" style={{ color: DS.text3 }}>Campus Alerts</h4>
+              {data.alerts.map((a, i) => {
+                const ac = alertTypeColor(a.type);
+                return (
+                  <div key={i} className="flex items-start gap-2.5 px-3 py-2.5 rounded-xl" style={{ background: ac.bg }}>
+                    <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: ac.color }} />
+                    <span className="text-xs font-semibold" style={{ color: DS.text }}>{a.msg}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Attendance + Leave Breakdown side by side */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Attendance bar per dept */}
+            <div className="rounded-2xl p-4" style={{ background: DS.bgCard, border: `1px solid ${DS.border}` }}>
+              <h4 className="text-xs font-black uppercase tracking-wider mb-3" style={{ color: DS.text3 }}>Staff by Department</h4>
+              <div className="space-y-2">
+                {data.staffByDept.map(d => (
+                  <div key={d.dept} className="flex items-center gap-2">
+                    <span className="text-[10px] font-medium w-16 flex-shrink-0 truncate" style={{ color: DS.text2 }}>{d.dept}</span>
+                    <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: DS.bgLow }}>
+                      <div className="h-full rounded-full" style={{ width: `${(d.present / d.count) * 100}%`, background: DS.primary }} />
+                    </div>
+                    <span className="text-[10px] font-bold" style={{ color: DS.text }}>{d.present}/{d.count}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Leave breakdown donut */}
+            <div className="rounded-2xl p-4" style={{ background: DS.bgCard, border: `1px solid ${DS.border}` }}>
+              <h4 className="text-xs font-black uppercase tracking-wider mb-3" style={{ color: DS.text3 }}>Leave Breakdown</h4>
+              <div className="flex items-center gap-3">
+                <ResponsiveContainer width={70} height={70}>
+                  <RePieChart>
+                    <Pie data={data.leaveBreakdown} cx="50%" cy="50%" innerRadius={18} outerRadius={32} dataKey="count" strokeWidth={0}>
+                      {data.leaveBreakdown.map((e, i) => <Cell key={i} fill={e.color} />)}
+                    </Pie>
+                  </RePieChart>
+                </ResponsiveContainer>
+                <div className="space-y-1 flex-1">
+                  {data.leaveBreakdown.map(l => (
+                    <div key={l.type} className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: l.color }} />
+                      <span className="text-[10px] flex-1" style={{ color: DS.text2 }}>{l.type}</span>
+                      <span className="text-[10px] font-bold" style={{ color: DS.text }}>{l.count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Payroll Steps */}
+          <div className="rounded-2xl p-4" style={{ background: DS.bgCard, border: `1px solid ${DS.border}` }}>
+            <h4 className="text-xs font-black uppercase tracking-wider mb-3" style={{ color: DS.text3 }}>Payroll Readiness</h4>
+            <div className="flex items-center gap-2 flex-wrap">
+              {data.payrollSteps.map((step, i) => {
+                const s = stepIcon(step.status);
+                return (
+                  <React.Fragment key={i}>
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold" style={{ background: s.bg, color: s.color }}>{s.icon}</span>
+                      <span className="text-[9px] font-medium text-center leading-tight max-w-[60px]" style={{ color: DS.text3 }}>{step.label}</span>
+                    </div>
+                    {i < data.payrollSteps.length - 1 && <div className="w-6 h-px mt-[-12px]" style={{ background: DS.border }} />}
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Top Absentees */}
+          {data.topAbsentees.length > 0 && (
+            <div className="rounded-2xl p-4" style={{ background: DS.bgCard, border: `1px solid ${DS.border}` }}>
+              <h4 className="text-xs font-black uppercase tracking-wider mb-3" style={{ color: DS.text3 }}>Top Absentees MTD</h4>
+              <div className="space-y-2">
+                {data.topAbsentees.map((a, i) => (
+                  <div key={i} className="flex items-center justify-between px-3 py-2 rounded-xl" style={{ background: DS.errorBg }}>
+                    <div>
+                      <span className="text-xs font-semibold" style={{ color: DS.text }}>{a.name}</span>
+                      <span className="text-[10px] ml-2" style={{ color: DS.text3 }}>{a.dept}</span>
+                    </div>
+                    <span className="text-xs font-black" style={{ color: DS.error }}>{a.days}d absent</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
-      <span className="text-[10px] font-semibold px-2 py-1 rounded-lg" style={{ background: 'white', color: DS.text3 }}>↻ {refresh}</span>
-    </div>
-  );
-}
-
-// ─── HR Zone View ─────────────────────────────────────────────────────────────
-function HRDashboardZoneView({ period }: { period: Period }) {
-  return (
-    <div className="space-y-8">
-      {period === 'today' && (
-        <section>
-          <ZoneHeader zone={1} title="Right Now" subtitle="Live attendance, UAL alerts & today's critical flags" color={DS.zone1} bg={DS.zone1Bg} refresh="5 min" />
-          <div className="grid grid-cols-3 gap-4">
-            <WidgetShell title="Workforce Snapshot" icon={Users} colSpan={3}>
-              {renderWidget('WGT_WORKFORCE_SNAPSHOT', 'horizontal_bar')}
-            </WidgetShell>
-            <WidgetShell title="Total Headcount" icon={Users}>{renderWidget('WGT_HEADCOUNT', 'kpi_card')}</WidgetShell>
-            <WidgetShell title="Present Today" icon={UserCheck}>{renderWidget('WGT_PRESENT_TODAY', 'kpi_card')}</WidgetShell>
-            <WidgetShell title="Absent / On Leave" icon={UserX}>{renderWidget('WGT_ABSENT_TODAY', 'kpi_card')}</WidgetShell>
-            <WidgetShell title="UAL / Habitual Absentee Tracker" icon={AlertTriangle} colSpan={2}>
-              {renderWidget('WGT_UAL_TRACKER', 'action_list')}
-            </WidgetShell>
-            <WidgetShell title="Smart Alerts" icon={Bell}>{renderWidget('WGT_ALERTS', 'alert_banner')}</WidgetShell>
-            <WidgetShell title="On Leave by Department" icon={MapPin}>{renderWidget('WGT_ON_LEAVE_DEPT', 'horizontal_bar')}</WidgetShell>
-            <WidgetShell title="Pending Approvals" icon={Clock}>{renderWidget('WGT_PENDING_APPROVALS', 'action_list')}</WidgetShell>
-            <WidgetShell title="Leave Violations" icon={Flag}>{renderWidget('WGT_LEAVE_VIOLATIONS', 'action_list')}</WidgetShell>
-          </div>
-        </section>
-      )}
-      {period === 'mtd' && (
-        <section>
-          <ZoneHeader zone={2} title="This Month — MTD" subtitle="Close the month: payroll readiness, 194J, onboarding SLA, F&F" color={DS.zone2} bg={DS.zone2Bg} refresh="15 min" />
-          <div className="grid grid-cols-3 gap-4">
-            <WidgetShell title="Leave Consumption MTD by Type" icon={Calendar} colSpan={3}>
-              {renderWidget('WGT_LEAVE_MTD_BYTYPE', 'bar')}
-            </WidgetShell>
-            <WidgetShell title="Loss of Pay MTD" icon={DollarSign}>{renderWidget('WGT_LOP_MTD', 'kpi_card')}</WidgetShell>
-            <WidgetShell title="Top LOP Staff" icon={UserMinus}>{renderWidget('WGT_TOP_LOP_STAFF', 'action_list')}</WidgetShell>
-            <WidgetShell title="Payroll Readiness" icon={FileCheck}>{renderWidget('WGT_PAYROLL_READINESS', 'step_tracker')}</WidgetShell>
-            <WidgetShell title="Month-End Checklist" icon={CheckCircle2}>{renderWidget('WGT_DEADLINE_CHECKLIST', 'action_list')}</WidgetShell>
-            <WidgetShell title="Onboarding SLA Breaches" icon={Briefcase}>{renderWidget('WGT_ONBOARDING_SLA', 'action_list')}</WidgetShell>
-            <WidgetShell title="F&F Settlement Status" icon={LogOut}>{renderWidget('WGT_FF_STATUS', 'action_list')}</WidgetShell>
-            <WidgetShell title="194J Visiting Faculty TDS" icon={Shield} colSpan={2}>
-              {renderWidget('WGT_194J_TRACKER', 'status_matrix')}
-            </WidgetShell>
-            <WidgetShell title="Leave Type Breakdown" icon={Calendar}>{renderWidget('WGT_LEAVE_BREAKDOWN', 'horizontal_bar')}</WidgetShell>
-            <WidgetShell title="Statutory Compliance" icon={Shield}>{renderWidget('WGT_STATUTORY_STATUS', 'status_matrix')}</WidgetShell>
-            <WidgetShell title="Onboarding Pipeline" icon={Briefcase}>{renderWidget('WGT_ONBOARDING_PIPELINE', 'horizontal_bar')}</WidgetShell>
-          </div>
-        </section>
-      )}
-      {period === 'ytd' && (
-        <section>
-          <ZoneHeader zone={3} title="This Year — YTD" subtitle="Strategic: attrition trends, TA funnel, headcount budget, appraisal health" color={DS.zone3} bg={DS.zone3Bg} refresh="1 hr" />
-          <div className="grid grid-cols-3 gap-4">
-            <WidgetShell title="Attrition Trend 12M" icon={TrendingDown} colSpan={2}>
-              {renderWidget('WGT_ATTRITION_TREND_12M', 'line')}
-            </WidgetShell>
-            <WidgetShell title="Attrition Rate YTD" icon={TrendingDown}>{renderWidget('WGT_ATTRITION_RATE', 'kpi_card')}</WidgetShell>
-            <WidgetShell title="Headcount vs Budget" icon={BarChart3} colSpan={2}>
-              {renderWidget('WGT_HEADCOUNT_SUMMARY', 'grouped_bar')}
-            </WidgetShell>
-            <WidgetShell title="Open Positions" icon={Users2}>{renderWidget('WGT_OPEN_POSITIONS', 'kpi_card')}</WidgetShell>
-            <WidgetShell title="TA Funnel" icon={Target} colSpan={2}>
-              {renderWidget('WGT_TA_FUNNEL', 'funnel')}
-            </WidgetShell>
-            <WidgetShell title="Appraisal Progress" icon={Target}>{renderWidget('WGT_APPRAISAL_PROGRESS', 'donut')}</WidgetShell>
-            <WidgetShell title="Probation & Exit Pipeline" icon={LogOut} colSpan={2}>
-              {renderWidget('WGT_PROBATION_EXIT', 'action_list')}
-            </WidgetShell>
-            <WidgetShell title="Attendance Trend 30d" icon={TrendingUp}>
-              {renderWidget('WGT_ATT_TREND', 'area')}
-            </WidgetShell>
-            <WidgetShell title="Appraisal Cycle" icon={Target}>{renderWidget('WGT_APPRAISAL_CYCLE', 'donut')}</WidgetShell>
-            <WidgetShell title="L&D Completion" icon={BookOpen}>{renderWidget('WGT_LD_COMPLETION', 'bar')}</WidgetShell>
-            <WidgetShell title="Exit Pipeline" icon={LogOut}>{renderWidget('WGT_EXIT_PIPELINE', 'funnel')}</WidgetShell>
-            <WidgetShell title="Activity Feed" icon={Activity}>{renderWidget('WGT_ACTIVITY_FEED', 'feed')}</WidgetShell>
-          </div>
-        </section>
-      )}
-    </div>
-  );
-}
-
-// ─── Chairman Zone View ───────────────────────────────────────────────────────
-function ManagementDashboardZoneView({ period }: { period: Period }) {
-  return (
-    <div className="space-y-8">
-      {period === 'today' && (
-        <section>
-          <ZoneHeader zone={1} title="Group Pulse — Now" subtitle="Live headcount, staff movement & campus-level flags" color={DS.zone1} bg={DS.zone1Bg} refresh="5 min" />
-          <div className="grid grid-cols-3 gap-4">
-            <WidgetShell title="Group KPI Bar" icon={Zap} colSpan={3}>
-              {renderWidget('WGT_GROUP_KPI', 'kpi_card')}
-            </WidgetShell>
-            <WidgetShell title="Total Headcount" icon={Users}>{renderWidget('WGT_HEADCOUNT', 'kpi_card')}</WidgetShell>
-            <WidgetShell title="Present Today" icon={UserCheck}>{renderWidget('WGT_PRESENT_TODAY', 'kpi_card')}</WidgetShell>
-            <WidgetShell title="Smart Alerts" icon={Bell}>{renderWidget('WGT_ALERTS', 'alert_banner')}</WidgetShell>
-            <WidgetShell title="Staff Movement (Joiners vs Exits)" icon={Users2} colSpan={2}>
-              {renderWidget('WGT_STAFF_MOVEMENT', 'grouped_bar')}
-            </WidgetShell>
-            <WidgetShell title="Headcount vs Budget" icon={BarChart3}>
-              {renderWidget('WGT_HEADCOUNT_BUDGET', 'grouped_bar')}
-            </WidgetShell>
-          </div>
-        </section>
-      )}
-      {period === 'mtd' && (
-        <section>
-          <ZoneHeader zone={2} title="This Month — MTD" subtitle="Payroll cost, LOP, campus-level readiness & compliance" color={DS.zone2} bg={DS.zone2Bg} refresh="15 min" />
-          <div className="grid grid-cols-3 gap-4">
-            <WidgetShell title="Campus Overview" icon={Building2} colSpan={3}>
-              {renderWidget('WGT_GOI_CAMPUS_TABLE', 'campus_table')}
-            </WidgetShell>
-            <WidgetShell title="Payroll Status Matrix" icon={Table2} colSpan={3}>
-              {renderWidget('WGT_PAYROLL_MATRIX', 'status_matrix')}
-            </WidgetShell>
-            <WidgetShell title="Payroll Cost by Campus" icon={DollarSign} colSpan={3}>
-              {renderWidget('WGT_PAYROLL_COST_SUMMARY', 'campus_table')}
-            </WidgetShell>
-            <WidgetShell title="Loss of Pay MTD" icon={DollarSign}>{renderWidget('WGT_LOP_MTD', 'kpi_card')}</WidgetShell>
-            <WidgetShell title="Payroll Summary" icon={DollarSign}>{renderWidget('WGT_PAYROLL_SUMMARY', 'kpi_card')}</WidgetShell>
-            <WidgetShell title="Activity Feed" icon={Activity}>{renderWidget('WGT_ACTIVITY_FEED', 'feed')}</WidgetShell>
-          </div>
-        </section>
-      )}
-      {period === 'ytd' && (
-        <section>
-          <ZoneHeader zone={3} title="This Year — Strategy" subtitle="Attrition league, payroll trends, performance distribution, high-performer risk" color={DS.zone3} bg={DS.zone3Bg} refresh="1 hr" />
-          <div className="grid grid-cols-3 gap-4">
-            <WidgetShell title="Attrition Trend 12M" icon={TrendingDown} colSpan={2}>
-              {renderWidget('WGT_ATTRITION_TREND_12M', 'line')}
-            </WidgetShell>
-            <WidgetShell title="Attrition Rate YTD" icon={TrendingDown}>{renderWidget('WGT_ATTRITION_RATE', 'kpi_card')}</WidgetShell>
-            <WidgetShell title="Attrition League by Campus" icon={Award}>
-              {renderWidget('WGT_ATTRITION_LEAGUE', 'action_list')}
-            </WidgetShell>
-            <WidgetShell title="Payroll Trend 12M" icon={DollarSign} colSpan={2}>
-              {renderWidget('WGT_PAYROLL_TREND_12M', 'line')}
-            </WidgetShell>
-            <WidgetShell title="Performance Distribution" icon={BarChart3} colSpan={2}>
-              {renderWidget('WGT_PERFORMANCE_DIST', 'stacked_bar')}
-            </WidgetShell>
-            <WidgetShell title="High Performer Risk" icon={AlertTriangle}>
-              {renderWidget('WGT_HIGH_PERFORMER_RISK', 'action_list')}
-            </WidgetShell>
-            <WidgetShell title="Appraisal Progress" icon={Target}>{renderWidget('WGT_APPRAISAL_PROGRESS', 'donut')}</WidgetShell>
-            <WidgetShell title="Appraisal Cycle" icon={Target} colSpan={2}>{renderWidget('WGT_APPRAISAL_CYCLE', 'donut')}</WidgetShell>
-          </div>
-        </section>
-      )}
-    </div>
-  );
-}
-
-// ─── Principal Zone View ──────────────────────────────────────────────────────
-function PrincipalDashboardZoneView({ period }: { period: Period }) {
-  return (
-    <div className="space-y-8">
-      {period === 'today' && (
-        <section>
-          <ZoneHeader zone={1} title="Campus Right Now" subtitle="Attendance, absent staff, class coverage & substitute status" color={DS.zone1} bg={DS.zone1Bg} refresh="5 min" />
-          <div className="grid grid-cols-3 gap-4">
-            <WidgetShell title="Present Today" icon={UserCheck}>{renderWidget('WGT_PRESENT_TODAY', 'kpi_card')}</WidgetShell>
-            <WidgetShell title="Absent / On Leave" icon={UserX}>{renderWidget('WGT_ABSENT_TODAY', 'kpi_card')}</WidgetShell>
-            <WidgetShell title="Unsubstituted Classes" icon={AlertCircle}>{renderWidget('WGT_UNSUBSTITUTED', 'action_list')}</WidgetShell>
-            <WidgetShell title="Today's Absences by Class" icon={CalendarDays} colSpan={2}>
-              {renderWidget('WGT_TODAY_ABSENCES_CLASS', 'action_list')}
-            </WidgetShell>
-            <WidgetShell title="Smart Alerts" icon={Bell}>{renderWidget('WGT_ALERTS', 'alert_banner')}</WidgetShell>
-            <WidgetShell title="Department Coverage Map" icon={Layers} colSpan={3}>
-              {renderWidget('WGT_DEPT_COVERAGE', 'horizontal_bar')}
-            </WidgetShell>
-          </div>
-        </section>
-      )}
-      {period === 'mtd' && (
-        <section>
-          <ZoneHeader zone={2} title="This Month — Operations" subtitle="Leave approvals, upcoming leave, staff strength & heatmap" color={DS.zone2} bg={DS.zone2Bg} refresh="15 min" />
-          <div className="grid grid-cols-3 gap-4">
-            <WidgetShell title="Upcoming Leave (7 Days)" icon={CalendarDays} colSpan={2}>
-              {renderWidget('WGT_UPCOMING_LEAVE_7D', 'calendar')}
-            </WidgetShell>
-            <WidgetShell title="Pending Leave Approvals" icon={Clock}>{renderWidget('WGT_PENDING_APPROVALS', 'action_list')}</WidgetShell>
-            <WidgetShell title="Department Leave Heatmap" icon={LayoutGrid} colSpan={2}>{renderWidget('WGT_DEPT_HEATMAP', 'heatmap')}</WidgetShell>
-            <WidgetShell title="On Leave by Dept" icon={MapPin}>{renderWidget('WGT_ON_LEAVE_DEPT', 'horizontal_bar')}</WidgetShell>
-            <WidgetShell title="Staff Strength by Dept" icon={Users} colSpan={2}>
-              {renderWidget('WGT_STAFF_STRENGTH', 'grouped_bar')}
-            </WidgetShell>
-            <WidgetShell title="Activity Feed" icon={Activity}>{renderWidget('WGT_ACTIVITY_FEED', 'feed')}</WidgetShell>
-          </div>
-        </section>
-      )}
-      {period === 'ytd' && (
-        <section>
-          <ZoneHeader zone={3} title="This Year — Academic Health" subtitle="Appraisal progress, probation & exit pipeline, L&D, staff development" color={DS.zone3} bg={DS.zone3Bg} refresh="1 hr" />
-          <div className="grid grid-cols-3 gap-4">
-            <WidgetShell title="Appraisal Progress" icon={Target} colSpan={2}>
-              {renderWidget('WGT_APPRAISAL_PROGRESS', 'donut')}
-            </WidgetShell>
-            <WidgetShell title="Appraisal Cycle" icon={Target}>{renderWidget('WGT_APPRAISAL_CYCLE', 'donut')}</WidgetShell>
-            <WidgetShell title="Probation & Exit Pipeline" icon={LogOut} colSpan={2}>
-              {renderWidget('WGT_PROBATION_EXIT', 'action_list')}
-            </WidgetShell>
-            <WidgetShell title="Probation Expiring" icon={AlertTriangle}>{renderWidget('WGT_PROBATION_EXPIRY', 'action_list')}</WidgetShell>
-            <WidgetShell title="L&D Completion" icon={BookOpen}>{renderWidget('WGT_LD_COMPLETION', 'bar')}</WidgetShell>
-            <WidgetShell title="Leave Type Breakdown" icon={Calendar}>{renderWidget('WGT_LEAVE_BREAKDOWN', 'horizontal_bar')}</WidgetShell>
-            <WidgetShell title="UAL / Habitual Absentee Tracker" icon={AlertTriangle}>{renderWidget('WGT_UAL_TRACKER', 'action_list')}</WidgetShell>
-          </div>
-        </section>
-      )}
     </div>
   );
 }
 
 // ─── Sortable Widget (Grid mode) ──────────────────────────────────────────────
-function SortableWidget({ item, onRemove }: {
-  item: LayoutItem; onRemove: (id: string) => void; onChartTypeChange?: (id: string, ct: ChartTypeOption) => void;
+function SortableWidget({ item, activeChartType, onRemove, onChartTypeChange, isLocked, role, onCampusSelect }: {
+  item: LayoutItem;
+  activeChartType: ChartTypeOption;
+  onRemove: (id: string) => void;
+  onChartTypeChange: (id: string, ct: ChartTypeOption) => void;
+  isLocked?: boolean;
+  role?: DashboardRole;
+  onCampusSelect?: (campus: string) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.widgetId });
   const meta = WIDGET_CATALOGUE.find(w => w.id === item.widgetId);
@@ -1767,18 +2340,38 @@ function SortableWidget({ item, onRemove }: {
     >
       <div className="rounded-2xl flex flex-col h-full" style={{ background: DS.bgCard, boxShadow: DS.shadow, border: `1px solid ${DS.border}` }}>
         <div className="flex items-center gap-2 px-3 py-2.5" style={{ borderBottom: `1px solid ${DS.border}` }}>
-          <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing p-1 rounded">
-            <GripVertical className="w-3.5 h-3.5" style={{ color: DS.text3 }} />
-          </button>
+          {!isLocked ? (
+            <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing p-1 rounded">
+              <GripVertical className="w-3.5 h-3.5" style={{ color: DS.text3 }} />
+            </button>
+          ) : (
+            <div className="w-5 h-5" />
+          )}
           <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: DS.bgLow }}>
             <Icon className="w-3 h-3" style={{ color: CAT_COLORS[meta.category] }} />
           </div>
           <span className="text-xs font-semibold flex-1 truncate" style={{ color: DS.text, fontFamily: 'Manrope, sans-serif' }}>{meta.name}</span>
-          <button onClick={() => onRemove(item.widgetId)} className="w-5 h-5 flex items-center justify-center rounded hover:bg-red-50 transition-colors ml-1">
-            <X className="w-3 h-3" style={{ color: DS.text3 }} />
-          </button>
+          {/* Chart type selector — always visible when widget has multiple types */}
+          {meta.availableChartTypes.length > 1 && (
+            <select
+              value={activeChartType}
+              onChange={e => onChartTypeChange(item.widgetId, e.target.value as ChartTypeOption)}
+              className="text-[10px] font-semibold outline-none cursor-pointer px-1.5 py-0.5 rounded-md transition-colors"
+              style={{ color: DS.primary, background: DS.bgLow, border: `1px solid ${DS.border}` }}
+              onPointerDown={e => e.stopPropagation()}
+            >
+              {meta.availableChartTypes.map(ct => (
+                <option key={ct} value={ct}>{ct.replace(/_/g, ' ')}</option>
+              ))}
+            </select>
+          )}
+          {!isLocked && (
+            <button onClick={() => onRemove(item.widgetId)} className="w-5 h-5 flex items-center justify-center rounded hover:bg-red-50 transition-colors ml-1" onPointerDown={e => e.stopPropagation()}>
+              <X className="w-3 h-3" style={{ color: DS.text3 }} />
+            </button>
+          )}
         </div>
-        <div className="flex-1 p-3 min-h-[120px]">{renderWidget(item.widgetId, item.chartType)}</div>
+        <div className="flex-1 p-3 min-h-[120px]">{renderWidget(item.widgetId, activeChartType, role, { onCampusSelect })}</div>
       </div>
     </div>
   );
@@ -1787,12 +2380,30 @@ function SortableWidget({ item, onRemove }: {
 // ─── Add Widget Drawer ────────────────────────────────────────────────────────
 function AddWidgetDrawer({ open, onClose, role, activeIds, onAdd }: {
   open: boolean; onClose: () => void; role: DashboardRole; activeIds: string[];
-  onAdd: (id: string) => void;
+  onAdd: (ids: string[]) => void;
 }) {
   const [search, setSearch] = useState('');
+  const [moduleFilter, setModuleFilter] = useState<string>('All Modules');
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const allModules = Array.from(new Set(WIDGET_CATALOGUE.map(w => w.sourceModule)));
+
+  React.useEffect(() => {
+    if (!open) setSelected(new Set());
+  }, [open]);
+
+  const toggleSelection = (id: string) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
   const available = WIDGET_CATALOGUE.filter(w =>
     (w.roles.includes(role)) &&
     !activeIds.includes(w.id) &&
+    (moduleFilter === 'All Modules' || w.sourceModule === moduleFilter) &&
     (w.name.toLowerCase().includes(search.toLowerCase()) || w.description.toLowerCase().includes(search.toLowerCase()))
   );
 
@@ -1817,15 +2428,26 @@ function AddWidgetDrawer({ open, onClose, role, activeIds, onAdd }: {
           </button>
         </div>
         <div className="px-5 py-3" style={{ borderBottom: `1px solid ${DS.border}` }}>
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: DS.bgLow }}>
-            <Search className="w-4 h-4 flex-shrink-0" style={{ color: DS.text3 }} />
-            <input
-              className="flex-1 bg-transparent text-sm outline-none"
-              placeholder="Search widgets…"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              style={{ color: DS.text, fontFamily: 'Inter, sans-serif' }}
-            />
+          <div className="flex flex-col gap-2">
+            <select 
+              value={moduleFilter} 
+              onChange={e => setModuleFilter(e.target.value)}
+              className="text-xs font-semibold px-2 py-1.5 rounded-lg outline-none bg-transparent"
+              style={{ color: DS.text, border: `1px solid ${DS.border}` }}
+            >
+              <option value="All Modules">All Modules</option>
+              {allModules.map(m => <option key={m} value={m}>{m}</option>)}
+            </select>
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: DS.bgLow }}>
+              <Search className="w-4 h-4 flex-shrink-0" style={{ color: DS.text3 }} />
+              <input
+                className="flex-1 bg-transparent text-sm outline-none"
+                placeholder="Search widgets…"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                style={{ color: DS.text, fontFamily: 'Inter, sans-serif' }}
+              />
+            </div>
           </div>
         </div>
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
@@ -1834,19 +2456,18 @@ function AddWidgetDrawer({ open, onClose, role, activeIds, onAdd }: {
               <p className="text-[10px] font-black uppercase tracking-widest mb-2" style={{ color: CAT_COLORS[cat] }}>{cat.replace('_', ' ')}</p>
               <div className="space-y-2">
                 {grouped[cat].map(w => (
-                  <button key={w.id} onClick={() => { onAdd(w.id); onClose(); }}
-                    className="w-full flex items-start gap-3 p-3 rounded-xl text-left transition-all hover:-translate-y-0.5"
-                    style={{ background: DS.bgLow, border: `1px solid transparent` }}
-                    onMouseEnter={e => (e.currentTarget.style.borderColor = DS.primary)}
-                    onMouseLeave={e => (e.currentTarget.style.borderColor = 'transparent')}
+                  <button key={w.id} onClick={() => toggleSelection(w.id)}
+                    className="w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all hover:-translate-y-0.5"
+                    style={{ background: DS.bgLow, border: `1px solid ${selected.has(w.id) ? DS.primary : 'transparent'}` }}
                   >
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${CAT_COLORS[cat]}15` }}>
                       <w.icon className="w-4 h-4" style={{ color: CAT_COLORS[cat] }} />
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <p className="text-xs font-semibold" style={{ color: DS.text }}>{w.name}</p>
                       <p className="text-[10px] leading-snug mt-0.5" style={{ color: DS.text3 }}>{w.description}</p>
                     </div>
+                    {selected.has(w.id) && <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" style={{ color: DS.primary }} />}
                   </button>
                 ))}
               </div>
@@ -1858,6 +2479,21 @@ function AddWidgetDrawer({ open, onClose, role, activeIds, onAdd }: {
             </div>
           )}
         </div>
+        <div className="p-4 flex gap-3" style={{ borderTop: `1px solid ${DS.border}`, background: DS.bgCard }}>
+          <button 
+            onClick={() => { onAdd(available.map(w => w.id)); onClose(); }}
+            disabled={available.length === 0}
+            className="flex-1 py-2.5 rounded-xl text-xs font-semibold disabled:opacity-50" style={{ background: DS.bgLow, color: DS.text }}>
+            Add All ({available.length})
+          </button>
+          <button 
+            onClick={() => { if(selected.size > 0) { onAdd(Array.from(selected)); onClose(); } }}
+            disabled={selected.size === 0}
+            className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-white transition-opacity disabled:opacity-50" 
+            style={{ background: DS.primaryGrad }}>
+            Add Selected ({selected.size})
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -1868,17 +2504,45 @@ const ManagementDashboard: React.FC = () => {
   const navigate = useNavigate();
   usePersona();
   const [dashRole, setDashRole] = useState<DashboardRole>('HR_MANAGER');
-  const [viewMode, setViewMode] = useState<ViewMode>('zone');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [period, setPeriod] = useState<Period>('today');
+  const [isLocked, setIsLocked] = useState(true);
+  const [selectedCampus, setSelectedCampus] = useState<string | null>(null);
 
-  const defaultWidgets = DEFAULT_LAYOUTS[dashRole] || DEFAULT_LAYOUTS.HR_MANAGER;
-  const [layout, setLayout] = useState<LayoutItem[]>(() =>
-    defaultWidgets.map((id, i) => {
+  // ── Global chart type preferences (persists across period/tab switches) ──────
+  const [widgetChartTypes, setWidgetChartTypes] = useState<Record<string, ChartTypeOption>>(() => {
+    // Seed defaults from catalogue
+    const defaults: Record<string, ChartTypeOption> = {};
+    WIDGET_CATALOGUE.forEach(w => { defaults[w.id] = w.defaultChartType; });
+    return defaults;
+  });
+
+  const handleChartTypeChange = (widgetId: string, ct: ChartTypeOption) => {
+    setWidgetChartTypes(prev => ({ ...prev, [widgetId]: ct }));
+  };
+
+  const createLayouts = (role: DashboardRole): Record<Period, LayoutItem[]> => {
+    const roleDefaults = DEFAULT_LAYOUTS[role] || DEFAULT_LAYOUTS.HR_MANAGER;
+    const generateLayout = (ids: string[]) => ids.map((id, i) => {
       const meta = WIDGET_CATALOGUE.find(w => w.id === id);
       return { widgetId: id, position: i, chartType: meta?.defaultChartType || 'kpi_card', colSpan: meta?.colSpan || 1 };
-    })
-  );
+    });
+    return {
+      today: generateLayout(roleDefaults.today),
+      mtd: generateLayout(roleDefaults.mtd),
+      ytd: generateLayout(roleDefaults.ytd),
+    };
+  };
+
+  const [layouts, setLayouts] = useState<Record<Period, LayoutItem[]>>(() => createLayouts('HR_MANAGER'));
+  const layout = layouts[period];
+
+  const setLayout = (updater: React.SetStateAction<LayoutItem[]>) => {
+    setLayouts((prev) => ({
+      ...prev,
+      [period]: typeof updater === 'function' ? updater(prev[period]) : updater,
+    }));
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -1896,27 +2560,30 @@ const ManagementDashboard: React.FC = () => {
     }
   }, []);
 
-  const addWidget = (id: string) => {
-    const meta = WIDGET_CATALOGUE.find(w => w.id === id);
-    setLayout(prev => [...prev, { widgetId: id, position: prev.length, chartType: meta?.defaultChartType || 'kpi_card', colSpan: meta?.colSpan || 1 }]);
+  const addWidgets = (ids: string[]) => {
+    const newItems = ids.map((id, index) => {
+      const meta = WIDGET_CATALOGUE.find(w => w.id === id);
+      return { widgetId: id, position: layout.length + index, chartType: meta?.defaultChartType || 'kpi_card', colSpan: meta?.colSpan || 1 };
+    });
+    setLayout(prev => [...prev, ...newItems]);
   };
 
   const removeWidget = (id: string) => setLayout(prev => prev.filter(i => i.widgetId !== id));
 
   const handleRoleChange = (r: DashboardRole) => {
     setDashRole(r);
-    const defaults = DEFAULT_LAYOUTS[r] || [];
-    setLayout(defaults.map((id, i) => {
-      const meta = WIDGET_CATALOGUE.find(w => w.id === id);
-      return { widgetId: id, position: i, chartType: meta?.defaultChartType || 'kpi_card', colSpan: meta?.colSpan || 1 };
-    }));
+    setLayouts(createLayouts(r));
+    // Reset chart types to defaults when role changes
+    const defaults: Record<string, ChartTypeOption> = {};
+    WIDGET_CATALOGUE.forEach(w => { defaults[w.id] = w.defaultChartType; });
+    setWidgetChartTypes(defaults);
   };
 
   const roleLabels: Record<DashboardRole, string> = {
     HR_MANAGER: 'HR Manager', PRINCIPAL: 'Principal / HOD', CHAIRMAN: 'Group Chairman', FINANCE: 'Finance Head',
   };
 
-  const zoneComponent = dashRole === 'HR_MANAGER' ? <HRDashboardZoneView period={period} /> : dashRole === 'CHAIRMAN' ? <ManagementDashboardZoneView period={period} /> : dashRole === 'PRINCIPAL' ? <PrincipalDashboardZoneView period={period} /> : <HRDashboardZoneView period={period} />;
+  const onCampusSelect = dashRole === 'CHAIRMAN' ? (campus: string) => setSelectedCampus(campus) : undefined;
 
   return (
     <div className="min-h-screen" style={{ background: DS.bg, fontFamily: 'Inter, sans-serif' }}>
@@ -1955,21 +2622,6 @@ const ManagementDashboard: React.FC = () => {
             ))}
           </div>
 
-          {/* View Mode Toggle */}
-          <div className="flex items-center gap-1 p-1 rounded-xl" style={{ background: DS.bgLow }}>
-            <button onClick={() => setViewMode('zone')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-              style={{ background: viewMode === 'zone' ? DS.primary : 'transparent', color: viewMode === 'zone' ? 'white' : DS.text2 }}
-            >
-              <Layers className="w-3.5 h-3.5" /> Zone View
-            </button>
-            <button onClick={() => setViewMode('grid')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-              style={{ background: viewMode === 'grid' ? DS.primary : 'transparent', color: viewMode === 'grid' ? 'white' : DS.text2 }}
-            >
-              <LayoutGrid className="w-3.5 h-3.5" /> Builder
-            </button>
-          </div>
 
           {/* Period */}
           <div className="flex items-center gap-1 p-1 rounded-xl" style={{ background: DS.bgLow }}>
@@ -1982,7 +2634,13 @@ const ManagementDashboard: React.FC = () => {
           </div>
 
           {/* Actions */}
-          {viewMode === 'grid' && (
+          <button onClick={() => setIsLocked(!isLocked)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all hover:-translate-y-0.5"
+            style={{ background: isLocked ? DS.bgLow : DS.warningBg, color: isLocked ? DS.text3 : DS.warning }}
+          >
+            {isLocked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />} {isLocked ? 'Locked' : 'Unlocked'}
+          </button>
+          {!isLocked && (
             <button onClick={() => setDrawerOpen(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all hover:-translate-y-0.5"
               style={{ background: DS.primaryGrad, color: 'white', boxShadow: '0 4px 12px rgba(0,63,152,0.3)' }}
@@ -2005,11 +2663,9 @@ const ManagementDashboard: React.FC = () => {
               {roleLabels[dashRole]} Dashboard
             </h2>
             <p className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
-              {viewMode === 'zone'
-                ? period === 'today' ? 'Zone 1 — Right Now · Live attendance & alerts'
-                  : period === 'mtd' ? 'Zone 2 — This Month (MTD) · Payroll, leave & compliance'
-                  : 'Zone 3 — This Year (YTD) · Attrition, appraisals & talent'
-                : 'Drag-and-drop builder — customise your workspace'}
+              {period === 'today' ? 'Right Now · Live attendance & alerts'
+                : period === 'mtd' ? 'This Month (MTD) · Payroll, leave & compliance'
+                : 'This Year (YTD) · Attrition, appraisals & talent'}
               {' · '}{new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
             </p>
           </div>
@@ -2026,17 +2682,23 @@ const ManagementDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Zone View */}
-        {viewMode === 'zone' && zoneComponent}
-
         {/* Grid Builder View */}
-        {viewMode === 'grid' && (
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={layout.map(i => i.widgetId)} strategy={rectSortingStrategy}>
-              <div className="grid grid-cols-3 gap-4 auto-rows-min">
-                {layout.map(item => (
-                  <SortableWidget key={item.widgetId} item={item} onRemove={removeWidget} onChartTypeChange={(id, ct) => setLayout(prev => prev.map(i => i.widgetId === id ? { ...i, chartType: ct } : i))} />
-                ))}
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={layout.map(i => i.widgetId)} strategy={rectSortingStrategy}>
+            <div className="grid grid-cols-3 gap-4 auto-rows-min">
+              {layout.map(item => (
+                <SortableWidget
+                  key={item.widgetId}
+                  item={item}
+                  activeChartType={widgetChartTypes[item.widgetId] || item.chartType}
+                  onRemove={removeWidget}
+                  onChartTypeChange={handleChartTypeChange}
+                  isLocked={isLocked}
+                  role={dashRole}
+                  onCampusSelect={onCampusSelect}
+                />
+              ))}
+              {!isLocked && (
                 <button
                   onClick={() => setDrawerOpen(true)}
                   className="col-span-1 h-32 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all hover:-translate-y-0.5"
@@ -2045,10 +2707,10 @@ const ManagementDashboard: React.FC = () => {
                   <Plus className="w-5 h-5" />
                   <span className="text-xs font-semibold">Add Widget</span>
                 </button>
-              </div>
-            </SortableContext>
-          </DndContext>
-        )}
+              )}
+            </div>
+          </SortableContext>
+        </DndContext>
       </div>
 
       <AddWidgetDrawer
@@ -2056,8 +2718,14 @@ const ManagementDashboard: React.FC = () => {
         onClose={() => setDrawerOpen(false)}
         role={dashRole}
         activeIds={layout.map(i => i.widgetId)}
-        onAdd={addWidget}
+        onAdd={addWidgets}
       />
+      {selectedCampus && (
+        <CampusDrillPanel
+          campus={selectedCampus}
+          onClose={() => setSelectedCampus(null)}
+        />
+      )}
     </div>
   );
 };

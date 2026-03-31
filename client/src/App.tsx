@@ -43,6 +43,7 @@ import AlumniPortal from './pages/AlumniPortal';
 import LeaveDashboard from './pages/LeaveDashboard';
 import LeaveApprovals from './pages/LeaveApprovals';
 import LeaveConfiguration from './pages/LeaveConfiguration';
+import YearlyLeaveBook from './pages/YearlyLeaveBook';
 import ResearchPublication from './pages/ResearchPublication';
 import ControlTower from './pages/ControlTower';
 
@@ -99,6 +100,7 @@ function App() {
           <Route path="/leave/dashboard" element={<LeaveDashboard />} />
           <Route path="/leave/approvals" element={<LeaveApprovals />} />
           <Route path="/leave/config" element={<LeaveConfiguration />} />
+          <Route path="/leave/reports/yearly-book" element={<YearlyLeaveBook />} />
 
           {/* Alumni Portal */}
           <Route path="/alumni-portal" element={<AlumniPortal />} />

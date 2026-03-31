@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import Layout from '../components/Layout';
 import { Card, CardContent } from '../components/ui/card';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 import {
     PieChart, FileText, Download, BarChart2, Filter,
     Settings, CheckCircle2, Plus, Sheet, Table,
@@ -26,9 +29,13 @@ const mockReports = [
     { id: 15, title: 'Staff Details - Administration', module: 'Staff Portfolio', type: 'Excel', lastRun: 'New', icon: Briefcase, color: 'text-slate-600', bg: 'bg-slate-50' },
     { id: 16, title: 'Staff Details - ISE', module: 'Staff Portfolio', type: 'Excel', lastRun: 'New', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
     { id: 17, title: 'Staff Details - MBA', module: 'Staff Portfolio', type: 'Excel', lastRun: 'New', icon: BarChart2, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { id: 18, title: 'Bio Metric Details - May 2024', module: 'NHC', type: 'Excel', lastRun: 'New', icon: Activity, color: 'text-blue-700', bg: 'bg-blue-50' },
+    { id: 19, title: 'Leave Book Details - May 2024', module: 'NHC', type: 'Excel', lastRun: 'New', icon: Calendar, color: 'text-teal-600', bg: 'bg-teal-50' },
+    { id: 20, title: 'Yearly Leave Book - 2025', module: 'NHC', type: 'Excel', lastRun: 'New', icon: FileCheck, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+    { id: 21, title: 'Staff Details by Department', module: 'NHC', type: 'Excel', lastRun: 'New', icon: Users, color: 'text-emerald-700', bg: 'bg-emerald-50' },
 ];
 
-const mockModules = ['Onboarding', 'Appraisal', 'Exit Management', 'Capacity Intelligence', 'Staff Portfolio', 'Talent Acquisition', 'Leave Management', 'Payroll', 'Attendance'];
+const mockModules = ['Onboarding', 'Appraisal', 'Exit Management', 'Capacity Intelligence', 'Staff Portfolio', 'Talent Acquisition', 'Leave Management', 'Payroll', 'Attendance', 'NHC'];
 const mockColumns = [
     'SlNo', 'StaffCode', 'Name', 'Designation', 'DOB', 'Qualification',
     'Experience', 'DOJ', 'Basic', 'DA', 'HRA', 'CCA', 'Others',
@@ -105,11 +112,54 @@ const ReportsDashboard: React.FC = () => {
 
     const handleDownload = (format: string, reportTitle: string) => {
         setIsGenerating(true);
-        // Simulate generation delay
         setTimeout(() => {
-            setIsGenerating(false);
-            alert(`Successfully generated ${reportTitle} as ${format}`);
-        }, 1500);
+            try {
+                let exportData: { columns: string[], data: any[] } = { columns: [], data: [] };
+                if (reportTitle === 'Custom Report') {
+                    exportData.columns = selectedColumns;
+                    exportData.data = [1, 2, 3, 4, 5].map(row => {
+                        const rowData: any = {};
+                        selectedColumns.forEach(col => { rowData[col] = `Sample ${col} ${row}`; });
+                        return rowData;
+                    });
+                } else {
+                    exportData = getReportData(reportTitle);
+                }
+
+                if (format === 'PDF') {
+                    const isLandscape = exportData.columns.length > 7;
+                    const doc = new jsPDF({ orientation: isLandscape ? 'landscape' : 'portrait', unit: 'mm', format: 'a4' });
+                    
+                    doc.setFontSize(18);
+                    doc.text(reportTitle, 14, 15);
+                    
+                    const tableBody = exportData.data.map(row => exportData.columns.map(col => String(row[col] ?? '-')));
+                    
+                    autoTable(doc, {
+                        startY: 20,
+                        head: [exportData.columns],
+                        body: tableBody,
+                        styles: { fontSize: 8, cellPadding: 2 },
+                        headStyles: { fillColor: [30, 58, 138], textColor: 255, fontStyle: 'bold' },
+                        alternateRowStyles: { fillColor: [248, 250, 252] },
+                        margin: { top: 20 },
+                        theme: 'grid'
+                    });
+                    
+                    doc.save(`${reportTitle.replace(/[^a-zA-Z0-9_-]/g, '_')}.pdf`);
+                } else if (format === 'Excel') {
+                    const worksheet = XLSX.utils.json_to_sheet(exportData.data, { header: exportData.columns });
+                    const workbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(workbook, worksheet, "Report Data");
+                    XLSX.writeFile(workbook, `${reportTitle.replace(/[^a-zA-Z0-9_-]/g, '_')}.xlsx`);
+                }
+            } catch (err) {
+                console.error("Export failed", err);
+                alert("An error occurred while generating the report. Please try again.");
+            } finally {
+                setIsGenerating(false);
+            }
+        }, 800);
     };
 
     const toggleColumn = (col: string) => {
@@ -299,6 +349,111 @@ const ReportsDashboard: React.FC = () => {
                         { SlNo: "21", StaffCode: "NH-0385", Name: "IEUOUOE", Designation: "Physical Education Inst.", DOB: "1983-04-12", OTHERS: "SSLC, PUC", UG: "B A, B.PEd", PG: "M P Ed, KSET", "DOCT.": "(Ph.D)", "Spec.": "physical Education ...", Teach: "11", Ind: "-", Res: "-", Others: "-", NHCE: "5.04", Tot: "16.04", DOJ: "2019-07-08", Basic: "15600", DA: "1755", HRA: "6240", CCA: "600", Others_Pay: "16666", "Conv.All": "1250", "AGP(Ind)": "0", "PF Amnt": "0", "Variable Pay": "0", Gross: "42111" }
                     ]
                 };
+            case 'Bio Metric Details - May 2024': {
+                // Mirrors "MonthlyAttendenceReport - 2024-" sheet in Bio Metric details - May 2024.xls
+                // Columns: EMPCODE, EMPLOYEENAME, DAY1-DAY31, Present, Absent, Leave, WO
+                const days = Array.from({ length: 31 }, (_, i) => `D${i + 1}`);
+                const dayOfWeek = ['Wed','Thu','Fri','Sat','Sun','Mon','Tue','Wed','Thu','Fri','Sat','Sun','Mon','Tue','Wed','Thu','Fri','Sat','Sun','Mon','Tue','Wed','Thu','Fri','Sat','Sun','Mon','Tue','Wed','Thu','Fri'];
+                // Attendance patterns per employee (P=Present, A=Absent, H=Holiday, W/WO=Weekend, EL=Earned Leave, CL=CasualLeave, LOP=LOP)
+                const bioData = [
+                    { EMPCODE:'NH-0001', EMPLOYEENAME:'V Manjula', att:['P','P','P','W','W','P','P','P','P','P','W','W','P','P','P','P','P','W','W','P','P','P','P','EL','W','W','P','P','P','P','P'], present:24, absent:0, leave:3, wo:4 },
+                    { EMPCODE:'NH-0212', EMPLOYEENAME:'Bindu Menon', att:['P','P','P','W','W','P','P','P','P','P','W','W','P','P','P','P','P','W','W','P','P','P','CL','CL','W','W','P','P','P','P','P'], present:23, absent:0, leave:2, wo:4 },
+                    { EMPCODE:'NH-0796', EMPLOYEENAME:'Maroju Hima Bindu', att:['P','P','P','W','W','P','P','P','P','P','W','W','P','P','P','P','VL','W','W','VL','VL','VL','VL','VL','W','W','VL','VL','P','P','P'], present:16, absent:0, leave:9, wo:4 },
+                    { EMPCODE:'NH-1615', EMPLOYEENAME:'Praveena M P', att:['P','P','P','W','W','P','P','P','P','P','W','W','P','P','P','P','P','W','W','P','P','P','P','P','W','W','LOP','LOP','LOP','LOP','LOP'], present:20, absent:0, leave:0, wo:4 },
+                    { EMPCODE:'NH-0003', EMPLOYEENAME:'Surya Prakash H N', att:['P','P','P','W','W','P','P','P','P','P','W','W','P','P','P','P','P','W','W','P','P','P','P','P','W','W','P','P','P','P','P'], present:23, absent:0, leave:0, wo:4 },
+                    { EMPCODE:'NH-0010', EMPLOYEENAME:'Registrar (Admin)', att:['P','P','OOD','W','W','P','P','P','P','P','W','W','P','P','P','P','P','W','W','P','P','P','P','P','W','W','P','P','OOD','P','P'], present:21, absent:0, leave:2, wo:4 },
+                ];
+                const bioRows = bioData.map(emp => {
+                    const row: any = { EMPCODE: emp.EMPCODE, EMPLOYEENAME: emp.EMPLOYEENAME };
+                    days.forEach((d, i) => { row[d] = emp.att[i] || '-'; });
+                    row['Present'] = emp.present; row['Absent'] = emp.absent; row['Leave'] = emp.leave; row['W/O'] = emp.wo;
+                    return row;
+                });
+                // Header info row (matching Excel title row)
+                const bioHeaderRow: any = { EMPCODE: 'NEW HORIZON COLLEGE OF ENGINEERING', EMPLOYEENAME: 'Monthly Biometric Attendance Report — May 2024' };
+                days.forEach(d => { bioHeaderRow[d] = ''; });
+                bioHeaderRow['Present'] = ''; bioHeaderRow['Absent'] = ''; bioHeaderRow['Leave'] = ''; bioHeaderRow['W/O'] = '';
+                const dayHeaderRow: any = { EMPCODE: 'EMPCODE', EMPLOYEENAME: 'EMPLOYEE NAME' };
+                dayOfWeek.forEach((dw, i) => { dayHeaderRow[days[i]] = dw; });
+                dayHeaderRow['Present'] = 'P'; dayHeaderRow['Absent'] = 'A'; dayHeaderRow['Leave'] = 'L'; dayHeaderRow['W/O'] = 'W';
+                return {
+                    columns: ['EMPCODE', 'EMPLOYEENAME', ...days, 'Present', 'Absent', 'Leave', 'W/O'],
+                    data: [bioHeaderRow, dayHeaderRow, ...bioRows]
+                };
+            }
+            case 'Leave Book Details - May 2024': {
+                // Mirrors "LeaveBookMonthWise" sheet in Leave Book details - May 2024.xls
+                // Header: NEW HORIZON COLLEGE OF ENGINEERING / Monthly Availed Leave Report / For The Month: May-2024
+                const leaveBookCols = ['Staff Code', 'Staff Name', 'Department', 'Designation', 'D.O.J', 'EL', 'CL', 'SL', 'ML', 'VL', 'OOD', 'OED', 'CO', 'LOP', 'LOPNR', 'HR Comments'];
+                const leaveBookHeader: any = { 'Staff Code': 'NEW HORIZON COLLEGE OF ENGINEERING', 'Staff Name': 'Monthly Availed Leave Report', 'Department': 'For The Month: May-2024', 'Designation': '', 'D.O.J': '', 'EL': '', 'CL': '', 'SL': '', 'ML': '', 'VL': '', 'OOD': '', 'OED': '', 'CO': '', 'LOP': '', 'LOPNR': '', 'HR Comments': '' };
+                return {
+                    columns: leaveBookCols,
+                    data: [
+                        leaveBookHeader,
+                        { 'Staff Code': 'NH-0001', 'Staff Name': 'V Manjula',         'Department': 'Human Resources', 'Designation': 'Executive Director',  'D.O.J': '01-Jun-2010', 'EL': 3,   'CL': '-', 'SL': '-', 'ML': '-', 'VL': '-', 'OOD': '-', 'OED': '-', 'CO': '-', 'LOP': '-', 'LOPNR': '-', 'HR Comments': '' },
+                        { 'Staff Code': 'NH-0212', 'Staff Name': 'Bindu Menon',        'Department': 'Human Resources', 'Designation': 'Sr. HR Generalist',    'D.O.J': '15-Aug-2015', 'EL': '-', 'CL': '-', 'SL': '-', 'ML': '-', 'VL': '-', 'OOD': '-', 'OED': '-', 'CO': '-', 'LOP': '-', 'LOPNR': '-', 'HR Comments': '' },
+                        { 'Staff Code': 'NH-0796', 'Staff Name': 'Maroju Hima Bindu', 'Department': 'Human Resources', 'Designation': 'Sr. HR Executive',     'D.O.J': '22-Oct-2017', 'EL': '-', 'CL': '-', 'SL': '-', 'ML': '-', 'VL': 7,   'OOD': '-', 'OED': '-', 'CO': 2,  'LOP': '-', 'LOPNR': '-', 'HR Comments': '' },
+                        { 'Staff Code': 'NH-1615', 'Staff Name': 'Praveena M P',       'Department': 'Human Resources', 'Designation': 'Personal Assistant',   'D.O.J': '10-Mar-2021', 'EL': '-', 'CL': '-', 'SL': '-', 'ML': '-', 'VL': '-', 'OOD': '-', 'OED': '-', 'CO': '-', 'LOP': 5,  'LOPNR': '-', 'HR Comments': 'Salary Hold LWD - 27.05.24' },
+                        { 'Staff Code': 'NH-0003', 'Staff Name': 'Surya Prakash H N', 'Department': 'Administration',  'Designation': 'Registrar',             'D.O.J': '10-May-2008', 'EL': 2,   'CL': '-', 'SL': '-', 'ML': '-', 'VL': '-', 'OOD': 2,  'OED': '-', 'CO': '-', 'LOP': '-', 'LOPNR': '-', 'HR Comments': '' },
+                        { 'Staff Code': 'NH-0004', 'Staff Name': 'Kavitha R',          'Department': 'Administration',  'Designation': 'Asst. Registrar',       'D.O.J': '15-Jun-2012', 'EL': '-', 'CL': 1,   'SL': '-', 'ML': '-', 'VL': '-', 'OOD': '-', 'OED': '-', 'CO': '-', 'LOP': '-', 'LOPNR': '-', 'HR Comments': '' },
+                        { 'Staff Code': 'NH-0010', 'Staff Name': 'Registrar (Admin)',  'Department': 'Administration',  'Designation': 'Principal',             'D.O.J': '25-Aug-2003', 'EL': '-', 'CL': '-', 'SL': '-', 'ML': '-', 'VL': '-', 'OOD': '-', 'OED': '-', 'CO': '-', 'LOP': '-', 'LOPNR': '-', 'HR Comments': '' },
+                        { 'Staff Code': 'NH-0015', 'Staff Name': 'ISE HOD',            'Department': 'ISE',             'Designation': 'Professor & HOD',       'D.O.J': '05-Feb-2018', 'EL': '-', 'CL': '-', 'SL': '-', 'ML': '-', 'VL': '-', 'OOD': '-', 'OED': '-', 'CO': '-', 'LOP': '-', 'LOPNR': '-', 'HR Comments': '' },
+                        { 'Staff Code': 'NH-0381', 'Staff Name': 'MBA Office Exec.',   'Department': 'MBA',             'Designation': 'Office Executive',      'D.O.J': '01-Jan-2014', 'EL': '-', 'CL': 2,   'SL': '-', 'ML': '-', 'VL': '-', 'OOD': '-', 'OED': '-', 'CO': '-', 'LOP': '-', 'LOPNR': '-', 'HR Comments': '' },
+                        { 'Staff Code': 'NH-0382', 'Staff Name': 'MBA HOD',            'Department': 'MBA',             'Designation': 'Sr. Asst. Prof. & HOD', 'D.O.J': '10-Jun-2013', 'EL': 1,   'CL': '-', 'SL': '-', 'ML': '-', 'VL': '-', 'OOD': '-', 'OED': '-', 'CO': '-', 'LOP': '-', 'LOPNR': '-', 'HR Comments': '' },
+                    ]
+                };
+            }
+            case 'Yearly Leave Book - 2025': {
+                // Mirrors "Yearly Leave Book - 2025" sheet in Yearly Leave Book - 2025.xls
+                // Columns: EmployeeCode, EmployeeName, Department, Designation, DOJ, then Total/Taken/Balance × (EL, CL, SL, ML, VL, OOD, OED, CO, LOP, LOPNR)
+                const ylbHeader: any = { EmployeeCode: 'NEW HORIZON COLLEGE OF ENGINEERING', EmployeeName: 'REPORT NAME:- LEAVE BOOK DETAILS — 2025', Department: '', Designation: '', DOJ: '', TotalEL: '', TakenEL: '', BalanceEL: '', TotalCL: '', TakenCL: '', BalanceCL: '', TotalSL: '', TakenSL: '', BalanceSL: '', TotalML: '', TakenML: '', BalanceML: '', TotalVL: '', TakenVL: '', BalanceVL: '', TotalOOD: '', TakenOOD: '', BalanceOOD: '', TotalOED: '', TakenOED: '', BalanceOED: '', TotalCO: '', TakenCO: '', BalanceCO: '', TotalLOP: '', TakenLOP: '', BalanceLOP: '', TotalLOPNR: '', TakenLOPNR: '', BalanceLOPNR: '' };
+                return {
+                    columns: ['EmployeeCode','EmployeeName','Department','Designation','DOJ','TotalEL','TakenEL','BalanceEL','TotalCL','TakenCL','BalanceCL','TotalSL','TakenSL','BalanceSL','TotalML','TakenML','BalanceML','TotalVL','TakenVL','BalanceVL','TotalOOD','TakenOOD','BalanceOOD','TotalOED','TakenOED','BalanceOED','TotalCO','TakenCO','BalanceCO','TotalLOP','TakenLOP','BalanceLOP','TotalLOPNR','TakenLOPNR','BalanceLOPNR'],
+                    data: [
+                        ylbHeader,
+                        { EmployeeCode:'NH-0001', EmployeeName:'V Manjula',         Department:'Human Resources', Designation:'Executive Director',      DOJ:'01-Jun-2010', TotalEL:21, TakenEL:16,   BalanceEL:5,   TotalCL:12, TakenCL:7.5, BalanceCL:4.5, TotalSL:'-', TakenSL:'-', BalanceSL:'-', TotalML:'-', TakenML:'-', BalanceML:'-', TotalVL:'-', TakenVL:'-', BalanceVL:'-', TotalOOD:7, TakenOOD:0, BalanceOOD:7, TotalOED:'-', TakenOED:'-', BalanceOED:'-', TotalCO:'-', TakenCO:'-', BalanceCO:'-', TotalLOP:5, TakenLOP:0, BalanceLOP:5, TotalLOPNR:'-', TakenLOPNR:'-', BalanceLOPNR:'-' },
+                        { EmployeeCode:'NH-0003', EmployeeName:'Surya Prakash H N', Department:'Administration',  Designation:'Registrar',               DOJ:'10-May-2008', TotalEL:21, TakenEL:14,   BalanceEL:7,   TotalCL:12, TakenCL:10.5,BalanceCL:1.5, TotalSL:'-', TakenSL:'-', BalanceSL:'-', TotalML:'-', TakenML:'-', BalanceML:'-', TotalVL:'-', TakenVL:'-', BalanceVL:'-', TotalOOD:7, TakenOOD:4, BalanceOOD:3, TotalOED:'-', TakenOED:'-', BalanceOED:'-', TotalCO:'-', TakenCO:'-', BalanceCO:'-', TotalLOP:5, TakenLOP:0, BalanceLOP:5, TotalLOPNR:'-', TakenLOPNR:'-', BalanceLOPNR:'-' },
+                        { EmployeeCode:'NH-0212', EmployeeName:'Bindu Menon',        Department:'Human Resources', Designation:'Sr. HR Generalist',       DOJ:'15-Aug-2015', TotalEL:15, TakenEL:8,    BalanceEL:7,   TotalCL:12, TakenCL:5,   BalanceCL:7,   TotalSL:6,   TakenSL:0,   BalanceSL:6,   TotalML:'-', TakenML:'-', BalanceML:'-', TotalVL:'-', TakenVL:'-', BalanceVL:'-', TotalOOD:5, TakenOOD:2, BalanceOOD:3, TotalOED:'-', TakenOED:'-', BalanceOED:'-', TotalCO:'-', TakenCO:'-', BalanceCO:'-', TotalLOP:5, TakenLOP:0, BalanceLOP:5, TotalLOPNR:'-', TakenLOPNR:'-', BalanceLOPNR:'-' },
+                        { EmployeeCode:'NH-0796', EmployeeName:'Maroju Hima Bindu', Department:'Human Resources', Designation:'Sr. HR Executive',        DOJ:'22-Oct-2017', TotalEL:12, TakenEL:6,    BalanceEL:6,   TotalCL:12, TakenCL:4,   BalanceCL:8,   TotalSL:6,   TakenSL:0,   BalanceSL:6,   TotalML:'-', TakenML:'-', BalanceML:'-', TotalVL:7,   TakenVL:7,   BalanceVL:0,   TotalOOD:5, TakenOOD:0, BalanceOOD:5, TotalOED:'-', TakenOED:'-', BalanceOED:'-', TotalCO:3,  TakenCO:2,  BalanceCO:1,  TotalLOP:5, TakenLOP:0, BalanceLOP:5, TotalLOPNR:'-', TakenLOPNR:'-', BalanceLOPNR:'-' },
+                        { EmployeeCode:'NH-1615', EmployeeName:'Praveena M P',       Department:'Human Resources', Designation:'Personal Assistant',      DOJ:'10-Mar-2021', TotalEL:9,  TakenEL:4,    BalanceEL:5,   TotalCL:12, TakenCL:3,   BalanceCL:9,   TotalSL:6,   TakenSL:1,   BalanceSL:5,   TotalML:'-', TakenML:'-', BalanceML:'-', TotalVL:'-', TakenVL:'-', BalanceVL:'-', TotalOOD:5, TakenOOD:0, BalanceOOD:5, TotalOED:'-', TakenOED:'-', BalanceOED:'-', TotalCO:'-', TakenCO:'-', BalanceCO:'-', TotalLOP:5, TakenLOP:5, BalanceLOP:0, TotalLOPNR:'-', TakenLOPNR:'-', BalanceLOPNR:'-' },
+                        { EmployeeCode:'NH-0015', EmployeeName:'ISE HOD',            Department:'ISE',             Designation:'Professor & HOD',         DOJ:'05-Feb-2018', TotalEL:21, TakenEL:12,   BalanceEL:9,   TotalCL:12, TakenCL:8,   BalanceCL:4,   TotalSL:6,   TakenSL:0,   BalanceSL:6,   TotalML:'-', TakenML:'-', BalanceML:'-', TotalVL:'-', TakenVL:'-', BalanceVL:'-', TotalOOD:7, TakenOOD:3, BalanceOOD:4, TotalOED:'-', TakenOED:'-', BalanceOED:'-', TotalCO:'-', TakenCO:'-', BalanceCO:'-', TotalLOP:5, TakenLOP:0, BalanceLOP:5, TotalLOPNR:'-', TakenLOPNR:'-', BalanceLOPNR:'-' },
+                        { EmployeeCode:'NH-0381', EmployeeName:'MBA Office Exec.',   Department:'MBA',             Designation:'Office Executive',        DOJ:'01-Jan-2014', TotalEL:15, TakenEL:9,    BalanceEL:6,   TotalCL:12, TakenCL:6,   BalanceCL:6,   TotalSL:6,   TakenSL:0,   BalanceSL:6,   TotalML:'-', TakenML:'-', BalanceML:'-', TotalVL:'-', TakenVL:'-', BalanceVL:'-', TotalOOD:5, TakenOOD:0, BalanceOOD:5, TotalOED:'-', TakenOED:'-', BalanceOED:'-', TotalCO:'-', TakenCO:'-', BalanceCO:'-', TotalLOP:5, TakenLOP:0, BalanceLOP:5, TotalLOPNR:'-', TakenLOPNR:'-', BalanceLOPNR:'-' },
+                        { EmployeeCode:'NH-0382', EmployeeName:'MBA HOD',            Department:'MBA',             Designation:'Sr. Asst. Prof. & HOD',  DOJ:'10-Jun-2013', TotalEL:21, TakenEL:10,   BalanceEL:11,  TotalCL:12, TakenCL:5,   BalanceCL:7,   TotalSL:6,   TakenSL:0,   BalanceSL:6,   TotalML:'-', TakenML:'-', BalanceML:'-', TotalVL:'-', TakenVL:'-', BalanceVL:'-', TotalOOD:7, TakenOOD:1, BalanceOOD:6, TotalOED:'-', TakenOED:'-', BalanceOED:'-', TotalCO:'-', TakenCO:'-', BalanceCO:'-', TotalLOP:5, TakenLOP:1, BalanceLOP:4, TotalLOPNR:'-', TakenLOPNR:'-', BalanceLOPNR:'-' },
+                    ]
+                };
+            }
+            case 'Staff Details by Department': {
+                // Mirrors "New Microsoft Excel Worksheet (3) (1).xlsx" — dept-grouped staff salary register
+                // Columns match the Excel: SlNo, StaffCode, Name, Designation, DOB, Qualification(OTHERS/UG/PG/DOCT./Spec.), Experience(Teach/Ind/Res/Others/NHCE/Tot), DOJ, pay components
+                const sdCols = ['SlNo','StaffCode','Name','Designation','Department','DOB','OTHERS','UG','PG','DOCT.','Spec.','Teach','Ind','Res','Exp.Others','NHCE','Tot','DOJ','Basic','DA','HRA','CCA','Others','Conv.All','AGP(Ind)','PF Amnt','Variable Pay','Gross'];
+                const sdHeader: any = { SlNo:'NEW HORIZON COLLEGE OF ENGINEERING', StaffCode:'Staff Details by Department', Name:'', Designation:'', Department:'', DOB:'', OTHERS:'', UG:'', PG:'', 'DOCT.':'', 'Spec.':'', Teach:'', Ind:'', Res:'', 'Exp.Others':'', NHCE:'', Tot:'', DOJ:'', Basic:'', DA:'', HRA:'', CCA:'', Others:'', 'Conv.All':'', 'AGP(Ind)':'', 'PF Amnt':'', 'Variable Pay':'', Gross:'' };
+                const admHeader: any = { SlNo:'— Administration —', StaffCode:'', Name:'', Designation:'', Department:'', DOB:'', OTHERS:'', UG:'', PG:'', 'DOCT.':'', 'Spec.':'', Teach:'', Ind:'', Res:'', 'Exp.Others':'', NHCE:'', Tot:'', DOJ:'', Basic:'', DA:'', HRA:'', CCA:'', Others:'', 'Conv.All':'', 'AGP(Ind)':'', 'PF Amnt':'', 'Variable Pay':'', Gross:'' };
+                const iseHeader: any = { SlNo:'— ISE —', StaffCode:'', Name:'', Designation:'', Department:'', DOB:'', OTHERS:'', UG:'', PG:'', 'DOCT.':'', 'Spec.':'', Teach:'', Ind:'', Res:'', 'Exp.Others':'', NHCE:'', Tot:'', DOJ:'', Basic:'', DA:'', HRA:'', CCA:'', Others:'', 'Conv.All':'', 'AGP(Ind)':'', 'PF Amnt':'', 'Variable Pay':'', Gross:'' };
+                const mbaHeader: any = { SlNo:'— MBA —', StaffCode:'', Name:'', Designation:'', Department:'', DOB:'', OTHERS:'', UG:'', PG:'', 'DOCT.':'', 'Spec.':'', Teach:'', Ind:'', Res:'', 'Exp.Others':'', NHCE:'', Tot:'', DOJ:'', Basic:'', DA:'', HRA:'', CCA:'', Others:'', 'Conv.All':'', 'AGP(Ind)':'', 'PF Amnt':'', 'Variable Pay':'', Gross:'' };
+                return {
+                    columns: sdCols,
+                    data: [
+                        sdHeader,
+                        admHeader,
+                        { SlNo:1, StaffCode:'NH-0010', Name:'ABC',       Designation:'Registrar',             Department:'Administration', DOB:'23-Nov-1975', OTHERS:'SSLC, PUC', UG:'B. Com',  PG:'MBA',    'DOCT.':'-',     'Spec.':'-',                         Teach:'-',     Ind:'18.09', Res:'-', 'Exp.Others':'-',   NHCE:'18.08', Tot:'37.05', DOJ:'29-Mar-2006', Basic:64900, DA:7301,  HRA:25960, CCA:600, Others:60111, 'Conv.All':1250, 'AGP(Ind)':0,     'PF Amnt':0,    'Variable Pay':15000, Gross:175122 },
+                        { SlNo:2, StaffCode:'NH-0011', Name:'DEF',       Designation:'Asst. Registrar',       Department:'Administration', DOB:'07-Dec-1971', OTHERS:'SSLC, PUC', UG:'B.COM',  PG:'-',      'DOCT.':'-',     'Spec.':'COMMERCE',                  Teach:'-',     Ind:'-',     Res:'-', 'Exp.Others':'5.07', NHCE:'17.03', Tot:'22.1',  DOJ:'02-Aug-2007', Basic:20300, DA:2284,  HRA:8120,  CCA:600, Others:32772, 'Conv.All':1250, 'AGP(Ind)':0,     'PF Amnt':0,    'Variable Pay':0,     Gross:65326  },
+                        { SlNo:3, StaffCode:'NH-0012', Name:'XYZ',       Designation:'Sr. Office Executive',  Department:'Administration', DOB:'20-Jun-1989', OTHERS:'SSLC, DIP', UG:'B.COM',  PG:'-',      'DOCT.':'-',     'Spec.':'ACCOUNTANCY',               Teach:'-',     Ind:'2.05',  Res:'-', 'Exp.Others':'-',   NHCE:'10.1',  Tot:'13.03', DOJ:'29-Jan-2014', Basic:15300, DA:1721,  HRA:6120,  CCA:600, Others:22089, 'Conv.All':1250, 'AGP(Ind)':0,     'PF Amnt':0,    'Variable Pay':0,     Gross:47080  },
+                        { SlNo:4, StaffCode:'NH-0013', Name:'ahdhjka',   Designation:'jr. Divisional Asst.',  Department:'Administration', DOB:'21-Jun-1976', OTHERS:'SSLC',      UG:'BA',     PG:'-',      'DOCT.':'-',     'Spec.':'ARTS',                      Teach:'-',     Ind:'-',     Res:'-', 'Exp.Others':'-',   NHCE:'15.05', Tot:'15.05', DOJ:'27-Jun-2009', Basic:13500, DA:1519,  HRA:5400,  CCA:600, Others:16746, 'Conv.All':1250, 'AGP(Ind)':0,     'PF Amnt':0,    'Variable Pay':0,     Gross:39015  },
+                        { SlNo:9, StaffCode:'NH-0014', Name:'Principal', Designation:'Principal',             Department:'Administration', DOB:'01-May-1977', OTHERS:'SSLC, PUC', UG:'BE',     PG:'M. Tech','DOCT.':'Ph. D',  'Spec.':'Manufacturing Engineering', Teach:'-',     Ind:'10.02', Res:'-', 'Exp.Others':'-',   NHCE:'21.03', Tot:'31.05', DOJ:'25-Aug-2003', Basic:95724, DA:17230, HRA:28717, CCA:600, Others:163928,'Conv.All':0,    'AGP(Ind)':10000, 'PF Amnt':1800, 'Variable Pay':0,     Gross:318000 },
+                        iseHeader,
+                        { SlNo:8, StaffCode:'NH-0015', Name:'jlksdlj',  Designation:'Professor & HOD',       Department:'ISE',            DOB:'13-Dec-1965', OTHERS:'10th, puc', UG:'B.E',    PG:'ME',     'DOCT.':'Ph. D', 'Spec.':'Computer Science',           Teach:'22.03', Ind:'4',     Res:'-', 'Exp.Others':'-',   NHCE:'6.09',  Tot:'33',    DOJ:'05-Feb-2018', Basic:69153, DA:12448, HRA:20746, CCA:600, Others:99454, 'Conv.All':0,    'AGP(Ind)':10000, 'PF Amnt':1800, 'Variable Pay':0,     Gross:214200 },
+                        { SlNo:1, StaffCode:'NH-0016', Name:'HLJHFJKH', Designation:'Sr. Assistant Professor',Department:'ISE',            DOB:'15-Apr-1980', OTHERS:'10th, 12th',UG:'B E',    PG:'M Tech', 'DOCT.':'-',     'Spec.':'CSE',                       Teach:'4.09',  Ind:'1.07',  Res:'-', 'Exp.Others':'-',   NHCE:'13.04', Tot:'19.08', DOJ:'25-Jul-2011', Basic:34660, DA:6239,  HRA:10398, CCA:600, Others:38307, 'Conv.All':0,    'AGP(Ind)':7000,  'PF Amnt':1800, 'Variable Pay':0,     Gross:99004  },
+                        { SlNo:2, StaffCode:'NH-0017', Name:'JLKFDJLJ', Designation:'Associate Professor',   Department:'ISE',            DOB:'30-Jul-1976', OTHERS:'SSLC, HSC', UG:'B.E',    PG:'M Tech', 'DOCT.':'Ph.D',  'Spec.':'CSE',                       Teach:'10.04', Ind:'-',     Res:'-', 'Exp.Others':'-',   NHCE:'10.04', Tot:'20.08', DOJ:'21-Jul-2014', Basic:35669, DA:6420,  HRA:10701, CCA:600, Others:32615, 'Conv.All':0,    'AGP(Ind)':9000,  'PF Amnt':1800, 'Variable Pay':0,     Gross:96805  },
+                        { SlNo:3, StaffCode:'NH-0018', Name:'JLFJLJ',   Designation:'Sr. Assistant Professor',Department:'ISE',            DOB:'01-Jun-1979', OTHERS:'SSLC, Pre Degree', UG:'BTech', PG:'M TECH','DOCT.':'(PhD)', 'Spec.':'CSE',                Teach:'2.09',  Ind:'-',     Res:'-', 'Exp.Others':'-',   NHCE:'11.04', Tot:'14.01', DOJ:'24-Jul-2013', Basic:29898, DA:5382,  HRA:8969,  CCA:600, Others:30321, 'Conv.All':0,    'AGP(Ind)':7000,  'PF Amnt':1800, 'Variable Pay':0,     Gross:83970  },
+                        { SlNo:4, StaffCode:'NH-0019', Name:'JLKJLDFJ', Designation:'Lab Instructor',        Department:'ISE',            DOB:'30-Jul-1980', OTHERS:'SSLC, Diploma', UG:'-',  PG:'-',      'DOCT.':'-',     'Spec.':'-',                         Teach:'-',     Ind:'-',     Res:'-', 'Exp.Others':'11.1',NHCE:'3.08',  Tot:'15.06', DOJ:'08-Mar-2021', Basic:13500, DA:1519,  HRA:5400,  CCA:600, Others:8631,  'Conv.All':1250, 'AGP(Ind)':0,     'PF Amnt':0,    'Variable Pay':0,     Gross:30900  },
+                        mbaHeader,
+                        { SlNo:1,  StaffCode:'NH-0381', Name:'JLSDJLJ',  Designation:'Office Executive',       Department:'MBA',            DOB:'22-Nov-1968', OTHERS:'SSLC',      UG:'-',      PG:'-',      'DOCT.':'-',     'Spec.':'-',                         Teach:'-',     Ind:'-',     Res:'-', 'Exp.Others':'8.04', NHCE:'10.1',  Tot:'19.02', DOJ:'01-Jan-2014', Basic:13500, DA:1519,  HRA:5400,  CCA:600, Others:16674, 'Conv.All':1250, 'AGP(Ind)':0,     'PF Amnt':0,    'Variable Pay':0,     Gross:38943  },
+                        { SlNo:2,  StaffCode:'NH-0382', Name:'UOUEOOI',  Designation:'Sr. Asst. Prof. & HOD', Department:'MBA',            DOB:'10-Mar-1983', OTHERS:'SSLC, PUC', UG:'BBM',    PG:'MBA, MPhil','DOCT.':'-',   'Spec.':'Marketing, Management',     Teach:'-',     Ind:'1.1',   Res:'-', 'Exp.Others':'-',   NHCE:'11.05', Tot:'13.03', DOJ:'10-Jun-2013', Basic:20688, DA:16550, HRA:6206,  CCA:600, Others:20651, 'Conv.All':0,    'AGP(Ind)':0,     'PF Amnt':1800, 'Variable Pay':0,     Gross:66496  },
+                        { SlNo:10, StaffCode:'NH-0384', Name:'EEOIUOIEU',Designation:'Librarian',             Department:'MBA',            DOB:'28-May-1986', OTHERS:'SSLC, PUC', UG:'BA',     PG:'MLISc, KSET','DOCT.':'-',  'Spec.':'Web Designing',             Teach:'-',     Ind:'-',     Res:'-', 'Exp.Others':'4.02', NHCE:'11.03', Tot:'15.05', DOJ:'08-Aug-2013', Basic:16200, DA:1823,  HRA:6480,  CCA:600, Others:17328, 'Conv.All':1250, 'AGP(Ind)':0,     'PF Amnt':0,    'Variable Pay':0,     Gross:43681  },
+                        { SlNo:21, StaffCode:'NH-0385', Name:'IEUOUOE',  Designation:'Physical Education Inst.',Department:'MBA',           DOB:'12-Apr-1983', OTHERS:'SSLC, PUC', UG:'BA, B.PEd',PG:'M P Ed, KSET','DOCT.':'(Ph.D)','Spec.':'Physical Education',   Teach:'11',    Ind:'-',     Res:'-', 'Exp.Others':'-',   NHCE:'5.04',  Tot:'16.04', DOJ:'08-Jul-2019', Basic:15600, DA:1755,  HRA:6240,  CCA:600, Others:16666, 'Conv.All':1250, 'AGP(Ind)':0,     'PF Amnt':0,    'Variable Pay':0,     Gross:42111  },
+                    ]
+                };
+            }
             default:
                 // Fallback for capacity/other static reports without live endpoints yet
                 return {
@@ -367,24 +522,25 @@ const ReportsDashboard: React.FC = () => {
                         {activeTab === 'standard' ? (
                             <div className="space-y-6 animate-in fade-in">
                                 {/* Filters */}
-                                <div className="flex justify-between items-center bg-white/60 border border-white/60 p-3 rounded-2xl shadow-sm backdrop-blur-md">
-                                    <div className="flex items-center gap-3">
-                                        <Filter className="w-5 h-5 text-slate-400" />
-                                        <div className="flex gap-2">
+                                <div className="flex justify-between items-center bg-white/60 border border-white/60 p-3 rounded-2xl shadow-sm backdrop-blur-md gap-4">
+                                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                                        <Filter className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                                        <div className="flex gap-2 overflow-x-auto min-w-0 pb-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                                            <style>{`.overflow-x-auto::-webkit-scrollbar { display: none; }`}</style>
                                             <button
                                                 onClick={() => setFilterModule('All')}
-                                                className={`px-4 py-2 text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-sm ${filterModule === 'All' ? 'bg-blue-800 text-white shadow-blue-900/30' : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-blue-800'}`}
+                                                className={`flex-shrink-0 px-4 py-2 text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-sm ${filterModule === 'All' ? 'bg-blue-800 text-white shadow-blue-900/30' : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-blue-800'}`}
                                             >All</button>
                                             {mockModules.map(m => (
                                                 <button
                                                     key={m}
                                                     onClick={() => setFilterModule(m)}
-                                                    className={`px-4 py-2 text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-sm ${filterModule === m ? 'bg-blue-800 text-white shadow-blue-900/30' : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-blue-800'}`}
+                                                    className={`flex-shrink-0 px-4 py-2 text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-sm ${filterModule === m ? 'bg-blue-800 text-white shadow-blue-900/30' : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-blue-800'}`}
                                                 >{m}</button>
                                             ))}
                                         </div>
                                     </div>
-                                    <div className="relative w-64">
+                                    <div className="relative w-64 flex-shrink-0 hidden md:block">
                                         <input type="text" placeholder="Search standard reports..." className="w-full text-sm rounded-xl py-2 pl-4 pr-4 bg-white border border-slate-200 focus:ring-2 focus:ring-blue-700/20 outline-none text-slate-800 placeholder:text-slate-400 shadow-sm transition-all" />
                                     </div>
                                 </div>
