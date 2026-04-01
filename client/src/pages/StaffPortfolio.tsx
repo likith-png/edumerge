@@ -10,7 +10,7 @@ import { usePersona } from '../contexts/PersonaContext';
 
 const StaffPortfolio: React.FC = () => {
     const navigate = useNavigate();
-    const { role } = usePersona();
+    const { role, user } = usePersona();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedDept, setSelectedDept] = useState('All');
 
@@ -115,8 +115,8 @@ const StaffPortfolio: React.FC = () => {
                                     <CardContent className="pt-6 relative">
                                         <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl -z-10 group-hover:bg-blue-800/10 transition-colors"></div>
                                         <div className="flex items-start gap-4 mb-4">
-                                            <div className="w-14 h-14 bg-blue-50/80 rounded-2xl flex items-center justify-center text-blue-800 font-bold shadow-sm border border-blue-100 overflow-hidden">
-                                                <img src={`https://i.pravatar.cc/150?u=${encodeURIComponent(staff.name)}`} alt={staff.name} className="w-full h-full object-cover" />
+                                            <div className={`w-14 h-14 ${['bg-blue-600', 'bg-indigo-600', 'bg-emerald-600', 'bg-rose-600', 'bg-amber-600', 'bg-violet-600', 'bg-teal-600', 'bg-sky-600'][staff.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 8]} rounded-2xl flex items-center justify-center text-white text-xl font-black shadow-lg border border-white/20 transition-transform group-hover:scale-110 duration-300`}>
+                                                {staff.name.charAt(0).toUpperCase()}
                                             </div>
                                             <div className="flex-1">
                                                 <h3 className="font-black text-slate-800 text-lg leading-tight group-hover:text-blue-800 transition-colors">{staff.name}</h3>
@@ -189,12 +189,12 @@ const StaffPortfolio: React.FC = () => {
                         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-800/10 rounded-full blur-3xl -mr-64 -mt-32 opacity-50 group-hover:bg-indigo-500/20 transition-all duration-700"></div>
                         <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -ml-32 -mb-32"></div>
                         <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
-                            <div className="w-32 h-32 bg-white/80 rounded-[2.5rem] flex items-center justify-center text-blue-800 text-4xl font-black shadow-lg border border-white/60 ring-4 ring-indigo-50/50 overflow-hidden">
-                                <img src={`https://i.pravatar.cc/300?u=${encodeURIComponent('ABC')}`} alt="ABC" className="w-full h-full object-cover" />
+                            <div className="w-32 h-32 bg-indigo-600 rounded-[2.5rem] flex items-center justify-center text-white text-5xl font-black shadow-xl border border-white/40 ring-4 ring-indigo-50/50 overflow-hidden transform group-hover:rotate-6 transition-transform duration-500">
+                                {user.name.charAt(0).toUpperCase()}
                             </div>
                             <div className="flex-1 text-center md:text-left">
-                                <h2 className="text-3xl font-black text-slate-800 mb-2">ABC</h2>
-                                <p className="text-slate-500 font-black tracking-[0.2em] uppercase text-xs mb-4">Registrar • Administration</p>
+                                <h2 className="text-3xl font-black text-slate-800 mb-2">{user.name}</h2>
+                                <p className="text-slate-500 font-black tracking-[0.2em] uppercase text-xs mb-4">{user.department || 'Administration'}</p>
                                 <div className="flex flex-wrap justify-center md:justify-start gap-3">
                                     <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-100 px-4 py-1.5 rounded-xl font-bold shadow-sm text-[10px] uppercase tracking-widest">Active Status</Badge>
                                     <Badge className="bg-blue-50 text-blue-800 border border-blue-100 px-4 py-1.5 rounded-xl font-bold shadow-sm text-[10px] uppercase tracking-widest">4.7 Overall Rating</Badge>

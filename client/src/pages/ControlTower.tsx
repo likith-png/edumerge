@@ -160,6 +160,17 @@ const CAMPUS_DRILL_DATA: Record<string, {
   topAbsentees: { name: string; dept: string; days: number }[];
   staffByDept: { dept: string; count: number; present: number }[];
   alerts: { msg: string; type: 'error' | 'warning' | 'info' }[];
+  salary: { gross: number; net: number; lopDeduction: number; costPerEmp: number; budgetVariance: number };
+  statutory: { pf: 'filed' | 'pending' | 'overdue'; esi: 'filed' | 'pending' | 'overdue'; tds: 'filed' | 'pending' | 'overdue'; pt: 'filed' | 'pending' | 'overdue' };
+  appraisal: { total: number; submitted: number; completed: number; cycle: string };
+  talentAcq: { openPositions: number; offersOut: number; joinedMTD: number; timeToHire: number };
+  onboarding: { active: number; slaBreached: number; completed: number };
+  exitData: { active: number; ffSettled: number; ffPending: number; attritionYTD: number };
+  lnd: { enrolled: number; completed: number; completionPct: number; certIssued: number };
+  lessonPlans: { submitted: number; total: number };
+  research: { papers: number; conferences: number; patents: number };
+  engagement: { score: number; trend: 'up' | 'down' | 'flat'; surveyResponse: number };
+  goals: { set: number; onTrack: number; atRisk: number; completed: number };
 }> = {
   "St. Xavier's": {
     attendance: { present: 160, onLeave: 22, ual: 3, lop: 8 },
@@ -178,6 +189,17 @@ const CAMPUS_DRILL_DATA: Record<string, {
       { dept: 'English', count: 28, present: 26 }, { dept: 'Admin', count: 22, present: 21 }, { dept: 'PE', count: 12, present: 11 },
     ],
     alerts: [{ msg: '3 UAL staff — escalated to HR', type: 'error' }, { msg: 'Payroll ready for disbursement', type: 'info' }],
+    salary: { gross: 5240000, net: 4620000, lopDeduction: 86000, costPerEmp: 28000, budgetVariance: 2 },
+    statutory: { pf: 'filed', esi: 'filed', tds: 'filed', pt: 'filed' },
+    appraisal: { total: 187, submitted: 172, completed: 165, cycle: 'Q1 2026' },
+    talentAcq: { openPositions: 4, offersOut: 2, joinedMTD: 3, timeToHire: 18 },
+    onboarding: { active: 3, slaBreached: 0, completed: 12 },
+    exitData: { active: 1, ffSettled: 2, ffPending: 0, attritionYTD: 3.2 },
+    lnd: { enrolled: 142, completed: 128, completionPct: 90, certIssued: 24 },
+    lessonPlans: { submitted: 178, total: 187 },
+    research: { papers: 12, conferences: 8, patents: 1 },
+    engagement: { score: 82, trend: 'up', surveyResponse: 88 },
+    goals: { set: 310, onTrack: 278, atRisk: 22, completed: 10 },
   },
   'Holy Cross': {
     attendance: { present: 196, onLeave: 31, ual: 7, lop: 12 },
@@ -196,6 +218,17 @@ const CAMPUS_DRILL_DATA: Record<string, {
       { dept: 'Maths', count: 36, present: 32 }, { dept: 'Admin', count: 28, present: 24 }, { dept: 'PE', count: 15, present: 14 },
     ],
     alerts: [{ msg: 'Payroll BLOCKED — finance approval pending', type: 'error' }, { msg: '7 UAL staff flagged this week', type: 'error' }, { msg: 'LOP validation incomplete — 12 cases', type: 'warning' }],
+    salary: { gross: 7180000, net: 6120000, lopDeduction: 194000, costPerEmp: 30667, budgetVariance: -4 },
+    statutory: { pf: 'filed', esi: 'filed', tds: 'pending', pt: 'filed' },
+    appraisal: { total: 234, submitted: 188, completed: 142, cycle: 'Q1 2026' },
+    talentAcq: { openPositions: 11, offersOut: 4, joinedMTD: 1, timeToHire: 34 },
+    onboarding: { active: 1, slaBreached: 1, completed: 6 },
+    exitData: { active: 5, ffSettled: 1, ffPending: 4, attritionYTD: 8.7 },
+    lnd: { enrolled: 180, completed: 112, completionPct: 62, certIssued: 18 },
+    lessonPlans: { submitted: 196, total: 234 },
+    research: { papers: 6, conferences: 4, patents: 0 },
+    engagement: { score: 54, trend: 'down', surveyResponse: 62 },
+    goals: { set: 390, onTrack: 240, atRisk: 98, completed: 52 },
   },
   'Delhi Public': {
     attendance: { present: 140, onLeave: 14, ual: 2, lop: 4 },
@@ -214,6 +247,17 @@ const CAMPUS_DRILL_DATA: Record<string, {
       { dept: 'English', count: 24, present: 22 }, { dept: 'Admin', count: 18, present: 17 },
     ],
     alerts: [{ msg: '2 UAL cases — warning issued', type: 'warning' }, { msg: 'Payroll ready', type: 'info' }],
+    salary: { gross: 4380000, net: 3960000, lopDeduction: 52000, costPerEmp: 28077, budgetVariance: 1 },
+    statutory: { pf: 'filed', esi: 'filed', tds: 'filed', pt: 'filed' },
+    appraisal: { total: 156, submitted: 148, completed: 144, cycle: 'Q1 2026' },
+    talentAcq: { openPositions: 3, offersOut: 1, joinedMTD: 2, timeToHire: 16 },
+    onboarding: { active: 2, slaBreached: 0, completed: 8 },
+    exitData: { active: 1, ffSettled: 3, ffPending: 0, attritionYTD: 2.8 },
+    lnd: { enrolled: 130, completed: 122, completionPct: 94, certIssued: 28 },
+    lessonPlans: { submitted: 152, total: 156 },
+    research: { papers: 8, conferences: 6, patents: 2 },
+    engagement: { score: 79, trend: 'flat', surveyResponse: 84 },
+    goals: { set: 260, onTrack: 238, atRisk: 14, completed: 8 },
   },
   'Presidency': {
     attendance: { present: 244, onLeave: 42, ual: 8, lop: 14 },
@@ -232,6 +276,17 @@ const CAMPUS_DRILL_DATA: Record<string, {
       { dept: 'Maths', count: 48, present: 42 }, { dept: 'Admin', count: 38, present: 32 }, { dept: 'PE', count: 20, present: 18 },
     ],
     alerts: [{ msg: '8 UAL staff — 3 escalated', type: 'error' }, { msg: 'Leave data sync in progress', type: 'warning' }, { msg: 'Payroll blocked till sync completes', type: 'warning' }],
+    salary: { gross: 9420000, net: 8140000, lopDeduction: 248000, costPerEmp: 31611, budgetVariance: -6 },
+    statutory: { pf: 'filed', esi: 'pending', tds: 'pending', pt: 'filed' },
+    appraisal: { total: 298, submitted: 234, completed: 188, cycle: 'Q1 2026' },
+    talentAcq: { openPositions: 14, offersOut: 6, joinedMTD: 2, timeToHire: 38 },
+    onboarding: { active: 2, slaBreached: 2, completed: 10 },
+    exitData: { active: 7, ffSettled: 2, ffPending: 5, attritionYTD: 9.4 },
+    lnd: { enrolled: 220, completed: 148, completionPct: 67, certIssued: 22 },
+    lessonPlans: { submitted: 241, total: 298 },
+    research: { papers: 22, conferences: 14, patents: 3 },
+    engagement: { score: 62, trend: 'down', surveyResponse: 71 },
+    goals: { set: 490, onTrack: 320, atRisk: 124, completed: 46 },
   },
   'Bishop Cotton': {
     attendance: { present: 118, onLeave: 19, ual: 4, lop: 7 },
@@ -250,6 +305,17 @@ const CAMPUS_DRILL_DATA: Record<string, {
       { dept: 'English', count: 20, present: 18 }, { dept: 'Admin', count: 16, present: 14 },
     ],
     alerts: [{ msg: '4 UAL cases pending review', type: 'warning' }, { msg: 'Statutory computation in progress', type: 'info' }],
+    salary: { gross: 3920000, net: 3440000, lopDeduction: 72000, costPerEmp: 27606, budgetVariance: 0 },
+    statutory: { pf: 'filed', esi: 'filed', tds: 'filed', pt: 'pending' },
+    appraisal: { total: 142, submitted: 126, completed: 114, cycle: 'Q1 2026' },
+    talentAcq: { openPositions: 6, offersOut: 2, joinedMTD: 1, timeToHire: 24 },
+    onboarding: { active: 1, slaBreached: 1, completed: 7 },
+    exitData: { active: 3, ffSettled: 1, ffPending: 2, attritionYTD: 5.1 },
+    lnd: { enrolled: 110, completed: 86, completionPct: 78, certIssued: 16 },
+    lessonPlans: { submitted: 128, total: 142 },
+    research: { papers: 5, conferences: 3, patents: 0 },
+    engagement: { score: 71, trend: 'flat', surveyResponse: 76 },
+    goals: { set: 240, onTrack: 192, atRisk: 36, completed: 12 },
   },
 };
 
@@ -662,6 +728,28 @@ const WIDGET_CATALOGUE: WidgetMeta[] = [
   { id: 'WGT_KRA_APPROVAL', name: 'KRA/KPI Approval Pipeline', category: 'talent', description: 'KRA submissions awaiting approval — by HOD, status, and deadline', defaultChartType: 'action_list', availableChartTypes: ['action_list'], sourceModule: 'KRA/KPI', roles: ['HR_MANAGER', 'PRINCIPAL'], context: 'both', icon: Sliders },
   // ── Exit Reasons ─────────────────────────────────────────────────────────────
   { id: 'WGT_EXIT_REASONS', name: 'Exit Reasons Analysis', category: 'talent', description: 'Top exit reasons from exit interviews — voluntary vs involuntary split', defaultChartType: 'donut', availableChartTypes: ['donut', 'bar', 'table'], sourceModule: 'Exit', roles: ['HR_MANAGER', 'CHAIRMAN'], context: 'both', icon: Lightbulb, colSpan: 2 },
+  // ── Additional GOI Widgets ──────────────────────────────────────────────────
+  { id: 'WGT_GOI_ATTRITION_CAMPUS', name: 'Attrition per Campus (YTD)', category: 'goi', description: 'YTD attrition % ranked per campus', defaultChartType: 'bar', availableChartTypes: ['bar', 'table'], sourceModule: 'Exit + Staff Master', roles: ['CHAIRMAN'], context: 'goi', icon: TrendingDown, colSpan: 2 },
+  { id: 'WGT_GOI_ENGAGEMENT', name: 'Engagement Scores per Campus', category: 'goi', description: 'Pulse survey engagement index by campus', defaultChartType: 'horizontal_bar', availableChartTypes: ['horizontal_bar', 'bar'], sourceModule: 'Engagement & Culture', roles: ['CHAIRMAN'], context: 'goi', icon: Heart },
+  { id: 'WGT_GOI_TA_PIPELINE', name: 'GOI Talent Acquisition Summary', category: 'goi', description: 'Open positions, offers out and joiners per campus', defaultChartType: 'table', availableChartTypes: ['table', 'bar'], sourceModule: 'Talent Acquisition', roles: ['CHAIRMAN', 'HR_MANAGER'], context: 'goi', icon: Users2, colSpan: 2 },
+  { id: 'WGT_GOI_TRAINING_COMPLETION', name: 'L&D Completion per Campus', category: 'goi', description: 'Training completion % per campus — enrolled vs completed', defaultChartType: 'horizontal_bar', availableChartTypes: ['horizontal_bar', 'bar'], sourceModule: 'L&D', roles: ['CHAIRMAN'], context: 'goi', icon: BookOpen, colSpan: 2 },
+  { id: 'WGT_GOI_STATUTORY_MATRIX', name: 'GOI Statutory Compliance Matrix', category: 'goi', description: 'PF, ESI, TDS, PT filing status per campus', defaultChartType: 'status_matrix', availableChartTypes: ['status_matrix'], sourceModule: 'Payroll', roles: ['CHAIRMAN', 'FINANCE'], context: 'goi', icon: Shield, colSpan: 3 },
+  { id: 'WGT_GOI_APPRAISAL_STATUS', name: 'Appraisal Cycle Status per Campus', category: 'goi', description: 'Submitted and completed appraisal counts per campus', defaultChartType: 'bar', availableChartTypes: ['bar', 'table'], sourceModule: 'Appraisal', roles: ['CHAIRMAN'], context: 'goi', icon: Target, colSpan: 2 },
+  { id: 'WGT_GOI_RESEARCH_OUTPUT', name: 'Research Output per Campus', category: 'goi', description: 'Papers, conferences and patents by campus YTD', defaultChartType: 'bar', availableChartTypes: ['bar', 'table'], sourceModule: 'Research', roles: ['CHAIRMAN'], context: 'goi', icon: Microscope, colSpan: 2 },
+  { id: 'WGT_GOI_HEADCOUNT_TREND', name: 'GOI Headcount Trend (12M)', category: 'goi', description: 'Monthly net headcount change across all campuses', defaultChartType: 'line', availableChartTypes: ['line', 'area'], sourceModule: 'Staff Master', roles: ['CHAIRMAN', 'HR_MANAGER'], context: 'goi', icon: TrendingUp, colSpan: 3 },
+  { id: 'WGT_GOI_LESSON_PLANS', name: 'Lesson Plan Submission per Campus', category: 'goi', description: 'Lesson plan submitted vs total required per campus', defaultChartType: 'horizontal_bar', availableChartTypes: ['horizontal_bar', 'table'], sourceModule: 'Lesson Plans', roles: ['CHAIRMAN', 'PRINCIPAL'], context: 'goi', icon: BookMarked, colSpan: 2 },
+  // ── Attendance extras ───────────────────────────────────────────────────────
+  { id: 'WGT_LATE_ARRIVALS', name: 'Late Arrivals Today', category: 'workforce', description: 'Staff who punched in after shift start time today', defaultChartType: 'action_list', availableChartTypes: ['action_list'], sourceModule: 'Attendance', roles: ['HR_MANAGER', 'PRINCIPAL'], context: 'both', icon: Clock },
+  { id: 'WGT_EARLY_DEPARTURES', name: 'Early Departures Today', category: 'workforce', description: 'Staff who left before shift end time today', defaultChartType: 'action_list', availableChartTypes: ['action_list'], sourceModule: 'Attendance', roles: ['HR_MANAGER', 'PRINCIPAL'], context: 'both', icon: LogOut },
+  // ── Leave extras ─────────────────────────────────────────────────────────────
+  { id: 'WGT_LEAVE_BALANCE', name: 'Leave Balance Summary', category: 'workforce', description: 'Average leave balance by type (EL/CL/SL) across all staff', defaultChartType: 'horizontal_bar', availableChartTypes: ['horizontal_bar', 'table'], sourceModule: 'Leave', roles: ['HR_MANAGER'], context: 'both', icon: Calendar, colSpan: 2 },
+  // ── Payroll extras ───────────────────────────────────────────────────────────
+  { id: 'WGT_PAYROLL_COMPONENTS', name: 'Payroll Component Breakdown', category: 'hr_ops', description: 'Basic, HRA, DA, Allowances vs Deductions stacked bar', defaultChartType: 'bar', availableChartTypes: ['bar', 'table'], sourceModule: 'Payroll', roles: ['HR_MANAGER', 'FINANCE'], context: 'both', icon: DollarSign, colSpan: 2 },
+  // ── Appraisal extras ─────────────────────────────────────────────────────────
+  { id: 'WGT_PROMOTION_PIPELINE', name: 'Promotion Pipeline', category: 'talent', description: 'Staff recommended for promotion by dept and current stage', defaultChartType: 'funnel', availableChartTypes: ['funnel', 'table'], sourceModule: 'Appraisal', roles: ['HR_MANAGER', 'CHAIRMAN'], context: 'both', icon: TrendingUp },
+  // ── TA extras ────────────────────────────────────────────────────────────────
+  { id: 'WGT_TIME_TO_HIRE', name: 'Time-to-Hire Trend (6M)', category: 'talent', description: 'Average days to fill a position per month for last 6 months', defaultChartType: 'line', availableChartTypes: ['line', 'bar'], sourceModule: 'Talent Acquisition', roles: ['HR_MANAGER', 'CHAIRMAN'], context: 'both', icon: Clock },
+  { id: 'WGT_OFFER_ACCEPTANCE', name: 'Offer Acceptance Rate', category: 'talent', description: 'Offers made vs accepted per month — decline reasons', defaultChartType: 'bar', availableChartTypes: ['bar', 'donut'], sourceModule: 'Talent Acquisition', roles: ['HR_MANAGER'], context: 'both', icon: CheckCircle2 },
 ];
 
 const CAT_COLORS: Record<WidgetCategory, string> = {
@@ -677,7 +765,7 @@ const DEFAULT_LAYOUTS: Record<DashboardRole, Record<Period, string[]>> = {
   CHAIRMAN: {
     today: ['WGT_GROUP_KPI', 'WGT_HEADCOUNT', 'WGT_PRESENT_TODAY', 'WGT_ALERTS', 'WGT_STAFF_MOVEMENT', 'WGT_HEADCOUNT_BUDGET'],
     mtd: ['WGT_GOI_CAMPUS_TABLE', 'WGT_PAYROLL_MATRIX', 'WGT_PAYROLL_COST_SUMMARY', 'WGT_LOP_MTD', 'WGT_PAYROLL_SUMMARY', 'WGT_ACTIVITY_FEED'],
-    ytd: ['WGT_ATTRITION_TREND_12M', 'WGT_ATTRITION_RATE', 'WGT_ATTRITION_LEAGUE', 'WGT_PAYROLL_TREND_12M', 'WGT_PERFORMANCE_DIST', 'WGT_HIGH_PERFORMER_RISK', 'WGT_APPRAISAL_PROGRESS', 'WGT_APPRAISAL_CYCLE']
+    ytd: ['WGT_ATTRITION_TREND_12M', 'WGT_ATTRITION_RATE', 'WGT_ATTRITION_LEAGUE', 'WGT_PAYROLL_TREND_12M', 'WGT_PERFORMANCE_DIST', 'WGT_HIGH_PERFORMER_RISK', 'WGT_APPRAISAL_PROGRESS', 'WGT_APPRAISAL_CYCLE', 'WGT_GOI_ATTRITION_CAMPUS', 'WGT_GOI_ENGAGEMENT', 'WGT_GOI_APPRAISAL_STATUS', 'WGT_GOI_RESEARCH_OUTPUT', 'WGT_GOI_HEADCOUNT_TREND']
   },
   PRINCIPAL: {
     today: ['WGT_PRESENT_TODAY', 'WGT_ABSENT_TODAY', 'WGT_UNSUBSTITUTED', 'WGT_TODAY_ABSENCES_CLASS', 'WGT_ALERTS', 'WGT_DEPT_COVERAGE'],
@@ -1052,6 +1140,26 @@ function renderWidget(id: string, chartType: ChartTypeOption, role?: DashboardRo
                <Line type="monotone" dataKey="v" stroke={DS.primary} strokeWidth={2.5} dot={false} />
             </ReLineChart>
           </ResponsiveContainer>
+        </div>
+      );
+    }
+    if (chartType === 'action_list' && id === 'WGT_OPEN_POSITIONS') {
+      const positions = [
+        { title: 'Maths Teacher', dept: 'Secondary', open: 2, priority: 'High' },
+        { title: 'Librarian', dept: 'Admin', open: 1, priority: 'Medium' },
+        { title: 'Science HOD', dept: 'Secondary', open: 1, priority: 'High' },
+      ];
+      return (
+        <div className="space-y-2 mt-2">
+          {positions.map((p, i) => (
+            <div key={i} className="flex justify-between items-center p-2 rounded-lg" style={{ background: DS.bgLow }}>
+              <div>
+                <p className="text-xs font-semibold" style={{ color: DS.text }}>{p.title}</p>
+                <p className="text-[10px]" style={{ color: DS.text3 }}>{p.dept} · {p.open} open</p>
+              </div>
+              <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: p.priority === 'High' ? DS.errorBg : DS.warningBg, color: p.priority === 'High' ? DS.error : DS.warning }}>{p.priority}</span>
+            </div>
+          ))}
         </div>
       );
     }
@@ -2193,6 +2301,1199 @@ function renderWidget(id: string, chartType: ChartTypeOption, role?: DashboardRo
     );
   }
 
+  // ── GOI Attrition per Campus ─────────────────────────────────────────────────
+  if (id === 'WGT_GOI_ATTRITION_CAMPUS') {
+    const attrData = [
+      { name: "St. Xavier's", rate: 3.2 }, { name: 'Holy Cross', rate: 8.7 },
+      { name: 'Delhi Public', rate: 2.8 }, { name: 'Presidency', rate: 9.4 }, { name: 'Bishop Cotton', rate: 5.1 },
+    ];
+    return (
+      <ResponsiveContainer width="100%" height={160}>
+        <ReBarChart data={attrData} margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+          <XAxis dataKey="name" tick={{ fontSize: 9, fill: DS.text3 }} />
+          <YAxis tick={{ fontSize: 9, fill: DS.text3 }} unit="%" />
+          <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} formatter={(v: any) => [`${v}%`, 'Attrition']} />
+          <Bar dataKey="rate" name="Attrition %" fill={DS.error} radius={[4, 4, 0, 0]} />
+        </ReBarChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  // ── GOI Engagement Scores per Campus ─────────────────────────────────────────
+  if (id === 'WGT_GOI_ENGAGEMENT') {
+    const engData = [
+      { name: "St. Xavier's", score: 82 }, { name: 'Holy Cross', score: 54 },
+      { name: 'Delhi Public', score: 79 }, { name: 'Presidency', score: 62 }, { name: 'Bishop Cotton', score: 71 },
+    ];
+    const max = 100;
+    return (
+      <div className="space-y-2">
+        {engData.map(d => (
+          <div key={d.name} className="flex items-center gap-2">
+            <span className="text-[10px] font-medium w-24 flex-shrink-0 truncate" style={{ color: DS.text2 }}>{d.name}</span>
+            <div className="flex-1 h-3 rounded-full overflow-hidden" style={{ background: DS.bgLow }}>
+              <div className="h-full rounded-full" style={{ width: `${(d.score / max) * 100}%`, background: d.score >= 75 ? DS.success : d.score >= 60 ? DS.amber : DS.error }} />
+            </div>
+            <span className="text-xs font-bold w-8 text-right" style={{ color: DS.text }}>{d.score}</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // ── GOI Talent Acquisition Summary ───────────────────────────────────────────
+  if (id === 'WGT_GOI_TA_PIPELINE') {
+    const taData = [
+      { campus: "St. Xavier's", open: 4, offers: 2, joined: 3, days: 18 },
+      { campus: 'Holy Cross', open: 11, offers: 4, joined: 1, days: 34 },
+      { campus: 'Delhi Public', open: 3, offers: 1, joined: 2, days: 16 },
+      { campus: 'Presidency', open: 14, offers: 6, joined: 2, days: 38 },
+      { campus: 'Bishop Cotton', open: 6, offers: 2, joined: 1, days: 24 },
+    ];
+    return (
+      <div className="overflow-x-auto text-xs mt-1">
+        <table className="w-full text-left">
+          <thead>
+            <tr style={{ color: DS.text3, borderBottom: `1px solid ${DS.border}` }}>
+              <th className="pb-2 font-semibold">Campus</th>
+              <th className="pb-2 font-semibold text-right">Open</th>
+              <th className="pb-2 font-semibold text-right">Offers Out</th>
+              <th className="pb-2 font-semibold text-right">Joined MTD</th>
+              <th className="pb-2 font-semibold text-right">Avg Days-to-Hire</th>
+            </tr>
+          </thead>
+          <tbody>
+            {taData.map(r => (
+              <tr key={r.campus} style={{ borderBottom: `1px dotted ${DS.border}` }}>
+                <td className="py-1.5" style={{ color: DS.text }}>{r.campus}</td>
+                <td className="py-1.5 text-right font-bold" style={{ color: r.open > 8 ? DS.error : DS.text }}>{r.open}</td>
+                <td className="py-1.5 text-right font-medium" style={{ color: DS.text2 }}>{r.offers}</td>
+                <td className="py-1.5 text-right font-medium" style={{ color: DS.success }}>{r.joined}</td>
+                <td className="py-1.5 text-right font-medium" style={{ color: r.days > 30 ? DS.error : DS.text2 }}>{r.days}d</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  // ── GOI L&D Completion per Campus ────────────────────────────────────────────
+  if (id === 'WGT_GOI_TRAINING_COMPLETION') {
+    const ldData = [
+      { name: "St. Xavier's", enrolled: 142, completed: 128 },
+      { name: 'Holy Cross', enrolled: 180, completed: 112 },
+      { name: 'Delhi Public', enrolled: 130, completed: 122 },
+      { name: 'Presidency', enrolled: 220, completed: 148 },
+      { name: 'Bishop Cotton', enrolled: 110, completed: 86 },
+    ];
+    return (
+      <div className="space-y-2">
+        {ldData.map(d => (
+          <div key={d.name}>
+            <div className="flex justify-between mb-0.5">
+              <span className="text-[10px] font-medium" style={{ color: DS.text2 }}>{d.name}</span>
+              <span className="text-[10px] font-bold" style={{ color: DS.text }}>{d.completed}/{d.enrolled} ({Math.round((d.completed / d.enrolled) * 100)}%)</span>
+            </div>
+            <div className="h-2.5 rounded-full overflow-hidden" style={{ background: DS.bgLow }}>
+              <div className="h-full rounded-full" style={{ width: `${(d.completed / d.enrolled) * 100}%`, background: DS.teal }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // ── GOI Statutory Compliance Matrix ──────────────────────────────────────────
+  if (id === 'WGT_GOI_STATUTORY_MATRIX') {
+    const statData = [
+      { campus: "St. Xavier's", pf: 'filed', esi: 'filed', tds: 'filed', pt: 'filed' },
+      { campus: 'Holy Cross', pf: 'filed', esi: 'filed', tds: 'pending', pt: 'filed' },
+      { campus: 'Delhi Public', pf: 'filed', esi: 'filed', tds: 'filed', pt: 'filed' },
+      { campus: 'Presidency', pf: 'filed', esi: 'pending', tds: 'pending', pt: 'filed' },
+      { campus: 'Bishop Cotton', pf: 'filed', esi: 'filed', tds: 'filed', pt: 'pending' },
+    ] as const;
+    const statColor = (s: string) => s === 'filed' ? { bg: DS.successBg, color: DS.success } : s === 'pending' ? { bg: DS.warningBg, color: DS.warning } : { bg: DS.errorBg, color: DS.error };
+    return (
+      <div className="overflow-x-auto text-xs mt-1">
+        <table className="w-full text-left">
+          <thead>
+            <tr style={{ color: DS.text3, borderBottom: `1px solid ${DS.border}` }}>
+              <th className="pb-2 font-semibold">Campus</th>
+              {(['PF', 'ESI', 'TDS', 'PT'] as const).map(h => <th key={h} className="pb-2 font-semibold text-center">{h}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {statData.map(r => (
+              <tr key={r.campus} style={{ borderBottom: `1px dotted ${DS.border}` }}>
+                <td className="py-1.5" style={{ color: DS.text }}>{r.campus}</td>
+                {([r.pf, r.esi, r.tds, r.pt] as string[]).map((s, i) => {
+                  const sc = statColor(s);
+                  return <td key={i} className="py-1.5 text-center"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: sc.bg, color: sc.color }}>{s}</span></td>;
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  // ── GOI Appraisal Status per Campus ──────────────────────────────────────────
+  if (id === 'WGT_GOI_APPRAISAL_STATUS') {
+    const apData = [
+      { name: "St. Xavier's", submitted: 172, completed: 165 },
+      { name: 'Holy Cross', submitted: 188, completed: 142 },
+      { name: 'Delhi Public', submitted: 148, completed: 144 },
+      { name: 'Presidency', submitted: 234, completed: 188 },
+      { name: 'Bishop Cotton', submitted: 126, completed: 114 },
+    ];
+    return (
+      <ResponsiveContainer width="100%" height={160}>
+        <ReBarChart data={apData} margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+          <XAxis dataKey="name" tick={{ fontSize: 9, fill: DS.text3 }} />
+          <YAxis tick={{ fontSize: 9, fill: DS.text3 }} />
+          <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+          <Legend wrapperStyle={{ fontSize: 10 }} />
+          <Bar dataKey="submitted" name="Submitted" fill={DS.primary} radius={[4, 4, 0, 0]} />
+          <Bar dataKey="completed" name="Completed" fill={DS.success} radius={[4, 4, 0, 0]} />
+        </ReBarChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  // ── GOI Research Output per Campus ───────────────────────────────────────────
+  if (id === 'WGT_GOI_RESEARCH_OUTPUT') {
+    const resData = [
+      { name: "St. Xavier's", papers: 12, conferences: 8, patents: 1 },
+      { name: 'Holy Cross', papers: 6, conferences: 4, patents: 0 },
+      { name: 'Delhi Public', papers: 8, conferences: 6, patents: 2 },
+      { name: 'Presidency', papers: 22, conferences: 14, patents: 3 },
+      { name: 'Bishop Cotton', papers: 5, conferences: 3, patents: 0 },
+    ];
+    return (
+      <ResponsiveContainer width="100%" height={160}>
+        <ReBarChart data={resData} margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+          <XAxis dataKey="name" tick={{ fontSize: 9, fill: DS.text3 }} />
+          <YAxis tick={{ fontSize: 9, fill: DS.text3 }} />
+          <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+          <Legend wrapperStyle={{ fontSize: 10 }} />
+          <Bar dataKey="papers" name="Papers" stackId="a" fill={DS.primary} />
+          <Bar dataKey="conferences" name="Conferences" stackId="a" fill={DS.teal} />
+          <Bar dataKey="patents" name="Patents" stackId="a" fill={DS.purple} radius={[4, 4, 0, 0]} />
+        </ReBarChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  // ── GOI Headcount Trend 12M ───────────────────────────────────────────────────
+  if (id === 'WGT_GOI_HEADCOUNT_TREND') {
+    const hcTrend = [
+      { month: 'Jan', total: 992 }, { month: 'Feb', total: 1008 }, { month: 'Mar', total: 1024 },
+      { month: 'Apr', total: 1018 }, { month: 'May', total: 1031 }, { month: 'Jun', total: 1044 },
+      { month: 'Jul', total: 1039 }, { month: 'Aug', total: 1052 }, { month: 'Sep', total: 1068 },
+      { month: 'Oct', total: 1076 }, { month: 'Nov', total: 1082 }, { month: 'Dec', total: 1095 },
+    ];
+    return (
+      <ResponsiveContainer width="100%" height={160}>
+        <ReLineChart data={hcTrend} margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+          <XAxis dataKey="month" tick={{ fontSize: 9, fill: DS.text3 }} />
+          <YAxis tick={{ fontSize: 9, fill: DS.text3 }} domain={['auto', 'auto']} />
+          <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+          <Line type="monotone" dataKey="total" name="Total Headcount" stroke={DS.primary} strokeWidth={2} dot={false} />
+        </ReLineChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  // ── GOI Lesson Plans per Campus ───────────────────────────────────────────────
+  if (id === 'WGT_GOI_LESSON_PLANS') {
+    const lpData = [
+      { name: "St. Xavier's", submitted: 178, total: 187 },
+      { name: 'Holy Cross', submitted: 196, total: 234 },
+      { name: 'Delhi Public', submitted: 152, total: 156 },
+      { name: 'Presidency', submitted: 241, total: 298 },
+      { name: 'Bishop Cotton', submitted: 128, total: 142 },
+    ];
+    return (
+      <div className="space-y-2">
+        {lpData.map(d => (
+          <div key={d.name}>
+            <div className="flex justify-between mb-0.5">
+              <span className="text-[10px] font-medium" style={{ color: DS.text2 }}>{d.name}</span>
+              <span className="text-[10px] font-bold" style={{ color: DS.text }}>{d.submitted}/{d.total}</span>
+            </div>
+            <div className="h-2.5 rounded-full overflow-hidden" style={{ background: DS.bgLow }}>
+              <div className="h-full rounded-full" style={{ width: `${(d.submitted / d.total) * 100}%`, background: (d.submitted / d.total) >= 0.9 ? DS.success : (d.submitted / d.total) >= 0.75 ? DS.amber : DS.error }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // ── Late Arrivals Today ───────────────────────────────────────────────────────
+  if (id === 'WGT_LATE_ARRIVALS') {
+    const lateData = [
+      { name: 'Arjun Mehta', dept: 'Science', punchIn: '09:18', minsLate: 18 },
+      { name: 'Priya Nair', dept: 'Admin', punchIn: '09:32', minsLate: 32 },
+      { name: 'Sunil Rao', dept: 'Maths', punchIn: '09:12', minsLate: 12 },
+      { name: 'Kavitha S', dept: 'English', punchIn: '09:45', minsLate: 45 },
+      { name: 'Dinesh T', dept: 'PE', punchIn: '09:22', minsLate: 22 },
+    ];
+    return (
+      <div className="space-y-2">
+        {lateData.map((e, i) => (
+          <div key={i} className="flex items-center gap-2.5 px-3 py-2 rounded-xl" style={{ background: DS.warningBg }}>
+            <Clock className="w-3.5 h-3.5 flex-shrink-0" style={{ color: DS.warning }} />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold" style={{ color: DS.text }}>{e.name} · <span style={{ color: DS.text3 }}>{e.dept}</span></p>
+              <p className="text-[10px]" style={{ color: DS.text3 }}>Punched in at {e.punchIn}</p>
+            </div>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: DS.warning, color: 'white' }}>+{e.minsLate}m</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // ── Early Departures Today ────────────────────────────────────────────────────
+  if (id === 'WGT_EARLY_DEPARTURES') {
+    const earlyData = [
+      { name: 'Meena Rao', dept: 'Commerce', punchOut: '16:14', minsEarly: 46 },
+      { name: 'Rahul Jain', dept: 'Admin', punchOut: '16:38', minsEarly: 22 },
+      { name: 'Anitha K', dept: 'Science', punchOut: '16:05', minsEarly: 55 },
+    ];
+    return (
+      <div className="space-y-2">
+        {earlyData.map((e, i) => (
+          <div key={i} className="flex items-center gap-2.5 px-3 py-2 rounded-xl" style={{ background: DS.blueBg }}>
+            <LogOut className="w-3.5 h-3.5 flex-shrink-0" style={{ color: DS.blue }} />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold" style={{ color: DS.text }}>{e.name} · <span style={{ color: DS.text3 }}>{e.dept}</span></p>
+              <p className="text-[10px]" style={{ color: DS.text3 }}>Punched out at {e.punchOut}</p>
+            </div>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: DS.blue, color: 'white' }}>-{e.minsEarly}m</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // ── Leave Balance Summary ────────────────────────────────────────────────────
+  if (id === 'WGT_LEAVE_BALANCE') {
+    const balData = [
+      { type: 'Earned Leave (EL)', avg: 8.4, max: 30 },
+      { type: 'Casual Leave (CL)', avg: 4.2, max: 12 },
+      { type: 'Sick Leave (SL)', avg: 6.1, max: 15 },
+    ];
+    return (
+      <div className="space-y-3">
+        {balData.map(d => (
+          <div key={d.type} className="flex items-center gap-3">
+            <span className="text-xs font-medium w-36 flex-shrink-0" style={{ color: DS.text2 }}>{d.type}</span>
+            <div className="flex-1 h-3 rounded-full overflow-hidden" style={{ background: DS.bgLow }}>
+              <div className="h-full rounded-full" style={{ width: `${(d.avg / d.max) * 100}%`, background: DS.primary }} />
+            </div>
+            <span className="text-xs font-bold w-16 text-right" style={{ color: DS.text }}>avg {d.avg}d</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // ── Payroll Component Breakdown ───────────────────────────────────────────────
+  if (id === 'WGT_PAYROLL_COMPONENTS') {
+    const compData = [
+      { dept: 'Teaching', basic: 480000, hra: 192000, da: 96000, allowances: 72000, deductions: 84000 },
+      { dept: 'Non-Teaching', basic: 260000, hra: 104000, da: 52000, allowances: 38000, deductions: 42000 },
+      { dept: 'Admin', basic: 180000, hra: 72000, da: 36000, allowances: 28000, deductions: 32000 },
+      { dept: 'Visiting', basic: 120000, hra: 0, da: 0, allowances: 12000, deductions: 14400 },
+    ];
+    return (
+      <ResponsiveContainer width="100%" height={160}>
+        <ReBarChart data={compData} margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+          <XAxis dataKey="dept" tick={{ fontSize: 9, fill: DS.text3 }} />
+          <YAxis tick={{ fontSize: 9, fill: DS.text3 }} />
+          <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+          <Legend wrapperStyle={{ fontSize: 10 }} />
+          <Bar dataKey="basic" name="Basic" stackId="a" fill={DS.primary} />
+          <Bar dataKey="hra" name="HRA" stackId="a" fill={DS.teal} />
+          <Bar dataKey="da" name="DA" stackId="a" fill={DS.purple} />
+          <Bar dataKey="allowances" name="Allowances" stackId="a" fill={DS.amber} />
+          <Bar dataKey="deductions" name="Deductions" stackId="b" fill={DS.error} radius={[4, 4, 0, 0]} />
+        </ReBarChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  // ── Promotion Pipeline ────────────────────────────────────────────────────────
+  if (id === 'WGT_PROMOTION_PIPELINE') {
+    const promStages = [
+      { stage: 'Recommended', count: 42 },
+      { stage: 'HOD Approved', count: 34 },
+      { stage: 'HR Review', count: 24 },
+      { stage: 'Management', count: 16 },
+      { stage: 'Promoted', count: 11 },
+    ];
+    return (
+      <div className="space-y-2">
+        {promStages.map((s, i) => (
+          <div key={i} className="flex items-center gap-3">
+            <span className="text-xs font-medium w-28 flex-shrink-0" style={{ color: DS.text2 }}>{s.stage}</span>
+            <div className="flex-1 h-6 rounded-lg overflow-hidden" style={{ background: DS.bgLow }}>
+              <div className="h-full rounded-lg flex items-center px-2" style={{ width: `${(s.count / 42) * 100}%`, background: DS.primary, minWidth: '2rem' }}>
+                <span className="text-[10px] font-bold text-white">{s.count}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // ── Time-to-Hire Trend 6M ────────────────────────────────────────────────────
+  if (id === 'WGT_TIME_TO_HIRE') {
+    const tthData = [
+      { month: 'Jan', days: 28 }, { month: 'Feb', days: 32 }, { month: 'Mar', days: 24 },
+      { month: 'Apr', days: 36 }, { month: 'May', days: 29 }, { month: 'Jun', days: 22 },
+    ];
+    return (
+      <ResponsiveContainer width="100%" height={140}>
+        <ReLineChart data={tthData} margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+          <XAxis dataKey="month" tick={{ fontSize: 9, fill: DS.text3 }} />
+          <YAxis tick={{ fontSize: 9, fill: DS.text3 }} unit="d" />
+          <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} formatter={(v: any) => [`${v} days`, 'Avg Days-to-Hire']} />
+          <Line type="monotone" dataKey="days" name="Avg Days" stroke={DS.primary} strokeWidth={2} dot={{ fill: DS.primary, r: 3 }} />
+        </ReLineChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  // ── Offer Acceptance Rate ────────────────────────────────────────────────────
+  if (id === 'WGT_OFFER_ACCEPTANCE') {
+    const oaData = [
+      { month: 'Jan', made: 8, accepted: 6 }, { month: 'Feb', made: 12, accepted: 9 },
+      { month: 'Mar', made: 10, accepted: 8 }, { month: 'Apr', made: 14, accepted: 11 },
+      { month: 'May', made: 9, accepted: 7 }, { month: 'Jun', made: 11, accepted: 9 },
+    ];
+    return (
+      <ResponsiveContainer width="100%" height={140}>
+        <ReBarChart data={oaData} margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+          <XAxis dataKey="month" tick={{ fontSize: 9, fill: DS.text3 }} />
+          <YAxis tick={{ fontSize: 9, fill: DS.text3 }} />
+          <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+          <Legend wrapperStyle={{ fontSize: 10 }} />
+          <Bar dataKey="made" name="Offers Made" fill={DS.bgHigh} radius={[4, 4, 0, 0]} />
+          <Bar dataKey="accepted" name="Accepted" fill={DS.success} radius={[4, 4, 0, 0]} />
+        </ReBarChart>
+      </ResponsiveContainer>
+    );
+  }
+
+
+
+  // ── Engagement Score ─────────────────────────────────────────────────────────
+  if (id === 'WGT_ENGAGEMENT_SCORE') {
+    const trendData = [
+      { month: 'Jan', score: 72 }, { month: 'Feb', score: 75 }, { month: 'Mar', score: 74 },
+      { month: 'Apr', score: 78 }, { month: 'May', score: 81 }, { month: 'Jun', score: 79 },
+    ];
+    if (chartType === 'line') {
+      return (
+        <ResponsiveContainer width="100%" height={140}>
+          <ReLineChart data={trendData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+            <XAxis dataKey="month" tick={{ fontSize: 10, fill: DS.text3 }} />
+            <YAxis tick={{ fontSize: 10, fill: DS.text3 }} domain={[60, 100]} />
+            <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+            <Line type="monotone" dataKey="score" stroke={DS.success} strokeWidth={3} dot={{ fill: DS.success, r: 4 }} />
+          </ReLineChart>
+        </ResponsiveContainer>
+      );
+    }
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-2">
+        <div className="text-4xl font-black" style={{ color: DS.success, fontFamily: 'Manrope, sans-serif' }}>79.2</div>
+        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full" style={{ background: DS.successBg, color: DS.success }}>
+          <TrendingUp className="w-3 h-3" />
+          <span className="text-[10px] font-bold">+2.4% vs prev qtr</span>
+        </div>
+        <p className="text-[10px] text-center" style={{ color: DS.text3 }}>Overall employee engagement index based on pulse surveys</p>
+      </div>
+    );
+  }
+
+  // ── Sentiment by Department ──────────────────────────────────────────────────
+  if (id === 'WGT_SENTIMENT_HEATMAP') {
+    const sentData = [
+      { dept: 'Science', positive: 82, neutral: 12, negative: 6 },
+      { dept: 'Maths', positive: 65, neutral: 25, negative: 10 },
+      { dept: 'Admin', positive: 45, neutral: 35, negative: 20 },
+      { dept: 'Primary', positive: 78, neutral: 15, negative: 7 },
+    ];
+    return (
+      <ResponsiveContainer width="100%" height={160}>
+        <ReBarChart data={sentData} margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+          <XAxis dataKey="dept" tick={{ fontSize: 10, fill: DS.text3 }} />
+          <YAxis tick={{ fontSize: 9, fill: DS.text3 }} />
+          <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+          <Legend wrapperStyle={{ fontSize: 10 }} />
+          <Bar dataKey="positive" name="Positive %" fill={DS.success} stackId="a" />
+          <Bar dataKey="neutral" name="Neutral %" fill={DS.amber} stackId="a" />
+          <Bar dataKey="negative" name="Negative %" fill={DS.error} stackId="a" radius={[3, 3, 0, 0]} />
+        </ReBarChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  // ── Goal Completion Rate ────────────────────────────────────────────────────
+  if (id === 'WGT_GOALS_COMPLETION') {
+    const goalData = [
+      { name: 'Completed', value: 64, color: DS.purple },
+      { name: 'On Track', value: 24, color: DS.success },
+      { name: 'Behind', value: 12, color: DS.error },
+    ];
+    if (chartType === 'bar') {
+      return (
+        <ResponsiveContainer width="100%" height={150}>
+          <ReBarChart data={goalData} margin={{ top: 0, right: 10, left: -25, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+            <XAxis dataKey="name" tick={{ fontSize: 10, fill: DS.text3 }} />
+            <YAxis tick={{ fontSize: 9, fill: DS.text3 }} unit="%" />
+            <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+            <Bar dataKey="value" name="Goals %" radius={[4, 4, 0, 0]}>
+              {goalData.map((e, i) => <Cell key={i} fill={e.color} />)}
+            </Bar>
+          </ReBarChart>
+        </ResponsiveContainer>
+      );
+    }
+    return (
+      <div className="flex items-center gap-4">
+        <ResponsiveContainer width={100} height={100}>
+          <RePieChart>
+            <Pie data={goalData} cx="50%" cy="50%" innerRadius={28} outerRadius={44} dataKey="value" strokeWidth={0}>
+              {goalData.map((e, i) => <Cell key={i} fill={e.color} />)}
+            </Pie>
+          </RePieChart>
+        </ResponsiveContainer>
+        <div className="space-y-1.5 flex-1">
+          {goalData.map(e => (
+            <div key={e.name} className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: e.color }} />
+              <span className="text-xs flex-1" style={{ color: DS.text2 }}>{e.name}</span>
+              <span className="text-xs font-bold" style={{ color: DS.text }}>{e.value}%</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // ── Pending Goal Approvals ──────────────────────────────────────────────────
+  if (id === 'WGT_GOALS_PENDING') {
+    const pendingGoals = [
+      { name: 'Dr. Sameer K', dept: 'Research', type: 'Annual OKR', days: 4 },
+      { name: 'Anita Desai', dept: 'English', type: 'KPI Setting', days: 2 },
+      { name: 'Robert Fox', dept: 'Admin', type: 'Mid-Year Goal', days: 7 },
+    ];
+    return (
+      <div className="space-y-2">
+        {pendingGoals.map((g, i) => (
+          <div key={i} className="flex items-center justify-between p-2.5 rounded-xl" style={{ background: g.days > 5 ? DS.errorBg : DS.bgLow }}>
+            <div>
+              <p className="text-xs font-semibold" style={{ color: DS.text }}>{g.name} · <span style={{ color: DS.text3 }}>{g.dept}</span></p>
+              <p className="text-[10px]" style={{ color: DS.text3 }}>{g.type}</p>
+            </div>
+            <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: 'white', color: g.days > 5 ? DS.error : DS.text3 }}>{g.days}d ago</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // ── Performance Tracking Status ──────────────────────────────────────────────
+  if (id === 'WGT_PERF_TRACKING') {
+    const perfData = [
+      { dept: 'Primary', achieved: 85, target: 100 },
+      { dept: 'Secondary', achieved: 78, target: 100 },
+      { dept: 'Admin', achieved: 92, target: 100 },
+      { dept: 'Sports', achieved: 64, target: 100 },
+    ];
+    return (
+      <ResponsiveContainer width="100%" height={160}>
+        <ReBarChart data={perfData} margin={{ top: 0, right: 10, left: -25, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+          <XAxis dataKey="dept" tick={{ fontSize: 9, fill: DS.text3 }} />
+          <YAxis tick={{ fontSize: 9, fill: DS.text3 }} unit="%" />
+          <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+          <Legend wrapperStyle={{ fontSize: 10 }} />
+          <Bar dataKey="achieved" name="Achieved %" fill={DS.primary} radius={[4, 4, 0, 0]} />
+        </ReBarChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  // ── Mid-Year Review Progress ────────────────────────────────────────────────
+  if (id === 'WGT_MID_YEAR_REVIEW') {
+    const reviewData = [
+      { name: 'Completed', value: 142, color: DS.success },
+      { name: 'In Review', value: 48, color: DS.warning },
+      { name: 'Pending', value: 24, color: DS.error },
+    ];
+    return (
+      <div className="flex items-center gap-4">
+        <ResponsiveContainer width={100} height={100}>
+          <RePieChart>
+            <Pie data={reviewData} cx="50%" cy="50%" innerRadius={28} outerRadius={44} dataKey="value" strokeWidth={0}>
+              {reviewData.map((e, i) => <Cell key={i} fill={e.color} />)}
+            </Pie>
+          </RePieChart>
+        </ResponsiveContainer>
+        <div className="space-y-1.5 flex-1">
+          {reviewData.map(e => (
+            <div key={e.name} className="flex items-center justify-between text-xs">
+              <span style={{ color: DS.text2 }}>{e.name}</span>
+              <span className="font-bold" style={{ color: e.color }}>{e.value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // ── KRA/KPI Approval Pipeline ───────────────────────────────────────────────
+  if (id === 'WGT_KRA_APPROVAL') {
+    const kraData = [
+      { name: 'Rahul Sen', hod: 'Dr. Roy', status: 'HOD Approved', date: '22 Mar' },
+      { name: 'Megha V', hod: 'Ms. Alice', status: 'Pending HOD', date: '24 Mar' },
+      { name: 'Kevin P', hod: 'Mr. John', status: 'Draft', date: '25 Mar' },
+    ];
+    return (
+      <div className="space-y-2">
+        {kraData.map((k, i) => (
+          <div key={i} className="flex items-center gap-3 p-2.5 rounded-xl" style={{ background: DS.bgLow }}>
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black" style={{ background: DS.primary, color: 'white' }}>{k.name.charAt(0)}</div>
+            <div className="flex-1">
+              <p className="text-xs font-semibold" style={{ color: DS.text }}>{k.name}</p>
+              <p className="text-[10px]" style={{ color: DS.text3 }}>HOD: {k.hod} · {k.date}</p>
+            </div>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg" style={{ background: k.status.includes('Pending') ? DS.warningBg : DS.successBg, color: k.status.includes('Pending') ? DS.warning : DS.success }}>{k.status}</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // ── 360 Feedback Status ─────────────────────────────────────────────────────
+  if (id === 'WGT_FEEDBACK360_STATUS') {
+    const fbStatus = [
+      { stage: 'Invited', count: 450, color: DS.primary },
+      { stage: 'Responded', count: 320, color: DS.success },
+      { stage: 'Pending', count: 130, color: DS.amber },
+    ];
+    return (
+      <div className="space-y-3">
+        {fbStatus.map(s => (
+          <div key={s.stage}>
+            <div className="flex justify-between text-[10px] mb-1">
+              <span style={{ color: DS.text2 }}>{s.stage}</span>
+              <span className="font-bold" style={{ color: DS.text }}>{s.count} ({Math.round(s.count / 450 * 100)}%)</span>
+            </div>
+            <div className="h-2 rounded-full overflow-hidden" style={{ background: DS.bgLow }}>
+              <div className="h-full rounded-full" style={{ width: `${(s.count / 450) * 100}%`, background: s.color }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // ── Top 360 Competency Scores ───────────────────────────────────────────────
+  if (id === 'WGT_FEEDBACK360_SCORES') {
+    const scores = [
+      { concept: 'Leadership', score: 4.2 },
+      { concept: 'Communication', score: 3.8 },
+      { concept: 'Teamwork', score: 4.5 },
+      { concept: 'Innovation', score: 3.2 },
+      { concept: 'Strategy', score: 3.9 },
+    ];
+    return (
+      <ResponsiveContainer width="100%" height={160}>
+        <ReBarChart data={scores} layout="vertical" margin={{ top: 0, right: 30, left: 10, bottom: 0 }}>
+          <XAxis type="number" domain={[0, 5]} tick={{ fontSize: 9, fill: DS.text3 }} />
+          <YAxis dataKey="concept" type="category" tick={{ fontSize: 9, fill: DS.text3 }} width={70} />
+          <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+          <Bar dataKey="score" fill={DS.primary} radius={[0, 4, 4, 0]} />
+        </ReBarChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  // ── Calibration Session Status ──────────────────────────────────────────────
+  if (id === 'WGT_CALIBRATION_STATUS') {
+    const calibData = [
+      { session: 'Sr. Faculty Q1', status: 'Completed', participants: 24, bell: 'Normal' },
+      { session: 'Admn Staff H1', status: 'In Progress', participants: 42, bell: 'Skewed' },
+      { session: 'HOD Annual', status: 'Scheduled', participants: 12, bell: '–' },
+    ];
+    return (
+      <div className="space-y-2">
+        {calibData.map((c, i) => (
+          <div key={i} className="flex items-center gap-3 p-3 rounded-xl" style={{ background: DS.bgLow }}>
+            <Sliders className="w-4 h-4" style={{ color: DS.primary }} />
+            <div className="flex-1">
+              <p className="text-xs font-semibold" style={{ color: DS.text }}>{c.session}</p>
+              <p className="text-[10px]" style={{ color: DS.text3 }}>{c.participants} staff · Curve: {c.bell}</p>
+            </div>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: c.status === 'Completed' ? DS.successBg : DS.warningBg, color: c.status === 'Completed' ? DS.success : DS.warning }}>{c.status}</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // ── Alumni Network Summary ───────────────────────────────────────────────
+  if (id === 'WGT_ALUMNI_STATS') {
+    const alData = [
+      { label: 'Total Alumni', value: '1,240', delta: '+12%', dt: 'up' },
+      { label: 'Active Users', value: '842', delta: '68%', dt: 'neutral' },
+    ];
+    return (
+      <div className="grid grid-cols-2 gap-3">
+        {alData.map(item => (
+          <div key={item.label} className="rounded-2xl p-4" style={{ background: DS.bgLow }}>
+            <p className="text-[10px] font-semibold mb-1" style={{ color: DS.text3 }}>{item.label}</p>
+            <p className="text-xl font-black" style={{ color: DS.text, fontFamily: 'Manrope, sans-serif' }}>{item.value}</p>
+            <span className="text-[9px] font-bold" style={{ color: item.dt === 'up' ? DS.success : DS.text3 }}>{item.delta}</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // ── LMS Enrolment Overview ───────────────────────────────────────────────
+  if (id === 'WGT_LMS_ENROLMENT') {
+    const lmsData = { active: 342, completed: 2150, certifications: 184 };
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between p-3 rounded-xl" style={{ background: DS.primaryGrad, color: 'white' }}>
+          <div><p className="text-[10px] font-bold opacity-80">Active Enrolments</p><p className="text-2xl font-black">{lmsData.active}</p></div>
+          <BookOpen className="w-8 h-8 opacity-20" />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="p-3 rounded-xl" style={{ background: DS.bgLow }}><p className="text-[10px] font-semibold" style={{ color: DS.text3 }}>Total Completions</p><p className="text-lg font-black" style={{ color: DS.text }}>{lmsData.completed}</p></div>
+          <div className="p-3 rounded-xl" style={{ background: DS.bgLow }}><p className="text-[10px] font-semibold" style={{ color: DS.text3 }}>Certifications</p><p className="text-lg font-black" style={{ color: DS.text }}>{lmsData.certifications}</p></div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Course Completion by Category ────────────────────────────────────────
+  if (id === 'WGT_COURSE_COMPLETION') {
+    const catData = [
+      { name: 'Mandatory', value: 92, color: DS.error },
+      { name: 'Elective', value: 64, color: DS.primary },
+      { name: 'Leadership', value: 45, color: DS.purple },
+    ];
+    return (
+      <ResponsiveContainer width="100%" height={160}>
+        <ReBarChart data={catData} margin={{ top: 0, right: 10, left: -25, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+          <XAxis dataKey="name" tick={{ fontSize: 9, fill: DS.text3 }} />
+          <YAxis tick={{ fontSize: 9, fill: DS.text3 }} unit="%" />
+          <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+          <Bar dataKey="value" name="Completion %" radius={[4, 4, 0, 0]}>
+            {catData.map((e, i) => <Cell key={i} fill={e.color} />)}
+          </Bar>
+        </ReBarChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  // ── Skill Gap Analysis ──────────────────────────────────────────────────
+  if (id === 'WGT_SKILL_GAP') {
+    const gapData = [
+      { skill: 'Digital Literacy', required: 90, actual: 72 },
+      { skill: 'Pedagogy', required: 95, actual: 88 },
+      { skill: 'Soft Skills', required: 80, actual: 75 },
+      { skill: 'Leadership', required: 85, actual: 64 },
+    ];
+    return (
+      <ResponsiveContainer width="100%" height={160}>
+        <ReBarChart data={gapData} margin={{ top: 0, right: 10, left: -25, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+          <XAxis dataKey="skill" tick={{ fontSize: 8, fill: DS.text3 }} />
+          <YAxis tick={{ fontSize: 9, fill: DS.text3 }} unit="%" />
+          <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+          <Bar dataKey="required" name="Required" fill={DS.bgLow} />
+          <Bar dataKey="actual" name="Actual" fill={DS.primary} radius={[3, 3, 0, 0]} />
+        </ReBarChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  // ── Survey Response Rate ────────────────────────────────────────────────
+  if (id === 'WGT_SURVEY_RESPONSE') {
+    const surveyData = [
+      { name: 'Pulse Survey Q2', rate: 78, color: DS.success },
+      { name: 'Curriculum Feedback', rate: 92, color: DS.primary },
+      { name: 'Workplace Safety', rate: 45, color: DS.error },
+    ];
+    return (
+      <div className="space-y-3">
+        {surveyData.map(s => (
+          <div key={s.name}>
+            <div className="flex justify-between text-[10px] mb-1">
+              <span style={{ color: DS.text2 }}>{s.name}</span>
+              <span className="font-bold" style={{ color: s.rate < 50 ? DS.error : DS.text }}>{s.rate}%</span>
+            </div>
+            <div className="h-2 rounded-full overflow-hidden" style={{ background: DS.bgLow }}>
+              <div className="h-full rounded-full" style={{ width: `${s.rate}%`, background: s.color }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // ── HR Tasks Summary ────────────────────────────────────────────────────
+  if (id === 'WGT_TASKS_SUMMARY') {
+    const tasks = [
+      { title: 'Update Salary Slips', priority: 'High', status: 'Pending' },
+      { title: 'Interview Dr. Rao', priority: 'Medium', status: 'Done' },
+      { title: 'Policy Revise', priority: 'Low', status: 'In Progress' },
+    ];
+    return (
+       <div className="space-y-2">
+        {tasks.map((t, i) => (
+          <div key={i} className="flex items-center gap-3 p-2.5 rounded-xl" style={{ background: DS.bgLow }}>
+            <CheckSquare className="w-4 h-4" style={{ color: t.status === 'Done' ? DS.success : DS.text3 }} />
+            <div className="flex-1">
+              <p className="text-xs font-semibold" style={{ color: DS.text }}>{t.title}</p>
+              <p className="text-[10px]" style={{ color: DS.text3 }}>{t.priority} Priority</p>
+            </div>
+            <span className="text-[10px] font-bold" style={{ color: t.status === 'Done' ? DS.success : DS.warning }}>{t.status}</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // ── Month-End Deadline Checklist ─────────────────────────────────────────
+  if (id === 'WGT_DEADLINE_CHECKLIST') {
+    const checks = [
+      { task: 'Attendance Finalise', due: '25th Mar', done: true },
+      { task: 'LOP Sync with Payroll', due: '26th Mar', done: true },
+      { task: 'Deductions Review', due: '28th Mar', done: false },
+      { task: 'Salary Disburse', due: '30th Mar', done: false },
+    ];
+    return (
+      <div className="space-y-2">
+        {checks.map((c, i) => (
+          <div key={i} className="flex items-center gap-3 p-2.5 rounded-xl" style={{ background: c.done ? DS.successBg : DS.bgLow }}>
+            {c.done ? <CheckCircle2 className="w-4 h-4" style={{ color: DS.success }} /> : <Clock className="w-4 h-4" style={{ color: DS.warning }} />}
+            <div className="flex-1">
+              <p className="text-xs font-semibold" style={{ color: DS.text }}>{c.task}</p>
+              <p className="text-[10px]" style={{ color: DS.text3 }}>Due: {c.due}</p>
+            </div>
+            {c.done && <span className="text-[10px] font-bold" style={{ color: DS.success }}>Done</span>}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // ── Policy Acknowledgement Tracker ──────────────────────────────────────
+  if (id === 'WGT_POLICY_ACK') {
+    const polData = [
+      { name: 'Sexual Harassment (POSH)', rate: 98, color: DS.success },
+      { name: 'Code of Conduct 2024', rate: 84, color: DS.primary },
+      { name: 'Leave Policy Update', rate: 62, color: DS.warning },
+    ];
+    return (
+      <div className="space-y-3">
+        {polData.map(p => (
+          <div key={p.name}>
+            <div className="flex justify-between text-[10px] mb-1">
+              <span className="truncate flex-1 pr-2" style={{ color: DS.text2 }}>{p.name}</span>
+              <span className="font-bold" style={{ color: DS.text }}>{p.rate}%</span>
+            </div>
+            <div className="h-2 rounded-full overflow-hidden" style={{ background: DS.bgLow }}>
+              <div className="h-full rounded-full" style={{ width: `${p.rate}%`, background: p.color }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // ── Staff Portfolio Updates ──────────────────────────────────────────────
+  if (id === 'WGT_PORTFOLIO_UPDATES') {
+    return (
+      <div className="space-y-3">
+        <div className="p-3 rounded-xl flex items-center justify-between" style={{ background: DS.bgLow }}>
+          <div className="flex items-center gap-3">
+            <FolderOpen className="w-5 h-5" style={{ color: DS.primary }} />
+            <div>
+              <p className="text-xs font-semibold" style={{ color: DS.text }}>Profile Completion</p>
+              <p className="text-lg font-black" style={{ color: DS.text }}>86%</p>
+            </div>
+          </div>
+          <button className="text-[10px] font-black px-2 py-1 rounded-lg" style={{ background: DS.primary, color: 'white' }}>Nudge All</button>
+        </div>
+        <div className="text-[10px] font-semibold" style={{ color: DS.text3 }}>Stale Profiles (Last 90 days): <span style={{ color: DS.error }}>42 staff</span></div>
+      </div>
+    );
+  }
+
+  // ── Certificates Issued ──────────────────────────────────────────────────
+  if (id === 'WGT_CERTIFICATES') {
+    const certData = [
+      { type: 'Relieving', count: 12 },
+      { type: 'Experience', count: 24 },
+      { type: 'Salary Cert.', count: 18 },
+    ];
+    return (
+      <div className="flex items-center gap-4">
+        {certData.map(c => (
+          <div key={c.type} className="flex-1 text-center p-2 rounded-xl" style={{ background: DS.bgLow }}>
+            <p className="text-lg font-black" style={{ color: DS.primary }}>{c.count}</p>
+            <p className="text-[9px] font-medium" style={{ color: DS.text3 }}>{c.type}</p>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // ── Exit Reasons Analysis ────────────────────────────────────────────────
+  if (id === 'WGT_EXIT_REASONS') {
+    const exitData = [
+      { name: 'Better Comp', value: 35, color: DS.primary },
+      { name: 'Location', value: 25, color: DS.teal },
+      { name: 'Higher Studies', value: 20, color: DS.purple },
+      { name: 'Personal', value: 15, color: DS.amber },
+      { name: 'Other', value: 5, color: DS.text3 },
+    ];
+    return (
+      <div className="flex items-center gap-4">
+        <ResponsiveContainer width={90} height={90}>
+          <RePieChart>
+            <Pie data={exitData} cx="50%" cy="50%" innerRadius={22} outerRadius={40} dataKey="value" strokeWidth={0}>
+              {exitData.map((e, i) => <Cell key={i} fill={e.color} />)}
+            </Pie>
+          </RePieChart>
+        </ResponsiveContainer>
+        <div className="space-y-1 flex-1">
+          {exitData.slice(0, 4).map(e => (
+            <div key={e.name} className="flex items-center gap-1.5 overflow-hidden">
+              <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: e.color }} />
+              <span className="text-[9px] flex-1 truncate" style={{ color: DS.text2 }}>{e.name}</span>
+              <span className="text-[9px] font-bold" style={{ color: DS.text }}>{e.value}%</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // ── Workforce Capacity Utilisation ──────────────────────────────────────────
+  if (id === 'WGT_CAPACITY_UTILISATION') {
+    const capData = [
+      { dept: 'Sci', assigned: 1600, capacity: 1800 },
+      { dept: 'Mat', assigned: 1450, capacity: 1400 },
+      { dept: 'Eng', assigned: 1200, capacity: 1500 },
+      { dept: 'Lan', assigned: 900, capacity: 1000 },
+    ];
+    return (
+      <ResponsiveContainer width="100%" height={160}>
+        <ReBarChart data={capData} margin={{ top: 0, right: 10, left: -25, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+          <XAxis dataKey="dept" tick={{ fontSize: 9, fill: DS.text3 }} />
+          <YAxis tick={{ fontSize: 9, fill: DS.text3 }} />
+          <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+          <Legend wrapperStyle={{ fontSize: 10 }} />
+          <Bar dataKey="capacity" name="Capacity" fill={DS.bgLow} />
+          <Bar dataKey="assigned" name="Assigned" fill={DS.primary} radius={[3, 3, 0, 0]} />
+        </ReBarChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  // ── Research & Publications (Institutional) ─────────────────────────────────
+  if (id === 'WGT_RESEARCH_SUMMARY') {
+    const resData = [
+      { dept: 'Science', papers: 8, conferences: 12 },
+      { dept: 'Medicine', papers: 14, conferences: 6 },
+      { dept: 'Commerce', papers: 3, conferences: 5 },
+    ];
+    return (
+      <ResponsiveContainer width="100%" height={160}>
+        <ReBarChart data={resData} margin={{ top: 0, right: 10, left: -25, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+          <XAxis dataKey="dept" tick={{ fontSize: 9, fill: DS.text3 }} />
+          <YAxis tick={{ fontSize: 9, fill: DS.text3 }} />
+          <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+          <Legend wrapperStyle={{ fontSize: 10 }} />
+          <Bar dataKey="papers" name="Papers" fill={DS.primary} stackId="a" />
+          <Bar dataKey="conferences" name="Conferences" fill={DS.teal} stackId="a" radius={[3, 3, 0, 0]} />
+        </ReBarChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  // ── Lesson Plan Submission Status (Institutional) ───────────────────────────
+  if (id === 'WGT_LESSON_PLAN_STATUS') {
+    const lpDataArr = [
+      { dept: 'Primary', done: 85, total: 100 },
+      { dept: 'Secondary', done: 92, total: 100 },
+      { dept: 'Higher Sec', done: 64, total: 100 },
+    ];
+    return (
+      <div className="space-y-3">
+        {lpDataArr.map(d => (
+          <div key={d.dept} className="flex items-center gap-3">
+            <span className="text-xs font-medium w-24 flex-shrink-0" style={{ color: DS.text2 }}>{d.dept}</span>
+            <div className="flex-1 h-3 rounded-full overflow-hidden" style={{ background: DS.bgLow }}>
+              <div className="h-full rounded-full" style={{ width: `${d.done}%`, background: d.done > 80 ? DS.success : d.done > 70 ? DS.amber : DS.error }} />
+            </div>
+            <span className="text-xs font-bold w-12 text-right" style={{ color: DS.text }}>{d.done}%</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // ── Org Headcount Breakdown Tree ────────────────────────────────────────────
+  if (id === 'WGT_ORG_HEADCOUNT_TREE') {
+    const treeData = [
+      { name: 'Academic', value: 540, color: DS.primary },
+      { name: 'Admin', value: 120, color: DS.teal },
+      { name: 'Support', value: 84, color: DS.purple },
+      { name: 'Others', value: 36, color: DS.amber },
+    ];
+    return (
+      <ResponsiveContainer width="100%" height={160}>
+        <ReBarChart data={treeData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+          <XAxis dataKey="name" tick={{ fontSize: 9, fill: DS.text3 }} />
+          <YAxis tick={{ fontSize: 9, fill: DS.text3 }} />
+          <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+          <Bar dataKey="value" name="Headcount" radius={[4, 4, 0, 0]}>
+            {treeData.map((e, i) => <Cell key={i} fill={e.color} />)}
+          </Bar>
+        </ReBarChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  // ── 360 Feedback Status ──────────────────────────────────────────────────
+  if (id === 'WGT_FEEDBACK360_STATUS') {
+    const feedbackData = [
+      { name: 'Completed', value: 342, color: DS.success },
+      { name: 'Pending', value: 158, color: DS.amber },
+      { name: 'Not Started', value: 42, color: DS.text3 },
+    ];
+    return (
+      <div className="flex items-center gap-4">
+        <ResponsiveContainer width={100} height={100}>
+          <RePieChart>
+            <Pie data={feedbackData} cx="50%" cy="50%" innerRadius={28} outerRadius={44} dataKey="value" strokeWidth={0}>
+              {feedbackData.map((e, i) => <Cell key={i} fill={e.color} />)}
+            </Pie>
+          </RePieChart>
+        </ResponsiveContainer>
+        <div className="space-y-1 flex-1">
+          {feedbackData.map(e => (
+            <div key={e.name} className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: e.color }} />
+              <span className="text-[10px] flex-1" style={{ color: DS.text2 }}>{e.name}</span>
+              <span className="text-[10px] font-bold" style={{ color: DS.text }}>{e.value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // ── 360 Competency Scores ──────────────────────────────────────────────────
+  if (id === 'WGT_FEEDBACK360_SCORES') {
+    const scoreData = [
+      { name: 'Leadership', score: 8.2 }, { name: 'Comms', score: 7.5 },
+      { name: 'Technical', score: 9.0 }, { name: 'Culture', score: 8.8 },
+    ];
+    return (
+      <div className="space-y-2.5">
+        {scoreData.map(s => (
+          <div key={s.name}>
+            <div className="flex justify-between mb-0.5">
+              <span className="text-[10px] font-medium" style={{ color: DS.text2 }}>{s.name}</span>
+              <span className="text-[10px] font-bold" style={{ color: DS.text }}>{s.score}/10</span>
+            </div>
+            <div className="h-2 rounded-full overflow-hidden" style={{ background: DS.bgLow }}>
+              <div className="h-full rounded-full" style={{ width: `${s.score * 10}%`, background: DS.primary }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // ── Calibration Status ──────────────────────────────────────────────────────
+  if (id === 'WGT_CALIBRATION_STATUS') {
+    const calData = [
+      { bucket: 'Top', pre: 12, post: 10 },
+      { bucket: 'Solid', pre: 65, post: 70 },
+      { bucket: 'Dev', pre: 15, post: 12 },
+      { bucket: 'Concern', pre: 8, post: 8 },
+    ];
+    return (
+      <ResponsiveContainer width="100%" height={150}>
+        <ReBarChart data={calData} margin={{ top: 0, right: 10, left: -25, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+          <XAxis dataKey="bucket" tick={{ fontSize: 9, fill: DS.text3 }} />
+          <YAxis tick={{ fontSize: 9, fill: DS.text3 }} unit="%" />
+          <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+          <Legend wrapperStyle={{ fontSize: 10 }} />
+          <Bar dataKey="pre" name="Pre-Cal" fill={DS.bgLow} />
+          <Bar dataKey="post" name="Post-Cal" fill={DS.primary} radius={[3, 3, 0, 0]} />
+        </ReBarChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  // ── Alumni & boomerang Tracking ─────────────────────────────────────────────
+  if (id === 'WGT_ALUMNI_STATS') {
+    const alumniData = [
+      { year: '2021', total: 124, boomers: 8 },
+      { year: '2022', total: 156, boomers: 12 },
+      { year: '2023', total: 142, boomers: 11 },
+    ];
+    return (
+      <ResponsiveContainer width="100%" height={140}>
+        <ReBarChart data={alumniData} margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+          <XAxis dataKey="year" tick={{ fontSize: 10, fill: DS.text3 }} />
+          <YAxis tick={{ fontSize: 10, fill: DS.text3 }} />
+          <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+          <Bar dataKey="total" name="Alumni" fill={DS.bgHigh} stackId="a" />
+          <Bar dataKey="boomers" name="Boomerangs" fill={DS.teal} stackId="a" radius={[3, 3, 0, 0]} />
+        </ReBarChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  // ── LMS Enrolment Trends ────────────────────────────────────────────────────
+  if (id === 'WGT_LMS_ENROLMENT') {
+    const lmsData = [
+      { name: 'Pedagogy', count: 184 }, { name: 'Tech Skills', count: 142 },
+      { name: 'Soft Skills', count: 96 }, { name: 'Compliance', count: 210 },
+    ];
+    return (
+      <ResponsiveContainer width="100%" height={150}>
+        <ReBarChart data={lmsData} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
+          <XAxis type="number" hide />
+          <YAxis dataKey="name" type="category" tick={{ fontSize: 9, fill: DS.text3 }} width={80} />
+          <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+          <Bar dataKey="count" fill={DS.primary} radius={[0, 4, 4, 0]} />
+        </ReBarChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  // ── Course Completion Status ────────────────────────────────────────────────
+  if (id === 'WGT_COURSE_COMPLETION') {
+    const courseData = [
+      { label: 'Completed', val: 74, color: DS.success },
+      { label: 'In Progress', val: 18, color: DS.amber },
+      { label: 'Overdue', val: 8, color: DS.error },
+    ];
+    return (
+      <div className="space-y-3">
+        {courseData.map(c => (
+          <div key={c.label}>
+            <div className="flex justify-between text-[10px] mb-1">
+              <span style={{ color: DS.text2 }}>{c.label}</span>
+              <span className="font-bold" style={{ color: DS.text }}>{c.val}%</span>
+            </div>
+            <div className="h-2.5 rounded-full overflow-hidden" style={{ background: DS.bgLow }}>
+              <div className="h-full rounded-full" style={{ width: `${c.val}%`, background: c.color }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // ── Critical Skill Gaps ─────────────────────────────────────────────────────
+  if (id === 'WGT_SKILL_GAP') {
+    const gapData = [
+      { skill: 'AI Literacy', current: 3.2, target: 4.5 },
+      { skill: 'Data Analysis', current: 3.8, target: 4.2 },
+      { skill: 'LDR-ship', current: 2.9, target: 4.0 },
+    ];
+    return (
+      <ResponsiveContainer width="100%" height={150}>
+        <ReBarChart data={gapData} margin={{ top: 0, right: 10, left: -25, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={DS.border} />
+          <XAxis dataKey="skill" tick={{ fontSize: 9, fill: DS.text3 }} />
+          <YAxis tick={{ fontSize: 9, fill: DS.text3 }} domain={[0, 5]} />
+          <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
+          <Legend wrapperStyle={{ fontSize: 10 }} />
+          <Bar dataKey="current" name="Current" fill={DS.error} />
+          <Bar dataKey="target" name="Target" fill={DS.bgHigh} radius={[3, 3, 0, 0]} />
+        </ReBarChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  // ── Pulse Survey Participation ──────────────────────────────────────────────
+  if (id === 'WGT_SURVEY_RESPONSE') {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-3">
+        <div className="relative w-24 h-24 flex items-center justify-center">
+          <svg className="w-full h-full transform -rotate-90">
+            <circle cx="48" cy="48" r="40" stroke={DS.bgLow} strokeWidth="8" fill="transparent" />
+            <circle cx="48" cy="48" r="40" stroke={DS.primary} strokeWidth="8" fill="transparent" strokeDasharray={251.2} strokeDashoffset={251.2 * (1 - 0.88)} strokeLinecap="round" />
+          </svg>
+          <div className="absolute flex flex-col items-center">
+            <span className="text-xl font-black" style={{ color: DS.text }}>88%</span>
+            <span className="text-[8px] font-bold tracking-widest text-slate-400">PART.</span>
+          </div>
+        </div>
+        <p className="text-[10px] text-center" style={{ color: DS.text3 }}>824 / 936 Responded<br/>(Engagement Pulse Q2)</p>
+      </div>
+    );
+  }
+
+  // ── Pending Action Tasks ────────────────────────────────────────────────────
+  if (id === 'WGT_TASKS_SUMMARY') {
+    const taskList = [
+      { task: 'Approve Leave', count: 12, color: DS.amber },
+      { task: 'KRA Reviews', count: 8, color: DS.primary },
+      { task: 'Exit Clearance', count: 3, color: DS.error },
+    ];
+    return (
+      <div className="space-y-2">
+        {taskList.map(t => (
+          <div key={t.task} className="flex items-center justify-between p-2.5 rounded-xl transition-transform hover:scale-[1.02]" style={{ background: DS.bgLow }}>
+            <span className="text-xs font-semibold" style={{ color: DS.text }}>{t.task}</span>
+            <span className="w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-black" style={{ background: t.color, color: 'white' }}>{t.count}</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return <div className="flex items-center justify-center h-16 text-xs" style={{ color: DS.text3 }}>Widget data loading…</div>;
 }
 
@@ -2200,6 +3501,7 @@ function renderWidget(id: string, chartType: ChartTypeOption, role?: DashboardRo
 
 // ─── Campus Drill-Down Panel (Chairman GOI → Individual Campus) ───────────────
 function CampusDrillPanel({ campus, onClose }: { campus: string; onClose: () => void }) {
+  const [activeTab, setActiveTab] = useState<'overview' | 'payroll' | 'talent' | 'learning'>('overview');
   const data = CAMPUS_DRILL_DATA[campus];
   const goiRow = GOI_CAMPUS_DATA.find(r => r.name === campus);
   if (!data || !goiRow) return null;
@@ -2212,6 +3514,17 @@ function CampusDrillPanel({ campus, onClose }: { campus: string; onClose: () => 
   };
   const attendancePct = Math.round((data.attendance.present / goiRow.staff) * 100);
   const alertTypeColor = (t: string) => t === 'error' ? { bg: DS.errorBg, color: DS.error } : t === 'warning' ? { bg: DS.warningBg, color: DS.warning } : { bg: DS.blueBg, color: DS.blue };
+  const statColor = (s: string) => s === 'filed' ? { bg: DS.successBg, color: DS.success } : s === 'pending' ? { bg: DS.warningBg, color: DS.warning } : { bg: DS.errorBg, color: DS.error };
+  const budgetColor = data.salary.budgetVariance > 0 ? DS.success : data.salary.budgetVariance < 0 ? DS.error : DS.text3;
+  const trendArrow = (t: string) => t === 'up' ? '↑' : t === 'down' ? '↓' : '→';
+  const trendColor = (t: string) => t === 'up' ? DS.success : t === 'down' ? DS.error : DS.text3;
+
+  const TABS = [
+    { id: 'overview' as const, label: 'Overview' },
+    { id: 'payroll' as const, label: 'Payroll & Finance' },
+    { id: 'talent' as const, label: 'Talent & HR' },
+    { id: 'learning' as const, label: 'Learning & Engagement' },
+  ];
 
   return (
     <div className="fixed inset-0 z-50 flex" style={{ background: 'rgba(11,28,48,0.32)', backdropFilter: 'blur(6px)' }}>
@@ -2219,140 +3532,414 @@ function CampusDrillPanel({ campus, onClose }: { campus: string; onClose: () => 
       <div className="flex-1" onClick={onClose} />
       {/* Panel */}
       <div
-        className="w-[520px] h-full overflow-y-auto flex flex-col animate-in slide-in-from-right-8 duration-300"
+        className="w-[560px] h-full overflow-y-auto flex flex-col animate-in slide-in-from-right-8 duration-300"
         style={{ background: DS.bg, borderLeft: `1px solid ${DS.border}`, boxShadow: '-8px 0 40px rgba(11,28,48,0.12)' }}
       >
-        {/* Header */}
-        <div className="sticky top-0 z-10 px-6 py-5 flex items-center justify-between" style={{ background: DS.bgCard, borderBottom: `1px solid ${DS.border}` }}>
-          <div>
-            <div className="flex items-center gap-2 mb-0.5">
-              <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full" style={{ background: DS.bgLow, color: DS.text3 }}>Campus Drill-Down</span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: goiRow.type === 'K-12' ? DS.amberBg : DS.blueBg, color: goiRow.type === 'K-12' ? DS.amber : DS.blue }}>{goiRow.type}</span>
+        {/* Sticky Header + Tabs */}
+        <div className="sticky top-0 z-10 flex flex-col" style={{ background: DS.bgCard, borderBottom: `1px solid ${DS.border}` }}>
+          <div className="px-6 pt-5 pb-3 flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full" style={{ background: DS.bgLow, color: DS.text3 }}>Campus Drill-Down</span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: goiRow.type === 'K-12' ? DS.amberBg : DS.blueBg, color: goiRow.type === 'K-12' ? DS.amber : DS.blue }}>{goiRow.type}</span>
+              </div>
+              <h2 className="text-xl font-black" style={{ color: DS.text, fontFamily: 'Manrope, sans-serif' }}>{campus}</h2>
             </div>
-            <h2 className="text-xl font-black" style={{ color: DS.text, fontFamily: 'Manrope, sans-serif' }}>{campus}</h2>
+            <div className="flex items-center gap-3">
+              <div className="text-center">
+                <div className="text-xl font-black" style={{ color: goiRow.health >= 80 ? DS.success : goiRow.health >= 60 ? DS.amber : DS.error, fontFamily: 'Manrope, sans-serif' }}>{goiRow.health}%</div>
+                <div className="text-[9px] font-semibold" style={{ color: DS.text3 }}>Health Score</div>
+              </div>
+              <button onClick={onClose} className="w-9 h-9 rounded-xl flex items-center justify-center transition-colors hover:bg-red-50" style={{ background: DS.bgLow }}>
+                <X className="w-4 h-4" style={{ color: DS.text3 }} />
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="text-center">
-              <div className="text-xl font-black" style={{ color: goiRow.health >= 80 ? DS.success : goiRow.health >= 60 ? DS.amber : DS.error, fontFamily: 'Manrope, sans-serif' }}>{goiRow.health}%</div>
-              <div className="text-[9px] font-semibold" style={{ color: DS.text3 }}>Health Score</div>
-            </div>
-            <button onClick={onClose} className="w-9 h-9 rounded-xl flex items-center justify-center transition-colors hover:bg-red-50" style={{ background: DS.bgLow }}>
-              <X className="w-4 h-4" style={{ color: DS.text3 }} />
-            </button>
+          {/* Tab Switcher */}
+          <div className="px-6 pb-3 flex items-center gap-2 flex-wrap">
+            {TABS.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className="text-xs font-semibold px-3 py-1.5 rounded-full transition-colors"
+                style={{
+                  background: activeTab === tab.id ? DS.primary : DS.bgLow,
+                  color: activeTab === tab.id ? '#ffffff' : DS.text3,
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
         </div>
 
         <div className="flex-1 p-6 space-y-5">
-          {/* KPI Row */}
-          <div className="grid grid-cols-4 gap-3">
-            {[
-              { label: 'Total Staff', value: goiRow.staff, icon: Users, color: DS.primary, bg: DS.bgLow },
-              { label: 'Present', value: `${data.attendance.present} (${attendancePct}%)`, icon: UserCheck, color: DS.success, bg: DS.successBg },
-              { label: 'On Leave', value: data.attendance.onLeave, icon: Calendar, color: DS.warning, bg: DS.warningBg },
-              { label: 'UAL / LOP', value: `${data.attendance.ual} / ${data.attendance.lop}`, icon: AlertTriangle, color: DS.error, bg: DS.errorBg },
-            ].map(kp => (
-              <div key={kp.label} className="rounded-2xl p-3 text-center" style={{ background: kp.bg }}>
-                <div className="w-7 h-7 rounded-xl mx-auto mb-1.5 flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.6)' }}>
-                  <kp.icon className="w-3.5 h-3.5" style={{ color: kp.color }} />
-                </div>
-                <div className="text-sm font-black leading-tight" style={{ color: DS.text, fontFamily: 'Manrope, sans-serif' }}>{kp.value}</div>
-                <div className="text-[9px] font-medium mt-0.5" style={{ color: DS.text3 }}>{kp.label}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* Alerts */}
-          {data.alerts.length > 0 && (
-            <div className="space-y-2">
-              <h4 className="text-xs font-black uppercase tracking-wider" style={{ color: DS.text3 }}>Campus Alerts</h4>
-              {data.alerts.map((a, i) => {
-                const ac = alertTypeColor(a.type);
-                return (
-                  <div key={i} className="flex items-start gap-2.5 px-3 py-2.5 rounded-xl" style={{ background: ac.bg }}>
-                    <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: ac.color }} />
-                    <span className="text-xs font-semibold" style={{ color: DS.text }}>{a.msg}</span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Attendance + Leave Breakdown side by side */}
-          <div className="grid grid-cols-2 gap-4">
-            {/* Attendance bar per dept */}
-            <div className="rounded-2xl p-4" style={{ background: DS.bgCard, border: `1px solid ${DS.border}` }}>
-              <h4 className="text-xs font-black uppercase tracking-wider mb-3" style={{ color: DS.text3 }}>Staff by Department</h4>
-              <div className="space-y-2">
-                {data.staffByDept.map(d => (
-                  <div key={d.dept} className="flex items-center gap-2">
-                    <span className="text-[10px] font-medium w-16 flex-shrink-0 truncate" style={{ color: DS.text2 }}>{d.dept}</span>
-                    <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: DS.bgLow }}>
-                      <div className="h-full rounded-full" style={{ width: `${(d.present / d.count) * 100}%`, background: DS.primary }} />
+          {/* ── Overview Tab ── */}
+          {activeTab === 'overview' && (
+            <>
+              {/* KPI Row */}
+              <div className="grid grid-cols-4 gap-3">
+                {[
+                  { label: 'Total Staff', value: goiRow.staff, icon: Users, color: DS.primary, bg: DS.bgLow },
+                  { label: 'Present', value: `${data.attendance.present} (${attendancePct}%)`, icon: UserCheck, color: DS.success, bg: DS.successBg },
+                  { label: 'On Leave', value: data.attendance.onLeave, icon: Calendar, color: DS.warning, bg: DS.warningBg },
+                  { label: 'UAL / LOP', value: `${data.attendance.ual} / ${data.attendance.lop}`, icon: AlertTriangle, color: DS.error, bg: DS.errorBg },
+                ].map(kp => (
+                  <div key={kp.label} className="rounded-2xl p-3 text-center" style={{ background: kp.bg }}>
+                    <div className="w-7 h-7 rounded-xl mx-auto mb-1.5 flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.6)' }}>
+                      <kp.icon className="w-3.5 h-3.5" style={{ color: kp.color }} />
                     </div>
-                    <span className="text-[10px] font-bold" style={{ color: DS.text }}>{d.present}/{d.count}</span>
+                    <div className="text-sm font-black leading-tight" style={{ color: DS.text, fontFamily: 'Manrope, sans-serif' }}>{kp.value}</div>
+                    <div className="text-[9px] font-medium mt-0.5" style={{ color: DS.text3 }}>{kp.label}</div>
                   </div>
                 ))}
               </div>
-            </div>
-            {/* Leave breakdown donut */}
-            <div className="rounded-2xl p-4" style={{ background: DS.bgCard, border: `1px solid ${DS.border}` }}>
-              <h4 className="text-xs font-black uppercase tracking-wider mb-3" style={{ color: DS.text3 }}>Leave Breakdown</h4>
-              <div className="flex items-center gap-3">
-                <ResponsiveContainer width={70} height={70}>
-                  <RePieChart>
-                    <Pie data={data.leaveBreakdown} cx="50%" cy="50%" innerRadius={18} outerRadius={32} dataKey="count" strokeWidth={0}>
-                      {data.leaveBreakdown.map((e, i) => <Cell key={i} fill={e.color} />)}
-                    </Pie>
-                  </RePieChart>
-                </ResponsiveContainer>
-                <div className="space-y-1 flex-1">
-                  {data.leaveBreakdown.map(l => (
-                    <div key={l.type} className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: l.color }} />
-                      <span className="text-[10px] flex-1" style={{ color: DS.text2 }}>{l.type}</span>
-                      <span className="text-[10px] font-bold" style={{ color: DS.text }}>{l.count}</span>
+
+              {/* Alerts */}
+              {data.alerts.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-xs font-black uppercase tracking-wider" style={{ color: DS.text3 }}>Campus Alerts</h4>
+                  {data.alerts.map((a, i) => {
+                    const ac = alertTypeColor(a.type);
+                    return (
+                      <div key={i} className="flex items-start gap-2.5 px-3 py-2.5 rounded-xl" style={{ background: ac.bg }}>
+                        <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: ac.color }} />
+                        <span className="text-xs font-semibold" style={{ color: DS.text }}>{a.msg}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Attendance + Leave Breakdown side by side */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="rounded-2xl p-4" style={{ background: DS.bgCard, border: `1px solid ${DS.border}` }}>
+                  <h4 className="text-xs font-black uppercase tracking-wider mb-3" style={{ color: DS.text3 }}>Staff by Department</h4>
+                  <div className="space-y-2">
+                    {data.staffByDept.map(d => (
+                      <div key={d.dept} className="flex items-center gap-2">
+                        <span className="text-[10px] font-medium w-16 flex-shrink-0 truncate" style={{ color: DS.text2 }}>{d.dept}</span>
+                        <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: DS.bgLow }}>
+                          <div className="h-full rounded-full" style={{ width: `${(d.present / d.count) * 100}%`, background: DS.primary }} />
+                        </div>
+                        <span className="text-[10px] font-bold" style={{ color: DS.text }}>{d.present}/{d.count}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="rounded-2xl p-4" style={{ background: DS.bgCard, border: `1px solid ${DS.border}` }}>
+                  <h4 className="text-xs font-black uppercase tracking-wider mb-3" style={{ color: DS.text3 }}>Leave Breakdown</h4>
+                  <div className="flex items-center gap-3">
+                    <ResponsiveContainer width={70} height={70}>
+                      <RePieChart>
+                        <Pie data={data.leaveBreakdown} cx="50%" cy="50%" innerRadius={18} outerRadius={32} dataKey="count" strokeWidth={0}>
+                          {data.leaveBreakdown.map((e, i) => <Cell key={i} fill={e.color} />)}
+                        </Pie>
+                      </RePieChart>
+                    </ResponsiveContainer>
+                    <div className="space-y-1 flex-1">
+                      {data.leaveBreakdown.map(l => (
+                        <div key={l.type} className="flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: l.color }} />
+                          <span className="text-[10px] flex-1" style={{ color: DS.text2 }}>{l.type}</span>
+                          <span className="text-[10px] font-bold" style={{ color: DS.text }}>{l.count}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payroll Steps */}
+              <div className="rounded-2xl p-4" style={{ background: DS.bgCard, border: `1px solid ${DS.border}` }}>
+                <h4 className="text-xs font-black uppercase tracking-wider mb-3" style={{ color: DS.text3 }}>Payroll Readiness</h4>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {data.payrollSteps.map((step, i) => {
+                    const s = stepIcon(step.status);
+                    return (
+                      <React.Fragment key={i}>
+                        <div className="flex flex-col items-center gap-1">
+                          <span className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold" style={{ background: s.bg, color: s.color }}>{s.icon}</span>
+                          <span className="text-[9px] font-medium text-center leading-tight max-w-[60px]" style={{ color: DS.text3 }}>{step.label}</span>
+                        </div>
+                        {i < data.payrollSteps.length - 1 && <div className="w-6 h-px mt-[-12px]" style={{ background: DS.border }} />}
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Top Absentees */}
+              {data.topAbsentees.length > 0 && (
+                <div className="rounded-2xl p-4" style={{ background: DS.bgCard, border: `1px solid ${DS.border}` }}>
+                  <h4 className="text-xs font-black uppercase tracking-wider mb-3" style={{ color: DS.text3 }}>Top Absentees MTD</h4>
+                  <div className="space-y-2">
+                    {data.topAbsentees.map((a, i) => (
+                      <div key={i} className="flex items-center justify-between px-3 py-2 rounded-xl" style={{ background: DS.errorBg }}>
+                        <div>
+                          <span className="text-xs font-semibold" style={{ color: DS.text }}>{a.name}</span>
+                          <span className="text-[10px] ml-2" style={{ color: DS.text3 }}>{a.dept}</span>
+                        </div>
+                        <span className="text-xs font-black" style={{ color: DS.error }}>{a.days}d absent</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* ── Payroll & Finance Tab ── */}
+          {activeTab === 'payroll' && (
+            <>
+              {/* Salary Card */}
+              <div className="rounded-2xl p-4" style={{ background: DS.bgCard, border: `1px solid ${DS.border}` }}>
+                <h4 className="text-xs font-black uppercase tracking-wider mb-3" style={{ color: DS.text3 }}>Salary Summary</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { label: 'Gross Payroll', value: `₹${(data.salary.gross / 100000).toFixed(1)}L`, color: DS.primary },
+                    { label: 'Net Payroll', value: `₹${(data.salary.net / 100000).toFixed(1)}L`, color: DS.success },
+                    { label: 'LOP Deduction', value: `₹${(data.salary.lopDeduction / 1000).toFixed(0)}K`, color: DS.error },
+                    { label: 'Cost per Emp', value: `₹${data.salary.costPerEmp.toLocaleString()}`, color: DS.text2 },
+                  ].map(item => (
+                    <div key={item.label} className="rounded-xl p-3" style={{ background: DS.bgLow }}>
+                      <p className="text-[10px] font-semibold mb-1" style={{ color: DS.text3 }}>{item.label}</p>
+                      <p className="text-base font-black" style={{ color: item.color, fontFamily: 'Manrope, sans-serif' }}>{item.value}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 px-3 py-2 rounded-xl flex items-center justify-between" style={{ background: data.salary.budgetVariance > 0 ? DS.successBg : data.salary.budgetVariance < 0 ? DS.errorBg : DS.bgLow }}>
+                  <span className="text-xs font-semibold" style={{ color: DS.text }}>Budget Variance</span>
+                  <span className="text-sm font-black" style={{ color: budgetColor }}>
+                    {data.salary.budgetVariance > 0 ? '+' : ''}{data.salary.budgetVariance}%
+                  </span>
+                </div>
+              </div>
+
+              {/* Statutory Compliance Grid */}
+              <div className="rounded-2xl p-4" style={{ background: DS.bgCard, border: `1px solid ${DS.border}` }}>
+                <h4 className="text-xs font-black uppercase tracking-wider mb-3" style={{ color: DS.text3 }}>Statutory Compliance</h4>
+                <div className="grid grid-cols-4 gap-2">
+                  {([['PF', data.statutory.pf], ['ESI', data.statutory.esi], ['TDS', data.statutory.tds], ['PT', data.statutory.pt]] as [string, string][]).map(([label, status]) => {
+                    const sc = statColor(status);
+                    return (
+                      <div key={label} className="rounded-xl p-3 text-center" style={{ background: sc.bg }}>
+                        <p className="text-xs font-black mb-1" style={{ color: DS.text }}>{label}</p>
+                        <span className="text-[10px] font-bold capitalize" style={{ color: sc.color }}>{status}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Payroll Steps */}
+              <div className="rounded-2xl p-4" style={{ background: DS.bgCard, border: `1px solid ${DS.border}` }}>
+                <h4 className="text-xs font-black uppercase tracking-wider mb-3" style={{ color: DS.text3 }}>Payroll Readiness Steps</h4>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {data.payrollSteps.map((step, i) => {
+                    const s = stepIcon(step.status);
+                    return (
+                      <React.Fragment key={i}>
+                        <div className="flex flex-col items-center gap-1">
+                          <span className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold" style={{ background: s.bg, color: s.color }}>{s.icon}</span>
+                          <span className="text-[9px] font-medium text-center leading-tight max-w-[60px]" style={{ color: DS.text3 }}>{step.label}</span>
+                        </div>
+                        {i < data.payrollSteps.length - 1 && <div className="w-6 h-px mt-[-12px]" style={{ background: DS.border }} />}
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* ── Talent & HR Tab ── */}
+          {activeTab === 'talent' && (
+            <>
+              {/* 4-tile grid */}
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: 'Open Positions', value: data.talentAcq.openPositions, color: data.talentAcq.openPositions > 8 ? DS.error : DS.primary, bg: data.talentAcq.openPositions > 8 ? DS.errorBg : DS.bgLow },
+                  { label: 'Time-to-Hire (days)', value: data.talentAcq.timeToHire, color: data.talentAcq.timeToHire > 30 ? DS.error : DS.success, bg: data.talentAcq.timeToHire > 30 ? DS.errorBg : DS.successBg },
+                  { label: 'Attrition YTD', value: `${data.exitData.attritionYTD}%`, color: data.exitData.attritionYTD > 7 ? DS.error : DS.success, bg: data.exitData.attritionYTD > 7 ? DS.errorBg : DS.successBg },
+                  { label: 'F&F Pending', value: data.exitData.ffPending, color: data.exitData.ffPending > 0 ? DS.warning : DS.success, bg: data.exitData.ffPending > 0 ? DS.warningBg : DS.successBg },
+                ].map(tile => (
+                  <div key={tile.label} className="rounded-2xl p-4" style={{ background: tile.bg }}>
+                    <p className="text-[10px] font-semibold mb-1" style={{ color: DS.text3 }}>{tile.label}</p>
+                    <p className="text-2xl font-black" style={{ color: tile.color, fontFamily: 'Manrope, sans-serif' }}>{tile.value}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Appraisal Progress */}
+              <div className="rounded-2xl p-4" style={{ background: DS.bgCard, border: `1px solid ${DS.border}` }}>
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-xs font-black uppercase tracking-wider" style={{ color: DS.text3 }}>Appraisal — {data.appraisal.cycle}</h4>
+                  <span className="text-[10px] font-semibold" style={{ color: DS.text3 }}>Total: {data.appraisal.total}</span>
+                </div>
+                <div className="space-y-2">
+                  <div>
+                    <div className="flex justify-between text-[10px] mb-0.5">
+                      <span style={{ color: DS.text2 }}>Submitted</span>
+                      <span className="font-bold" style={{ color: DS.text }}>{data.appraisal.submitted}</span>
+                    </div>
+                    <div className="h-2.5 rounded-full overflow-hidden" style={{ background: DS.bgLow }}>
+                      <div className="h-full rounded-full" style={{ width: `${(data.appraisal.submitted / data.appraisal.total) * 100}%`, background: DS.primary }} />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-[10px] mb-0.5">
+                      <span style={{ color: DS.text2 }}>Completed</span>
+                      <span className="font-bold" style={{ color: DS.text }}>{data.appraisal.completed}</span>
+                    </div>
+                    <div className="h-2.5 rounded-full overflow-hidden" style={{ background: DS.bgLow }}>
+                      <div className="h-full rounded-full" style={{ width: `${(data.appraisal.completed / data.appraisal.total) * 100}%`, background: DS.success }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Onboarding + Exit */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="rounded-2xl p-4" style={{ background: DS.bgCard, border: `1px solid ${DS.border}` }}>
+                  <h4 className="text-xs font-black uppercase tracking-wider mb-3" style={{ color: DS.text3 }}>Onboarding</h4>
+                  {[
+                    { label: 'Active', value: data.onboarding.active, color: DS.primary },
+                    { label: 'SLA Breached', value: data.onboarding.slaBreached, color: data.onboarding.slaBreached > 0 ? DS.error : DS.success },
+                    { label: 'Completed', value: data.onboarding.completed, color: DS.success },
+                  ].map(row => (
+                    <div key={row.label} className="flex items-center justify-between py-1">
+                      <span className="text-[10px] font-medium" style={{ color: DS.text2 }}>{row.label}</span>
+                      <span className="text-xs font-black" style={{ color: row.color }}>{row.value}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="rounded-2xl p-4" style={{ background: DS.bgCard, border: `1px solid ${DS.border}` }}>
+                  <h4 className="text-xs font-black uppercase tracking-wider mb-3" style={{ color: DS.text3 }}>Exit Pipeline</h4>
+                  {[
+                    { label: 'Active Exits', value: data.exitData.active, color: DS.error },
+                    { label: 'F&F Settled', value: data.exitData.ffSettled, color: DS.success },
+                    { label: 'F&F Pending', value: data.exitData.ffPending, color: data.exitData.ffPending > 0 ? DS.warning : DS.success },
+                  ].map(row => (
+                    <div key={row.label} className="flex items-center justify-between py-1">
+                      <span className="text-[10px] font-medium" style={{ color: DS.text2 }}>{row.label}</span>
+                      <span className="text-xs font-black" style={{ color: row.color }}>{row.value}</span>
                     </div>
                   ))}
                 </div>
               </div>
-            </div>
-          </div>
 
-          {/* Payroll Steps */}
-          <div className="rounded-2xl p-4" style={{ background: DS.bgCard, border: `1px solid ${DS.border}` }}>
-            <h4 className="text-xs font-black uppercase tracking-wider mb-3" style={{ color: DS.text3 }}>Payroll Readiness</h4>
-            <div className="flex items-center gap-2 flex-wrap">
-              {data.payrollSteps.map((step, i) => {
-                const s = stepIcon(step.status);
-                return (
-                  <React.Fragment key={i}>
-                    <div className="flex flex-col items-center gap-1">
-                      <span className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold" style={{ background: s.bg, color: s.color }}>{s.icon}</span>
-                      <span className="text-[9px] font-medium text-center leading-tight max-w-[60px]" style={{ color: DS.text3 }}>{step.label}</span>
+              {/* Talent Acquisition extras */}
+              <div className="rounded-2xl p-4" style={{ background: DS.bgCard, border: `1px solid ${DS.border}` }}>
+                <h4 className="text-xs font-black uppercase tracking-wider mb-3" style={{ color: DS.text3 }}>Talent Acquisition</h4>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  {[
+                    { label: 'Offers Out', value: data.talentAcq.offersOut },
+                    { label: 'Joined MTD', value: data.talentAcq.joinedMTD },
+                  ].map(item => (
+                    <div key={item.label} className="rounded-xl px-3 py-2" style={{ background: DS.bgLow }}>
+                      <p className="text-[10px] font-semibold mb-0.5" style={{ color: DS.text3 }}>{item.label}</p>
+                      <p className="text-lg font-black" style={{ color: DS.text, fontFamily: 'Manrope, sans-serif' }}>{item.value}</p>
                     </div>
-                    {i < data.payrollSteps.length - 1 && <div className="w-6 h-px mt-[-12px]" style={{ background: DS.border }} />}
-                  </React.Fragment>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Top Absentees */}
-          {data.topAbsentees.length > 0 && (
-            <div className="rounded-2xl p-4" style={{ background: DS.bgCard, border: `1px solid ${DS.border}` }}>
-              <h4 className="text-xs font-black uppercase tracking-wider mb-3" style={{ color: DS.text3 }}>Top Absentees MTD</h4>
-              <div className="space-y-2">
-                {data.topAbsentees.map((a, i) => (
-                  <div key={i} className="flex items-center justify-between px-3 py-2 rounded-xl" style={{ background: DS.errorBg }}>
-                    <div>
-                      <span className="text-xs font-semibold" style={{ color: DS.text }}>{a.name}</span>
-                      <span className="text-[10px] ml-2" style={{ color: DS.text3 }}>{a.dept}</span>
-                    </div>
-                    <span className="text-xs font-black" style={{ color: DS.error }}>{a.days}d absent</span>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            </>
+          )}
+
+          {/* ── Learning & Engagement Tab ── */}
+          {activeTab === 'learning' && (
+            <>
+              {/* L&D Completion */}
+              <div className="rounded-2xl p-4" style={{ background: DS.bgCard, border: `1px solid ${DS.border}` }}>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-xs font-black uppercase tracking-wider" style={{ color: DS.text3 }}>L&D Completion</h4>
+                  <span className="text-xs font-black" style={{ color: DS.teal }}>{data.lnd.completionPct}%</span>
+                </div>
+                <div className="h-3 rounded-full overflow-hidden mb-3" style={{ background: DS.bgLow }}>
+                  <div className="h-full rounded-full" style={{ width: `${data.lnd.completionPct}%`, background: DS.teal }} />
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  {[
+                    { label: 'Enrolled', value: data.lnd.enrolled, color: DS.primary },
+                    { label: 'Completed', value: data.lnd.completed, color: DS.success },
+                    { label: 'Certs Issued', value: data.lnd.certIssued, color: DS.purple },
+                  ].map(item => (
+                    <div key={item.label} className="rounded-xl p-2" style={{ background: DS.bgLow }}>
+                      <p className="text-base font-black" style={{ color: item.color, fontFamily: 'Manrope, sans-serif' }}>{item.value}</p>
+                      <p className="text-[9px] font-semibold" style={{ color: DS.text3 }}>{item.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Lesson Plans */}
+              <div className="rounded-2xl p-4" style={{ background: DS.bgCard, border: `1px solid ${DS.border}` }}>
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-xs font-black uppercase tracking-wider" style={{ color: DS.text3 }}>Lesson Plans</h4>
+                  <span className="text-xs font-bold" style={{ color: DS.text }}>{data.lessonPlans.submitted}/{data.lessonPlans.total}</span>
+                </div>
+                <div className="h-3 rounded-full overflow-hidden" style={{ background: DS.bgLow }}>
+                  <div className="h-full rounded-full" style={{
+                    width: `${(data.lessonPlans.submitted / data.lessonPlans.total) * 100}%`,
+                    background: (data.lessonPlans.submitted / data.lessonPlans.total) >= 0.9 ? DS.success : (data.lessonPlans.submitted / data.lessonPlans.total) >= 0.75 ? DS.amber : DS.error,
+                  }} />
+                </div>
+                <p className="text-[10px] font-semibold mt-1" style={{ color: DS.text3 }}>{Math.round((data.lessonPlans.submitted / data.lessonPlans.total) * 100)}% submitted</p>
+              </div>
+
+              {/* Research Output */}
+              <div className="rounded-2xl p-4" style={{ background: DS.bgCard, border: `1px solid ${DS.border}` }}>
+                <h4 className="text-xs font-black uppercase tracking-wider mb-3" style={{ color: DS.text3 }}>Research Output (YTD)</h4>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  {[
+                    { label: 'Papers', value: data.research.papers, color: DS.primary },
+                    { label: 'Conferences', value: data.research.conferences, color: DS.teal },
+                    { label: 'Patents', value: data.research.patents, color: DS.purple },
+                  ].map(item => (
+                    <div key={item.label} className="rounded-xl p-3" style={{ background: DS.bgLow }}>
+                      <p className="text-xl font-black" style={{ color: item.color, fontFamily: 'Manrope, sans-serif' }}>{item.value}</p>
+                      <p className="text-[9px] font-semibold mt-0.5" style={{ color: DS.text3 }}>{item.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Engagement Score */}
+              <div className="rounded-2xl p-4" style={{ background: DS.bgCard, border: `1px solid ${DS.border}` }}>
+                <h4 className="text-xs font-black uppercase tracking-wider mb-3" style={{ color: DS.text3 }}>Engagement & Goals</h4>
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="text-center">
+                    <div className="text-3xl font-black" style={{ color: data.engagement.score >= 75 ? DS.success : data.engagement.score >= 60 ? DS.amber : DS.error, fontFamily: 'Manrope, sans-serif' }}>
+                      {data.engagement.score}
+                    </div>
+                    <div className="text-[9px] font-semibold" style={{ color: DS.text3 }}>Engagement Score</div>
+                  </div>
+                  <div>
+                    <div className="text-xl font-black" style={{ color: trendColor(data.engagement.trend) }}>{trendArrow(data.engagement.trend)}</div>
+                    <div className="text-[9px] font-semibold capitalize" style={{ color: DS.text3 }}>{data.engagement.trend}</div>
+                  </div>
+                  <div className="flex-1 text-right">
+                    <div className="text-sm font-black" style={{ color: DS.text }}>{data.engagement.surveyResponse}%</div>
+                    <div className="text-[9px] font-semibold" style={{ color: DS.text3 }}>Survey Response</div>
+                  </div>
+                </div>
+                {/* Goals Summary */}
+                <div className="grid grid-cols-4 gap-2 text-center">
+                  {[
+                    { label: 'Set', value: data.goals.set, color: DS.text },
+                    { label: 'On Track', value: data.goals.onTrack, color: DS.success },
+                    { label: 'At Risk', value: data.goals.atRisk, color: data.goals.atRisk > 50 ? DS.error : DS.warning },
+                    { label: 'Completed', value: data.goals.completed, color: DS.purple },
+                  ].map(g => (
+                    <div key={g.label} className="rounded-xl p-2" style={{ background: DS.bgLow }}>
+                      <p className="text-sm font-black" style={{ color: g.color, fontFamily: 'Manrope, sans-serif' }}>{g.value}</p>
+                      <p className="text-[9px] font-semibold" style={{ color: DS.text3 }}>{g.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
           )}
         </div>
       </div>

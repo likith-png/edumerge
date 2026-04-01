@@ -9,8 +9,9 @@ import {
     CheckCircle, ArrowLeft, BookOpen, Trophy, Heart, Sparkles, Star, Lightbulb, Users, Award, Shield, Clock, AlertTriangle, Target,
     ExternalLink, X, Edit, Plus, Upload, Menu, IndianRupee, Activity
 } from 'lucide-react';
-import { getStaffPortfolio, updateStaffMember, updateStaffExperience, updateStaffEducation } from '../services/staffPortfolioService';
+import { getStaffPortfolio, updateStaffMember, updateStaffExperience, updateStaffEducation, updateStaffPersonalDetails } from '../services/staffPortfolioService';
 import { Dialog, DialogContent, DialogTitle } from '../components/ui/dialog';
+import { Input } from '../components/ui/input';
 
 const StaffPortfolioDetail: React.FC = () => {
     const { staffId } = useParams<{ staffId: string }>();
@@ -25,6 +26,8 @@ const StaffPortfolioDetail: React.FC = () => {
     const [selectedExp, setSelectedExp] = useState<any>(null);
     const [viewMode, setViewMode] = useState<'monthly' | 'yearly'>('monthly');
     const [isPersonalOpen, setIsPersonalOpen] = useState(false);
+    const [isEditingPersonal, setIsEditingPersonal] = useState(false);
+    const [personalForm, setPersonalForm] = useState<any>(portfolio?.personalDetails || {});
     const [experienceDetails, setExperienceDetails] = useState<any[]>(portfolio?.experienceDetails || []);
     const [educationDetails, setEducationDetails] = useState<any[]>(portfolio?.educationDetails || []);
     const [expForm, setExpForm] = useState<any>({});
@@ -108,6 +111,12 @@ const StaffPortfolioDetail: React.FC = () => {
         setEducationDetails(updated);
         updateStaffEducation(member.id, updated);
         setIsEditingEducation(false);
+    };
+
+    const handleSavePersonal = () => {
+        updateStaffPersonalDetails(member.id, personalForm);
+        setIsEditingPersonal(false);
+        // Refresh local portfolio data if needed, or rely on state
     };
     const handleExperienceChange = (field: string, value: string) => {
         const updatedForm = { ...expForm, [field]: value };
@@ -212,8 +221,8 @@ const StaffPortfolioDetail: React.FC = () => {
                 
                 <CardContent className="p-10 relative z-10">
                     <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
-                        <div className="w-32 h-32 bg-white/80 backdrop-blur-sm rounded-[2.5rem] flex items-center justify-center text-4xl font-black text-blue-800 shadow-lg border border-white ring-4 ring-blue-50/50 overflow-hidden">
-                            <img src={`https://i.pravatar.cc/300?u=${encodeURIComponent(member.name)}`} alt={member.name} className="w-full h-full object-cover" />
+                        <div className={`w-32 h-32 ${['bg-blue-600', 'bg-indigo-600', 'bg-emerald-600', 'bg-rose-600', 'bg-amber-600', 'bg-violet-600', 'bg-teal-600', 'bg-sky-600'][member.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 8]} rounded-[2.5rem] flex items-center justify-center text-white text-5xl font-black shadow-xl border border-white/20 ring-4 ring-blue-50/10 overflow-hidden transition-transform hover:scale-105 duration-500`}>
+                            {member.name.charAt(0).toUpperCase()}
                         </div>
                         <div className="flex-1 text-center md:text-left">
                             <h2 className="text-4xl font-black text-slate-800 tracking-tight">{member.name}</h2>
@@ -1329,78 +1338,90 @@ const StaffPortfolioDetail: React.FC = () => {
                         >
                             <X className="w-6 h-6" />
                         </button>
-                        <div className="flex items-center gap-4 text-white">
+                        <div className="flex items-center gap-4 text-white w-full">
                             <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-md border border-white/20">
                                 <User className="w-8 h-8" />
                             </div>
-                            <div>
-                                <h3 className="text-3xl font-black tracking-tight leading-none uppercase">Personal Information</h3>
-                                <p className="text-blue-100 text-[10px] font-black uppercase tracking-[0.2em] mt-2 opacity-80">Confidential & Verified Records</p>
+                            <div className="flex-1 flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-3xl font-black tracking-tight leading-none uppercase">Personal Information</h3>
+                                    <p className="text-blue-100 text-[10px] font-black uppercase tracking-[0.2em] mt-2 opacity-80">Confidential & Verified Records</p>
+                                </div>
+                                {!isEditingPersonal && (
+                                    <button 
+                                        onClick={() => {
+                                            setPersonalForm(portfolio.personalDetails);
+                                            setIsEditingPersonal(true);
+                                        }}
+                                        className="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-xl border border-white/30 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all"
+                                    >
+                                        <Edit className="w-3.5 h-3.5" /> Edit Info
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>
 
                     <div className="p-10 space-y-10 bg-white max-h-[70vh] overflow-y-auto">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Date of Birth</label>
-                                <div className="text-sm font-bold text-slate-900 bg-slate-50 p-4 rounded-2xl border border-slate-100">{portfolio.personalDetails.dob}</div>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Gender</label>
-                                <div className="text-sm font-bold text-slate-900 bg-slate-50 p-4 rounded-2xl border border-slate-100">{portfolio.personalDetails.gender}</div>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Blood Group</label>
-                                <div className="text-sm font-bold text-slate-900 bg-slate-50 p-4 rounded-2xl border border-slate-100">{portfolio.personalDetails.bloodGroup}</div>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nationality</label>
-                                <div className="text-sm font-bold text-slate-900 bg-slate-50 p-4 rounded-2xl border border-slate-100">{portfolio.personalDetails.nationality}</div>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Religion</label>
-                                <div className="text-sm font-bold text-slate-900 bg-slate-50 p-4 rounded-2xl border border-slate-100">{portfolio.personalDetails.religion}</div>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Marital Status</label>
-                                <div className="text-sm font-bold text-slate-900 bg-slate-50 p-4 rounded-2xl border border-slate-100">{portfolio.personalDetails.maritalStatus}</div>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Father's Name</label>
-                                <div className="text-sm font-bold text-slate-900 bg-slate-50 p-4 rounded-2xl border border-slate-100">{portfolio.personalDetails.fatherName}</div>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Mother's Name</label>
-                                <div className="text-sm font-bold text-slate-900 bg-slate-50 p-4 rounded-2xl border border-slate-100">{portfolio.personalDetails.motherName}</div>
-                            </div>
+                            {[
+                                { label: 'Date of Birth', key: 'dob', type: 'date' },
+                                { label: 'Gender', key: 'gender', type: 'select', options: ['Male', 'Female', 'Other'] },
+                                { label: 'Blood Group', key: 'bloodGroup', type: 'text' },
+                                { label: 'Nationality', key: 'nationality', type: 'text' },
+                                { label: 'Religion', key: 'religion', type: 'text' },
+                                { label: 'Marital Status', key: 'maritalStatus', type: 'select', options: ['Married', 'Single', 'Divorced', 'Widowed'] },
+                                { label: "Father's Name", key: 'fatherName', type: 'text' },
+                                { label: "Mother's Name", key: 'motherName', type: 'text' },
+                            ].map((field) => (
+                                <div key={field.key} className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{field.label}</label>
+                                    {isEditingPersonal ? (
+                                        field.type === 'select' ? (
+                                            <select 
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold focus:ring-2 focus:ring-blue-100 outline-none"
+                                                value={personalForm[field.key]}
+                                                onChange={(e) => setPersonalForm({ ...personalForm, [field.key]: e.target.value })}
+                                            >
+                                                {field.options?.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                                            </select>
+                                        ) : (
+                                            <Input 
+                                                type={field.type}
+                                                className="bg-slate-50 border-slate-200 rounded-xl h-12 font-bold"
+                                                value={personalForm[field.key]}
+                                                onChange={(e) => setPersonalForm({ ...personalForm, [field.key]: e.target.value })}
+                                            />
+                                        )
+                                    ) : (
+                                        <div className="text-sm font-bold text-slate-900 bg-slate-50 p-4 rounded-2xl border border-slate-100">{(portfolio.personalDetails as any)[field.key]}</div>
+                                    )}
+                                </div>
+                            ))}
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-slate-100">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                    <Shield className="w-3 h-3" /> Aadhar Number
-                                </label>
-                                <div className="text-sm font-black text-blue-800 bg-blue-50/50 p-4 rounded-2xl border border-blue-100/50">{portfolio.personalDetails.aadharNumber}</div>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                    <Shield className="w-3 h-3" /> PAN Number
-                                </label>
-                                <div className="text-sm font-black text-blue-800 bg-blue-50/50 p-4 rounded-2xl border border-blue-100/50">{portfolio.personalDetails.panNumber}</div>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                    <Shield className="w-3 h-3" /> PF Number
-                                </label>
-                                <div className="text-sm font-black text-blue-800 bg-blue-50/50 p-4 rounded-2xl border border-blue-100/50">{portfolio.personalDetails.pfNumber}</div>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                    <Shield className="w-3 h-3" /> ESI Number
-                                </label>
-                                <div className="text-sm font-black text-blue-800 bg-blue-50/50 p-4 rounded-2xl border border-blue-100/50">{portfolio.personalDetails.esiNumber}</div>
-                            </div>
+                            {[
+                                { label: 'Aadhar Number', key: 'aadharNumber', icon: Shield },
+                                { label: 'PAN Number', key: 'panNumber', icon: Shield },
+                                { label: 'PF Number', key: 'pfNumber', icon: Shield },
+                                { label: 'ESI Number', key: 'esiNumber', icon: Shield },
+                            ].map((field) => (
+                                <div key={field.key} className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                        <field.icon className="w-3 h-3" /> {field.label}
+                                    </label>
+                                    {isEditingPersonal ? (
+                                        <Input 
+                                            className="bg-blue-50/50 border-blue-100/50 rounded-xl h-12 font-bold text-blue-800"
+                                            value={personalForm[field.key]}
+                                            onChange={(e) => setPersonalForm({ ...personalForm, [field.key]: e.target.value })}
+                                        />
+                                    ) : (
+                                        <div className="text-sm font-black text-blue-800 bg-blue-50/50 p-4 rounded-2xl border border-blue-100/50">{(portfolio.personalDetails as any)[field.key]}</div>
+                                    )}
+                                </div>
+                            ))}
                         </div>
 
                         <div className="bg-slate-50 rounded-[32px] p-8 border border-slate-100">
@@ -1408,22 +1429,25 @@ const StaffPortfolioDetail: React.FC = () => {
                                 <Menu className="w-4 h-4 text-slate-400" /> Bank & Financial Details
                             </h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                <div className="space-y-1">
-                                    <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Bank Name</div>
-                                    <div className="text-sm font-black text-slate-900">{portfolio.personalDetails.bankDetails.bankName}</div>
-                                </div>
-                                <div className="space-y-1">
-                                    <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Branch</div>
-                                    <div className="text-sm font-bold text-slate-700">{portfolio.personalDetails.bankDetails.branchName}</div>
-                                </div>
-                                <div className="space-y-1">
-                                    <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Account Number</div>
-                                    <div className="text-sm font-black text-blue-800">{portfolio.personalDetails.bankDetails.accountNumber}</div>
-                                </div>
-                                <div className="space-y-1">
-                                    <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">IFSC Code</div>
-                                    <div className="text-sm font-black text-slate-900">{portfolio.personalDetails.bankDetails.ifscCode}</div>
-                                </div>
+                                {[
+                                    { label: 'Bank Name', key: 'bankName' },
+                                    { label: 'Branch', key: 'branchName' },
+                                    { label: 'Account Number', key: 'accountNumber', color: 'text-blue-800' },
+                                    { label: 'IFSC Code', key: 'ifscCode' },
+                                ].map((field) => (
+                                    <div key={field.key} className="space-y-1">
+                                        <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{field.label}</div>
+                                        {isEditingPersonal ? (
+                                            <Input 
+                                                className={`bg-white border-slate-200 rounded-lg h-9 text-xs font-bold ${field.color || 'text-slate-900'}`}
+                                                value={personalForm.bankDetails[field.key]}
+                                                onChange={(e) => setPersonalForm({ ...personalForm, bankDetails: { ...personalForm.bankDetails, [field.key]: e.target.value } })}
+                                            />
+                                        ) : (
+                                            <div className={`text-sm font-black ${field.color || 'text-slate-900'}`}>{(portfolio.personalDetails.bankDetails as any)[field.key]}</div>
+                                        )}
+                                    </div>
+                                ))}
                             </div>
                         </div>
 
@@ -1435,11 +1459,28 @@ const StaffPortfolioDetail: React.FC = () => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-1">
                                         <div className="text-[9px] font-black text-blue-200 uppercase tracking-widest">Passport Number</div>
-                                        <div className="text-sm font-black text-slate-900">{portfolio.personalDetails.passportDetails.number}</div>
+                                        {isEditingPersonal ? (
+                                            <Input 
+                                                className="bg-white border-blue-100 rounded-lg h-9 text-xs font-bold"
+                                                value={personalForm.passportDetails?.number}
+                                                onChange={(e) => setPersonalForm({ ...personalForm, passportDetails: { ...personalForm.passportDetails, number: e.target.value } })}
+                                            />
+                                        ) : (
+                                            <div className="text-sm font-black text-slate-900">{portfolio.personalDetails.passportDetails.number}</div>
+                                        )}
                                     </div>
                                     <div className="space-y-1">
                                         <div className="text-[9px] font-black text-blue-200 uppercase tracking-widest">Expiry Date</div>
-                                        <div className="text-sm font-black text-slate-900">{portfolio.personalDetails.passportDetails.expiryDate}</div>
+                                        {isEditingPersonal ? (
+                                            <Input 
+                                                type="date"
+                                                className="bg-white border-blue-100 rounded-lg h-9 text-xs font-bold"
+                                                value={personalForm.passportDetails?.expiryDate}
+                                                onChange={(e) => setPersonalForm({ ...personalForm, passportDetails: { ...personalForm.passportDetails, expiryDate: e.target.value } })}
+                                            />
+                                        ) : (
+                                            <div className="text-sm font-black text-slate-900">{portfolio.personalDetails.passportDetails.expiryDate}</div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -1449,15 +1490,31 @@ const StaffPortfolioDetail: React.FC = () => {
                         <div className="space-y-8 pt-8 border-t border-slate-100">
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Current Address</label>
-                                <div className="text-sm font-medium text-slate-700 bg-slate-50 p-5 rounded-2xl border border-slate-100 leading-relaxed italic">
-                                    {portfolio.personalDetails.currentAddress}
-                                </div>
+                                {isEditingPersonal ? (
+                                    <textarea 
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-5 text-sm font-medium italic min-h-[100px] outline-none focus:ring-2 focus:ring-blue-100"
+                                        value={personalForm.currentAddress}
+                                        onChange={(e) => setPersonalForm({ ...personalForm, currentAddress: e.target.value })}
+                                    />
+                                ) : (
+                                    <div className="text-sm font-medium text-slate-700 bg-slate-50 p-5 rounded-2xl border border-slate-100 leading-relaxed italic">
+                                        {portfolio.personalDetails.currentAddress}
+                                    </div>
+                                )}
                             </div>
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Permanent Address</label>
-                                <div className="text-sm font-medium text-slate-700 bg-slate-50 p-5 rounded-2xl border border-slate-100 leading-relaxed italic">
-                                    {portfolio.personalDetails.permanentAddress}
-                                </div>
+                                {isEditingPersonal ? (
+                                    <textarea 
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-5 text-sm font-medium italic min-h-[100px] outline-none focus:ring-2 focus:ring-blue-100"
+                                        value={personalForm.permanentAddress}
+                                        onChange={(e) => setPersonalForm({ ...personalForm, permanentAddress: e.target.value })}
+                                    />
+                                ) : (
+                                    <div className="text-sm font-medium text-slate-700 bg-slate-50 p-5 rounded-2xl border border-slate-100 leading-relaxed italic">
+                                        {portfolio.personalDetails.permanentAddress}
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -1466,28 +1523,52 @@ const StaffPortfolioDetail: React.FC = () => {
                                 <Heart className="w-4 h-4" /> Emergency Contact Details
                             </h4>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div className="space-y-1">
-                                    <div className="text-[9px] font-black text-rose-300 uppercase tracking-widest">Contact Person</div>
-                                    <div className="text-sm font-black text-slate-900">{portfolio.personalDetails.emergencyContact.name}</div>
-                                </div>
-                                <div className="space-y-1">
-                                    <div className="text-[9px] font-black text-rose-300 uppercase tracking-widest">Relation</div>
-                                    <div className="text-sm font-bold text-slate-700 italic">{portfolio.personalDetails.emergencyContact.relation}</div>
-                                </div>
-                                <div className="space-y-1">
-                                    <div className="text-[9px] font-black text-rose-300 uppercase tracking-widest">Phone Number</div>
-                                    <div className="text-sm font-black text-rose-600 underline underline-offset-4">{portfolio.personalDetails.emergencyContact.phone}</div>
-                                </div>
+                                {[
+                                    { label: 'Contact Person', key: 'name' },
+                                    { label: 'Relation', key: 'relation', isItalic: true },
+                                    { label: 'Phone Number', key: 'phone', color: 'text-rose-600' },
+                                ].map((field) => (
+                                    <div key={field.key} className="space-y-1">
+                                        <div className="text-[9px] font-black text-rose-300 uppercase tracking-widest">{field.label}</div>
+                                        {isEditingPersonal ? (
+                                            <Input 
+                                                className={`bg-white border-rose-100 rounded-lg h-9 text-xs font-bold ${field.color || 'text-slate-900'}`}
+                                                value={personalForm.emergencyContact[field.key]}
+                                                onChange={(e) => setPersonalForm({ ...personalForm, emergencyContact: { ...personalForm.emergencyContact, [field.key]: e.target.value } })}
+                                            />
+                                        ) : (
+                                            <div className={`text-sm font-black ${field.color || 'text-slate-900'} ${field.isItalic ? 'italic' : ''}`}>{(portfolio.personalDetails.emergencyContact as any)[field.key]}</div>
+                                        )}
+                                    </div>
+                                ))}
                             </div>
                         </div>
 
-                        <div className="pt-6 flex justify-end">
-                            <Button
-                                onClick={() => setIsPersonalOpen(false)}
-                                className="bg-slate-900 text-white hover:bg-slate-800 rounded-2xl px-10 h-14 font-black uppercase tracking-widest text-xs"
-                            >
-                                Close Records
-                            </Button>
+                        <div className="pt-6 flex justify-end gap-3">
+                            {isEditingPersonal ? (
+                                <>
+                                    <Button
+                                        onClick={() => setIsEditingPersonal(false)}
+                                        variant="ghost"
+                                        className="rounded-2xl px-8 h-14 font-black uppercase tracking-widest text-[10px] text-slate-500 hover:bg-slate-100"
+                                    >
+                                        Discard
+                                    </Button>
+                                    <Button
+                                        onClick={handleSavePersonal}
+                                        className="bg-blue-800 text-white hover:bg-blue-900 rounded-2xl px-10 h-14 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-blue-800/20"
+                                    >
+                                        Save Changes
+                                    </Button>
+                                </>
+                            ) : (
+                                <Button
+                                    onClick={() => setIsPersonalOpen(false)}
+                                    className="bg-slate-900 text-white hover:bg-slate-800 rounded-2xl px-10 h-14 font-black uppercase tracking-widest text-xs"
+                                >
+                                    Close Records
+                                </Button>
+                            )}
                         </div>
                     </div>
                 </DialogContent>

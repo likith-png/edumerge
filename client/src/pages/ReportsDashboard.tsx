@@ -37,13 +37,30 @@ const mockReports = [
 ];
 
 const mockModules = ['Onboarding', 'Appraisal', 'Exit Management', 'Capacity Intelligence', 'Staff Portfolio', 'Talent Acquisition', 'Leave Management', 'Payroll', 'Attendance', 'NHC'];
-const mockColumns = [
-    'SlNo', 'StaffCode', 'Name', 'Designation', 'DOB', 'Qualification',
-    'Experience', 'DOJ', 'Basic', 'DA', 'HRA', 'CCA', 'Others',
-    'Conv.All', 'AGP(Ind)', 'PF Amnt', 'Variable Pay', 'Gross'
+
+const ONBOARDING_DATA = [
+    { id: 0, name: 'Mr. Arvind Sharma', role: 'Mathematics Teacher', dept: 'Mathematics', stage: 'Offer Accepted', status: 'Completed', joinDate: '2026-04-01' },
+    { id: 1, name: 'Ms. Reshma Binu Prasad', role: 'Assistant Professor', dept: 'Computer Science', stage: 'Documentation', status: 'In Progress', joinDate: '2026-03-15' },
+    { id: 2, name: 'Ms. Sanchaiyata Majumdar', role: 'Lab Instructor', dept: 'Physics', stage: 'Orientation', status: 'On Track', joinDate: '2026-03-10' },
+    { id: 3, name: 'Dr. R Sedhunivas', role: 'Admin Officer', dept: 'Administration', stage: 'BGV', status: 'SLA Breach', joinDate: '2026-02-28' },
+    { id: 4, name: 'Dr. Ranjita Saikia', role: 'Lecturer', dept: 'Mathematics', stage: 'Operational Checklist', status: 'On Track', joinDate: '2026-03-12' },
+    { id: 5, name: 'Mr. Manjit Singh', role: 'Research Associate', dept: 'Chemistry', stage: 'Sign-Off', status: 'On Track', joinDate: '2026-03-01' },
 ];
 
-const seededTalentData = [
+const MODULE_COLUMNS: Record<string, string[]> = {
+    'Staff Portfolio': ['SlNo', 'StaffCode', 'Name', 'Designation', 'Department', 'DOJ', 'Qualification', 'Experience', 'Status'],
+    'Payroll': ['SlNo', 'StaffCode', 'Name', 'Designation', 'Department', 'Basic', 'DA', 'HRA', 'CCA', 'Others', 'Gross'],
+    'Talent Acquisition': ['App ID', 'Name', 'Role', 'Department', 'Stage', 'Applied Date'],
+    'Onboarding': ['CAND-ID', 'Name', 'Role', 'Department', 'Current Stage', 'Status', 'Join Date'],
+    'Leave Management': ['Staff Code', 'Staff Name', 'Department', 'Designation', 'D.O.J', 'EL', 'CL', 'SL', 'ML', 'VL', 'OOD', 'LOP'],
+    'Attendance': ['EMPCODE', 'EMPLOYEENAME', 'Department', 'Present', 'Absent', 'Leave', 'Total'],
+    'NHC': ['SlNo', 'StaffCode', 'Name', 'Designation', 'Department', 'DOB', 'Experience', 'DOJ', 'Basic', 'HRA', 'Gross']
+};
+
+// Default columns for any other module
+const DEFAULT_COLUMNS = ['ID', 'Name', 'Module', 'Status', 'Created At'];
+
+const TALENT_DATA = [
     { id: 'APP-1001', name: 'Ms. Reshma Binu Prasad', role: 'Senior Developer', department: 'Engineering', stage: 'Offered', appliedDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
     { id: 'APP-1002', name: 'Ms. Sanchaiyata Majumdar', role: 'UX Designer', department: 'Design', stage: 'Interview', appliedDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
     { id: 'APP-1003', name: 'Dr. R Sedhunivas', role: 'Product Manager', department: 'Product', stage: 'Screening', appliedDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString() },
@@ -53,9 +70,21 @@ const seededTalentData = [
     { id: 'APP-1007', name: 'Ms. Reshma Binu Prasad', role: 'Account Executive', department: 'Sales', stage: 'Screening', appliedDate: new Date(Date.now() - 40 * 24 * 60 * 60 * 1000).toISOString() }
 ];
 
+const formatDateValue = (dateStr: any) => {
+    if (!dateStr || dateStr === '-') return '-';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const day = d.getDate().toString().padStart(2, '0');
+    const month = months[d.getMonth()];
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+};
+
 const ReportsDashboard: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'standard' | 'custom'>('standard');
     const [filterModule, setFilterModule] = useState<string>('All');
+    const [searchQuery, setSearchQuery] = useState<string>('');
     const [isGenerating, setIsGenerating] = useState(false);
 
     // Talent Acquisition Report Filters
@@ -83,14 +112,24 @@ const ReportsDashboard: React.FC = () => {
     }, []);
 
     // Custom Builder State
-    const [selectedModule, setSelectedModule] = useState('Onboarding');
-    const [selectedColumns, setSelectedColumns] = useState<string[]>(['Employee ID', 'Name', 'Department']);
+    const [selectedModule, setSelectedModule] = useState('Staff Portfolio');
+    const [selectedColumns, setSelectedColumns] = useState<string[]>(MODULE_COLUMNS['Staff Portfolio'].slice(0, 5));
     const [customFilters, setCustomFilters] = useState<{ column: string, operator: string, value: string }[]>([]);
     const [showGeneratedReport, setShowGeneratedReport] = useState(false);
+    const [customReportPreviewData, setCustomReportPreviewData] = useState<any[]>([]);
     const [viewReportModal, setViewReportModal] = useState<any | null>(null);
 
+    const availableColumns = MODULE_COLUMNS[selectedModule] || DEFAULT_COLUMNS;
+
+    // Reset columns when module changes
+    React.useEffect(() => {
+        setSelectedColumns(availableColumns.slice(0, 5));
+        setCustomFilters([]);
+        setShowGeneratedReport(false);
+    }, [selectedModule]);
+
     const addFilter = () => {
-        setCustomFilters([...customFilters, { column: mockColumns[0], operator: 'Equals', value: '' }]);
+        setCustomFilters([...customFilters, { column: availableColumns[0], operator: 'Equals', value: '' }]);
     };
 
     const updateFilter = (index: number, field: string, value: string) => {
@@ -106,9 +145,68 @@ const ReportsDashboard: React.FC = () => {
     const handleCustomExport = () => {
         setIsGenerating(true);
         setTimeout(() => {
+            const data = getModuleDataForCustom(selectedModule);
+            setCustomReportPreviewData(data);
             setIsGenerating(false);
             setShowGeneratedReport(true);
-        }, 1500);
+        }, 1200);
+    };
+
+    const getModuleDataForCustom = (module: string) => {
+        let rawData: any[] = [];
+        if (module === 'Staff Portfolio' || module === 'NHC' || module === 'Payroll') {
+            rawData = getAllStaff().map((s, idx) => {
+                const sal = s.reportDetails?.salary || { basic: 0, da: 0, hra: 0, cca: 0, others: 0, gross: 0 };
+                return {
+                    SlNo: idx + 1,
+                    StaffCode: s.id,
+                    Name: s.name,
+                    Designation: s.designation,
+                    Department: s.department,
+                    DOJ: formatDateValue(s.joiningDate),
+                    DOB: formatDateValue(s.reportDetails?.dob),
+                    Qualification: s.qualification,
+                    Experience: s.reportDetails?.experience.tot || '-',
+                    Status: s.status,
+                    Basic: sal.basic,
+                    DA: sal.da,
+                    HRA: sal.hra,
+                    CCA: sal.cca,
+                    Others: sal.others,
+                    Gross: sal.gross
+                };
+            });
+        } else if (module === 'Talent Acquisition') {
+            rawData = TALENT_DATA.map((t, idx) => ({
+                'App ID': t.id,
+                'SlNo': idx + 1,
+                Name: t.name,
+                Role: t.role,
+                Department: t.department,
+                Stage: t.stage,
+                'Applied Date': formatDateValue(t.appliedDate)
+            }));
+        } else if (module === 'Onboarding') {
+            rawData = ONBOARDING_DATA.map(o => ({
+                'CAND-ID': `CAND-${o.id}`,
+                Name: o.name,
+                Role: o.role,
+                Department: o.dept,
+                'Current Stage': o.stage,
+                Status: o.status,
+                'Join Date': formatDateValue(o.joinDate)
+            }));
+        } else {
+            // Fallback for others
+            rawData = [1, 2, 3, 4, 5].map(i => ({
+                ID: `REC-${i}`,
+                Name: `Record ${i}`,
+                Module: module,
+                Status: 'Active',
+                'Created At': formatDateValue(new Date())
+            }));
+        }
+        return rawData;
     };
 
     const handleDownload = (format: string, reportTitle: string) => {
@@ -118,11 +216,7 @@ const ReportsDashboard: React.FC = () => {
                 let exportData: { columns: string[], data: any[] } = { columns: [], data: [] };
                 if (reportTitle === 'Custom Report') {
                     exportData.columns = selectedColumns;
-                    exportData.data = [1, 2, 3, 4, 5].map(row => {
-                        const rowData: any = {};
-                        selectedColumns.forEach(col => { rowData[col] = `Sample ${col} ${row}`; });
-                        return rowData;
-                    });
+                    exportData.data = customReportPreviewData;
                 } else {
                     exportData = getReportData(reportTitle);
                 }
@@ -170,7 +264,7 @@ const ReportsDashboard: React.FC = () => {
     };
 
     const getFilteredTalentData = () => {
-        return seededTalentData.filter(app => {
+        return TALENT_DATA.filter((app: any) => {
             let matchesDate = true;
             if (taDateFilter === 'Last 7 Days') {
                 const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
@@ -184,13 +278,13 @@ const ReportsDashboard: React.FC = () => {
             const matchesStage = taStageFilter === 'All' || app.stage === taStageFilter;
 
             return matchesDate && matchesDept && matchesStage;
-        }).map(app => ({
+        }).map((app: any) => ({
             'App ID': app.id,
             Name: app.name,
             Role: app.role,
             Department: app.department,
             Stage: app.stage,
-            'Applied Date': new Date(app.appliedDate).toLocaleDateString()
+            'Applied Date': formatDateValue(app.appliedDate)
         }));
     };
 
@@ -219,7 +313,7 @@ const ReportsDashboard: React.FC = () => {
                         Name: c.name,
                         Department: c.dept,
                         Role: c.role,
-                        'Join Date': c.joinDate,
+                        'Join Date': formatDateValue(c.joinDate),
                         Status: c.status
                     })) : [{ ID: '-', Name: 'No new joiners found', Department: '-', Role: '-', 'Join Date': '-', Status: '-' }]
                 };
@@ -259,33 +353,33 @@ const ReportsDashboard: React.FC = () => {
                 return {
                     columns: ['Staff Code', 'Staff Name', 'Department', 'Designation', 'D.O.J', 'EL', 'CL', 'SL', 'ML', 'VL', 'OOD', 'OED', 'CO', 'LOP', 'LOPNR', 'HR Comments'],
                     data: [
-                        { 'Staff Code': 'NH-0001', 'Staff Name': 'V Manjula', 'Department': 'Human Resources', 'Designation': 'Executive Director', 'D.O.J': '2010-06-01', 'EL': 3, 'CL': '-', 'SL': '-', 'ML': '-', 'VL': '-', 'OOD': '-', 'OED': '-', 'CO': '-', 'LOP': '-', 'LOPNR': '-', 'HR Comments': '-' },
-                        { 'Staff Code': 'NH-0212', 'Staff Name': 'Bindu Menon', 'Department': 'Human Resources', 'Designation': 'Sr. HR Generalist', 'D.O.J': '2015-08-15', 'EL': '-', 'CL': '-', 'SL': '-', 'ML': '-', 'VL': '-', 'OOD': '-', 'OED': '-', 'CO': '-', 'LOP': '-', 'LOPNR': '-', 'HR Comments': '-' },
-                        { 'Staff Code': 'NH-0796', 'Staff Name': 'Maroju Hima Bindu', 'Department': 'Human Resources', 'Designation': 'Sr. HR Executive', 'D.O.J': '2017-10-22', 'EL': '-', 'CL': '-', 'SL': '-', 'ML': '-', 'VL': 7, 'OOD': '-', 'OED': '-', 'CO': 2, 'LOP': '-', 'LOPNR': '-', 'HR Comments': '-' }
+                        { 'Staff Code': 'NH-0001', 'Staff Name': 'V Manjula', 'Department': 'Human Resources', 'Designation': 'Executive Director', 'D.O.J': formatDateValue('2010-06-01'), 'EL': 3, 'CL': '-', 'SL': '-', 'ML': '-', 'VL': '-', 'OOD': '-', 'OED': '-', 'CO': '-', 'LOP': '-', 'LOPNR': '-', 'HR Comments': '-' },
+                        { 'Staff Code': 'NH-0212', 'Staff Name': 'Bindu Menon', 'Department': 'Human Resources', 'Designation': 'Sr. HR Generalist', 'D.O.J': formatDateValue('2015-08-15'), 'EL': '-', 'CL': '-', 'SL': '-', 'ML': '-', 'VL': '-', 'OOD': '-', 'OED': '-', 'CO': '-', 'LOP': '-', 'LOPNR': '-', 'HR Comments': '-' },
+                        { 'Staff Code': 'NH-0796', 'Staff Name': 'Maroju Hima Bindu', 'Department': 'Human Resources', 'Designation': 'Sr. HR Executive', 'D.O.J': formatDateValue('2017-10-22'), 'EL': '-', 'CL': '-', 'SL': '-', 'ML': '-', 'VL': 7, 'OOD': '-', 'OED': '-', 'CO': 2, 'LOP': '-', 'LOPNR': '-', 'HR Comments': '-' }
                     ]
                 };
             case 'Yearly Leave Book Details':
                 return {
                     columns: ['EmployeeCode', 'EmployeeName', 'Department', 'Designation', 'DOJ', 'TotalEL', 'TakenEL', 'BalanceEL', 'TotalCL', 'TakenCL', 'BalanceCL', 'TotalSL', 'TakenSL', 'BalanceSL', 'TotalML', 'TakenML', 'BalanceML', 'TotalVL', 'TakenVL', 'BalanceVL', 'TotalOOD', 'TakenOOD', 'BalanceOOD', 'TotalOED', 'TakenOED', 'BalanceOED', 'TotalCO', 'TakenCO', 'BalanceCO', 'TotalLOP', 'TakenLOP', 'BalanceLOP', 'TotalLOPNR', 'TakenLOPNR', 'BalanceLOPNR'],
                     data: [
-                        { 'EmployeeCode': 'NH-0001', 'EmployeeName': 'V Manjula', 'Department': 'Human Resources', 'Designation': 'Executive Director', 'DOJ': '2010-06-01', 'TotalEL': 21, 'TakenEL': 16, 'BalanceEL': 5, 'TotalCL': 12, 'TakenCL': 7.5, 'BalanceCL': 4.5, 'TotalSL': '-', 'TakenSL': '-', 'BalanceSL': '-', 'TotalML': '-', 'TakenML': '-', 'BalanceML': '-', 'TotalVL': '-', 'TakenVL': '-', 'BalanceVL': '-', 'TotalOOD': 7, 'TakenOOD': 0, 'BalanceOOD': 7, 'TotalOED': '-', 'TakenOED': '-', 'BalanceOED': '-', 'TotalCO': '-', 'TakenCO': '-', 'BalanceCO': '-', 'TotalLOP': 5, 'TakenLOP': 0, 'BalanceLOP': 5, 'TotalLOPNR': '-', 'TakenLOPNR': '-', 'BalanceLOPNR': '-' },
-                        { 'EmployeeCode': 'NH-0003', 'EmployeeName': 'Surya Prakash H N', 'Department': 'Administration', 'Designation': 'Registrar', 'DOJ': '2008-05-10', 'TotalEL': 21, 'TakenEL': 14, 'BalanceEL': 7, 'TotalCL': 12, 'TakenCL': 10.5, 'BalanceCL': 1.5, 'TotalSL': '-', 'TakenSL': '-', 'BalanceSL': '-', 'TotalML': '-', 'TakenML': '-', 'BalanceML': '-', 'TotalVL': '-', 'TakenVL': '-', 'BalanceVL': '-', 'TotalOOD': 7, 'TakenOOD': 4, 'BalanceOOD': 3, 'TotalOED': '-', 'TakenOED': '-', 'BalanceOED': '-', 'TotalCO': '-', 'TakenCO': '-', 'BalanceCO': '-', 'TotalLOP': 5, 'TakenLOP': 0, 'BalanceLOP': 5, 'TotalLOPNR': '-', 'TakenLOPNR': '-', 'BalanceLOPNR': '-' }
+                        { 'EmployeeCode': 'NH-0001', 'EmployeeName': 'V Manjula', 'Department': 'Human Resources', 'Designation': 'Executive Director', 'DOJ': formatDateValue('2010-06-01'), 'TotalEL': 21, 'TakenEL': 16, 'BalanceEL': 5, 'TotalCL': 12, 'TakenCL': 7.5, 'BalanceCL': 4.5, 'TotalSL': '-', 'TakenSL': '-', 'BalanceSL': '-', 'TotalML': '-', 'TakenML': '-', 'BalanceML': '-', 'TotalVL': '-', 'TakenVL': '-', 'BalanceVL': '-', 'TotalOOD': 7, 'TakenOOD': 0, 'BalanceOOD': 7, 'TotalOED': '-', 'TakenOED': '-', 'BalanceOED': '-', 'TotalCO': '-', 'TakenCO': '-', 'BalanceCO': '-', 'TotalLOP': 5, 'TakenLOP': 0, 'BalanceLOP': 5, 'TotalLOPNR': '-', 'TakenLOPNR': '-', 'BalanceLOPNR': '-' },
+                        { 'EmployeeCode': 'NH-0003', 'EmployeeName': 'Surya Prakash H N', 'Department': 'Administration', 'Designation': 'Registrar', 'DOJ': formatDateValue('2008-05-10'), 'TotalEL': 21, 'TakenEL': 14, 'BalanceEL': 7, 'TotalCL': 12, 'TakenCL': 10.5, 'BalanceCL': 1.5, 'TotalSL': '-', 'TakenSL': '-', 'BalanceSL': '-', 'TotalML': '-', 'TakenML': '-', 'BalanceML': '-', 'TotalVL': '-', 'TakenVL': '-', 'BalanceVL': '-', 'TotalOOD': 7, 'TakenOOD': 4, 'BalanceOOD': 3, 'TotalOED': '-', 'TakenOED': '-', 'BalanceOED': '-', 'TotalCO': '-', 'TakenCO': '-', 'BalanceCO': '-', 'TotalLOP': 5, 'TakenLOP': 0, 'BalanceLOP': 5, 'TotalLOPNR': '-', 'TakenLOPNR': '-', 'BalanceLOPNR': '-' }
                     ]
                 };
             case 'Staff Salary Details':
                 return {
                     columns: ['SlNo', 'StaffCode', 'Name', 'Designation', 'DOB', 'Qualification', 'Experience', 'DOJ', 'Basic', 'DA', 'HRA', 'CCA', 'Others', 'Conv.All', 'AGP(Ind)', 'PF Amnt', 'Variable Pay', 'Gross'],
                     data: [
-                        { 'SlNo': 1, 'StaffCode': 'NH-0010', 'Name': 'ABC', 'Designation': 'Registrar', 'DOB': '1975-10-15', 'Qualification': 'SSLC, PUC, B. Com', 'Experience': '37.05 Yrs', 'DOJ': '2008-05-10', 'Basic': 64900, 'DA': 7301, 'HRA': 25960, 'CCA': 600, 'Others': 60111, 'Conv.All': 1250, 'AGP(Ind)': 0, 'PF Amnt': 0, 'Variable Pay': 15000, 'Gross': 175122 },
-                        { 'SlNo': 2, 'StaffCode': 'NH-0011', 'Name': 'DEF', 'Designation': 'Asst. Registrar', 'DOB': '1982-03-24', 'Qualification': 'SSLC, PUC, B.COM', 'Experience': '22.1 Yrs', 'DOJ': '2010-02-18', 'Basic': 20300, 'DA': 2284, 'HRA': 8120, 'CCA': 600, 'Others': 32772, 'Conv.All': 1250, 'AGP(Ind)': 0, 'PF Amnt': 0, 'Variable Pay': 0, 'Gross': 65326 },
-                        { 'SlNo': 3, 'StaffCode': 'NH-0012', 'Name': 'XYZ', 'Designation': 'Sr. Office Executive', 'DOB': '1985-06-12', 'Qualification': 'SSLC, DIPLOMA', 'Experience': '15.5 Yrs', 'DOJ': '2012-04-05', 'Basic': 18500, 'DA': 2081, 'HRA': 7400, 'CCA': 600, 'Others': 28419, 'Conv.All': 1250, 'AGP(Ind)': 0, 'PF Amnt': 0, 'Variable Pay': 0, 'Gross': 58250 },
-                        { 'SlNo': 4, 'StaffCode': 'NH-0013', 'Name': 'ahdhjka', 'Designation': 'jr. Divisional Asst.', 'DOB': '1990-11-20', 'Qualification': 'ARTS', 'Experience': '8.2 Yrs', 'DOJ': '2015-09-15', 'Basic': 15200, 'DA': 1710, 'HRA': 6080, 'CCA': 600, 'Others': 22510, 'Conv.All': 1250, 'AGP(Ind)': 0, 'PF Amnt': 0, 'Variable Pay': 0, 'Gross': 47350 },
-                        { 'SlNo': 5, 'StaffCode': 'NH-0014', 'Name': 'lksdlkjlkjs', 'Designation': 'Office Executive', 'DOB': '1992-02-28', 'Qualification': 'COMMERCE', 'Experience': '6.1 Yrs', 'DOJ': '2018-01-10', 'Basic': 14000, 'DA': 1575, 'HRA': 5600, 'CCA': 600, 'Others': 20225, 'Conv.All': 1250, 'AGP(Ind)': 0, 'PF Amnt': 0, 'Variable Pay': 0, 'Gross': 43250 },
-                        { 'SlNo': 6, 'StaffCode': 'NH-0015', 'Name': 'ahdhjka', 'Designation': 'Sr. Assistant Professor', 'DOB': '1988-05-15', 'Qualification': 'M Tech, (PhD)', 'Experience': '10.5 Yrs', 'DOJ': '2014-07-20', 'Basic': 35400, 'DA': 3983, 'HRA': 14160, 'CCA': 600, 'Others': 45107, 'Conv.All': 1250, 'AGP(Ind)': 8000, 'PF Amnt': 1800, 'Variable Pay': 0, 'Gross': 110300 },
-                        { 'SlNo': 7, 'StaffCode': 'NH-0016', 'Name': 'ahdhjka', 'Designation': 'Associate Professor', 'DOB': '1980-08-22', 'Qualification': 'Ph.D', 'Experience': '18.2 Yrs', 'DOJ': '2012-01-15', 'Basic': 45000, 'DA': 5063, 'HRA': 18000, 'CCA': 600, 'Others': 58287, 'Conv.All': 1250, 'AGP(Ind)': 9000, 'PF Amnt': 1800, 'Variable Pay': 0, 'Gross': 139000 },
-                        { 'SlNo': 8, 'StaffCode': 'NH-0017', 'Name': 'ahdhjka', 'Designation': 'Professor & HOD', 'DOB': '1972-01-05', 'Qualification': 'Ph.D', 'Experience': '25.4 Yrs', 'DOJ': '2008-05-10', 'Basic': 65000, 'DA': 7313, 'HRA': 26000, 'CCA': 600, 'Others': 82587, 'Conv.All': 1250, 'AGP(Ind)': 10000, 'PF Amnt': 0, 'Variable Pay': 25000, 'Gross': 217750 },
-                        { 'SlNo': 9, 'StaffCode': 'NH-0018', 'Name': 'ahdhjka', 'Designation': 'Sr. Assistant Professor & HOD', 'DOB': '1984-04-18', 'Qualification': 'MBA, MPhil', 'Experience': '14.1 Yrs', 'DOJ': '2013-06-01', 'Basic': 32400, 'DA': 3645, 'HRA': 12960, 'CCA': 600, 'Others': 41045, 'Conv.All': 1250, 'AGP(Ind)': 8000, 'PF Amnt': 1800, 'Variable Pay': 0, 'Gross': 101700 },
-                        { 'SlNo': 10, 'StaffCode': 'NH-0019', 'Name': 'ahdhjka', 'Designation': 'Librarian', 'DOB': '1986-12-30', 'Qualification': 'MLISc, KSET', 'Experience': '12.3 Yrs', 'DOJ': '2016-03-22', 'Basic': 25000, 'DA': 2813, 'HRA': 10000, 'CCA': 600, 'Others': 31587, 'Conv.All': 1250, 'AGP(Ind)': 0, 'PF Amnt': 0, 'Variable Pay': 0, 'Gross': 71250 }
+                        { 'SlNo': 1, 'StaffCode': 'NH-0010', 'Name': 'ABC', 'Designation': 'Registrar', 'DOB': formatDateValue('1975-10-15'), 'Qualification': 'SSLC, PUC, B. Com', 'Experience': '37.05 Yrs', 'DOJ': formatDateValue('2008-05-10'), 'Basic': 64900, 'DA': 7301, 'HRA': 25960, 'CCA': 600, 'Others': 60111, 'Conv.All': 1250, 'AGP(Ind)': 0, 'PF Amnt': 0, 'Variable Pay': 15000, 'Gross': 175122 },
+                        { 'SlNo': 2, 'StaffCode': 'NH-0011', 'Name': 'DEF', 'Designation': 'Asst. Registrar', 'DOB': formatDateValue('1982-03-24'), 'Qualification': 'SSLC, PUC, B.COM', 'Experience': '22.1 Yrs', 'DOJ': formatDateValue('2010-02-18'), 'Basic': 20300, 'DA': 2284, 'HRA': 8120, 'CCA': 600, 'Others': 32772, 'Conv.All': 1250, 'AGP(Ind)': 0, 'PF Amnt': 0, 'Variable Pay': 0, 'Gross': 65326 },
+                        { 'SlNo': 3, 'StaffCode': 'NH-0012', 'Name': 'XYZ', 'Designation': 'Sr. Office Executive', 'DOB': formatDateValue('1985-06-12'), 'Qualification': 'SSLC, DIPLOMA', 'Experience': '15.5 Yrs', 'DOJ': formatDateValue('2012-04-05'), 'Basic': 18500, 'DA': 2081, 'HRA': 7400, 'CCA': 600, 'Others': 28419, 'Conv.All': 1250, 'AGP(Ind)': 0, 'PF Amnt': 0, 'Variable Pay': 0, 'Gross': 58250 },
+                        { 'SlNo': 4, 'StaffCode': 'NH-0013', 'Name': 'ahdhjka', 'Designation': 'jr. Divisional Asst.', 'DOB': formatDateValue('1990-11-20'), 'Qualification': 'ARTS', 'Experience': '8.2 Yrs', 'DOJ': formatDateValue('2015-09-15'), 'Basic': 15200, 'DA': 1710, 'HRA': 6080, 'CCA': 600, 'Others': 22510, 'Conv.All': 1250, 'AGP(Ind)': 0, 'PF Amnt': 0, 'Variable Pay': 0, 'Gross': 47350 },
+                        { 'SlNo': 5, 'StaffCode': 'NH-0014', 'Name': 'lksdlkjlkjs', 'Designation': 'Office Executive', 'DOB': formatDateValue('1992-02-28'), 'Qualification': 'COMMERCE', 'Experience': '6.1 Yrs', 'DOJ': formatDateValue('2018-01-10'), 'Basic': 14000, 'DA': 1575, 'HRA': 5600, 'CCA': 600, 'Others': 20225, 'Conv.All': 1250, 'AGP(Ind)': 0, 'PF Amnt': 0, 'Variable Pay': 0, 'Gross': 43250 },
+                        { 'SlNo': 6, 'StaffCode': 'NH-0015', 'Name': 'ahdhjka', 'Designation': 'Sr. Assistant Professor', 'DOB': formatDateValue('1988-05-15'), 'Qualification': 'M Tech, (PhD)', 'Experience': '10.5 Yrs', 'DOJ': formatDateValue('2014-07-20'), 'Basic': 35400, 'DA': 3983, 'HRA': 14160, 'CCA': 600, 'Others': 45107, 'Conv.All': 1250, 'AGP(Ind)': 8000, 'PF Amnt': 1800, 'Variable Pay': 0, 'Gross': 110300 },
+                        { 'SlNo': 7, 'StaffCode': 'NH-0016', 'Name': 'ahdhjka', 'Designation': 'Associate Professor', 'DOB': formatDateValue('1980-08-22'), 'Qualification': 'Ph.D', 'Experience': '18.2 Yrs', 'DOJ': formatDateValue('2012-01-15'), 'Basic': 45000, 'DA': 5063, 'HRA': 18000, 'CCA': 600, 'Others': 58287, 'Conv.All': 1250, 'AGP(Ind) ': 9000, 'PF Amnt': 1800, 'Variable Pay': 0, 'Gross': 139000 },
+                        { 'SlNo': 8, 'StaffCode': 'NH-0017', 'Name': 'ahdhjka', 'Designation': 'Professor & HOD', 'DOB': formatDateValue('1972-01-05'), 'Qualification': 'Ph.D', 'Experience': '25.4 Yrs', 'DOJ': formatDateValue('2008-05-10'), 'Basic': 65000, 'DA': 7313, 'HRA': 26000, 'CCA': 600, 'Others': 82587, 'Conv.All': 1250, 'AGP(Ind)': 10000, 'PF Amnt': 0, 'Variable Pay': 25000, 'Gross': 217750 },
+                        { 'SlNo': 9, 'StaffCode': 'NH-0018', 'Name': 'ahdhjka', 'Designation': 'Sr. Assistant Professor & HOD', 'DOB': formatDateValue('1984-04-18'), 'Qualification': 'MBA, MPhil', 'Experience': '14.1 Yrs', 'DOJ': formatDateValue('2013-06-01'), 'Basic': 32400, 'DA': 3645, 'HRA': 12960, 'CCA': 600, 'Others': 41045, 'Conv.All': 1250, 'AGP(Ind)': 8000, 'PF Amnt': 1800, 'Variable Pay': 0, 'Gross': 101700 },
+                        { 'SlNo': 10, 'StaffCode': 'NH-0019', 'Name': 'ahdhjka', 'Designation': 'Librarian', 'DOB': formatDateValue('1986-12-30'), 'Qualification': 'MLISc, KSET', 'Experience': '12.3 Yrs', 'DOJ': formatDateValue('2016-03-22'), 'Basic': 25000, 'DA': 2813, 'HRA': 10000, 'CCA': 600, 'Others': 31587, 'Conv.All': 1250, 'AGP(Ind)': 0, 'PF Amnt': 0, 'Variable Pay': 0, 'Gross': 71250 }
                     ]
                 };
             case 'Monthly Biometric Attendance Report':
@@ -429,7 +523,7 @@ const ReportsDashboard: React.FC = () => {
                             Name: s.name,
                             Designation: s.designation,
                             Department: s.department,
-                            DOB: s.reportDetails?.dob || '-',
+                            DOB: formatDateValue(s.reportDetails?.dob),
                             OTHERS: edu.others,
                             UG: edu.ug,
                             PG: edu.pg,
@@ -441,7 +535,7 @@ const ReportsDashboard: React.FC = () => {
                             'Exp.Others': exp.expOthers,
                             NHCE: exp.nhce,
                             Tot: exp.tot,
-                            DOJ: s.joiningDate,
+                            DOJ: formatDateValue(s.joiningDate),
                             Basic: sal.basic,
                             DA: sal.da,
                             HRA: sal.hra,
@@ -528,6 +622,17 @@ const ReportsDashboard: React.FC = () => {
                     <div className="p-6 bg-slate-50/50">
                         {activeTab === 'standard' ? (
                             <div className="space-y-6 animate-in fade-in">
+                                {/* Mobile Search */}
+                                <div className="md:hidden">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Search reports..." 
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="w-full text-sm rounded-2xl py-3 px-5 bg-white border border-slate-200 focus:ring-2 focus:ring-blue-700/20 outline-none text-slate-800 placeholder:text-slate-400 shadow-sm transition-all" 
+                                    />
+                                </div>
+
                                 {/* Filters */}
                                 <div className="flex justify-between items-center bg-white/60 border border-white/60 p-3 rounded-2xl shadow-sm backdrop-blur-md gap-4">
                                     <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -548,13 +653,23 @@ const ReportsDashboard: React.FC = () => {
                                         </div>
                                     </div>
                                     <div className="relative w-64 flex-shrink-0 hidden md:block">
-                                        <input type="text" placeholder="Search standard reports..." className="w-full text-sm rounded-xl py-2 pl-4 pr-4 bg-white border border-slate-200 focus:ring-2 focus:ring-blue-700/20 outline-none text-slate-800 placeholder:text-slate-400 shadow-sm transition-all" />
+                                        <input 
+                                            type="text" 
+                                            placeholder="Search standard reports..." 
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="w-full text-sm rounded-xl py-2 pl-4 pr-4 bg-white border border-slate-200 focus:ring-2 focus:ring-blue-700/20 outline-none text-slate-800 placeholder:text-slate-400 shadow-sm transition-all" 
+                                        />
                                     </div>
                                 </div>
 
                                 {/* Reports Grid */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {mockReports.filter(r => filterModule === 'All' || r.module === filterModule).map(report => (
+                                {mockReports
+                                    .filter(r => (filterModule === 'All' || r.module === filterModule) && 
+                                                 (r.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                                  r.module.toLowerCase().includes(searchQuery.toLowerCase())))
+                                    .map(report => (
                                         <div key={report.id} className="glass-card shadow-sm border border-white/80 p-6 rounded-[32px] group/report flex flex-col justify-between min-h-[240px] relative overflow-hidden bg-white/60">
                                             {/* Ambient glow */}
                                             <div className={`absolute -top-20 -right-20 w-40 h-40 ${report.bg.replace('bg-', 'bg-').replace('50', '500')} opacity-10 rounded-full blur-3xl group-hover/report:opacity-20 transition-opacity duration-700`}></div>
@@ -632,7 +747,7 @@ const ReportsDashboard: React.FC = () => {
                                             Configure Columns
                                         </h4>
                                         <div className="flex flex-wrap gap-3">
-                                            {mockColumns.map(col => {
+                                            {availableColumns.map((col: string) => {
                                                 const isSelected = selectedColumns.includes(col);
                                                 return (
                                                     <button
@@ -664,7 +779,7 @@ const ReportsDashboard: React.FC = () => {
                                                 {customFilters.map((filter, index) => (
                                                     <div key={index} className="flex gap-3 items-center bg-white border border-slate-100 shadow-sm p-2 rounded-2xl">
                                                         <select value={filter.column} onChange={e => updateFilter(index, 'column', e.target.value)} className="p-2 rounded-xl text-sm flex-1 bg-slate-50 text-slate-800 border border-slate-200 outline-none focus:ring-2 focus:ring-blue-700/20 appearance-none">
-                                                            {mockColumns.map(c => <option key={c} value={c}>{c}</option>)}
+                                                            {availableColumns.map((c: string) => <option key={c} value={c}>{c}</option>)}
                                                         </select>
                                                         <select value={filter.operator} onChange={e => updateFilter(index, 'operator', e.target.value)} className="p-2 rounded-xl text-sm w-32 bg-slate-50 text-slate-800 border border-slate-200 outline-none focus:ring-2 focus:ring-blue-700/20 appearance-none">
                                                             <option>Equals</option>
@@ -716,20 +831,22 @@ const ReportsDashboard: React.FC = () => {
                                                     </button>
                                                 </div>
                                             </div>
-                                            <div className="overflow-x-auto rounded-2xl border border-white/60 bg-white/60 shadow-sm backdrop-blur-sm">
-                                                <table className="w-full text-sm text-left">
-                                                    <thead className="bg-white/60 text-slate-600 font-black uppercase text-[10px] tracking-widest border-b border-white/40">
+                                            <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+                                                <table className="w-full text-sm text-left border-collapse">
+                                                    <thead className="bg-slate-50 text-slate-500 font-black uppercase text-[10px] tracking-widest border-b border-slate-200">
                                                         <tr>
                                                             {selectedColumns.map(col => (
-                                                                <th key={col} className="px-6 py-4 whitespace-nowrap">{col}</th>
+                                                                <th key={col} className="px-6 py-4 whitespace-nowrap border-r border-slate-200 last:border-r-0">{col}</th>
                                                             ))}
                                                         </tr>
                                                     </thead>
-                                                    <tbody className="divide-y divide-white/40">
-                                                        {[1, 2, 3, 4, 5].map(row => (
-                                                            <tr key={row} className="hover:bg-white transition-colors">
-                                                                {selectedColumns.map(col => (
-                                                                    <td key={col} className="px-6 py-4 text-slate-700 font-medium">Sample {col} {row}</td>
+                                                    <tbody className="divide-y divide-slate-100">
+                                                        {customReportPreviewData.map((row: any, idx: number) => (
+                                                            <tr key={idx} className="hover:bg-blue-50/30 transition-colors">
+                                                                {selectedColumns.map((col: string) => (
+                                                                    <td key={col} className="px-6 py-4 text-slate-700 font-bold border-r border-slate-100 last:border-r-0">
+                                                                        {String(row[col] ?? '-')}
+                                                                    </td>
                                                                 ))}
                                                             </tr>
                                                         ))}
@@ -829,22 +946,22 @@ const ReportsDashboard: React.FC = () => {
                                 {(() => {
                                     const repData = getReportData((viewReportModal as any).title);
                                     return (
-                                        <div className="overflow-x-auto border border-slate-200 rounded-3xl bg-white shadow-sm p-2">
-                                            <table className="w-full text-sm text-left border-separate border-spacing-y-2">
-                                                <thead className="bg-transparent text-slate-500 font-black uppercase text-[10px] tracking-widest">
+                                        <div className="overflow-x-auto border border-slate-200 rounded-3xl bg-white shadow-md">
+                                            <table className="w-full text-sm text-left border-collapse">
+                                                <thead className="bg-slate-50 text-slate-500 font-black uppercase text-[10px] tracking-widest border-b border-slate-200">
                                                     <tr>
                                                         {repData.columns.map(col => (
-                                                            <th key={col} className="px-6 py-4 whitespace-nowrap">{col}</th>
+                                                            <th key={col} className="px-6 py-4 whitespace-nowrap border-r border-slate-200 last:border-r-0">{col}</th>
                                                         ))}
                                                     </tr>
                                                 </thead>
-                                                <tbody className="">
+                                                <tbody className="divide-y divide-slate-100">
                                                     {repData.data.map((row, idx) => (
-                                                        <tr key={idx} className="bg-white/60 hover:bg-white transition-colors group">
-                                                            {repData.columns.map((col, cIdx) => (
-                                                                <td key={col} className={`px-6 py-5 text-sm font-bold text-slate-700 border-y border-white/60 ${cIdx === 0 ? 'rounded-l-2xl border-l' : ''} ${cIdx === repData.columns.length - 1 ? 'rounded-r-2xl border-r' : ''}`}>
+                                                        <tr key={idx} className="hover:bg-blue-50/30 transition-colors group">
+                                                            {repData.columns.map((col) => (
+                                                                <td key={col} className={`px-6 py-4 text-xs font-bold text-slate-700 border-r border-slate-100 last:border-r-0`}>
                                                                     {col === 'Status' ? (
-                                                                        <Badge className={`px-3 py-1 text-[10px] rounded-full font-black uppercase tracking-widest border shadow-none pointer-events-none ${(row as any)[col] === 'Pending' || (row as any)[col] === 'Onboarding' ? 'bg-blue-50 text-blue-800 border-blue-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}`}>
+                                                                        <Badge className={`px-3 py-1 text-[9px] rounded-full font-black uppercase tracking-widest border shadow-none pointer-events-none ${(row as any)[col] === 'Pending' || (row as any)[col] === 'Onboarding' ? 'bg-blue-50 text-blue-800 border-blue-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}`}>
                                                                             {(row as any)[col]}
                                                                         </Badge>
                                                                     ) : col === 'Name' || col === 'Staff Name' || col === 'EmployeeName' ? (

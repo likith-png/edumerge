@@ -704,7 +704,7 @@ export function getStaffPortfolio(staffId: string): StaffPortfolioData | null {
             { orgName: 'NHCE', designation: member.designation, natureOfJob: 'Current', jobType: 'Full Time', fromDate: member.joiningDate, toDate: 'Present', totalExp: '-', lastDrawn: '-' }
         ],
         salaryDetails: member.reportDetails?.salary,
-        personalDetails: {
+        personalDetails: personalDetailsStorage[staffId] || {
             dob: '1980-05-15',
             gender: 'Female',
             bloodGroup: 'B+',
@@ -814,6 +814,25 @@ export function updateStaffMember(staffId: string, updates: Partial<StaffMember>
 /**
  * Update staff member education mapping for report format
  */
+export function updateStaffPersonalDetails(staffId: string, details: PersonalDetails): boolean {
+    const idx = mockStaffMembers.findIndex(m => m.id === staffId);
+    if (idx === -1) return false;
+    
+    // In our simplified mock, we might need to update other fields if they overlap
+    // For now, we'll store it as part of a hidden state or just mock the success
+    // In getStaffPortfolio, we return personalDetails which is currently hardcoded
+    // Let's add a storage for it
+    if (!personalDetailsStorage[staffId]) {
+        personalDetailsStorage[staffId] = details;
+    } else {
+        personalDetailsStorage[staffId] = { ...personalDetailsStorage[staffId], ...details };
+    }
+    return true;
+}
+
+// Storage for updated personal details (since they are currently hardcoded in getStaffPortfolio)
+const personalDetailsStorage: Record<string, PersonalDetails> = {};
+
 export function updateStaffEducation(staffId: string, educations: EducationalQualification[]): boolean {
     const idx = mockStaffMembers.findIndex(m => m.id === staffId);
     if (idx === -1) return false;
