@@ -16,7 +16,7 @@ const StaffPortfolio: React.FC = () => {
 
     // If employee, we directly show their portfolio. 
     // In a real app, this ID would come from the auth/persona context.
-    const employeeStaffId = 'FAC001';
+    const employeeStaffId = 'NH-0010';
 
     const allStaff = getAllStaff();
     const departments = ['All', ...getDepartments()];
@@ -190,11 +190,11 @@ const StaffPortfolio: React.FC = () => {
                         <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -ml-32 -mb-32"></div>
                         <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
                             <div className="w-32 h-32 bg-white/80 rounded-[2.5rem] flex items-center justify-center text-blue-800 text-4xl font-black shadow-lg border border-white/60 ring-4 ring-indigo-50/50 overflow-hidden">
-                                <img src={`https://i.pravatar.cc/300?u=${encodeURIComponent('Ms. Reshma Binu Prasad')}`} alt="Ms. Reshma Binu Prasad" className="w-full h-full object-cover" />
+                                <img src={`https://i.pravatar.cc/300?u=${encodeURIComponent('ABC')}`} alt="ABC" className="w-full h-full object-cover" />
                             </div>
                             <div className="flex-1 text-center md:text-left">
-                                <h2 className="text-3xl font-black text-slate-800 mb-2">Ms. Reshma Binu Prasad</h2>
-                                <p className="text-slate-500 font-black tracking-[0.2em] uppercase text-xs mb-4">Assistant Professor • Computer Science</p>
+                                <h2 className="text-3xl font-black text-slate-800 mb-2">ABC</h2>
+                                <p className="text-slate-500 font-black tracking-[0.2em] uppercase text-xs mb-4">Registrar • Administration</p>
                                 <div className="flex flex-wrap justify-center md:justify-start gap-3">
                                     <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-100 px-4 py-1.5 rounded-xl font-bold shadow-sm text-[10px] uppercase tracking-widest">Active Status</Badge>
                                     <Badge className="bg-blue-50 text-blue-800 border border-blue-100 px-4 py-1.5 rounded-xl font-bold shadow-sm text-[10px] uppercase tracking-widest">4.7 Overall Rating</Badge>

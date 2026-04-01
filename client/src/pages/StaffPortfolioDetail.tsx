@@ -7,9 +7,9 @@ import { Badge } from '../components/ui/badge';
 import {
     User, TrendingUp, GraduationCap, Calendar, FileText,
     CheckCircle, ArrowLeft, BookOpen, Trophy, Heart, Sparkles, Star, Lightbulb, Users, Award, Shield, Clock, AlertTriangle, Target,
-    ExternalLink, X, Edit, Plus, Upload, Menu
+    ExternalLink, X, Edit, Plus, Upload, Menu, IndianRupee, Activity
 } from 'lucide-react';
-import { getStaffPortfolio } from '../services/staffPortfolioService';
+import { getStaffPortfolio, updateStaffMember, updateStaffExperience, updateStaffEducation } from '../services/staffPortfolioService';
 import { Dialog, DialogContent, DialogTitle } from '../components/ui/dialog';
 
 const StaffPortfolioDetail: React.FC = () => {
@@ -26,8 +26,9 @@ const StaffPortfolioDetail: React.FC = () => {
     const [viewMode, setViewMode] = useState<'monthly' | 'yearly'>('monthly');
     const [isPersonalOpen, setIsPersonalOpen] = useState(false);
     const [experienceDetails, setExperienceDetails] = useState<any[]>(portfolio?.experienceDetails || []);
+    const [educationDetails, setEducationDetails] = useState<any[]>(portfolio?.educationDetails || []);
     const [expForm, setExpForm] = useState<any>({});
-
+    const [editEduForm, setEditEduForm] = useState<any>({});
 
 
     if (!portfolio) {
@@ -47,37 +48,67 @@ const StaffPortfolioDetail: React.FC = () => {
 
     const { member, performanceHistory, trainingJourney, academicContributions,
         researchOutput, complianceRecords, careerTimeline, exitInfo,
-        badges, kudos, highlights, probationData } = portfolio;
+        badges, kudos, highlights, probationData, salaryDetails, biometricData, monthlyLeave, yearlyLeave } = portfolio;
 
     const calculateTotalExperience = (from: string, to: string) => {
         if (!from || !to) return '';
         try {
             const [fDay, fMonth, fYear] = from.split('/').map(Number);
             const [tDay, tMonth, tYear] = to.split('/').map(Number);
-            
+
             const startDate = new Date(fYear, fMonth - 1, fDay);
             const endDate = new Date(tYear, tMonth - 1, tDay);
-            
+
             if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return '';
-            
-            const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            const years = (diffDays / 365.25).toFixed(2);
-            return years;
+            if (endDate < startDate) return '';
+
+            let years = endDate.getFullYear() - startDate.getFullYear();
+            let months = endDate.getMonth() - startDate.getMonth();
+
+            if (endDate.getDate() < startDate.getDate()) months--;
+            if (months < 0) { years--; months += 12; }
+
+            const yStr = years > 0 ? `${years} ${years === 1 ? 'Year' : 'Years'}` : '';
+            const mStr = months > 0 ? `${months} ${months === 1 ? 'Month' : 'Months'}` : '';
+            return [yStr, mStr].filter(Boolean).join(' ') || '0 Months';
         } catch (e) {
             return '';
         }
     };
 
+    const handleSaveBasicDetails = () => {
+        updateStaffMember(member.id, {
+            name: editForm.name,
+            designation: editForm.designation,
+            department: editForm.department,
+            email: editForm.email
+        });
+        setIsEditingBasic(false);
+    };
+
     const handleSaveExperience = () => {
+        let updated: any[] = [];
         if (selectedExp) {
-            setExperienceDetails(prev => prev.map(exp => exp === selectedExp ? expForm : exp));
+            updated = experienceDetails.map(exp => exp === selectedExp ? expForm : exp);
         } else {
-            setExperienceDetails(prev => [...prev, expForm]);
+            updated = [...experienceDetails, expForm];
         }
+        setExperienceDetails(updated);
+        updateStaffExperience(member.id, updated);
         setIsEditingExperience(false);
     };
 
+    const handleSaveEducation = () => {
+        let updated: any[] = [];
+        if (selectedEdu) {
+            updated = educationDetails.map(edu => edu === selectedEdu ? editEduForm : edu);
+        } else {
+            updated = [...educationDetails, editEduForm];
+        }
+        setEducationDetails(updated);
+        updateStaffEducation(member.id, updated);
+        setIsEditingEducation(false);
+    };
     const handleExperienceChange = (field: string, value: string) => {
         const updatedForm = { ...expForm, [field]: value };
         if (field === 'fromDate' || field === 'toDate') {
@@ -253,7 +284,7 @@ const StaffPortfolioDetail: React.FC = () => {
                         variant="ghost" 
                         size="sm" 
                         className="bg-white hover:bg-white/80 text-blue-800 shadow-sm border border-white/60 font-black text-[10px] uppercase tracking-widest gap-2 rounded-xl h-10 px-4"
-                        onClick={() => { setSelectedEdu(null); setIsEditingEducation(true); }}
+                        onClick={() => { setSelectedEdu(null); setEditEduForm({}); setIsEditingEducation(true); }}
                     >
                         <Plus className="w-4 h-4" /> Add Detail
                     </Button>
@@ -277,7 +308,7 @@ const StaffPortfolioDetail: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {portfolio.educationDetails.map((edu: any, i: number) => (
+                                {educationDetails.map((edu: any, i: number) => (
                                     <tr key={i} className="border-b border-white/60 hover:bg-white/80 transition-colors">
                                         <td className="px-6 py-4 text-xs font-bold text-slate-800">{edu.level}</td>
                                         <td className="px-6 py-4 text-xs font-semibold text-slate-600">{edu.course}</td>
@@ -293,10 +324,14 @@ const StaffPortfolioDetail: React.FC = () => {
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center justify-end gap-2">
-                                                <button onClick={() => { setSelectedEdu(edu); setIsEditingEducation(true); }} className="w-8 h-8 rounded-lg bg-white border border-white/60 shadow-sm flex items-center justify-center text-slate-400 hover:text-blue-800 transition-colors">
+                                                <button onClick={() => { setSelectedEdu(edu); setEditEduForm(edu); setIsEditingEducation(true); }} className="w-8 h-8 rounded-lg bg-white border border-white/60 shadow-sm flex items-center justify-center text-slate-400 hover:text-blue-800 transition-colors">
                                                     <Edit className="w-3.5 h-3.5" />
                                                 </button>
-                                                <button className="w-8 h-8 rounded-lg bg-white border border-rose-100 shadow-sm flex items-center justify-center text-rose-400 hover:text-rose-600 transition-colors">
+                                                <button onClick={() => {
+                                                    const updated = educationDetails.filter(e => e !== edu);
+                                                    setEducationDetails(updated);
+                                                    updateStaffEducation(member.id, updated);
+                                                }} className="w-8 h-8 rounded-lg bg-white border border-rose-100 shadow-sm flex items-center justify-center text-rose-400 hover:text-rose-600 transition-colors">
                                                     <X className="w-4 h-4" />
                                                 </button>
                                             </div>
@@ -381,7 +416,9 @@ const StaffPortfolioDetail: React.FC = () => {
                                                 </button>
                                                 <button 
                                                     onClick={() => {
-                                                        setExperienceDetails(prev => prev.filter(e => e !== exp));
+                                                        const updated = experienceDetails.filter(e => e !== exp);
+                                                        setExperienceDetails(updated);
+                                                        updateStaffExperience(member.id, updated);
                                                     }}
                                                     className="w-8 h-8 rounded-lg bg-white border border-rose-100 shadow-sm flex items-center justify-center text-rose-400 hover:text-rose-600 transition-colors"
                                                 >
@@ -396,6 +433,182 @@ const StaffPortfolioDetail: React.FC = () => {
                     </div>
                 </CardContent>
             </Card>
+
+            {/* Salary Details Card */}
+            {salaryDetails && (
+                <Card className="mb-8 overflow-hidden bg-white/60 backdrop-blur-md border border-white/60 shadow-sm rounded-3xl text-sm">
+                    <CardHeader className="bg-white/40 border-b border-white/60 py-5">
+                        <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-slate-800 flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-xl bg-green-50 text-green-600 flex items-center justify-center shadow-sm"><IndianRupee className="w-4 h-4" /></div> 
+                            Compensation & Salary Details
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-6 bg-gradient-to-br from-green-50/50 to-emerald-50/30">
+                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                            <div className="space-y-1">
+                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Basic Pay</p>
+                                <p className="text-xl font-bold text-slate-800">₹{salaryDetails.basic.toLocaleString('en-IN')}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">DA</p>
+                                <p className="text-xl font-bold text-slate-800">₹{salaryDetails.da.toLocaleString('en-IN')}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">HRA</p>
+                                <p className="text-xl font-bold text-slate-800">₹{salaryDetails.hra.toLocaleString('en-IN')}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">CCA</p>
+                                <p className="text-xl font-bold text-slate-800">₹{salaryDetails.cca.toLocaleString('en-IN')}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Others</p>
+                                <p className="text-xl font-bold text-slate-800">₹{salaryDetails.others.toLocaleString('en-IN')}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Conv. All.</p>
+                                <p className="text-xl font-bold text-slate-800">₹{salaryDetails.convAll.toLocaleString('en-IN')}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">AGP (Ind)</p>
+                                <p className="text-xl font-bold text-slate-800">₹{salaryDetails.agp.toLocaleString('en-IN')}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">PF Amount</p>
+                                <p className="text-xl font-bold text-slate-800">₹{salaryDetails.pfAmnt.toLocaleString('en-IN')}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Variable Pay</p>
+                                <p className="text-xl font-bold text-slate-800">₹{salaryDetails.variablePay.toLocaleString('en-IN')}</p>
+                            </div>
+                            <div className="p-3 bg-emerald-100 rounded-xl border border-emerald-200 col-span-2 md:col-span-1 lg:col-span-1 flex flex-col justify-center">
+                                <p className="text-[10px] font-black text-emerald-800 uppercase tracking-widest">Gross Salary</p>
+                                <p className="text-2xl font-black text-emerald-900">₹{salaryDetails.gross.toLocaleString('en-IN')}</p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+
+            {/* Attendance & Leave Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                {/* Biometric Attendance Card */}
+                <Card className="bg-white/60 backdrop-blur-md border border-white/60 shadow-sm rounded-3xl overflow-hidden">
+                    <CardHeader className="bg-white/40 border-b border-white/60 py-5">
+                        <CardTitle className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center shadow-sm">
+                                <Activity className="h-4 w-4" />
+                            </div>
+                            Biometric Attendance
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                        {biometricData ? (
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-100">
+                                        <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">Total Present</p>
+                                        <p className="text-2xl font-black text-blue-900">{biometricData.status.filter((s: string) => s === 'P').length} Days</p>
+                                    </div>
+                                    <div className="p-4 bg-rose-50/50 rounded-2xl border border-rose-100">
+                                        <p className="text-[10px] font-black text-rose-600 uppercase tracking-widest mb-1">Late Marks</p>
+                                        <p className="text-2xl font-black text-rose-900">{biometricData.in_times.filter((t: string) => t && t > '10:00').length}</p>
+                                    </div>
+                                </div>
+                                <div className="mt-4">
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Daily Log (Snapshot)</p>
+                                    <div className="grid grid-cols-7 gap-2">
+                                        {Array.from({ length: 31 }, (_, i) => {
+                                            const status = biometricData.status[i];
+                                            const inTime = biometricData.in_times[i];
+                                            return (
+                                                <div key={i} className={`aspect-square flex flex-col items-center justify-center rounded-lg border text-[10px] font-bold ${
+                                                    status === 'P' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' :
+                                                    status === 'A' ? 'bg-rose-50 border-rose-100 text-rose-700' :
+                                                    status === 'H' || status === 'W' ? 'bg-slate-50 border-slate-100 text-slate-500' :
+                                                    'bg-white border-slate-100 text-slate-400'
+                                                }`} title={`Day ${i+1}: ${status} (${inTime || 'N/A'})`}>
+                                                    <span>{i + 1}</span>
+                                                    <span className="text-[8px] opacity-70 font-black">{status}</span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <p className="text-slate-500 text-sm italic">No biometric data available for this member.</p>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* Leave Book Card */}
+                <Card className="bg-white/60 backdrop-blur-md border border-white/60 shadow-sm rounded-3xl overflow-hidden">
+                    <CardHeader className="bg-white/40 border-b border-white/60 py-5">
+                        <CardTitle className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center shadow-sm">
+                                <Calendar className="h-4 w-4" />
+                            </div>
+                            Leave Book Summary - {new Date().getFullYear()}
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                        {yearlyLeave ? (
+                            <div className="space-y-6">
+                                <div className="grid grid-cols-3 gap-3">
+                                    <div className="p-3 bg-white/40 border border-white/60 rounded-2xl text-center">
+                                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Earned Leave</p>
+                                        <div className="text-lg font-black text-slate-800">{yearlyLeave.BalanceEL} <span className="text-[10px] text-slate-400">Bal</span></div>
+                                        <p className="text-[8px] text-slate-400 mt-1">{yearlyLeave.TakenEL} Taken of {yearlyLeave.TotalEL}</p>
+                                    </div>
+                                    <div className="p-3 bg-white/40 border border-white/60 rounded-2xl text-center">
+                                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Casual Leave</p>
+                                        <div className="text-lg font-black text-slate-800">{yearlyLeave.BalanceCL} <span className="text-[10px] text-slate-400">Bal</span></div>
+                                        <p className="text-[8px] text-slate-400 mt-1">{yearlyLeave.TakenCL} Taken of {yearlyLeave.TotalCL}</p>
+                                    </div>
+                                    <div className="p-3 bg-white/40 border border-white/60 rounded-2xl text-center">
+                                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Sick Leave</p>
+                                        <div className="text-lg font-black text-slate-800">{yearlyLeave.BalanceSL} <span className="text-[10px] text-slate-400">Bal</span></div>
+                                        <p className="text-[8px] text-slate-400 mt-1">{yearlyLeave.TakenSL} Taken of {yearlyLeave.TotalSL}</p>
+                                    </div>
+                                </div>
+
+                                <div className="bg-amber-50/50 border border-amber-100 rounded-2xl p-4">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <p className="text-[10px] font-black text-amber-700 uppercase tracking-widest">Recent Activity (May 2024)</p>
+                                        <Badge className="bg-amber-100 text-amber-700 text-[8px] border-none">MONTHLY LOG</Badge>
+                                    </div>
+                                    {monthlyLeave ? (
+                                        <div className="flex flex-wrap gap-2">
+                                            {monthlyLeave.EL !== '-' && (
+                                                <Badge variant="outline" className="bg-white text-emerald-700 border-emerald-100 text-[10px] font-bold">EL: {monthlyLeave.EL} Days</Badge>
+                                            )}
+                                            {monthlyLeave.CL !== '-' && (
+                                                <Badge variant="outline" className="bg-white text-blue-700 border-blue-100 text-[10px] font-bold">CL: {monthlyLeave.CL} Days</Badge>
+                                            )}
+                                            {monthlyLeave.LOP !== '-' && (
+                                                <Badge variant="outline" className="bg-white text-rose-700 border-rose-100 text-[10px] font-bold">LOP: {monthlyLeave.LOP} Days</Badge>
+                                            )}
+                                            {monthlyLeave.CO !== '-' && (
+                                                <Badge variant="outline" className="bg-white text-purple-700 border-purple-100 text-[10px] font-bold">CO: {monthlyLeave.CODays}</Badge>
+                                            )}
+                                            {monthlyLeave['HR Comments'] && (
+                                                <div className="w-full mt-2 pt-2 border-t border-amber-100 text-[9px] text-amber-800 italic">
+                                                    HR: {monthlyLeave['HR Comments']}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <p className="text-[10px] text-slate-500 italic">No leave details recorded for May.</p>
+                                    )}
+                                </div>
+                            </div>
+                        ) : (
+                            <p className="text-slate-500 text-sm italic">No yearly leave record found.</p>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Left Column - Performance & Timeline */}
@@ -970,7 +1183,7 @@ const StaffPortfolioDetail: React.FC = () => {
                         </div>
                         <div className="col-span-2 pt-6 border-t border-slate-100 flex justify-end gap-3">
                             <Button variant="outline" onClick={() => setIsEditingBasic(false)} className="rounded-2xl px-6 h-12 font-black uppercase text-[10px]">Cancel</Button>
-                            <Button onClick={() => setIsEditingBasic(false)} className="bg-blue-800 text-white rounded-2xl px-8 h-12 font-black uppercase text-[10px]">Save Changes</Button>
+                            <Button onClick={handleSaveBasicDetails} className="bg-blue-800 text-white rounded-2xl px-8 h-12 font-black uppercase text-[10px]">Save Changes</Button>
                         </div>
                     </div>
                 </DialogContent>
@@ -984,15 +1197,15 @@ const StaffPortfolioDetail: React.FC = () => {
                         <DialogTitle className="text-2xl font-black text-white">Update Education Detail</DialogTitle>
                     </div>
                     <div className="p-8 bg-white grid grid-cols-3 gap-6">
-                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Education</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedEdu?.level} /></div>
-                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Course</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedEdu?.course} /></div>
-                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Specialization</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedEdu?.specialization} /></div>
-                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">School / Institute</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedEdu?.institute} /></div>
-                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Board / University</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedEdu?.board} /></div>
-                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Course Type</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedEdu?.courseType} /></div>
-                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Class</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedEdu?.class} /></div>
-                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Percentage</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedEdu?.percentage} /></div>
-                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Passing Year</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" defaultValue={selectedEdu?.passingYear} /></div>
+                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Education</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" value={editEduForm.level || ''} onChange={(e) => setEditEduForm({...editEduForm, level: e.target.value})} /></div>
+                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Course</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" value={editEduForm.course || ''} onChange={(e) => setEditEduForm({...editEduForm, course: e.target.value})} /></div>
+                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Specialization</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" value={editEduForm.specialization || ''} onChange={(e) => setEditEduForm({...editEduForm, specialization: e.target.value})} /></div>
+                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">School / Institute</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" value={editEduForm.institute || ''} onChange={(e) => setEditEduForm({...editEduForm, institute: e.target.value})} /></div>
+                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Board / University</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" value={editEduForm.board || ''} onChange={(e) => setEditEduForm({...editEduForm, board: e.target.value})} /></div>
+                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Course Type</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" value={editEduForm.courseType || ''} onChange={(e) => setEditEduForm({...editEduForm, courseType: e.target.value})} /></div>
+                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Class</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" value={editEduForm.class || ''} onChange={(e) => setEditEduForm({...editEduForm, class: e.target.value})} /></div>
+                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Percentage</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" value={editEduForm.percentage || ''} onChange={(e) => setEditEduForm({...editEduForm, percentage: e.target.value})} /></div>
+                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Passing Year</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" value={editEduForm.passingYear || ''} onChange={(e) => setEditEduForm({...editEduForm, passingYear: e.target.value})} /></div>
                         
                         <div className="col-span-3 pt-6 border-t border-slate-100 flex items-center justify-between">
                             <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border border-dashed border-slate-300">
@@ -1001,7 +1214,7 @@ const StaffPortfolioDetail: React.FC = () => {
                             </div>
                             <div className="flex gap-3">
                                 <Button variant="outline" onClick={() => setIsEditingEducation(false)} className="rounded-2xl px-6 h-12 font-black uppercase text-[10px]">Cancel</Button>
-                                <Button onClick={() => setIsEditingEducation(false)} className="bg-blue-600 text-white rounded-2xl px-8 h-12 font-black uppercase text-[10px]">Update Detail</Button>
+                                <Button onClick={handleSaveEducation} className="bg-blue-600 text-white rounded-2xl px-8 h-12 font-black uppercase text-[10px]">Update Detail</Button>
                             </div>
                         </div>
                     </div>
@@ -1098,7 +1311,7 @@ const StaffPortfolioDetail: React.FC = () => {
                             </div>
                             <div className="flex gap-3">
                                 <Button variant="outline" onClick={() => setIsEditingExperience(false)} className="rounded-2xl px-6 h-12 font-black uppercase text-[10px]">Cancel</Button>
-                                <Button onClick={handleSaveExperience} className="bg-slate-900 text-white rounded-2xl px-8 h-12 font-black uppercase text-[10px]">Save Details</Button>
+                                <Button onClick={handleSaveExperience} className="bg-slate-800 text-white hover:bg-slate-900 rounded-2xl px-8 h-12 font-black uppercase text-[10px]">Update Experience</Button>
                             </div>
                         </div>
                     </div>

@@ -6,7 +6,10 @@ import {
   Building2, BookOpen, Target, Briefcase, LogOut, Bell, Search,
   Circle, Zap, Shield, FileCheck, Users2,
   LayoutGrid, Table2, Layers, MapPin,
-  AlertCircle, ArrowRight, Award, Flag, UserMinus, CalendarDays, BarChart3, Lock, Unlock
+  AlertCircle, ArrowRight, Award, Flag, UserMinus, CalendarDays, BarChart3, Lock, Unlock,
+  Heart, MessageSquare, Sliders, GraduationCap, Microscope, BookMarked, GitBranch,
+  ClipboardList, Network, RotateCcw, FileText, FolderOpen, Medal, Crosshair,
+  CheckSquare, Star, ThumbsUp, Lightbulb, Database
 } from 'lucide-react';
 import {
   LineChart as ReLineChart, Line,
@@ -615,6 +618,50 @@ const WIDGET_CATALOGUE: WidgetMeta[] = [
   { id: 'WGT_APPRAISAL_PROGRESS', name: 'Appraisal Progress (My Institution)', category: 'talent', description: '% staff submitted self-appraisal + manager review. Overdue HOD list.', defaultChartType: 'donut', availableChartTypes: ['donut', 'table'], sourceModule: 'Appraisal', roles: ['PRINCIPAL', 'HR_MANAGER'], context: 'both', icon: Target },
   { id: 'WGT_STAFF_STRENGTH', name: 'Staff Strength vs Sanctioned', category: 'workforce', description: 'Dept-wise sanctioned vs actual posts — vacancy count and critical gaps', defaultChartType: 'bar', availableChartTypes: ['bar', 'table'], sourceModule: 'Staff Master', roles: ['PRINCIPAL', 'HR_MANAGER'], context: 'both', icon: Users, colSpan: 2 },
   { id: 'WGT_PROBATION_EXIT', name: 'Probation & Exit Pipeline', category: 'hr_ops', description: 'Combined view: probation expiry bands + active exits with replacement status', defaultChartType: 'action_list', availableChartTypes: ['action_list'], sourceModule: 'Probation + Exit', roles: ['PRINCIPAL', 'HR_MANAGER'], context: 'both', icon: LogOut },
+  // ── Engagement & Culture ────────────────────────────────────────────────────
+  { id: 'WGT_ENGAGEMENT_SCORE', name: 'Engagement Score', category: 'talent', description: 'Overall employee engagement index with trend vs last quarter', defaultChartType: 'kpi_card', availableChartTypes: ['kpi_card', 'line'], sourceModule: 'Engagement & Culture', roles: ['HR_MANAGER', 'CHAIRMAN'], context: 'both', icon: Heart },
+  { id: 'WGT_SENTIMENT_HEATMAP', name: 'Sentiment by Department', category: 'talent', description: 'Pulse survey sentiment heat map across departments', defaultChartType: 'heatmap', availableChartTypes: ['heatmap', 'bar'], sourceModule: 'Engagement & Culture', roles: ['HR_MANAGER'], context: 'both', icon: ThumbsUp, colSpan: 2 },
+  // ── Goals ───────────────────────────────────────────────────────────────────
+  { id: 'WGT_GOALS_COMPLETION', name: 'Goal Completion Rate', category: 'talent', description: 'OKR / goal completion % by department and individual', defaultChartType: 'donut', availableChartTypes: ['donut', 'bar', 'table'], sourceModule: 'Goal Setting', roles: ['HR_MANAGER', 'PRINCIPAL', 'CHAIRMAN'], context: 'both', icon: Crosshair },
+  { id: 'WGT_GOALS_PENDING', name: 'Pending Goal Approvals', category: 'talent', description: 'Goals awaiting manager / HOD approval with submitter and deadline', defaultChartType: 'action_list', availableChartTypes: ['action_list'], sourceModule: 'Goal Setting', roles: ['HR_MANAGER', 'PRINCIPAL'], context: 'both', icon: ClipboardList },
+  // ── 360 Feedback ────────────────────────────────────────────────────────────
+  { id: 'WGT_FEEDBACK360_STATUS', name: '360 Feedback Status', category: 'talent', description: 'Cycle completion: % invited, responded, and pending by dept', defaultChartType: 'horizontal_bar', availableChartTypes: ['horizontal_bar', 'donut'], sourceModule: 'Feedback 360', roles: ['HR_MANAGER', 'PRINCIPAL', 'CHAIRMAN'], context: 'both', icon: MessageSquare, colSpan: 2 },
+  { id: 'WGT_FEEDBACK360_SCORES', name: 'Top 360 Competency Scores', category: 'talent', description: 'Average 360 rating per competency — strengths & development areas', defaultChartType: 'bar', availableChartTypes: ['bar', 'table'], sourceModule: 'Feedback 360', roles: ['HR_MANAGER'], context: 'both', icon: Star, colSpan: 2 },
+  // ── Calibration ─────────────────────────────────────────────────────────────
+  { id: 'WGT_CALIBRATION_STATUS', name: 'Calibration Session Status', category: 'talent', description: 'Open / completed calibration sessions with bell-curve distribution', defaultChartType: 'status_matrix', availableChartTypes: ['status_matrix', 'bar'], sourceModule: 'Calibration', roles: ['HR_MANAGER', 'CHAIRMAN'], context: 'both', icon: Sliders, colSpan: 2 },
+  // ── Capacity Intelligence ────────────────────────────────────────────────────
+  { id: 'WGT_CAPACITY_UTILISATION', name: 'Workforce Capacity Utilisation', category: 'workforce', description: 'Teaching load vs sanctioned capacity — under/over-utilised staff flags', defaultChartType: 'bar', availableChartTypes: ['bar', 'horizontal_bar', 'table'], sourceModule: 'Capacity Intelligence', roles: ['PRINCIPAL', 'HR_MANAGER', 'CHAIRMAN'], context: 'both', icon: Database, colSpan: 2 },
+  // ── Alumni ───────────────────────────────────────────────────────────────────
+  { id: 'WGT_ALUMNI_STATS', name: 'Alumni Network Summary', category: 'hr_ops', description: 'Total alumni, active portal users, placement rate, re-hire requests', defaultChartType: 'kpi_card', availableChartTypes: ['kpi_card', 'table'], sourceModule: 'Alumni Portal', roles: ['HR_MANAGER', 'CHAIRMAN'], context: 'both', icon: GraduationCap },
+  // ── Research & Publications ──────────────────────────────────────────────────
+  { id: 'WGT_RESEARCH_SUMMARY', name: 'Research & Publications', category: 'talent', description: 'Papers published, patents filed, conferences attended YTD by dept', defaultChartType: 'bar', availableChartTypes: ['bar', 'table'], sourceModule: 'Research', roles: ['PRINCIPAL', 'HR_MANAGER', 'CHAIRMAN'], context: 'both', icon: Microscope, colSpan: 2 },
+  // ── Lesson Plans ─────────────────────────────────────────────────────────────
+  { id: 'WGT_LESSON_PLAN_STATUS', name: 'Lesson Plan Submission Status', category: 'hr_ops', description: 'Submitted vs pending lesson plans by dept for current month', defaultChartType: 'horizontal_bar', availableChartTypes: ['horizontal_bar', 'donut'], sourceModule: 'Lesson Plans', roles: ['PRINCIPAL'], context: 'both', icon: BookMarked },
+  // ── LMS & Learning ──────────────────────────────────────────────────────────
+  { id: 'WGT_LMS_ENROLMENT', name: 'LMS Enrolment Overview', category: 'talent', description: 'Active enrolments, completions, avg score and certification issued', defaultChartType: 'kpi_card', availableChartTypes: ['kpi_card', 'bar'], sourceModule: 'LMS', roles: ['HR_MANAGER', 'PRINCIPAL'], context: 'both', icon: BookOpen },
+  { id: 'WGT_COURSE_COMPLETION', name: 'Course Completion by Category', category: 'talent', description: 'Completion rate grouped by course category (Mandatory / Elective / Leadership)', defaultChartType: 'bar', availableChartTypes: ['bar', 'donut', 'table'], sourceModule: 'LMS', roles: ['HR_MANAGER'], context: 'both', icon: Award, colSpan: 2 },
+  // ── Skill Pathways ────────────────────────────────────────────────────────────
+  { id: 'WGT_SKILL_GAP', name: 'Skill Gap Analysis', category: 'talent', description: 'Required vs assessed skill coverage — critical gaps highlighted by dept', defaultChartType: 'bar', availableChartTypes: ['bar', 'table'], sourceModule: 'Skill Pathways', roles: ['HR_MANAGER', 'CHAIRMAN'], context: 'both', icon: GitBranch, colSpan: 2 },
+  // ── Surveys ───────────────────────────────────────────────────────────────────
+  { id: 'WGT_SURVEY_RESPONSE', name: 'Survey Response Rate', category: 'talent', description: 'Active surveys with response rate and pending nudges', defaultChartType: 'horizontal_bar', availableChartTypes: ['horizontal_bar', 'action_list'], sourceModule: 'Surveys', roles: ['HR_MANAGER', 'PRINCIPAL'], context: 'both', icon: ClipboardList },
+  // ── Task Management ───────────────────────────────────────────────────────────
+  { id: 'WGT_TASKS_SUMMARY', name: 'HR Tasks Summary', category: 'hr_ops', description: 'Open, in-progress and overdue HR tasks with assignee and priority', defaultChartType: 'action_list', availableChartTypes: ['action_list', 'donut'], sourceModule: 'Task Management', roles: ['HR_MANAGER', 'PRINCIPAL'], context: 'both', icon: CheckSquare },
+  // ── Organisation Structure ────────────────────────────────────────────────────
+  { id: 'WGT_ORG_HEADCOUNT_TREE', name: 'Org Headcount Breakdown', category: 'workforce', description: 'Headcount by division → department → team hierarchy', defaultChartType: 'bar', availableChartTypes: ['bar', 'table'], sourceModule: 'Organisation Structure', roles: ['HR_MANAGER', 'CHAIRMAN'], context: 'both', icon: Network, colSpan: 2 },
+  // ── Performance Tracking ─────────────────────────────────────────────────────
+  { id: 'WGT_PERF_TRACKING', name: 'Performance Tracking Status', category: 'talent', description: 'Live KPI vs KRA achievement % by staff category and dept', defaultChartType: 'bar', availableChartTypes: ['bar', 'horizontal_bar', 'table'], sourceModule: 'Performance Tracking', roles: ['HR_MANAGER', 'PRINCIPAL', 'CHAIRMAN'], context: 'both', icon: BarChart3, colSpan: 2 },
+  // ── Mid-Year Review ──────────────────────────────────────────────────────────
+  { id: 'WGT_MID_YEAR_REVIEW', name: 'Mid-Year Review Progress', category: 'talent', description: '% of mid-year reviews completed vs pending — overdue list by HOD', defaultChartType: 'donut', availableChartTypes: ['donut', 'action_list'], sourceModule: 'Mid-Year Review', roles: ['HR_MANAGER', 'PRINCIPAL'], context: 'both', icon: RotateCcw },
+  // ── Policy ───────────────────────────────────────────────────────────────────
+  { id: 'WGT_POLICY_ACK', name: 'Policy Acknowledgement Tracker', category: 'hr_ops', description: 'Active policy acknowledgement campaigns with % staff accepted', defaultChartType: 'horizontal_bar', availableChartTypes: ['horizontal_bar', 'action_list'], sourceModule: 'Policy', roles: ['HR_MANAGER'], context: 'both', icon: FileText },
+  // ── Staff Portfolio ──────────────────────────────────────────────────────────
+  { id: 'WGT_PORTFOLIO_UPDATES', name: 'Staff Portfolio Updates', category: 'hr_ops', description: 'Profiles updated / incomplete this month — nudge list for stale profiles', defaultChartType: 'kpi_card', availableChartTypes: ['kpi_card', 'action_list'], sourceModule: 'Staff Portfolio', roles: ['HR_MANAGER', 'PRINCIPAL'], context: 'both', icon: FolderOpen },
+  // ── Certificates ─────────────────────────────────────────────────────────────
+  { id: 'WGT_CERTIFICATES', name: 'Certificates Issued', category: 'hr_ops', description: 'Experience letters, relieving letters and other certificates issued MTD', defaultChartType: 'kpi_card', availableChartTypes: ['kpi_card', 'bar'], sourceModule: 'Certificates', roles: ['HR_MANAGER'], context: 'both', icon: Medal },
+  // ── KRA/KPI ──────────────────────────────────────────────────────────────────
+  { id: 'WGT_KRA_APPROVAL', name: 'KRA/KPI Approval Pipeline', category: 'talent', description: 'KRA submissions awaiting approval — by HOD, status, and deadline', defaultChartType: 'action_list', availableChartTypes: ['action_list'], sourceModule: 'KRA/KPI', roles: ['HR_MANAGER', 'PRINCIPAL'], context: 'both', icon: Sliders },
+  // ── Exit Reasons ─────────────────────────────────────────────────────────────
+  { id: 'WGT_EXIT_REASONS', name: 'Exit Reasons Analysis', category: 'talent', description: 'Top exit reasons from exit interviews — voluntary vs involuntary split', defaultChartType: 'donut', availableChartTypes: ['donut', 'bar', 'table'], sourceModule: 'Exit', roles: ['HR_MANAGER', 'CHAIRMAN'], context: 'both', icon: Lightbulb, colSpan: 2 },
 ];
 
 const CAT_COLORS: Record<WidgetCategory, string> = {
