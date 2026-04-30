@@ -205,7 +205,14 @@ const Dashboard: React.FC = () => {
     const [pinError, setPinError] = React.useState(false);
     const [hiddenModules, setHiddenModules] = React.useState<string[]>(() => {
         const saved = localStorage.getItem('hrms_hidden_modules');
-        return saved ? JSON.parse(saved) : [];
+        return saved ? JSON.parse(saved) : [
+            "Probation Management",
+            "Appraisal & Performance",
+            "Leave Management",
+            "Feedback",
+            "Exit Management",
+            "Vehicle Management"
+        ];
     });
 
     const handlePinSubmit = (e?: React.FormEvent) => {
