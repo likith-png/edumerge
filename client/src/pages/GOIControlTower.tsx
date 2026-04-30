@@ -4,7 +4,7 @@ import {
   Calendar, Clock, Layers, CheckCircle2, AlertCircle, 
   BrainCircuit, Heart, ChevronRight, XCircle, Package, Truck,
   Target, Wallet, BarChart4, Receipt, CalendarCheck, BookOpen, Building, FlaskConical,
-  Banknote, Tag, ArrowDownToLine, Scale
+  Banknote, Tag, ArrowDownToLine, Scale, BedDouble
 } from 'lucide-react';
 import Layout from '../components/Layout';
 import {
@@ -142,7 +142,7 @@ export default function GOIControlTower() {
     if (selectedCampus === 'All') {
       const totalStudents = CAMPUSES.reduce((acc, c) => acc + c.students, 0);
       const totalStaff = CAMPUSES.reduce((acc, c) => acc + c.staff, 0);
-      const totalBudget = ALL_METRICS.budget.reduce((acc, b) => acc + b.allocated, 0);
+      const totalBudget = ALL_METRICS.budget.reduce((acc: number, b: any) => acc + b.allocated, 0);
       return {
         demand: formatLakhs(feeSum.demand),
         discount: formatLakhs(feeSum.discount),
