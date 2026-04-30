@@ -3,7 +3,6 @@ import Layout from '../components/Layout';
 import { Card, CardContent } from '../components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import {
-    UserPlus,
     TrendingUp,
     MessageSquare,
     Heart,
@@ -24,25 +23,25 @@ import {
     Lock,
     Unlock,
     Settings,
-    ShieldCheck
+    ShieldCheck,
+    Truck,
+    Search,
+    Building2
 } from 'lucide-react';
 import { usePersona } from '../contexts/PersonaContext';
 import EmployeeDashboard from './EmployeeDashboard';
 import ManagerTeamDashboard from './ManagerTeamDashboard';
 import { Switch } from '../components/ui/switch';
+import { Input } from '../components/ui/input';
+import { Button } from '../components/ui/button';
+
 
 const categories = [
     {
         name: "Talent Acquisition",
-        icon: UserPlus,
+        icon: Users,
         color: "blue",
         modules: [
-            {
-                title: "Onboarding Pro",
-                description: "Full-cycle onboarding from offer acceptance to probation. Self-service portal, BGV, SLA tracking and more.",
-                icon: UserPlus,
-                path: "/onboarding-pro"
-            },
             {
                 title: "Probation Management",
                 description: "Track performance reviews and confirmation workflows.",
@@ -143,28 +142,35 @@ const categories = [
         color: "slate",
         modules: [
             {
-                title: "Control Tower",
+                title: "HRMS Control Tower",
                 description: "Real-time HRMS command centre — plug-and-play widgets, GOI view, payroll readiness, approvals and more.",
                 icon: Zap,
                 path: "/control-tower"
+            },
+            {
+                title: "GOI Control Tower",
+                description: "Group of Institutions command centre — aggregates data from Fee, HRMS, Student Performance, Visitor, etc.",
+                icon: Building2,
+                path: "/goi-control-tower"
             },
             {
                 title: "Capacity Intelligence (ICIS)",
                 description: "Unified AI engine for academic, faculty, infra, and financial capacity.",
                 icon: BrainCircuit,
                 path: "/capacity-intelligence"
-            },
+            }
+        ]
+    },
+    {
+        name: "Operations",
+        icon: Truck,
+        color: "cyan",
+        modules: [
             {
-                title: "Talent Dashboard",
-                description: "Strategic insights into talent acquisition and retention.",
-                icon: TrendingUp,
-                path: "/talent-dashboard"
-            },
-            {
-                title: "HR Dashboard",
-                description: "Overview of Exit Management, Attrition, and key metrics.",
-                icon: TrendingUp,
-                path: "/hr-dashboard"
+                title: "Vehicle Management",
+                description: "Fleet registry, compliance engine, fuel tracking, driver management, routes, fees and analytics.",
+                icon: Truck,
+                path: "/vehicle-management"
             }
         ]
     },
@@ -261,108 +267,73 @@ const Dashboard: React.FC = () => {
             ) : isManager ? (
                 <ManagerTeamDashboard />
             ) : (
-                <div className="space-y-12 pb-10">
-                    {/* Hero Greeting */}
-                    <div className="relative overflow-hidden rounded-3xl p-8 text-white shadow-2xl" style={{ background: 'linear-gradient(135deg, #003f98 0%, #1a56be 100%)' }}>
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full blur-3xl opacity-10 -mr-32 -mt-32"></div>
-                        <div className="absolute bottom-0 left-0 w-64 h-64 bg-amber-400 rounded-full blur-3xl opacity-10 -ml-32 -mb-32"></div>
-
-                        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                            <div className="flex-1 w-full md:w-auto text-left">
-                                <h2 className="text-3xl font-black tracking-tight mb-2" style={{ fontFamily: 'Manrope, sans-serif' }}>Welcome Back, HR Team</h2>
-                                <p className="text-slate-400 font-medium max-w-md mb-6">
-                                    Let's streamline your workforce operations.
-                                </p>
-
-                                {/* Module Search */}
-                                <div className="max-w-md relative group">
-                                    <div className="absolute inset-y-0 left-0 pl-1.5 flex items-center pointer-events-none transition-all group-focus-within:pl-4">
-                                        <div className="p-2 rounded-lg bg-white/5 border border-white/10">
-                                            <Network className="h-4 w-4 text-slate-400" />
-                                        </div>
-                                    </div>
-                                    <input
-                                        type="text"
-                                        placeholder="Search modules or submodules..."
+                <div className="space-y-8 pb-10">
+                    {/* Welcome Banner */}
+                    <div className="bg-white border border-slate-200 rounded-xl p-8 shadow-sm">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                            <div>
+                                <h2 className="text-2xl font-bold text-slate-900">Welcome back, Admin</h2>
+                                <p className="text-slate-500 mt-1">Manage institutional operations and staff intelligence.</p>
+                                
+                                <div className="max-w-md relative mt-6">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                    <Input
+                                        placeholder="Search modules..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="block w-full bg-white/5 border border-white/10 rounded-2xl py-3.5 pl-14 pr-4 text-sm font-bold placeholder:text-slate-500 transition-all focus:bg-white/10 focus:ring-2 focus:ring-blue-500/50 outline-none"
+                                        className="pl-10 h-10 border-slate-200 focus:ring-blue-500 rounded-lg"
                                     />
-                                    {searchQuery && (
-                                        <button 
-                                            onClick={() => setSearchQuery("")}
-                                            className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-full bg-white/10 hover:bg-white/20 text-slate-400"
-                                        >
-                                            <XCircle className="w-4 h-4" />
-                                        </button>
-                                    )}
                                 </div>
-                                </div>
-
-
-
-                            {/* Settings Gateway */}
-                            <button 
+                            </div>
+                            
+                            <Button
+                                variant="outline"
                                 onClick={() => setShowPinModal(true)}
-                                className="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/20 hover:scale-105 transition-all group relative mt-[-10px]"
+                                className="border-slate-200 text-slate-600 hover:bg-slate-50 gap-2"
                             >
-                                <Settings2 className="w-4 h-4 text-white/70 group-hover:text-white group-hover:rotate-90 transition-all duration-500" />
-                                <div className="absolute -top-1 -right-1 p-0.5 bg-amber-400 rounded-full border border-[#1a56be]">
-                                    <Lock className="w-1.5 h-1.5 text-[#003f98]" />
-                                </div>
-                            </button>
+                                <Settings2 className="w-4 h-4" /> Configuration
+                            </Button>
                         </div>
                     </div>
 
-                    {/* Categorized Modules */}
+                    {/* Module Categories */}
                     {filteredCategories.length === 0 ? (
-                        <div className="text-center py-20 bg-slate-50 rounded-[3rem] border border-dashed border-slate-200">
-                            <div className="p-4 rounded-3xl bg-white shadow-sm inline-block mb-4">
-                                <Network className="w-8 h-8 text-slate-300" />
-                            </div>
-                            <h4 className="font-black text-slate-800 tracking-tight">No modules found</h4>
-                            <p className="text-sm text-slate-500 font-medium">Try searching for something else, like "Onboarding" or "Academics"</p>
+                        <div className="text-center py-20 bg-white border border-dashed border-slate-200 rounded-xl">
+                            <Network className="w-10 h-10 text-slate-300 mx-auto mb-4" />
+                            <h4 className="font-semibold text-slate-900">No modules found</h4>
+                            <p className="text-sm text-slate-500 mt-1">Try a different search query</p>
                         </div>
                     ) : filteredCategories.map((category) => (
-                        <div key={category.name} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className={`p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-slate-200`}>
-                                    <category.icon className={`h-5 w-5 text-slate-600`} />
+                        <div key={category.name} className="space-y-4">
+                            <div className="flex items-center gap-3 px-1">
+                                <div className="p-1.5 bg-slate-100 rounded-lg text-slate-600">
+                                    <category.icon className="h-4 w-4" />
                                 </div>
-                                <h3 className="text-xl font-black text-slate-900 tracking-tight">{category.name}</h3>
-                                <div className="flex-1 h-px bg-slate-200 ml-4"></div>
+                                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">{category.name}</h3>
+                                <div className="flex-1 h-px bg-slate-200 ml-2"></div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                 {category.modules.map((module) => (
                                     <Card
                                         key={module.path}
-                                        className="group relative cursor-pointer overflow-hidden border-none bg-white transition-all duration-300 hover:shadow-2xl hover:shadow-blue-900/10 hover:-translate-y-1"
+                                        className="hover:border-blue-300 hover:shadow-md transition-all cursor-pointer group border-slate-200"
                                         onClick={() => navigate(module.path)}
                                     >
                                         <CardContent className="p-5">
-                                            <div className="flex flex-col h-full gap-4">
-                                                <div className="flex justify-between items-start">
-                                                    <div className="p-3 rounded-2xl bg-slate-50 group-hover:bg-blue-50 transition-colors duration-200">
-                                                        <module.icon className="h-6 w-6 text-slate-400 group-hover:text-blue-800 transition-colors duration-300" />
-                                                    </div>
-                                                    <div className="p-1 rounded-full bg-slate-100 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <ChevronRight className="h-4 w-4 text-slate-400" />
-                                                    </div>
+                                            <div className="flex items-start gap-4">
+                                                <div className="p-2.5 rounded-xl bg-slate-50 group-hover:bg-blue-50 text-slate-600 group-hover:text-blue-600 transition-colors">
+                                                    <module.icon className="h-5 w-5" />
                                                 </div>
-
-                                                <div>
-                                                    <h4 className="font-black text-slate-900 mb-1 group-hover:text-blue-800 transition-colors">{module.title}</h4>
-                                                    <p className="text-xs font-medium text-slate-500 leading-relaxed line-clamp-2">
+                                                <div className="flex-1 min-w-0">
+                                                    <h4 className="font-bold text-slate-900 group-hover:text-blue-700 transition-colors truncate">{module.title}</h4>
+                                                    <p className="text-xs text-slate-500 line-clamp-2 mt-1">
                                                         {module.description}
                                                     </p>
                                                 </div>
-
-                                                {/* Subtle line at bottom */}
-                                                <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
+                                                <ChevronRight className="h-4 w-4 text-slate-400 group-hover:translate-x-1 transition-transform self-center" />
                                             </div>
                                         </CardContent>
-                                        <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-blue-100 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
                                     </Card>
                                 ))}
                             </div>
@@ -371,132 +342,126 @@ const Dashboard: React.FC = () => {
                 </div>
             )}
 
-            {/* PIN Entry Modal */}
+            {/* PIN Entry Modal (Glass) */}
             {showPinModal && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
-                    <div className="w-full max-w-sm glass-card border border-white/20 rounded-[40px] p-8 shadow-2xl relative overflow-hidden bg-white/90">
-                        <button 
-                            onClick={() => { setShowPinModal(false); setPinInput(""); }}
-                            className="absolute top-6 right-6 p-2 rounded-full hover:bg-slate-100 text-slate-400"
-                        >
-                            <XCircle className="w-5 h-5" />
-                        </button>
-
-                        <div className="text-center space-y-6">
-                            <div className="inline-flex p-4 rounded-3xl bg-blue-50 text-blue-600 ring-4 ring-blue-100">
-                                <ShieldCheck className="w-8 h-8" />
-                            </div>
-                            
-                            <div>
-                                <h3 className="text-xl font-black text-slate-900 tracking-tight">Security Verification</h3>
-                                <p className="text-sm text-slate-500 font-medium">Enter secret PIN to access Developer Room</p>
-                            </div>
-
-                            <form onSubmit={handlePinSubmit} className="space-y-4">
-                                <div 
-                                    onClick={() => pinInputRef.current?.focus()}
-                                    className="flex justify-center gap-3 cursor-text"
-                                >
-                                    {[0, 1, 2, 3].map((i) => (
-                                        <div 
-                                            key={i} 
-                                            className={`w-12 h-14 rounded-2xl border-2 flex items-center justify-center text-xl font-black transition-all ${pinError ? 'border-red-400 bg-red-50 text-red-600 animate-shake' : pinInput.length > i ? 'border-blue-600 bg-blue-50 text-blue-800 scale-105' : 'border-slate-200 bg-slate-50'}`}
-                                        >
-                                            {pinInput.length > i ? '•' : ''}
-                                        </div>
-                                    ))}
-                                </div>
-                                <input 
-                                    ref={pinInputRef}
-                                    autoFocus
-                                    type="text"
-                                    inputMode="numeric"
-                                    pattern="[0-9]*"
-                                    maxLength={4}
-                                    value={pinInput}
-                                    onChange={(e) => {
-                                        const val = e.target.value.replace(/[^0-9]/g, '').substring(0, 4);
-                                        setPinInput(val);
-                                        if (val.length === 4 && val === "2012") {
-                                            setTimeout(() => {
-                                                setShowPinModal(false);
-                                                setIsSettingsOpen(true);
-                                                setPinInput("");
-                                            }, 300);
-                                        } else if (val.length === 4) {
-                                            setPinError(true);
-                                            setTimeout(() => { 
-                                                setPinInput(""); 
-                                                setPinError(false);
-                                                pinInputRef.current?.focus();
-                                            }, 1000);
-                                        }
-                                    }}
-                                    className="absolute opacity-0 pointer-events-none inset-0 w-full h-full"
-                                    style={{ caretColor: 'transparent' }}
-                                />
-                                <p className={`text-xs font-bold transition-all ${pinError ? 'text-red-500 opacity-100' : 'text-slate-400 opacity-0'}`}>
-                                    Incorrect PIN. Access Denied.
-                                </p>
-                            </form>
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-xl animate-in fade-in duration-500">
+                    <div className="w-full max-w-sm glass-card border-white/60 p-10 shadow-2xl relative overflow-hidden text-center space-y-8">
+                        {/* Security header */}
+                        <div className="mx-auto w-20 h-20 glass-icon-container bg-blue-50 text-blue-600 border-white/80 scale-110 mb-2">
+                            <ShieldCheck className="w-10 h-10" />
                         </div>
+                        
+                        <div className="space-y-2">
+                            <h3 className="text-xl premium-text">Security Protocol</h3>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] leading-tight">Enter authorization PIN to access Governance Tier</p>
+                        </div>
+
+                        <form onSubmit={handlePinSubmit} className="space-y-6">
+                            <div 
+                                onClick={() => pinInputRef.current?.focus()}
+                                className="flex justify-center gap-4 cursor-text"
+                            >
+                                {[0, 1, 2, 3].map((i) => (
+                                    <div 
+                                        key={i} 
+                                        className={`w-14 h-16 rounded-2xl border-2 flex items-center justify-center text-2xl font-black transition-all ${pinError ? 'border-rose-400 bg-rose-50 text-rose-600 animate-shake' : pinInput.length > i ? 'border-slate-900 bg-slate-900 text-white scale-110 shadow-xl' : 'glass-card border-white/60 bg-white/40'}`}
+                                    >
+                                        {pinInput.length > i ? '•' : ''}
+                                    </div>
+                                ))}
+                            </div>
+                            <input 
+                                ref={pinInputRef}
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                maxLength={4}
+                                value={pinInput}
+                                onChange={(e) => {
+                                    const val = e.target.value.replace(/[^0-9]/g, '').substring(0, 4);
+                                    setPinInput(val);
+                                    if (val.length === 4 && val === "2012") {
+                                        setTimeout(() => {
+                                            setShowPinModal(false);
+                                            setIsSettingsOpen(true);
+                                            setPinInput("");
+                                        }, 300);
+                                    } else if (val.length === 4) {
+                                        setPinError(true);
+                                        setTimeout(() => { 
+                                            setPinInput(""); 
+                                            setPinError(false);
+                                            pinInputRef.current?.focus();
+                                        }, 1000);
+                                    }
+                                }}
+                                className="absolute opacity-0 pointer-events-none inset-0 w-full h-full"
+                            />
+                            <p className={`text-[10px] font-black uppercase tracking-widest transition-all ${pinError ? 'text-rose-600 opacity-100' : 'text-slate-400 opacity-0'}`}>
+                                Authorization Failed. Protocol Active.
+                            </p>
+                        </form>
                     </div>
                 </div>
             )}
 
-            {/* Developer Configuration Modal */}
+            {/* Developer Configuration Modal (Premium Glass) */}
             {isSettingsOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-lg animate-in fade-in duration-500">
-                    <div className="w-full max-w-4xl h-[85vh] glass-card border border-white/20 rounded-[48px] shadow-2xl relative flex flex-col overflow-hidden bg-white/95">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-2xl animate-in fade-in duration-700">
+                    <div className="w-full max-w-5xl h-[85vh] glass-panel border-white/20 rounded-[48px] shadow-2xl relative flex flex-col overflow-hidden">
+                        {/* Ambient glow in modal */}
+                        <div className="absolute -top-20 -left-20 w-80 h-80 bg-blue-600/10 rounded-full blur-[120px]"></div>
+                        <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-indigo-600/10 rounded-full blur-[120px]"></div>
+
                         {/* Header */}
-                        <div className="shrink-0 p-8 border-b border-slate-100 flex items-center justify-between bg-white/50 backdrop-blur-md">
-                            <div className="flex items-center gap-4">
-                                <div className="p-3 rounded-2xl bg-slate-900 shadow-xl shadow-slate-900/20">
-                                    <Settings className="w-6 h-6 text-white animate-[spin_4s_linear_infinite]" />
+                        <div className="shrink-0 p-10 border-b border-white/10 flex items-center justify-between relative z-10">
+                            <div className="flex items-center gap-6">
+                                <div className="p-4 rounded-3xl bg-white text-slate-900 shadow-2xl">
+                                    <Settings className="w-8 h-8 animate-[spin_10s_linear_infinite]" />
                                 </div>
-                                <div>
-                                    <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-                                        Developer Configuration <span className="text-[10px] py-0.5 px-2 bg-blue-100 text-blue-700 rounded-full font-black uppercase leading-tight">Master Admin</span>
+                                <div className="space-y-1">
+                                    <h2 className="text-2xl font-black text-white tracking-tight flex items-center gap-4">
+                                        Governance Configuration <span className="text-[10px] py-1 px-3 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-full font-black uppercase tracking-widest leading-none">Security Tier 5</span>
                                     </h2>
-                                    <p className="text-xs text-slate-500 font-bold uppercase tracking-widest italic opacity-60">Visibility Control Room</p>
+                                    <p className="text-[10px] text-white/40 font-black uppercase tracking-[0.3em]">Institutional Visibility Control Matrix</p>
                                 </div>
                             </div>
                             <button 
                                 onClick={() => setIsSettingsOpen(false)}
-                                className="px-6 py-3 rounded-2xl bg-slate-900 text-white font-black text-xs uppercase tracking-widest hover:bg-slate-800 hover:scale-105 transition-all shadow-xl shadow-slate-900/20"
+                                className="px-10 py-4 rounded-2xl bg-white text-slate-900 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-100 transition-all shadow-xl active:scale-95"
                             >
-                                Save & Exit
+                                Persist Changes
                             </button>
                         </div>
 
                         {/* Content */}
-                        <div className="flex-grow overflow-y-auto p-8 bg-slate-50/50">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="flex-grow overflow-y-auto p-10 space-y-12 relative z-10 no-scrollbar">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                                 {categories.map(category => (
-                                    <div key={category.name} className="space-y-4">
-                                        <div className="flex items-center gap-2 px-2">
-                                            <category.icon className="w-4 h-4 text-slate-400" />
-                                            <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">{category.name}</h3>
+                                    <div key={category.name} className="space-y-6">
+                                        <div className="flex items-center gap-4 px-4">
+                                            <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.6)]"></div>
+                                            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/50">{category.name}</h3>
                                         </div>
-                                        <div className="space-y-2">
+                                        <div className="space-y-3">
                                             {category.modules.map(module => (
                                                 <div 
                                                     key={module.title}
-                                                    className={`p-4 rounded-3xl border transition-all flex items-center justify-between group ${hiddenModules.includes(module.title) ? 'bg-white/50 border-slate-100 opacity-60' : 'bg-white border-white shadow-sm ring-1 ring-slate-100'}`}
+                                                    className={`p-5 rounded-[28px] border transition-all flex items-center justify-between group ${hiddenModules.includes(module.title) ? 'bg-white/5 border-white/5 opacity-40' : 'bg-white/10 border-white/10 hover:border-white/30 hover:bg-white/15'}`}
                                                 >
-                                                    <div className="flex items-center gap-3">
-                                                        <div className={`p-2 rounded-xl ${hiddenModules.includes(module.title) ? 'bg-slate-100 text-slate-400' : 'bg-blue-50 text-blue-600'}`}>
+                                                    <div className="flex items-center gap-5">
+                                                        <div className={`p-3 rounded-2xl shadow-inner ${hiddenModules.includes(module.title) ? 'bg-white/5 text-white/20' : 'bg-white text-slate-900'}`}>
                                                             <module.icon className="w-5 h-5" />
                                                         </div>
-                                                        <div>
-                                                            <h4 className="text-sm font-black text-slate-800">{module.title}</h4>
-                                                            <p className="text-[10px] text-slate-400 font-medium">{module.description.substring(0, 40)}...</p>
+                                                        <div className="space-y-1">
+                                                            <h4 className="text-sm font-black text-white tracking-tight">{module.title}</h4>
+                                                            <p className="text-[10px] text-white/40 font-bold uppercase tracking-wider">{category.name} Integration</p>
                                                         </div>
                                                     </div>
                                                     <Switch 
                                                         checked={!hiddenModules.includes(module.title)}
                                                         onCheckedChange={() => toggleModuleVisibility(module.title)}
-                                                        className="data-[state=checked]:bg-blue-700"
+                                                        className="data-[state=checked]:bg-blue-600 border-none shadow-xl scale-110"
                                                     />
                                                 </div>
                                             ))}
@@ -507,12 +472,14 @@ const Dashboard: React.FC = () => {
                         </div>
 
                         {/* Footer */}
-                        <div className="shrink-0 p-6 border-t border-slate-100 bg-white/50 flex justify-between items-center">
-                            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                                <Unlock className="w-3 h-3" />
-                                <span>Security Level 5</span>
+                        <div className="shrink-0 px-10 py-6 border-t border-white/10 bg-black/20 flex justify-between items-center relative z-10">
+                            <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
+                                <Unlock className="w-3.5 h-3.5" />
+                                <span>Encrypted Session Active</span>
                             </div>
-                            <p className="text-[10px] font-bold text-slate-300">Config: LOCAL_STORAGE_PERSISTENCE_V1</p>
+                            <div className="flex gap-4">
+                                <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">v2.0.26-ALPHA</p>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -376,19 +376,19 @@ const LeaveConfiguration = () => {
         <Layout title="Leave Configuration" description="Configure leave types, allocations, and approval workflows" icon={Settings} showBack>
             {showToast && (
                 <div className="fixed top-4 right-4 z-50 animate-in slide-in-from-right-8 fade-in duration-300">
-                    <div className="bg-emerald-50 text-emerald-600 border border-emerald-200 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 font-bold">
+                    <div className="bg-emerald-50 text-emerald-600 border border-emerald-200 px-4 py-3 rounded-lg shadow-sm flex items-center gap-2 font-bold">
                         <Check className="w-5 h-5" /> Configuration Saved Successfully!
                     </div>
                 </div>
             )}
 
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
-                <div className="flex justify-between items-center bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <div className="flex justify-between items-center bg-white px-4 py-4 rounded-2xl border border-slate-200 shadow-sm">
                     <div>
-                        <h2 className="text-2xl font-black text-slate-800 tracking-tight mb-1">Policy Settings</h2>
+                        <h2 className="text-xl font-black text-slate-800 tracking-tight mb-1">Policy Settings</h2>
                         <p className="text-slate-500 text-sm">Manage global leave policies, staff balances, and approval routing.</p>
                     </div>
-                    <Button onClick={handleSaveConfig} disabled={isSaving} className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 w-48">
+                    <Button onClick={handleSaveConfig} disabled={isSaving} className="bg-blue-600 hover:bg-blue-700 shadow-sm shadow-blue-500/20 w-48">
                         {isSaving ? 'Saving...' : <><Save className="w-4 h-4 mr-2" /> Save Settings</>}
                     </Button>
                 </div>
@@ -519,9 +519,9 @@ const LeaveConfiguration = () => {
                                         <Plus className="w-4 h-4 mr-1" /> Add Chain
                                     </Button>
                                 </div>
-                                <CardContent className="p-6 space-y-4">
+                                <CardContent className="px-4 py-4 space-y-4">
                                     {workflows.length === 0 ? (
-                                        <div className="text-center py-8 text-slate-400 font-medium">No approval workflows configured.</div>
+                                        <div className="text-center py-4 text-slate-400 font-medium">No approval workflows configured.</div>
                                     ) : (
                                         workflows.map((flow) => (
                                             <div key={flow.id} className="grid grid-cols-[1fr_auto_1fr_auto_1fr_auto] items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm group hover:border-blue-200 transition-colors">
@@ -600,14 +600,14 @@ const LeaveConfiguration = () => {
 
                     {/* GLOBAL RULES TAB */}
                     {activeTab === 'rules' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gapx-4 py-4">
                             <Card className="border-none shadow-sm ring-1 ring-slate-100 bg-white hover:ring-blue-200 transition-all">
-                                <CardContent className="p-6">
+                                <CardContent className="px-4 pb-4">
                                     <div className="flex items-start gap-4">
                                         <div className="p-3 bg-blue-50 text-blue-600 rounded-xl shrink-0"><Clock className="w-6 h-6" /></div>
                                         <div className="flex-1">
                                             <h4 className="font-black text-slate-800 text-lg mb-1">Sandwich Leave Enforcement</h4>
-                                            <p className="text-sm text-slate-500 mb-4">CL prefixed or suffixed to non-working days (weekends/holidays) will be counted as two days of leave.</p>
+                                            <p className="text-xs text-slate-500 mb-4">CL prefixed or suffixed to non-working days (weekends/holidays) will be counted as two days of leave.</p>
                                             <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-lg border border-slate-100">
                                                 <div className="relative inline-flex items-center cursor-pointer">
                                                     <input type="checkbox" className="sr-only peer" defaultChecked />
@@ -621,12 +621,12 @@ const LeaveConfiguration = () => {
                             </Card>
 
                             <Card className="border-none shadow-sm ring-1 ring-slate-100 bg-white hover:ring-emerald-200 transition-all">
-                                <CardContent className="p-6">
+                                <CardContent className="px-4 pb-4">
                                     <div className="flex items-start gap-4">
                                         <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl shrink-0"><FileText className="w-6 h-6" /></div>
                                         <div className="flex-1">
                                             <h4 className="font-black text-slate-800 text-lg mb-1">Mandatory Document Proof</h4>
-                                            <p className="text-sm text-slate-500 mb-4">Leaves extending beyond 3 days or specific types (OED) require supporting documentation.</p>
+                                            <p className="text-xs text-slate-500 mb-4">Leaves extending beyond 3 days or specific types (OED) require supporting documentation.</p>
                                             <div className="space-y-2">
                                                 <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 bg-slate-50 p-2 rounded border border-slate-100 cursor-pointer">
                                                     <input type="checkbox" defaultChecked className="rounded text-emerald-600" />
@@ -643,12 +643,12 @@ const LeaveConfiguration = () => {
                             </Card>
 
                             <Card className="border-none shadow-sm ring-1 ring-slate-100 bg-white hover:ring-amber-200 transition-all">
-                                <CardContent className="p-6">
+                                <CardContent className="px-4 pb-4">
                                     <div className="flex items-start gap-4">
                                         <div className="p-3 bg-amber-50 text-amber-600 rounded-xl shrink-0"><FileQuestion className="w-6 h-6" /></div>
                                         <div className="flex-1">
                                             <h4 className="font-black text-slate-800 text-lg mb-1">Unapproved Action Policy</h4>
-                                            <p className="text-sm text-slate-500 mb-4">Determine how the system handles leaves taken without prior approvals.</p>
+                                            <p className="text-xs text-slate-500 mb-4">Determine how the system handles leaves taken without prior approvals.</p>
                                             <div className="flex items-center gap-3 bg-amber-50/50 p-4 rounded-xl border border-amber-100">
                                                 <Check className="w-5 h-5 text-amber-600" />
                                                 <span className="text-sm font-bold text-slate-800">Automatically classify as LOPNR</span>
@@ -659,12 +659,12 @@ const LeaveConfiguration = () => {
                             </Card>
 
                             <Card className="border-none shadow-sm ring-1 ring-slate-100 bg-white hover:ring-purple-200 transition-all">
-                                <CardContent className="p-6">
+                                <CardContent className="px-4 pb-4">
                                     <div className="flex items-start gap-4">
                                         <div className="p-3 bg-purple-50 text-purple-600 rounded-xl shrink-0"><Settings className="w-6 h-6" /></div>
                                         <div className="flex-1">
                                             <h4 className="font-black text-slate-800 text-lg mb-1">Advanced Accrual & Policies</h4>
-                                            <p className="text-sm text-slate-500 mb-4">Configure carry-forwards, fractional leaves, and limits.</p>
+                                            <p className="text-xs text-slate-500 mb-4">Configure carry-forwards, fractional leaves, and limits.</p>
                                             <div className="space-y-2">
                                                 <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 bg-slate-50 p-2 rounded border border-slate-100 cursor-pointer">
                                                     <input type="checkbox" className="rounded text-purple-600" />
@@ -700,7 +700,7 @@ const LeaveConfiguration = () => {
                             <button onClick={() => setShowModal(false)} className="p-2 text-slate-400 hover:bg-slate-200 hover:text-slate-600 rounded-full transition-colors"><X className="w-5 h-5" /></button>
                         </div>
                         <div className="p-8 overflow-y-auto space-y-6">
-                            <div className="grid grid-cols-2 gap-6 border-b border-slate-100 pb-6">
+                            <div className="grid grid-cols-2 gapx-4 py-4 border-b border-slate-100 pb-6">
                                 <div className="space-y-1.5">
                                     <label className="text-sm font-bold text-slate-700">Leave ID</label>
                                     <input type="text" value={formData.id} onChange={(e) => setFormData({ ...formData, id: e.target.value.toUpperCase() })} disabled={!!editingType} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold disabled:opacity-50" />
@@ -711,7 +711,7 @@ const LeaveConfiguration = () => {
                                 </div>
                             </div>
                             <h4 className="font-bold text-slate-800 text-sm uppercase tracking-wider mb-2">Entitlements / Allocations</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gapx-4 py-4">
                                 <div className="space-y-1.5">
                                     <label className="text-sm font-bold text-slate-700">Teaching (Permanent)</label>
                                     <StructuredEntitlementInput value={formData.teachingPerm} onChange={(val) => setFormData({ ...formData, teachingPerm: val })} />
@@ -749,7 +749,7 @@ const LeaveConfiguration = () => {
                             </div>
                             <button onClick={() => setShowStaffModal(false)} className="p-2 text-slate-400 hover:bg-slate-200 hover:text-slate-600 rounded-full transition-colors"><X className="w-5 h-5" /></button>
                         </div>
-                        <div className="p-6 space-y-4">
+                        <div className="px-4 py-4 space-y-4">
                             {leaveTypes.map(type => (
                                 <div key={type.id} className="flex justify-between items-center bg-white border border-slate-200 p-3 rounded-xl shadow-sm">
                                     <div className="font-bold text-slate-700 text-sm">{type.name}</div>
@@ -783,7 +783,7 @@ const LeaveConfiguration = () => {
                             <h3 className="font-black text-lg text-slate-800 tracking-tight">{editingWorkflow ? 'Edit Approval Chain' : 'New Approval Chain'}</h3>
                             <button onClick={() => setShowWorkflowModal(false)} className="p-2 text-slate-400 hover:bg-slate-200 hover:text-slate-600 rounded-full transition-colors"><X className="w-5 h-5" /></button>
                         </div>
-                        <div className="p-6 space-y-4">
+                        <div className="px-4 py-4 space-y-4">
                             <div className="space-y-1.5">
                                 <label className="text-sm font-bold text-slate-700">Role Group</label>
                                 <input type="text" placeholder="e.g. Teaching Staff" value={workflowForm.roleGroup} onChange={(e) => setWorkflowForm({ ...workflowForm, roleGroup: e.target.value })} className="w-full bg-white border border-slate-200 rounded-xl py-2 px-3 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold" />
@@ -824,12 +824,12 @@ const LeaveConfiguration = () => {
                         <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                             <div>
                                 <h3 className="font-black text-xl text-slate-800 tracking-tight">{editingQuota ? 'Edit Quota Configuration' : 'Add Quota Entry'}</h3>
-                                <p className="text-sm text-slate-500 mt-1">Configure staff-specific leave entitlements and distribution rules.</p>
+                                <p className="text-xs text-slate-500 mt-1">Configure staff-specific leave entitlements and distribution rules.</p>
                             </div>
                             <button onClick={() => setShowQuotaModal(false)} className="p-2 text-slate-400 hover:bg-slate-200 hover:text-slate-600 rounded-full transition-colors"><X className="w-5 h-5" /></button>
                         </div>
                         <div className="p-8 overflow-y-auto space-y-6">
-                            <div className="grid grid-cols-2 gap-6">
+                            <div className="grid grid-cols-2 gapx-4 py-4">
                                 <div className="space-y-1.5">
                                     <label className="text-sm font-bold text-slate-700">Leave Code</label>
                                     <input type="text" placeholder="e.g. CL" value={quotaForm.leaveCode} onChange={(e) => setQuotaForm({ ...quotaForm, leaveCode: e.target.value.toUpperCase() })} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-4 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold" />

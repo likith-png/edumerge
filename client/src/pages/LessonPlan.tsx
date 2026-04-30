@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import Layout from '../components/Layout';
 import {
-    BookOpen, Home, ChevronRight, AlertTriangle, CheckCircle,
-    Clock, Users, Calendar, TrendingUp, Eye, Plus, Search,
+    BookOpen, ChevronRight, AlertTriangle, CheckCircle,
+    Clock, Users, Calendar, TrendingUp, Eye, Plus,
     BarChart2, Target, FileText, Activity, Star, Bell, X,
     CalendarClock, AlertOctagon, CheckCircle2, Edit3, MessageSquare, Send
 } from 'lucide-react';
@@ -121,7 +122,7 @@ const StatCard: React.FC<{ label: string; value: string | number; icon: React.El
                 </div>
                 <div>
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
-                    <p className="text-2xl font-black text-slate-900">{value}</p>
+                    <p className="text-xl font-black text-slate-900">{value}</p>
                     {sub && <p className="text-xs text-slate-400 font-medium">{sub}</p>}
                 </div>
             </CardContent>
@@ -783,7 +784,7 @@ const LessonPlanningTab: React.FC = () => {
                         return (
                             <Card key={l.id}
                                 onClick={() => setExpandedLesson(isOpen ? null : l.id)}
-                                className={`border-none shadow-sm cursor-pointer transition-all duration-200 ${isOpen ? 'ring-2 ring-indigo-500 shadow-md' : 'hover:shadow-md'}`}>
+                                className={`border-none shadow-sm cursor-pointer transition-all duration-200 ${isOpen ? 'ring-2 ring-indigo-500 shadow-sm' : 'hover:shadow-sm'}`}>
                                 <CardContent className="p-0">
                                     {/* Summary row */}
                                     <div className="p-5 flex items-start gap-4">
@@ -939,7 +940,7 @@ const CurriculumTrackingTab: React.FC = () => {
             <CardHeader className="px-6 pt-6 pb-4 border-b border-slate-100">
                 <CardTitle className="text-base font-black text-slate-900">Syllabus Coverage – All Teachers</CardTitle>
             </CardHeader>
-            <CardContent className="p-6 space-y-5">
+            <CardContent className="px-4 py-4 space-y-5">
                 {teachers.map(t => {
                     const colors = getStatusColors(t.status);
                     const p = pct(t);
@@ -990,15 +991,15 @@ const CurriculumTrackingTab: React.FC = () => {
                         </button>
                     </div>
 
-                    <div className="p-6 overflow-y-auto space-y-6">
+                    <div className="px-4 py-4 overflow-y-auto space-y-6">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-100">
                                 <p className="text-[10px] font-black text-emerald-800 uppercase tracking-widest mb-1">Completed Lessons</p>
-                                <p className="text-2xl font-black text-emerald-700">{selectedTeacher.completed}</p>
+                                <p className="text-xl font-black text-emerald-700">{selectedTeacher.completed}</p>
                             </div>
                             <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
                                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Planned</p>
-                                <p className="text-2xl font-black text-slate-700">{selectedTeacher.planned}</p>
+                                <p className="text-xl font-black text-slate-700">{selectedTeacher.planned}</p>
                             </div>
                         </div>
 
@@ -1127,7 +1128,7 @@ const BacklogMonitoringTab: React.FC = () => {
                                 if ((e.target as HTMLElement).closest('.notify-section')) return;
                                 setSelectedAlertTeacher(t);
                             }}
-                            className={`border-none shadow-sm cursor-pointer hover:shadow-md transition-all ${t.status === 'Critical Risk' ? 'ring-2 ring-red-200 shadow-md' : 'hover:ring-2 ring-orange-200'}`}
+                            className={`border-none shadow-sm cursor-pointer hover:shadow-sm transition-all ${t.status === 'Critical Risk' ? 'ring-2 ring-red-200 shadow-sm' : 'hover:ring-2 ring-orange-200'}`}
                         >
                             <CardContent className="p-5">
                                 <div className="flex items-start gap-4">
@@ -1213,7 +1214,7 @@ const BacklogMonitoringTab: React.FC = () => {
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onClick={() => setSelectedAlertTeacher(null)} />
                     <div className="relative w-full max-w-lg bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
                         {/* Header */}
-                        <div className={`p-6 bg-gradient-to-br ${selectedAlertTeacher.status === 'Critical Risk' ? 'from-red-600 to-rose-700' : 'from-orange-500 to-amber-600'} text-white shadow-md flex-shrink-0 z-10`}>
+                        <div className={`p-6 bg-gradient-to-br ${selectedAlertTeacher.status === 'Critical Risk' ? 'from-red-600 to-rose-700' : 'from-orange-500 to-amber-600'} text-white shadow-sm flex-shrink-0 z-10`}>
                             <div className="flex justify-between items-start mb-4">
                                 <div className="flex items-center gap-4">
                                     <div className="h-12 w-12 rounded-2xl bg-white/20 flex items-center justify-center font-black text-xl backdrop-blur-md shadow-inner">
@@ -1252,7 +1253,7 @@ const BacklogMonitoringTab: React.FC = () => {
                         {/* Scrollable Content */}
                         <div className="flex-1 overflow-y-auto bg-slate-50/50">
                             {/* Missing Sessions Block */}
-                            <div className="p-6">
+                            <div className="px-4 py-4">
                                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Delayed Sessions Detail</h3>
                                 <div className="space-y-3">
                                     {[1, 2, 3].map((_, i) => (
@@ -1270,7 +1271,7 @@ const BacklogMonitoringTab: React.FC = () => {
                             </div>
 
                             {/* Activity Log */}
-                            <div className="p-6 border-t border-slate-100 bg-white min-h-[50%]">
+                            <div className="px-4 py-4 border-t border-slate-100 bg-white min-h-[50%]">
                                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 flex justify-between items-center">
                                     <span>Notification Log</span>
                                     <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded flex items-center font-bold text-[9px]"><Bell className="h-3 w-3 mr-1"/> History</span>
@@ -1338,7 +1339,7 @@ const BacklogRecoveryTab: React.FC = () => {
                 </div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-2 gapx-4 py-4">
                 {/* Free slot list with drill-down */}
                 <Card className="border-none shadow-sm">
                     <CardHeader className="px-6 pt-6 pb-4 border-b border-slate-100 flex flex-row items-center justify-between">
@@ -1425,7 +1426,7 @@ const BacklogRecoveryTab: React.FC = () => {
                         })
                         ) : (
                             // Timetable View
-                            <div className="p-6 overflow-x-auto">
+                            <div className="px-4 py-4 overflow-x-auto">
                                 <div className="min-w-[600px]">
                                     <div className="grid grid-cols-8 gap-1 mb-1">
                                         <div className="col-span-1"></div>
@@ -1467,7 +1468,7 @@ const BacklogRecoveryTab: React.FC = () => {
                                                         }}
                                                         className={`col-span-1 h-12 rounded-md border flex flex-col items-center justify-center cursor-pointer transition-all relative overflow-hidden group
                                                         ${isScheduled ? 'bg-indigo-50 border-indigo-200' :
-                                                            isSelected ? 'bg-indigo-600 border-indigo-700 text-white shadow-md' :
+                                                            isSelected ? 'bg-indigo-600 border-indigo-700 text-white shadow-sm' :
                                                                 isCommon ? 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100' : 
                                                                     'bg-amber-50 border-amber-200'}
                                                         `}
@@ -1514,7 +1515,7 @@ const BacklogRecoveryTab: React.FC = () => {
                         <CardHeader className="px-6 pt-6 pb-4 border-b border-slate-100">
                             <CardTitle className="text-base font-black text-slate-900">Schedule Backlog Class</CardTitle>
                         </CardHeader>
-                        <CardContent className="p-6 space-y-4">
+                        <CardContent className="px-4 py-4 space-y-4">
                             {selected ? (
                                 <>
                                     <div className="p-4 bg-indigo-50 rounded-xl">
@@ -1538,7 +1539,7 @@ const BacklogRecoveryTab: React.FC = () => {
                                     </div>
                                 </>
                             ) : (
-                                <div className="flex flex-col items-center justify-center py-8 text-center text-slate-400">
+                                <div className="flex flex-col items-center justify-center py-4 text-center text-slate-400">
                                     <Calendar className="h-10 w-10 mb-3 opacity-30" />
                                     <p className="text-sm font-bold">Select a common free slot</p>
                                     <p className="text-xs mt-1">Click "Schedule" on any green slot to begin</p>
@@ -1627,7 +1628,7 @@ const ClassroomObservationTab: React.FC = () => {
                     {observations.map(o => (
                         <Card key={o.id}
                             onClick={() => setSelected(o)}
-                            className={`border-none shadow-sm cursor-pointer hover:shadow-md transition-all ${selected?.id === o.id ? 'ring-2 ring-indigo-500 shadow-md' : ''}`}>
+                            className={`border-none shadow-sm cursor-pointer hover:shadow-sm transition-all ${selected?.id === o.id ? 'ring-2 ring-indigo-500 shadow-sm' : ''}`}>
                             <CardContent className="p-5 flex items-center gap-4">
                                 <div className={`h-10 w-10 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0 transition-colors ${selected?.id === o.id ? 'bg-indigo-600 text-white' : 'bg-indigo-50 text-indigo-600'}`}>
                                     {o.teacher.charAt(0)}
@@ -1663,7 +1664,7 @@ const ClassroomObservationTab: React.FC = () => {
                             </div>
                             <button onClick={() => setSelected(null)} className="text-slate-400 hover:text-slate-700"><X className="h-4 w-4" /></button>
                         </CardHeader>
-                        <CardContent className="p-6 space-y-5 overflow-y-auto max-h-[75vh]">
+                        <CardContent className="px-4 py-4 space-y-5 overflow-y-auto max-h-[75vh]">
                             {selected.status === 'Completed' ? (
                                 <>
                                     {/* Overall score banner */}
@@ -1961,7 +1962,7 @@ const TeacherPerformanceTab: React.FC = () => {
                                         <p className="text-sm font-bold text-slate-900">{t.name}</p>
                                         <p className="text-xs text-slate-400">{t.subject} · {t.grade}</p>
                                     </div>
-                                    <div className="hidden md:flex items-center gap-6">
+                                    <div className="hidden md:flex items-center gapx-4 py-4">
                                         <div className="text-right">
                                             <p className="text-[10px] text-slate-400 font-bold">Coverage</p>
                                             <p className="text-sm font-black text-slate-700">{t.coverageScore}%</p>
@@ -1992,7 +1993,7 @@ const TeacherPerformanceTab: React.FC = () => {
                                             ].map(s => (
                                                 <div key={s.label} className="bg-white rounded-xl p-4 border border-slate-100">
                                                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{s.label}</p>
-                                                    <p className={`text-2xl font-black text-${s.color}-600 mb-1`}>{s.value > 0 ? `${s.value}%` : '–'}</p>
+                                                    <p className={`text-xl font-black text-${s.color}-600 mb-1`}>{s.value > 0 ? `${s.value}%` : '–'}</p>
                                                     <ProgressBar value={s.value} color={`bg-${s.color}-500`} />
                                                     <p className="text-[10px] text-slate-400 mt-1.5">{s.sub}</p>
                                                 </div>
@@ -2031,7 +2032,7 @@ const TeacherPerformanceTab: React.FC = () => {
                                         <div className="flex items-center gap-4">
                                             <div className={`flex-1 p-4 bg-${overallColor}-50 rounded-xl`}>
                                                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Composite Score</p>
-                                                <p className={`text-3xl font-black text-${overallColor}-600`}>{t.overall}%</p>
+                                                <p className={`text-xl font-black text-${overallColor}-600`}>{t.overall}%</p>
                                                 <p className="text-xs text-slate-400 mt-1">{t.obsScore !== null ? 'Avg of 3 metrics' : 'Avg of 2 metrics (obs pending)'}</p>
                                             </div>
                                             <div className="flex flex-col gap-2">
@@ -2053,7 +2054,7 @@ const TeacherPerformanceTab: React.FC = () => {
                                                         Generate Report
                                                     </Button>
                                                     {showReportDropdown === t.id && (
-                                                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-20 py-1 animate-in fade-in zoom-in-95 duration-200">
+                                                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-sm z-20 py-1 animate-in fade-in zoom-in-95 duration-200">
                                                             <button 
                                                                 className="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors"
                                                                 onClick={() => handleDownload('PDF', t.name)}
@@ -2146,7 +2147,7 @@ const ConfigurationTab: React.FC = () => {
                     </Button>
                 </div>
             </CardHeader>
-            <CardContent className="p-6 space-y-4">{children}</CardContent>
+            <CardContent className="px-4 py-4 space-y-4">{children}</CardContent>
         </Card>
     );
 
@@ -2326,55 +2327,38 @@ const LessonPlan: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
-            {/* Top nav */}
-            <div className="bg-white/80 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 lg:px-6">
-                    <div className="flex items-center justify-between h-16">
-                        <div className="flex items-center gap-3">
-                            <button onClick={() => window.location.href = '/'} className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 hover:text-indigo-600 transition-colors">
-                                <Home className="w-4 h-4" />
-                            </button>
-                            <div className="p-2 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-lg shadow-md shadow-indigo-300/30">
-                                <BookOpen className="h-4 w-4 text-white" />
-                            </div>
-                            <div>
-                                <h1 className="text-base font-black text-slate-900 tracking-tight leading-none">Lesson Plan & Curriculum</h1>
-                                <p className="text-[10px] text-slate-400 font-medium uppercase tracking-widest mt-0.5">Academic Management Suite</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="flex items-center bg-slate-100 rounded-lg p-1 mr-2">
-                                <button onClick={() => setPersona('employee')} className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${persona === 'employee' ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Employee</button>
-                                <button onClick={() => setPersona('manager')} className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${persona === 'manager' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Manager</button>
-                                <button onClick={() => setPersona('hr')} className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${persona === 'hr' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>HR/Admin</button>
-                            </div>
-                            <div className="relative hidden md:block">
-                                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                                <input className="h-8 w-52 pl-9 pr-4 bg-slate-100 border-none rounded-lg text-xs focus:ring-2 focus:ring-indigo-500 transition-all" placeholder="Search subjects, teachers…" />
-                            </div>
-                            <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg h-8 text-xs">
-                                <Plus className="h-3.5 w-3.5 mr-1.5" />New Plan
-                            </Button>
-                        </div>
+        <Layout
+            title="Lesson Plan & Curriculum"
+            description="Academic Management Suite | Curriculum coverage, backlog monitoring and observations."
+            headerActions={
+                <div className="flex items-center gap-3">
+                    <div className="flex items-center bg-slate-100 rounded-xl p-1 shadow-inner border border-slate-200">
+                        <button onClick={() => setPersona('employee')} className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${persona === 'employee' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-700'}`}>Employee</button>
+                        <button onClick={() => setPersona('manager')} className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${persona === 'manager' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-700'}`}>Manager</button>
+                        <button onClick={() => setPersona('hr')} className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${persona === 'hr' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-700'}`}>Admin</button>
                     </div>
+                    {persona === 'hr' && (
+                        <Button size="sm" className="bg-slate-900 hover:bg-black text-white rounded-xl h-10 px-6 font-black uppercase text-[10px] tracking-widest">
+                            <Plus className="h-4 w-4 mr-2" />New Plan
+                        </Button>
+                    )}
                 </div>
-            </div>
-
-            {/* Tab bar */}
-            <div className="bg-white border-b border-slate-200 sticky top-16 z-40">
-                <div className="max-w-7xl mx-auto px-4 lg:px-6">
-                    <div className="flex gap-1 overflow-x-auto scrollbar-hide py-1">
+            }
+        >
+            <div className="space-y-6">
+                {/* Tab bar */}
+                <div className="bg-white/80 backdrop-blur-md border border-slate-100 rounded-3xl p-1.5 sticky top-0 z-40 shadow-sm mb-8 overflow-x-auto scrollbar-hide">
+                    <div className="flex gap-1">
                         {visibleTabs.map(tab => {
                             const Icon = tab.icon;
                             const isActive = activeTab === tab.id;
                             return (
                                 <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                                    className={`flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${isActive ? 'bg-indigo-50 text-indigo-700' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'}`}>
+                                    className={`flex items-center gap-2 px-6 py-3 rounded-[20px] text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all ${isActive ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50'}`}>
                                     <Icon className="h-3.5 w-3.5 flex-shrink-0" />
                                     {tab.label}
                                     {tab.id === 'backlog' && (
-                                        <span className="ml-1 bg-red-500 text-white text-[9px] font-black rounded-full h-4 w-4 flex items-center justify-center flex-shrink-0">
+                                        <span className={`ml-2 text-[9px] font-black rounded-full h-4 w-4 flex items-center justify-center flex-shrink-0 ${isActive ? 'bg-white text-indigo-600' : 'bg-red-500 text-white'}`}>
                                             {teachers.filter(t => t.status === 'Backlog Detected' || t.status === 'Critical Risk').length}
                                         </span>
                                     )}
@@ -2383,13 +2367,13 @@ const LessonPlan: React.FC = () => {
                         })}
                     </div>
                 </div>
-            </div>
 
-            {/* Content */}
-            <div className="max-w-7xl mx-auto px-4 lg:px-6 py-6">
-                {renderTab()}
+                {/* Content */}
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    {renderTab()}
+                </div>
             </div>
-        </div>
+        </Layout>
     );
 };
 

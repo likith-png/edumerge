@@ -19,13 +19,13 @@ const Stage1Documents = ({ onComplete }: any) => {
     const isAllUploaded = documents.every(d => d.status === 'Uploaded');
 
     return (
-        <div className="p-6">
+        <div className="px-4 py-4">
             <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-indigo-600" /> Document Submission
             </h2>
-            <p className="text-slate-500 mb-6 text-sm">Please upload clear scanned copies of the following documents to proceed to verification.</p>
+            <p className="text-slate-500 mb-4 text-sm">Please upload clear scanned copies of the following documents to proceed to verification.</p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 {documents.map((doc) => (
                     <Card key={doc.id} className={`border ${doc.status === 'Uploaded' ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200'}`}>
                         <CardContent className="p-4 flex items-center justify-between">

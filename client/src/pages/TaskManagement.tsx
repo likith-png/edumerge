@@ -63,7 +63,7 @@ const TaskManagement: React.FC = () => {
                             <button onClick={() => navigate(-1)} className="p-2 rounded-xl hover:bg-white hover:shadow-sm text-slate-400 hover:text-indigo-600 transition-all">
                                 <ChevronRight className="w-6 h-6 rotate-180" />
                             </button>
-                            <h1 className="text-3xl font-[950] tracking-tight text-slate-900">Task Management</h1>
+                            <h1 className="text-xl font-[950] tracking-tight text-slate-900">Task Management</h1>
                         </div>
                         <p className="text-slate-500 font-medium pl-14">Central hub for all your automated and manual action items.</p>
                     </div>
@@ -84,7 +84,7 @@ const TaskManagement: React.FC = () => {
                         </div>
                         <Button
                             onClick={() => setShowCreateModal(true)}
-                            className="h-12 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black shadow-lg shadow-indigo-200 gap-2"
+                            className="h-12 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black shadow-sm shadow-indigo-200 gap-2"
                         >
                             <Plus className="w-5 h-5" /> Raise Task
                         </Button>
@@ -92,9 +92,9 @@ const TaskManagement: React.FC = () => {
                 </div>
 
                 {/* Stats Row */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gapx-4 py-4">
                     <Card className="rounded-[32px] border-none shadow-xl shadow-slate-100 bg-white/60 backdrop-blur-xl">
-                        <CardContent className="p-6 flex items-center justify-between">
+                        <CardContent className="px-4 py-4 flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Total Tasks</p>
                                 <h3 className="text-4xl font-[950] text-slate-900 mt-2">{stats.total}</h3>
@@ -105,7 +105,7 @@ const TaskManagement: React.FC = () => {
                         </CardContent>
                     </Card>
                     <Card className="rounded-[32px] border-none shadow-xl shadow-slate-100 bg-white/60 backdrop-blur-xl">
-                        <CardContent className="p-6 flex items-center justify-between">
+                        <CardContent className="px-4 py-4 flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Pending</p>
                                 <h3 className="text-4xl font-[950] text-slate-900 mt-2">{stats.pending}</h3>
@@ -116,7 +116,7 @@ const TaskManagement: React.FC = () => {
                         </CardContent>
                     </Card>
                     <Card className="rounded-[32px] border-none shadow-xl shadow-slate-100 bg-white/60 backdrop-blur-xl">
-                        <CardContent className="p-6 flex items-center justify-between">
+                        <CardContent className="px-4 py-4 flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Completed</p>
                                 <h3 className="text-4xl font-[950] text-slate-900 mt-2">{stats.completed}</h3>
@@ -127,7 +127,7 @@ const TaskManagement: React.FC = () => {
                         </CardContent>
                     </Card>
                     <Card className="rounded-[32px] border-none shadow-xl shadow-slate-100 bg-white/60 backdrop-blur-xl">
-                        <CardContent className="p-6 flex items-center justify-between">
+                        <CardContent className="px-4 py-4 flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">High Priority</p>
                                 <h3 className="text-4xl font-[950] text-slate-900 mt-2">{stats.highPriority}</h3>
@@ -158,10 +158,10 @@ const TaskManagement: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
+                    <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" : "space-y-4"}>
                         {tasks.map(task => (
                             <Card key={task.id} className={`rounded-[32px] border-none shadow-sm hover:shadow-xl hover:shadow-indigo-100/50 transition-all duration-300 group cursor-pointer bg-white ${task.status === 'Completed' ? 'opacity-60' : ''}`}>
-                                <CardContent className="p-6 space-y-4">
+                                <CardContent className="px-4 py-4 space-y-4">
                                     <div className="flex justify-between items-start">
                                         <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${getPriorityColor(task.priority)}`}>
                                             {task.priority} Priority
@@ -210,7 +210,7 @@ const TaskManagement: React.FC = () => {
                                 onClick={() => setShowCreateModal(true)}
                                 className="rounded-[32px] border-2 border-dashed border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/30 flex flex-col items-center justify-center text-slate-400 hover:text-indigo-600 transition-all min-h-[200px] gap-4 group"
                             >
-                                <div className="w-16 h-16 rounded-full bg-slate-50 group-hover:bg-white group-hover:shadow-lg flex items-center justify-center transition-all">
+                                <div className="w-16 h-16 rounded-full bg-slate-50 group-hover:bg-white group-hover:shadow-sm flex items-center justify-center transition-all">
                                     <Plus className="w-8 h-8" />
                                 </div>
                                 <span className="font-bold text-sm">Create New Task</span>
@@ -224,7 +224,7 @@ const TaskManagement: React.FC = () => {
                     <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
                         <Card className="w-full max-w-lg rounded-[40px] shadow-2xl border-none">
                             <CardHeader className="p-8 pb-0">
-                                <CardTitle className="text-2xl font-black text-slate-900">Create New Task</CardTitle>
+                                <CardTitle className="text-xl font-black text-slate-900">Create New Task</CardTitle>
                             </CardHeader>
                             <CardContent className="p-8">
                                 <form onSubmit={handleCreateTask} className="space-y-6">
@@ -248,7 +248,7 @@ const TaskManagement: React.FC = () => {
                                     </div>
                                     <div className="flex gap-3 pt-4">
                                         <Button type="button" variant="outline" onClick={() => setShowCreateModal(false)} className="flex-1 h-12 rounded-xl font-bold border-slate-200 hover:bg-slate-50">Cancel</Button>
-                                        <Button type="submit" className="flex-1 h-12 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black shadow-lg shadow-indigo-200">Create Task</Button>
+                                        <Button type="submit" className="flex-1 h-12 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black shadow-sm shadow-indigo-200">Create Task</Button>
                                     </div>
                                 </form>
                             </CardContent>

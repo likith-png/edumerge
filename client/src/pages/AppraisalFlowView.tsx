@@ -67,10 +67,10 @@ const AppraisalFlowView: React.FC = () => {
                         <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <Calendar className="h-10 w-10 text-slate-400" />
                         </div>
-                        <h2 className="text-2xl font-bold text-slate-900 mb-2">
+                        <h2 className="text-xl font-bold text-slate-900 mb-2">
                             📭 No Active Appraisal Cycle
                         </h2>
-                        <p className="text-slate-600 mb-6">
+                        <p className="text-slate-600 mb-4">
                             Your HR team hasn't set up this year's appraisal cycle yet.
                             <br />
                             Please check back soon!
@@ -129,7 +129,7 @@ const AppraisalFlowView: React.FC = () => {
     const renderFacultyView = () => (
         <>
             {/* Progressive Stepper */}
-            <Card className="mb-6 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+            <Card className="mb-4 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
                 <CardContent className="pt-6">
                     <div className="flex items-center justify-between mb-2">
                         <h2 className="text-lg font-bold text-slate-900">Your Appraisal Journey</h2>
@@ -142,7 +142,7 @@ const AppraisalFlowView: React.FC = () => {
                                     <div className={`
                                         w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all
                                         ${phase.status === 'completed' ? 'bg-green-600 text-white' :
-                                            phase.status === 'active' ? 'bg-blue-600 text-white shadow-lg scale-110' :
+                                            phase.status === 'active' ? 'bg-blue-600 text-white shadow-sm scale-110' :
                                                 'bg-slate-200 text-slate-400'}
                                     `}>
                                         {phase.status === 'completed' ? (
@@ -164,7 +164,7 @@ const AppraisalFlowView: React.FC = () => {
                                     )}
                                 </div>
                                 {idx < phases.length - 1 && (
-                                    <div className={`flex-1 h-1 mb-8 ${phase.status === 'completed' ? 'bg-green-600' : 'bg-slate-200'
+                                    <div className={`flex-1 h-1 mb-4 ${phase.status === 'completed' ? 'bg-green-600' : 'bg-slate-200'
                                         }`} />
                                 )}
                             </React.Fragment>
@@ -173,10 +173,10 @@ const AppraisalFlowView: React.FC = () => {
                 </CardContent>
             </Card>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gapx-4 py-4">
                 {/* Main: YOUR CURRENT ACTION */}
                 <div className="lg:col-span-2 space-y-6">
-                    <Card className="border-2 border-blue-300 shadow-lg">
+                    <Card className="border-2 border-blue-300 shadow-sm">
                         <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
                             <CardTitle className="flex items-center gap-2">
                                 <TrendingUp className="h-6 w-6" />
@@ -189,7 +189,7 @@ const AppraisalFlowView: React.FC = () => {
                         <CardContent className="pt-6">
                             {/* Auto Score Display */}
                             {autoEval && (
-                                <div className="mb-6">
+                                <div className="mb-4">
                                     <div className="flex items-center justify-between mb-4">
                                         <div>
                                             <h3 className="text-sm text-slate-600 mb-1">
@@ -199,7 +199,7 @@ const AppraisalFlowView: React.FC = () => {
                                                 <span className="text-5xl font-bold text-blue-900">
                                                     {autoEval.overallRating}
                                                 </span>
-                                                <span className="text-2xl text-slate-600">/5</span>
+                                                <span className="text-xl text-slate-600">/5</span>
                                                 <Badge className="ml-2 bg-green-600 text-white">
                                                     {autoEval.performanceBand}
                                                 </Badge>
@@ -208,7 +208,7 @@ const AppraisalFlowView: React.FC = () => {
                                         </div>
                                         <div className="text-right">
                                             <div className="text-xs text-slate-600">Predicted Year-End</div>
-                                            <div className="text-3xl font-bold text-indigo-900">
+                                            <div className="text-xl font-bold text-indigo-900">
                                                 {autoEval.predictedYearEndRating}
                                             </div>
                                         </div>
@@ -218,28 +218,28 @@ const AppraisalFlowView: React.FC = () => {
                                     <div className="grid grid-cols-4 gap-3 mb-4">
                                         <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
                                             <div className="text-xs text-blue-700 mb-1">Academic (40%)</div>
-                                            <div className="text-2xl font-bold text-blue-900">
+                                            <div className="text-xl font-bold text-blue-900">
                                                 {autoEval.componentScores.academic}
                                             </div>
                                             <CheckCircle className="h-4 w-4 text-green-600 mt-1" />
                                         </div>
                                         <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
                                             <div className="text-xs text-purple-700 mb-1">Professional (30%)</div>
-                                            <div className="text-2xl font-bold text-purple-900">
+                                            <div className="text-xl font-bold text-purple-900">
                                                 {autoEval.componentScores.professional}
                                             </div>
                                             <CheckCircle className="h-4 w-4 text-green-600 mt-1" />
                                         </div>
                                         <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
                                             <div className="text-xs text-amber-700 mb-1">Development (20%)</div>
-                                            <div className="text-2xl font-bold text-amber-900">
+                                            <div className="text-xl font-bold text-amber-900">
                                                 {autoEval.componentScores.development}
                                             </div>
                                             <AlertCircle className="h-4 w-4 text-amber-600 mt-1" />
                                         </div>
                                         <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
                                             <div className="text-xs text-slate-700 mb-1">Compliance (10%)</div>
-                                            <div className="text-2xl font-bold text-slate-900">
+                                            <div className="text-xl font-bold text-slate-900">
                                                 {autoEval.componentScores.compliance}
                                             </div>
                                             <CheckCircle className="h-4 w-4 text-green-600 mt-1" />
@@ -378,7 +378,7 @@ const AppraisalFlowView: React.FC = () => {
                         <CardContent>
                             <div className="space-y-3">
                                 <div className="text-center p-3 bg-white rounded-lg">
-                                    <div className="text-3xl font-bold text-pink-900">
+                                    <div className="text-xl font-bold text-pink-900">
                                         {autoEval?.overallRating || '4.3'}/5
                                     </div>
                                     <div className="text-xs text-slate-600">Current Rating</div>
@@ -473,7 +473,7 @@ const AppraisalFlowView: React.FC = () => {
     const renderHODView = () => (
         <>
             {/* Cycle Header */}
-            <Card className="mb-6 border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50">
+            <Card className="mb-4 border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50">
                 <CardContent className="pt-4">
                     <div className="flex items-center justify-between">
                         <div>
@@ -535,7 +535,7 @@ const AppraisalFlowView: React.FC = () => {
             </Card>
 
             {/* Pending Approvals Card */}
-            <Card className="mb-6 border-orange-200">
+            <Card className="mb-4 border-orange-200">
                 <CardHeader className="bg-orange-50 border-b">
                     <CardTitle className="flex items-center gap-2">
                         <AlertCircle className="h-5 w-5 text-orange-600" />
@@ -599,21 +599,21 @@ const AppraisalFlowView: React.FC = () => {
 
             {/* Quick Actions for HOD */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card className="cursor-pointer hover:shadow-md transition-all" onClick={() => navigate('/appraisal/goal-approval')}>
+                <Card className="cursor-pointer hover:shadow-sm transition-all" onClick={() => navigate('/appraisal/goal-approval')}>
                     <CardContent className="pt-6 text-center">
                         <CheckCircle className="h-10 w-10 text-green-600 mx-auto mb-2" />
                         <h3 className="font-semibold text-slate-900">Review Goals</h3>
                         <p className="text-sm text-slate-600 mt-1">Approve faculty submissions</p>
                     </CardContent>
                 </Card>
-                <Card className="cursor-pointer hover:shadow-md transition-all" onClick={() => navigate('/appraisal/analytics')}>
+                <Card className="cursor-pointer hover:shadow-sm transition-all" onClick={() => navigate('/appraisal/analytics')}>
                     <CardContent className="pt-6 text-center">
                         <BarChart3 className="h-10 w-10 text-blue-600 mx-auto mb-2" />
                         <h3 className="font-semibold text-slate-900">Analytics</h3>
                         <p className="text-sm text-slate-600 mt-1">Department insights</p>
                     </CardContent>
                 </Card>
-                <Card className="cursor-pointer hover:shadow-md transition-all" onClick={() => navigate('/staff-portfolio')}>
+                <Card className="cursor-pointer hover:shadow-sm transition-all" onClick={() => navigate('/staff-portfolio')}>
                     <CardContent className="pt-6 text-center">
                         <Users className="h-10 w-10 text-purple-600 mx-auto mb-2" />
                         <h3 className="font-semibold text-slate-900">Staff Portfolios</h3>
@@ -630,16 +630,16 @@ const AppraisalFlowView: React.FC = () => {
             return (
                 <>
                     {/* Empty State for HR */}
-                    <Card className="mb-6 border-indigo-200 bg-gradient-to-r from-indigo-50 to-blue-50">
+                    <Card className="mb-4 border-indigo-200 bg-gradient-to-r from-indigo-50 to-blue-50">
                         <CardContent className="pt-6 pb-6">
                             <div className="text-center">
                                 <div className="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <Settings className="h-10 w-10 text-indigo-600" />
                                 </div>
-                                <h2 className="text-2xl font-bold text-slate-900 mb-2">
+                                <h2 className="text-xl font-bold text-slate-900 mb-2">
                                     No Appraisal Cycle Configured
                                 </h2>
-                                <p className="text-slate-600 mb-6 max-w-lg mx-auto">
+                                <p className="text-slate-600 mb-4 max-w-lg mx-auto">
                                     Get started by creating your first appraisal cycle.
                                     You'll define phases, weightages, and rating criteria in a simple 5-step wizard.
                                 </p>
@@ -659,7 +659,7 @@ const AppraisalFlowView: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {(!activeCycle || (activeCycle as AppraisalCycle).enabledStages?.kra !== false) && (
                             <Card
-                                className="border-blue-200 hover:shadow-lg transition-all cursor-pointer"
+                                className="border-blue-200 hover:shadow-sm transition-all cursor-pointer"
                                 onClick={() => navigate('/appraisal/kra')}
                             >
                                 <CardContent className="pt-6">
@@ -683,7 +683,7 @@ const AppraisalFlowView: React.FC = () => {
 
                         {(!activeCycle || (activeCycle as AppraisalCycle).enabledStages?.kpi !== false) && (
                             <Card
-                                className="border-green-200 hover:shadow-lg transition-all cursor-pointer"
+                                className="border-green-200 hover:shadow-sm transition-all cursor-pointer"
                                 onClick={() => navigate('/appraisal/kpi')}
                             >
                                 <CardContent className="pt-6">
@@ -707,7 +707,7 @@ const AppraisalFlowView: React.FC = () => {
 
                         {(!activeCycle || ((activeCycle as AppraisalCycle).enabledStages?.kra !== false || (activeCycle as AppraisalCycle).enabledStages?.kpi !== false)) && (
                             <Card
-                                className="border-purple-200 hover:shadow-lg transition-all cursor-pointer"
+                                className="border-purple-200 hover:shadow-sm transition-all cursor-pointer"
                                 onClick={() => navigate('/appraisal/goals')}
                             >
                                 <CardContent className="pt-6">
@@ -737,7 +737,7 @@ const AppraisalFlowView: React.FC = () => {
         return (
             <>
                 {/* Cycle Management Header */}
-                <Card className="mb-6 border-indigo-200 bg-gradient-to-r from-indigo-50 to-blue-50">
+                <Card className="mb-4 border-indigo-200 bg-gradient-to-r from-indigo-50 to-blue-50">
                     <CardContent className="pt-4">
                         <div className="flex items-center justify-between mb-4">
                             <div>
@@ -756,19 +756,19 @@ const AppraisalFlowView: React.FC = () => {
                         {/* Institution-Wide Stats */}
                         <div className="grid grid-cols-4 gap-4">
                             <div className="p-4 bg-white rounded-lg border border-slate-200 text-center">
-                                <div className="text-3xl font-bold text-blue-900">{employees.length}</div>
+                                <div className="text-xl font-bold text-blue-900">{employees.length}</div>
                                 <div className="text-xs text-slate-600 mt-1">Total Faculty</div>
                             </div>
                             <div className="p-4 bg-white rounded-lg border border-green-200 text-center">
-                                <div className="text-3xl font-bold text-green-900">89%</div>
+                                <div className="text-xl font-bold text-green-900">89%</div>
                                 <div className="text-xs text-slate-600 mt-1">Goals Set</div>
                             </div>
                             <div className="p-4 bg-white rounded-lg border border-amber-200 text-center">
-                                <div className="text-3xl font-bold text-amber-900">12</div>
+                                <div className="text-xl font-bold text-amber-900">12</div>
                                 <div className="text-xs text-slate-600 mt-1">Pending Approvals</div>
                             </div>
                             <div className="p-4 bg-white rounded-lg border border-purple-200 text-center">
-                                <div className="text-3xl font-bold text-purple-900">4.2</div>
+                                <div className="text-xl font-bold text-purple-900">4.2</div>
                                 <div className="text-xs text-slate-600 mt-1">Avg Rating (Projected)</div>
                             </div>
                         </div>
@@ -834,9 +834,9 @@ const AppraisalFlowView: React.FC = () => {
                 </Card>
 
                 {/* Quick Actions Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gapx-4 py-4">
                     <Card
-                        className="cursor-pointer hover:shadow-lg transition-all border-blue-200"
+                        className="cursor-pointer hover:shadow-sm transition-all border-blue-200"
                         onClick={() => navigate('/appraisal/analytics')}
                     >
                         <CardContent className="pt-6">
@@ -851,7 +851,7 @@ const AppraisalFlowView: React.FC = () => {
                     </Card>
 
                     <Card
-                        className="cursor-pointer hover:shadow-lg transition-all border-purple-200"
+                        className="cursor-pointer hover:shadow-sm transition-all border-purple-200"
                         onClick={() => setShowCalibrationInfo(!showCalibrationInfo)}
                     >
                         <CardContent className="pt-6">
@@ -869,7 +869,7 @@ const AppraisalFlowView: React.FC = () => {
                     </Card>
 
                     <Card
-                        className="cursor-pointer hover:shadow-lg transition-all border-green-200"
+                        className="cursor-pointer hover:shadow-sm transition-all border-green-200"
                         onClick={() => navigate('/staff-portfolio')}
                     >
                         <CardContent className="pt-6">
@@ -1012,7 +1012,7 @@ const AppraisalFlowView: React.FC = () => {
                                         {Object.entries(selectedCycle.weightages).map(([cat, val]) => (
                                             <div key={cat} className="p-3 bg-blue-50 rounded-lg border border-blue-100">
                                                 <div className="text-[10px] text-blue-600 uppercase font-bold tracking-wider">{cat}</div>
-                                                <div className="text-2xl font-bold text-blue-900">{val}%</div>
+                                                <div className="text-xl font-bold text-blue-900">{val}%</div>
                                             </div>
                                         ))}
                                     </div>

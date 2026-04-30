@@ -1,0 +1,26 @@
+
+> client@0.0.0 build
+> tsc -b && vite build
+
+src/components/exit/ExitInterview.tsx(250,46): error TS2304: Cannot find name 'ChevronDown'.
+src/components/exit/FinalSettlement.tsx(94,18): error TS2304: Cannot find name 'AlertCircle'.
+src/components/exit/SettlementDashboard.tsx(276,150): error TS2304: Cannot find name 'Plus'.
+src/components/exit/SettlementDashboard.tsx(440,34): error TS2339: Property 'activity' does not exist on type 'JSX.IntrinsicElements'.
+src/components/exit/SettlementDashboard.tsx(441,36): error TS2339: Property 'activity' does not exist on type 'JSX.IntrinsicElements'.
+src/components/exit/SettlementDashboard.tsx(442,34): error TS2339: Property 'activity' does not exist on type 'JSX.IntrinsicElements'.
+src/pages/AppraisalManagement.tsx(95,22): error TS2367: This comparison appears to be unintentional because the types 'UserRole' and '"HR Admin"' have no overlap.
+src/pages/AppraisalManagement.tsx(163,58): error TS2367: This comparison appears to be unintentional because the types 'UserRole' and '"HR Admin"' have no overlap.
+src/pages/AppraisalSetupWizard.tsx(609,37): error TS2339: Property 'activity' does not exist on type 'JSX.IntrinsicElements'.
+src/pages/AppraisalSetupWizard.tsx(610,34): error TS2339: Property 'activity' does not exist on type 'JSX.IntrinsicElements'.
+src/pages/CertificatesPrototype.tsx(242,29): error TS2607: JSX element class does not support attributes because it does not have a 'props' property.
+src/pages/CertificatesPrototype.tsx(242,30): error TS2786: 'Lock' cannot be used as a JSX component.
+  Its type '{ new (): Lock; prototype: Lock; }' is not a valid JSX element type.
+    Type '{ new (): Lock; prototype: Lock; }' is not assignable to type 'new (props: any, context: any) => Component<any, any, any>'.
+      Type 'Lock' is missing the following properties from type 'Component<any, any, any>': context, setState, forceUpdate, render, and 2 more.
+src/pages/CourseCatalog.tsx(329,38): error TS2552: Cannot find name 'User'. Did you mean 'Users'?
+src/pages/CourseCatalog.tsx(392,38): error TS2304: Cannot find name 'X'.
+src/pages/PolicyGuides.tsx(914,55): error TS2304: Cannot find name 'Activity'.
+src/pages/PolicyGuides.tsx(960,55): error TS2552: Cannot find name 'User'. Did you mean 'user'?
+src/pages/PolicyGuides.tsx(1022,34): error TS2304: Cannot find name 'Activity'.
+src/pages/ProbationConfig.tsx(443,101): error TS2322: Type '{ className: string; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'className' does not exist on type 'IntrinsicAttributes'.

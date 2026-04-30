@@ -573,53 +573,49 @@ const ReportsDashboard: React.FC = () => {
             icon={PieChart}
             showHome={true}
         >
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
+            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-1000 pb-16">
 
-                {/* Hero Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <Card className="glass-card shadow-sm border border-white/80">
-                        <CardContent className="p-4 flex items-center gap-4">
-                            <div className="glass-icon-container bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5)] rounded-2xl flex items-center justify-center w-12 h-12">
-                                <FileText className="w-6 h-6" />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-black text-slate-800 tracking-tight">128</div>
-                                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Reports Generated Today</div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card className="glass-card shadow-sm border border-white/80">
-                        <CardContent className="p-4 flex items-center gap-4">
-                            <div className="glass-icon-container bg-blue-50 text-blue-800 border border-blue-100 shadow-[inset_0_2px_4px_rgba(255,255,255,0.5)] rounded-2xl flex items-center justify-center w-12 h-12">
-                                <Sheet className="w-6 h-6" />
-                            </div>
-                            <div>
-                                <div className="text-2xl font-black text-slate-800 tracking-tight">{mockReports.length}</div>
-                                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Predefined Templates</div>
-                            </div>
-                        </CardContent>
-                    </Card>
+                {/* Professional Stats Overview */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div className="bg-white p-6 border border-slate-200 rounded-xl shadow-sm flex items-center gap-5">
+                        <div className="w-12 h-12 bg-slate-900 rounded-lg flex items-center justify-center text-white shadow-sm">
+                            <FileText className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <div className="text-2xl font-bold text-slate-900 tracking-tight">128</div>
+                            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-0.5">Daily Reports</div>
+                        </div>
+                    </div>
+                    <div className="bg-white p-6 border border-slate-200 rounded-xl shadow-sm flex items-center gap-5">
+                        <div className="w-12 h-12 bg-slate-900 rounded-lg flex items-center justify-center text-white shadow-sm">
+                            <Sheet className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <div className="text-2xl font-bold text-slate-900 tracking-tight">{mockReports.length}</div>
+                            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-0.5">Neural Blueprints</div>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Main Content Hub */}
-                <div className="glass-panel overflow-hidden border border-white/60 shadow-lg">
+                {/* Main Orchestration Hub */}
+                <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm min-h-[800px] flex flex-col">
                     {/* Header Tabs */}
-                    <div className="flex border-b border-white/60 bg-white/40 p-2 gap-2">
+                    <div className="flex border-b border-slate-200 bg-slate-50/50 p-1.5 gap-1.5">
                         <button
                             onClick={() => setActiveTab('standard')}
-                            className={`flex flex-1 items-center justify-center gap-2 py-4 text-sm font-black uppercase tracking-widest transition-all rounded-xl ${activeTab === 'standard' ? 'bg-gradient-to-r from-blue-900 to-blue-700 text-white shadow-md shadow-blue-900/20 translate-y-[-1px]' : 'text-slate-600 hover:text-blue-900 hover:bg-white/60'}`}
+                            className={`flex flex-1 items-center justify-center gap-2 py-3 text-xs font-bold uppercase tracking-wider transition-all rounded-lg border ${activeTab === 'standard' ? 'bg-white border-slate-200 text-slate-900 shadow-sm' : 'bg-transparent border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-100/50'}`}
                         >
-                            <FileText className="w-4 h-4" /> Standard Reports
+                            <FileText className="w-4 h-4" /> Standard Repository
                         </button>
                         <button
                             onClick={() => setActiveTab('custom')}
-                            className={`flex flex-1 items-center justify-center gap-2 py-4 text-sm font-black uppercase tracking-widest transition-all rounded-xl ${activeTab === 'custom' ? 'bg-gradient-to-r from-blue-900 to-blue-700 text-white shadow-md shadow-blue-900/20 translate-y-[-1px]' : 'text-slate-600 hover:text-blue-900 hover:bg-white/60'}`}
+                            className={`flex flex-1 items-center justify-center gap-2 py-3 text-xs font-bold uppercase tracking-wider transition-all rounded-lg border ${activeTab === 'custom' ? 'bg-white border-slate-200 text-slate-900 shadow-sm' : 'bg-transparent border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-100/50'}`}
                         >
-                            <Settings className="w-4 h-4" /> Custom Report Builder
+                            <Settings className="w-4 h-4" /> Architect Studio
                         </button>
                     </div>
 
-                    <div className="p-6 bg-slate-50/50">
+                    <div className="px-4 py-4 bg-slate-50/50">
                         {activeTab === 'standard' ? (
                             <div className="space-y-6 animate-in fade-in">
                                 {/* Mobile Search */}
@@ -634,20 +630,20 @@ const ReportsDashboard: React.FC = () => {
                                 </div>
 
                                 {/* Filters */}
-                                <div className="flex justify-between items-center bg-white/60 border border-white/60 p-3 rounded-2xl shadow-sm backdrop-blur-md gap-4">
+                                <div className="flex justify-between items-center bg-white border border-slate-200 p-2 rounded-lg shadow-sm gap-4">
                                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                                        <Filter className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                                        <Filter className="w-4 h-4 text-slate-400 flex-shrink-0" />
                                         <div className="flex gap-2 overflow-x-auto min-w-0 pb-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                                             <style>{`.overflow-x-auto::-webkit-scrollbar { display: none; }`}</style>
                                             <button
                                                 onClick={() => setFilterModule('All')}
-                                                className={`flex-shrink-0 px-4 py-2 text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-sm ${filterModule === 'All' ? 'bg-blue-800 text-white shadow-blue-900/30' : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-blue-800'}`}
+                                                className={`flex-shrink-0 px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-md transition-all ${filterModule === 'All' ? 'bg-slate-900 text-white shadow-sm' : 'bg-slate-50 border border-slate-200 text-slate-500 hover:bg-slate-100 hover:text-slate-900'}`}
                                             >All</button>
                                             {mockModules.map(m => (
                                                 <button
                                                     key={m}
                                                     onClick={() => setFilterModule(m)}
-                                                    className={`flex-shrink-0 px-4 py-2 text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-sm ${filterModule === m ? 'bg-blue-800 text-white shadow-blue-900/30' : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-blue-800'}`}
+                                                    className={`flex-shrink-0 px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-md transition-all ${filterModule === m ? 'bg-slate-900 text-white shadow-sm' : 'bg-slate-50 border border-slate-200 text-slate-500 hover:bg-slate-100 hover:text-slate-900'}`}
                                                 >{m}</button>
                                             ))}
                                         </div>
@@ -658,55 +654,52 @@ const ReportsDashboard: React.FC = () => {
                                             placeholder="Search standard reports..." 
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="w-full text-sm rounded-xl py-2 pl-4 pr-4 bg-white border border-slate-200 focus:ring-2 focus:ring-blue-700/20 outline-none text-slate-800 placeholder:text-slate-400 shadow-sm transition-all" 
+                                            className="w-full text-sm rounded-lg py-2 pl-4 pr-4 bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-slate-900/20 outline-none text-slate-800 placeholder:text-slate-400 transition-all" 
                                         />
                                     </div>
                                 </div>
 
                                 {/* Reports Grid */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gapx-4 py-4">
                                 {mockReports
                                     .filter(r => (filterModule === 'All' || r.module === filterModule) && 
                                                  (r.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                                                   r.module.toLowerCase().includes(searchQuery.toLowerCase())))
                                     .map(report => (
-                                        <div key={report.id} className="glass-card shadow-sm border border-white/80 p-6 rounded-[32px] group/report flex flex-col justify-between min-h-[240px] relative overflow-hidden bg-white/60">
-                                            {/* Ambient glow */}
-                                            <div className={`absolute -top-20 -right-20 w-40 h-40 ${report.bg.replace('bg-', 'bg-').replace('50', '500')} opacity-10 rounded-full blur-3xl group-hover/report:opacity-20 transition-opacity duration-700`}></div>
-                                            
-                                            <div className="flex justify-between items-start mb-6 relative z-10">
+                                        <div key={report.id} className="bg-white shadow-sm border border-slate-200 p-6 rounded-xl group/report flex flex-col justify-between min-h-[220px] relative overflow-hidden transition-all hover:shadow-md">
+                                            <div className="flex justify-between items-start mb-4 relative z-10">
                                                 <div className="flex flex-col gap-4">
-                                                    <div className={`border shadow-sm w-14 h-14 rounded-2xl flex items-center justify-center ${report.bg} ${report.color} group-hover/report:scale-110 transition-transform duration-500`}>
-                                                        <report.icon className="w-7 h-7" />
+                                                    <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${report.bg} ${report.color} shadow-sm border border-slate-100`}>
+                                                        <report.icon className="w-6 h-6" />
                                                     </div>
-                                                    <div className="space-y-2">
-                                                        <Badge className="bg-slate-100 text-slate-600 border border-slate-200 font-black text-[9px] uppercase tracking-widest px-2 py-0.5 shadow-none">
+                                                    <div className="space-y-1">
+                                                        <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-wider px-2 py-0 border-slate-200 text-slate-500">
                                                             {report.module}
                                                         </Badge>
-                                                        <h4 className="text-xl font-black text-slate-800 tracking-tight leading-tight group-hover/report:text-blue-800 transition-colors">
+                                                        <h4 className="text-lg font-bold text-slate-900 tracking-tight leading-tight group-hover/report:text-slate-700 transition-colors">
                                                             {report.title}
                                                         </h4>
-                                                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
-                                                            <Calendar className="w-3 h-3 text-slate-400" /> Last Run: {report.lastRun}
+                                                        <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wide flex items-center gap-1.5">
+                                                            <Calendar className="w-3 h-3" /> Last Run: {report.lastRun}
                                                         </p>
                                                     </div>
                                                 </div>
-                                                <div className="opacity-0 group-hover/report:opacity-100 transition-all duration-300 -translate-x-2 group-hover/report:translate-x-0 relative z-10">
-                                                    <button onClick={() => setViewReportModal(report)} className="w-10 h-10 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-400 hover:text-blue-800 hover:bg-slate-50 transition-all">
+                                                <div className="opacity-0 group-hover/report:opacity-100 transition-all duration-300 relative z-10">
+                                                    <button onClick={() => setViewReportModal(report)} className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 shadow-sm flex items-center justify-center text-slate-400 hover:text-slate-900 hover:bg-white transition-all">
                                                         <Eye className="w-4 h-4" />
                                                     </button>
                                                 </div>
                                             </div>
 
-                                            <div className="mt-auto pt-5 border-t border-slate-100 flex gap-3 relative z-10">
+                                            <div className="mt-auto pt-4 border-t border-slate-100 flex gap-2 relative z-10">
                                                 {(report.type === 'PDF' || report.type === 'PDF/Excel') && (
-                                                    <button onClick={() => handleDownload('PDF', report.title)} disabled={isGenerating} className="flex-1 flex items-center justify-center gap-2 py-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 hover:text-blue-800 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-sm transition-all disabled:opacity-50 group/btn">
-                                                        <Download className="w-3.5 h-3.5 group-hover/btn:-translate-y-0.5 transition-transform" /> PDF
+                                                    <button onClick={() => handleDownload('PDF', report.title)} disabled={isGenerating} className="flex-1 flex items-center justify-center gap-2 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm transition-all disabled:opacity-50">
+                                                        <Download className="w-3.5 h-3.5" /> PDF
                                                     </button>
                                                 )}
                                                 {(report.type === 'Excel' || report.type === 'PDF/Excel') && (
-                                                    <button onClick={() => handleDownload('Excel', report.title)} disabled={isGenerating} className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-800 hover:bg-blue-900 text-white border border-blue-700 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-md shadow-blue-900/20 hover:shadow-blue-900/40 disabled:opacity-50 group/btn">
-                                                        <Download className="w-3.5 h-3.5 group-hover/btn:-translate-y-0.5 transition-transform" /> Excel
+                                                    <button onClick={() => handleDownload('Excel', report.title)} disabled={isGenerating} className="flex-1 flex items-center justify-center gap-2 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all shadow-sm disabled:opacity-50">
+                                                        <Download className="w-3.5 h-3.5" /> Excel
                                                     </button>
                                                 )}
                                             </div>
@@ -719,43 +712,41 @@ const ReportsDashboard: React.FC = () => {
                                 <div className="max-w-4xl mx-auto space-y-8">
 
                                     <div className="text-center">
-                                        <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">Build a Custom Report</h3>
-                                        <p className="text-slate-500 font-medium">Select your data sources, configure columns, and apply targeted filters to generate bespoke analytics.</p>
+                                        <h3 className="text-xl font-bold text-slate-900 mb-2 tracking-tight">Build a Custom Report</h3>
+                                        <p className="text-slate-500 text-sm font-medium">Select your data sources, configure columns, and apply targeted filters.</p>
                                     </div>
 
                                     {/* Step 1: Data Source */}
-                                    <div className="glass-card shadow-sm border border-white/80 p-6 rounded-[32px] relative overflow-hidden bg-white/60">
-                                        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-800/10 rounded-full blur-3xl -z-10"></div>
-                                        <h4 className="font-bold text-slate-800 mb-6 flex items-center gap-3">
-                                            <span className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 text-blue-800 flex items-center justify-center text-sm shadow-sm">1</span>
+                                    <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm relative overflow-hidden">
+                                        <h4 className="font-bold text-slate-800 mb-4 flex items-center gap-3">
+                                            <span className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center text-sm shadow-sm">1</span>
                                             Select Data Source
                                         </h4>
                                         <select
                                             value={selectedModule}
                                             onChange={(e) => setSelectedModule(e.target.value)}
-                                            className="w-full md:w-1/2 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-700/20 outline-none text-slate-800 bg-white border border-slate-200 shadow-sm appearance-none"
+                                            className="w-full md:w-1/2 rounded-lg py-2.5 px-4 focus:ring-2 focus:ring-slate-900/20 outline-none text-slate-800 bg-slate-50 border border-slate-200 shadow-sm transition-all"
                                         >
                                             {mockModules.map(m => <option key={m} value={m}>{m} Module Data Engine</option>)}
                                         </select>
                                     </div>
 
                                     {/* Step 2: Columns */}
-                                    <div className="glass-card shadow-sm border border-white/80 p-6 rounded-[32px] relative overflow-hidden bg-white/60">
-                                        <div className="absolute top-0 left-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -z-10"></div>
-                                        <h4 className="font-bold text-slate-800 mb-6 flex items-center gap-3">
-                                            <span className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 text-blue-800 flex items-center justify-center text-sm shadow-sm">2</span>
+                                    <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm relative overflow-hidden">
+                                        <h4 className="font-bold text-slate-800 mb-4 flex items-center gap-3">
+                                            <span className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center text-sm shadow-sm">2</span>
                                             Configure Columns
                                         </h4>
-                                        <div className="flex flex-wrap gap-3">
+                                        <div className="flex flex-wrap gap-2">
                                             {availableColumns.map((col: string) => {
                                                 const isSelected = selectedColumns.includes(col);
                                                 return (
                                                     <button
                                                         key={col}
                                                         onClick={() => toggleColumn(col)}
-                                                        className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border transition-all flex items-center gap-2 shadow-sm ${isSelected ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:text-blue-800 hover:bg-slate-50'}`}
+                                                        className={`px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border transition-all flex items-center gap-2 ${isSelected ? 'bg-slate-900 border-slate-900 text-white shadow-sm' : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-white hover:text-slate-900'}`}
                                                     >
-                                                        {isSelected && <CheckCircle2 className="w-4 h-4" />}
+                                                        {isSelected && <CheckCircle2 className="w-3 h-3" />}
                                                         {col}
                                                     </button>
                                                 )
@@ -764,53 +755,53 @@ const ReportsDashboard: React.FC = () => {
                                     </div>
 
                                     {/* Step 3: Filters (Mock) */}
-                                    <div className="glass-card shadow-sm border border-white/80 p-6 rounded-[32px] bg-white/60">
-                                        <div className="flex items-center justify-between mb-6">
+                                    <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+                                        <div className="flex items-center justify-between mb-4">
                                             <h4 className="font-bold text-slate-800 flex items-center gap-3">
-                                                <span className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 text-blue-800 flex items-center justify-center text-sm shadow-sm">3</span>
+                                                <span className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center text-sm shadow-sm">3</span>
                                                 Apply Conditional Filters
                                             </h4>
-                                            <button onClick={addFilter} className="px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 font-black tracking-widest text-xs uppercase rounded-xl flex items-center gap-2 transition-colors shadow-sm">
-                                                <Plus className="w-4 h-4" /> Filter Rule
+                                            <button onClick={addFilter} className="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 font-bold tracking-wider text-[10px] uppercase rounded-lg flex items-center gap-2 transition-colors">
+                                                <Plus className="w-3.5 h-3.5" /> Add Rule
                                             </button>
                                         </div>
                                         {customFilters.length > 0 ? (
                                             <div className="space-y-3">
                                                 {customFilters.map((filter, index) => (
-                                                    <div key={index} className="flex gap-3 items-center bg-white border border-slate-100 shadow-sm p-2 rounded-2xl">
-                                                        <select value={filter.column} onChange={e => updateFilter(index, 'column', e.target.value)} className="p-2 rounded-xl text-sm flex-1 bg-slate-50 text-slate-800 border border-slate-200 outline-none focus:ring-2 focus:ring-blue-700/20 appearance-none">
+                                                    <div key={index} className="flex gap-3 items-center bg-slate-50 border border-slate-200 p-2 rounded-lg">
+                                                        <select value={filter.column} onChange={e => updateFilter(index, 'column', e.target.value)} className="p-2 rounded-md text-xs flex-1 bg-white text-slate-800 border border-slate-200 outline-none focus:ring-2 focus:ring-slate-900/10">
                                                             {availableColumns.map((c: string) => <option key={c} value={c}>{c}</option>)}
                                                         </select>
-                                                        <select value={filter.operator} onChange={e => updateFilter(index, 'operator', e.target.value)} className="p-2 rounded-xl text-sm w-32 bg-slate-50 text-slate-800 border border-slate-200 outline-none focus:ring-2 focus:ring-blue-700/20 appearance-none">
+                                                        <select value={filter.operator} onChange={e => updateFilter(index, 'operator', e.target.value)} className="p-2 rounded-md text-xs w-28 bg-white text-slate-800 border border-slate-200 outline-none focus:ring-2 focus:ring-slate-900/10">
                                                             <option>Equals</option>
                                                             <option>Contains</option>
                                                             <option>Greater Than</option>
                                                             <option>Less Than</option>
                                                         </select>
-                                                        <input type="text" placeholder="Value..." value={filter.value} onChange={e => updateFilter(index, 'value', e.target.value)} className="p-2 rounded-xl text-sm flex-1 text-slate-800 bg-white border border-slate-200 outline-none focus:ring-2 focus:ring-blue-700/20 placeholder:text-slate-400" />
-                                                        <button onClick={() => removeFilter(index)} className="w-10 h-10 flex items-center justify-center text-rose-500 hover:bg-rose-50 hover:text-rose-600 rounded-xl transition-colors">
-                                                            <X className="w-5 h-5" />
+                                                        <input type="text" placeholder="Value..." value={filter.value} onChange={e => updateFilter(index, 'value', e.target.value)} className="p-2 rounded-md text-xs flex-1 text-slate-800 bg-white border border-slate-200 outline-none focus:ring-2 focus:ring-slate-900/10 placeholder:text-slate-400" />
+                                                        <button onClick={() => removeFilter(index)} className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors">
+                                                            <X className="w-4 h-4" />
                                                         </button>
                                                     </div>
                                                 ))}
                                             </div>
                                         ) : (
-                                            <p className="text-xs font-bold tracking-widest uppercase text-slate-400 text-center py-6 bg-slate-50 rounded-2xl border border-slate-100">No filters applied. All records included.</p>
+                                            <p className="text-[10px] font-bold tracking-wider uppercase text-slate-400 text-center py-6 bg-slate-50 rounded-lg border border-slate-100 border-dashed">No filters applied. All records included.</p>
                                         )}
                                     </div>
 
                                     {/* Action Bar */}
-                                    <div className="bg-emerald-50 border border-emerald-100 shadow-sm p-6 rounded-[32px] flex justify-between items-center relative overflow-hidden">
-                                        <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-transparent pointer-events-none"></div>
+                                    <div className="bg-slate-900 shadow-lg px-6 py-5 rounded-xl flex justify-between items-center relative overflow-hidden">
+                                        <div className="absolute inset-0 bg-white/5 pointer-events-none"></div>
                                         <div className="relative z-10">
-                                            <p className="font-black text-emerald-700 text-lg uppercase tracking-widest">Preview Ready</p>
-                                            <p className="text-sm text-emerald-600/80 font-bold">{selectedColumns.length} columns selected from {selectedModule}</p>
+                                            <p className="font-bold text-white text-lg">Preview Ready</p>
+                                            <p className="text-xs text-slate-400 font-medium">{selectedColumns.length} columns selected from {selectedModule}</p>
                                         </div>
                                         <div className="flex gap-3 relative z-10">
                                             <button
                                                 onClick={handleCustomExport}
                                                 disabled={isGenerating || selectedColumns.length === 0}
-                                                className="px-6 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-xs tracking-widest rounded-2xl shadow-md shadow-emerald-500/20 transition-all flex items-center gap-2 disabled:opacity-50 disabled:shadow-none"
+                                                className="px-6 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-xs tracking-widest rounded-2xl shadow-sm shadow-emerald-500/20 transition-all flex items-center gap-2 disabled:opacity-50 disabled:shadow-none"
                                             >
                                                 {isGenerating ? <Activity className="w-5 h-5 animate-spin" /> : <Table className="w-5 h-5" />}
                                                 Generate Preview
@@ -819,8 +810,8 @@ const ReportsDashboard: React.FC = () => {
                                     </div>
 
                                     {showGeneratedReport && (
-                                        <div className="glass-card shadow-lg p-8 rounded-[32px] animate-in fade-in slide-in-from-bottom-2 border-blue-200 bg-white/80">
-                                            <div className="flex justify-between items-center mb-6">
+                                        <div className="glass-card shadow-sm p-8 rounded-[32px] animate-in fade-in slide-in-from-bottom-2 border-blue-200 bg-white/80">
+                                            <div className="flex justify-between items-center mb-4">
                                                 <h4 className="font-black text-slate-900 text-xl uppercase tracking-widest">Output: {selectedModule}</h4>
                                                 <div className="flex gap-3">
                                                     <button onClick={() => handleDownload('PDF', 'Custom Report')} className="px-5 py-2.5 bg-white border border-slate-200 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 text-slate-600 font-black uppercase shadow-sm tracking-widest rounded-xl text-xs flex items-center gap-2 transition-all">
@@ -867,7 +858,7 @@ const ReportsDashboard: React.FC = () => {
                         <div className="bg-white/90 border border-white shadow-2xl p-8 rounded-2xl flex flex-col items-center">
                             <Activity className="w-10 h-10 text-emerald-600 animate-spin mb-4" />
                             <h3 className="font-bold text-lg text-slate-800">Compiling Report Data...</h3>
-                            <p className="text-sm text-slate-500 mt-2">Connecting to analytics engine and generating secure specific format.</p>
+                            <p className="text-xs text-slate-500 mt-2">Connecting to analytics engine and generating secure specific format.</p>
                         </div>
                     </div>
                 )}
@@ -876,7 +867,7 @@ const ReportsDashboard: React.FC = () => {
                 {viewReportModal && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 backdrop-blur-md p-4 animate-in fade-in">
                         <div className="bg-white/80 border border-white/60 shadow-2xl rounded-3xl w-full max-w-6xl overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-8">
-                            <div className="p-8 border-b border-slate-200 flex flex-col gap-6 bg-white/60 relative">
+                            <div className="p-8 border-b border-slate-200 flex flex-col gapx-4 py-4 bg-white/60 relative">
                                 <div className="absolute top-0 right-0 w-64 h-64 bg-blue-800/10 rounded-full blur-3xl -z-10"></div>
                                 <div className="flex justify-between items-start relative z-10">
                                     <div className="flex items-center gap-5">
@@ -887,7 +878,7 @@ const ReportsDashboard: React.FC = () => {
                                             <Badge className="bg-blue-50 text-blue-800 border border-blue-100 font-black text-[10px] uppercase tracking-[0.2em] mb-2 px-3 shadow-none">
                                                 {(viewReportModal as any).module}
                                             </Badge>
-                                            <h3 className="font-black text-3xl text-slate-900 uppercase tracking-tighter">{(viewReportModal as any).title}</h3>
+                                            <h3 className="font-black text-xl text-slate-900 uppercase tracking-tighter">{(viewReportModal as any).title}</h3>
                                         </div>
                                     </div>
                                     <button onClick={() => setViewReportModal(null)} className="w-12 h-12 rounded-xl bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-all">
@@ -942,11 +933,11 @@ const ReportsDashboard: React.FC = () => {
                                     </div>
                                 )}
                             </div>
-                            <div className="p-6 overflow-y-auto flex-1 bg-white/40 backdrop-blur-sm">
+                            <div className="px-4 py-4 overflow-y-auto flex-1 bg-white/40 backdrop-blur-sm">
                                 {(() => {
                                     const repData = getReportData((viewReportModal as any).title);
                                     return (
-                                        <div className="overflow-x-auto border border-slate-200 rounded-3xl bg-white shadow-md">
+                                        <div className="overflow-x-auto border border-slate-200 rounded-3xl bg-white shadow-sm">
                                             <table className="w-full text-sm text-left border-collapse">
                                                 <thead className="bg-slate-50 text-slate-500 font-black uppercase text-[10px] tracking-widest border-b border-slate-200">
                                                     <tr>
@@ -981,7 +972,7 @@ const ReportsDashboard: React.FC = () => {
                             </div>
                             <div className="p-8 border-t border-slate-200 bg-white/60 flex justify-end gap-4 relative">
                                 <button onClick={() => handleDownload('PDF', (viewReportModal as any).title)} className="px-8 py-4 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-600 font-black uppercase text-xs tracking-widest rounded-2xl flex items-center gap-2 transition-all shadow-sm"><Download className="w-4 h-4" /> Download PDF</button>
-                                <button onClick={() => handleDownload('Excel', (viewReportModal as any).title)} className="px-8 py-4 bg-blue-800 hover:bg-blue-900 text-white font-black uppercase text-xs tracking-widest rounded-2xl flex items-center gap-2 transition-all shadow-md shadow-blue-900/20"><Download className="w-4 h-4" /> Download Excel</button>
+                                <button onClick={() => handleDownload('Excel', (viewReportModal as any).title)} className="px-8 py-4 bg-blue-800 hover:bg-blue-900 text-white font-black uppercase text-xs tracking-widest rounded-2xl flex items-center gap-2 transition-all shadow-sm shadow-blue-900/20"><Download className="w-4 h-4" /> Download Excel</button>
                             </div>
                         </div>
                     </div>

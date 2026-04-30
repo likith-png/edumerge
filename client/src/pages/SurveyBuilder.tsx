@@ -9,6 +9,8 @@ import {
 } from 'lucide-react';
 import { Switch } from '../components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { X } from 'lucide-react';
+import Layout from '../components/Layout';
 
 type QuestionType = 'short_text' | 'long_text' | 'multiple_choice' | 'checkbox' | 'rating' | 'date';
 
@@ -78,75 +80,92 @@ const SurveyBuilder: React.FC = () => {
 
     if (isPreview) {
         return (
-            <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in duration-500 py-10">
-                <div className="flex justify-between items-center bg-indigo-900 text-white p-4 rounded-xl shadow-xl">
-                    <h2 className="font-bold flex items-center gap-2">
-                        <Eye className="w-5 h-5" /> Preview Mode
-                    </h2>
-                    <Button variant="secondary" onClick={() => setIsPreview(false)} className="bg-white text-indigo-900 hover:bg-indigo-50">
-                        Back to Editor
+            <Layout
+                title={title || 'Untitled Survey'}
+                description={description || 'Survey Preview'}
+                headerActions={
+                    <Button variant="secondary" onClick={() => setIsPreview(false)} className="bg-white text-indigo-900 hover:bg-indigo-50 font-bold border-indigo-100 h-10 px-6 shadow-sm">
+                        <Eye className="w-4 h-4 mr-2" /> Back to Editor
                     </Button>
-                </div>
+                }
+            >
+                <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in duration-500">
+                    <div className="space-y-4">
+                        {questions.map((q, idx) => (
+                            <Card key={q.id} className="border-none shadow-sm hover:shadow-sm transition-shadow rounded-2xl overflow-hidden bg-white">
+                                <CardContent className="px-4 py-4 space-y-4">
+                                    <div className="flex gap-4">
+                                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-sm shrink-0 mt-0.5">
+                                            {idx + 1}
+                                        </div>
+                                        <div className="space-y-1 flex-1">
+                                            <p className="font-bold text-lg text-slate-900 leading-tight">
+                                                {q.title || 'Untitled Question'}
+                                                {q.required && <span className="text-rose-500 ml-1">*</span>}
+                                            </p>
 
-                <Card className="border-t-8 border-t-indigo-600 shadow-2xl">
-                    <CardContent className="p-8 space-y-2">
-                        <h1 className="text-4xl font-black text-slate-900">{title || 'Untitled Survey'}</h1>
-                        <p className="text-lg text-slate-500">{description || 'No description provided.'}</p>
-                    </CardContent>
-                </Card>
-
-                <div className="space-y-4">
-                    {questions.map((q, idx) => (
-                        <Card key={q.id} className="shadow-sm hover:shadow-md transition-shadow">
-                            <CardContent className="p-6 space-y-4">
-                                <div className="flex gap-2">
-                                    <span className="text-slate-400 font-bold">{idx + 1}.</span>
-                                    <div className="space-y-1 flex-1">
-                                        <p className="font-bold text-lg text-slate-900">
-                                            {q.title || 'Untitled Question'}
-                                            {q.required && <span className="text-rose-500 ml-1">*</span>}
-                                        </p>
-
-                                        <div className="pt-2">
-                                            {q.type === 'short_text' && <Input disabled placeholder="Short answer text" className="bg-slate-50" />}
-                                            {q.type === 'long_text' && <textarea disabled className="w-full h-24 rounded-md border border-slate-200 bg-slate-50 p-2 text-sm" placeholder="Long answer text" />}
-                                            {q.type === 'date' && <Input disabled type="date" className="w-full sm:w-auto bg-slate-50" />}
-                                            {q.type === 'rating' && (
-                                                <div className="flex gap-2">
-                                                    {[1, 2, 3, 4, 5].map(v => (
-                                                        <div key={v} className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center bg-slate-50 text-slate-400 font-bold">
-                                                            {v}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                            {(q.type === 'multiple_choice' || q.type === 'checkbox') && (
-                                                <div className="space-y-2">
-                                                    {q.options?.map((opt, i) => (
-                                                        <div key={i} className="flex items-center gap-2">
-                                                            <div className={`w-4 h-4 rounded-full border border-slate-300 ${q.type === 'checkbox' ? 'rounded-none' : ''}`} />
-                                                            <span className="text-slate-700">{opt}</span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
+                                            <div className="pt-2">
+                                                {q.type === 'short_text' && <Input disabled placeholder="Short answer text" className="bg-slate-50 h-11 border-slate-100 rounded-xl" />}
+                                                {q.type === 'long_text' && <textarea disabled className="w-full h-24 rounded-xl border border-slate-100 bg-slate-50 p-3 text-sm resize-none" placeholder="Long answer text" />}
+                                                {q.type === 'date' && <Input disabled type="date" className="w-full sm:w-auto bg-slate-50 h-11 border-slate-100 rounded-xl" />}
+                                                {q.type === 'rating' && (
+                                                    <div className="flex gap-2">
+                                                        {[1, 2, 3, 4, 5].map(v => (
+                                                            <div key={v} className="w-10 h-10 rounded-full border border-slate-100 flex items-center justify-center bg-slate-50 text-slate-400 font-bold hover:bg-white transition-colors">
+                                                                {v}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                                {(q.type === 'multiple_choice' || q.type === 'checkbox') && (
+                                                    <div className="space-y-3">
+                                                        {q.options?.map((opt, i) => (
+                                                            <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-transparent">
+                                                                <div className={`w-4 h-4 rounded-full border border-slate-300 ${q.type === 'checkbox' ? 'rounded-md' : ''}`} />
+                                                                <span className="text-slate-700 font-medium">{opt}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
                 </div>
-            </div>
+            </Layout>
         );
     }
 
     return (
-        <div className="max-w-6xl mx-auto flex gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <Layout
+            title="Survey Builder"
+            description="Create custom questionnaires, intake forms, or professional assessments."
+            headerActions={
+                <div className="flex items-center gap-3">
+                    <Button
+                        variant="ghost"
+                        className="text-slate-500 font-bold hover:bg-slate-100 hover:text-indigo-600 rounded-full px-4"
+                        onClick={() => setIsPreview(true)}
+                    >
+                        <Eye className="w-4 h-4 mr-2" /> Runtime Preview
+                    </Button>
+                    <div className="w-px h-6 bg-slate-200 mx-1" />
+                    <Button
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-sm shadow-indigo-100 h-10 px-8 rounded-full"
+                    >
+                        <Save className="w-4 h-4 mr-2" /> Save Form
+                    </Button>
+                </div>
+            }
+        >
+            <div className="max-w-6xl mx-auto flex gapx-4 py-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Main Canvas */}
             <div className="flex-1 space-y-6 pb-20">
                 {/* Survey Header */}
-                <Card className="border-t-4 border-t-indigo-600 shadow-sm hover:shadow-md transition-shadow">
+                <Card className="border-t-4 border-t-indigo-600 shadow-sm hover:shadow-sm transition-shadow">
                     <CardContent className="p-8 space-y-4">
                         <Input
                             value={title}
@@ -168,11 +187,11 @@ const SurveyBuilder: React.FC = () => {
                     {questions.map((q, idx) => (
                         <Card
                             key={q.id}
-                            className={`transition-all duration-200 border-l-4 ${activeQuestion === q.id ? 'border-l-indigo-600 ring-1 ring-indigo-100 shadow-xl scale-[1.01]' : 'border-l-transparent hover:shadow-md'
+                            className={`transition-all duration-200 border-l-4 ${activeQuestion === q.id ? 'border-l-indigo-600 ring-1 ring-indigo-100 shadow-xl scale-[1.01]' : 'border-l-transparent hover:shadow-sm'
                                 }`}
                             onClick={() => setActiveQuestion(q.id)}
                         >
-                            <CardContent className="p-6">
+                            <CardContent className="px-4 pb-4">
                                 <div className="flex gap-4">
                                     <div className="mt-2 text-slate-300 cursor-move hover:text-indigo-400">
                                         <GripVertical className="w-5 h-5" />
@@ -287,7 +306,7 @@ const SurveyBuilder: React.FC = () => {
 
             {/* Sticky Toolbox */}
             <div className="w-64 space-y-4">
-                <Card className="sticky top-6 shadow-xl shadow-indigo-100 border-indigo-100">
+                <Card className="sticky topx-4 py-4 shadow-xl shadow-indigo-100 border-indigo-100">
                     <CardHeader className="pb-3 bg-indigo-50/50">
                         <CardTitle className="text-sm font-black uppercase tracking-wider text-indigo-900">Toolbox</CardTitle>
                     </CardHeader>
@@ -313,7 +332,7 @@ const SurveyBuilder: React.FC = () => {
 
                         <div className="pt-4 mt-4 border-t border-slate-100 space-y-2">
                             <Button
-                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-200"
+                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-sm shadow-indigo-200"
                                 onClick={() => setIsPreview(true)}
                             >
                                 <Eye className="w-4 h-4 mr-2" /> Preview
@@ -328,28 +347,9 @@ const SurveyBuilder: React.FC = () => {
                     </CardContent>
                 </Card>
             </div>
-        </div>
+            </div>
+        </Layout>
     );
 };
-
-function X(props: any) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M18 6 6 18" />
-            <path d="m6 6 12 12" />
-        </svg>
-    )
-}
 
 export default SurveyBuilder;

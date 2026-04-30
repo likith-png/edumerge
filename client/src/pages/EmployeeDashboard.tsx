@@ -1,6 +1,8 @@
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
+import { Badge } from '../components/ui/badge';
 import {
     TrendingUp,
     MessageSquare,
@@ -15,31 +17,61 @@ import {
     Star,
     Award,
     Calendar,
-    Target
+    Target,
+    Zap,
+    Activity,
+    Sparkles,
+    ShieldCheck,
+    ArrowRight,
+    type LucideIcon
 } from 'lucide-react';
+import { Separator } from '../components/ui/separator';
 
-const employeeCategories = [
+interface Module {
+    title: string;
+    description: string;
+    icon: LucideIcon;
+    path: string;
+    color?: string;
+}
+
+interface Category {
+    name: string;
+    icon: LucideIcon;
+    modules: Module[];
+}
+
+interface User {
+    name: string;
+    id: string;
+    department?: string;
+}
+
+const employeeCategories: Category[] = [
     {
         name: "My Development & Growth",
         icon: Star,
         modules: [
             {
-                title: "Appraisal & Performance",
-                description: "Track your goals, view your ratings, and complete self-evaluations.",
+                title: "Appraisal Hub",
+                description: "Institutional performance governance and strategic KPI mapping.",
                 icon: TrendingUp,
-                path: "/appraisal"
+                path: "/appraisal",
+                color: "indigo"
             },
             {
-                title: "Learning & Development",
-                description: "Access training modules, certifications, and upskill recommendations.",
+                title: "Skill Pathways",
+                description: "Access curated certifications and upskill recommendations.",
                 icon: GraduationCap,
-                path: "/learning-development"
+                path: "/skill-pathways",
+                color: "emerald"
             },
             {
                 title: "Staff Portfolio",
-                description: "Your complete journey, documents, and professional timeline.",
+                description: "Your complete longitudinal record and professional timeline.",
                 icon: Users,
-                path: "/staff-portfolio"
+                path: "/staff-portfolio",
+                color: "indigo"
             }
         ]
     },
@@ -48,194 +80,195 @@ const employeeCategories = [
         icon: BookOpen,
         modules: [
             {
-                title: "Lesson Plan & Curriculum",
-                description: "Manage lesson plans, track curriculum progress, sessions, and academic schedules.",
+                title: "Curriculum Engine",
+                description: "Strategic lesson planning and academic progress auditing.",
                 icon: BookOpen,
-                path: "/lesson-plan"
+                path: "/lesson-plan",
+                color: "indigo"
             }
         ]
     },
     {
-        name: "My Workplace & Culture",
+        name: "Workplace & Culture",
         icon: Heart,
         modules: [
             {
-                title: "Organisation Structure",
-                description: "Explore the team hierarchy and connect with your colleagues.",
+                title: "Org Structure",
+                description: "Explore the team hierarchy and institutional pods.",
                 icon: Network,
-                path: "/org-structure"
+                path: "/org-structure",
+                color: "indigo"
             },
             {
                 title: "Policy & Guides",
-                description: "Access company policies, employee handbook, and cultural guides.",
+                description: "Access institutional directives and culture manuals.",
                 icon: BookOpen,
-                path: "/policy"
+                path: "/policy",
+                color: "indigo"
             },
             {
-                title: "Engagement & Culture",
-                description: "Join community events, surveys, and cultural activities.",
+                title: "Engagement Hub",
+                description: "Join community events and cultural synthesis activities.",
                 icon: Heart,
-                path: "/engagement"
+                path: "/engagement",
+                color: "rose"
             }
         ]
     },
     {
-        name: "Communications & Life Cycle",
+        name: "Communications",
         icon: UserCircle,
         modules: [
             {
-                title: "Feedback Hub",
-                description: "Give and receive constructive feedback across the organization.",
+                title: "Feedback 360",
+                description: "Multi-rater qualitative feedback and sentiment capture.",
                 icon: MessageSquare,
-                path: "/feedback"
+                path: "/feedback",
+                color: "orange"
             },
             {
                 title: "Exit Management",
-                description: "Initiate separation or track your exit clearance process.",
+                description: "Institutional separation and offboarding governance.",
                 icon: LogOut,
-                path: "/exit"
+                path: "/exit",
+                color: "rose"
             }
         ]
     }
 ];
 
-const EmployeeDashboard: React.FC<{ user: { name: string; id: string; department?: string } }> = ({ user }) => {
+const EmployeeDashboard: React.FC<{ user: User }> = ({ user }) => {
     const navigate = useNavigate();
 
     return (
-        <div className="space-y-12 pb-10">
-            {/* Employee Hero Section */}
-            <div className="relative overflow-hidden rounded-3xl bg-indigo-900 p-8 text-white shadow-2xl">
-                <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500 rounded-full blur-3xl opacity-20 -mr-40 -mt-40"></div>
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-600 rounded-full blur-3xl opacity-15 -ml-32 -mb-32"></div>
+        <div className="space-y-20 pb-20 animate-in fade-in duration-1000">
+            {/* Hero Section */}
+            <div className="relative overflow-hidden rounded-3xl bg-slate-900 p-8 xl:p-12 text-white shadow-xl border border-slate-800 group">
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500 rounded-full blur-[120px] opacity-10 -mr-64 -mt-64" />
+                <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-600 rounded-full blur-[100px] opacity-10 -ml-40 -mb-40" />
 
-                <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-                    <div className="flex items-center gap-6">
-                        <div className="w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center p-1 shadow-inner">
-                            <div className="w-full h-full rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-2xl font-black">
+                <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-12">
+                    <div className="flex items-center gap-8">
+                        <div className="w-24 h-24 rounded-2xl bg-white/10 flex items-center justify-center p-2 border border-white/20 transition-all duration-300">
+                            <div className="w-full h-full rounded-xl bg-blue-600 flex items-center justify-center text-4xl font-bold">
                                 {user.name.charAt(0)}
                             </div>
                         </div>
-                        <div>
-                            <h2 className="text-3xl font-black tracking-tight mb-1">Happy {new Date().toLocaleDateString(undefined, { weekday: 'long' })}, {user.name.split(' ')[0]}!</h2>
-                            <div className="flex items-center gap-3">
-                                <span className="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold border border-white/10">{user.department}</span>
-                                <span className="text-indigo-200 text-xs font-medium tracking-wide">Employee ID: {user.id}</span>
+                        <div className="space-y-3">
+                            <h2 className="text-3xl xl:text-4xl font-bold tracking-tight">
+                                Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 17 ? 'Afternoon' : 'Evening'}, <br />
+                                <span className="text-blue-400">{user.name.split(' ')[0]}</span>
+                            </h2>
+                            <div className="flex items-center gap-4">
+                                <Badge className="bg-white/10 text-white px-4 py-1 rounded-full text-xs font-bold border border-white/20">{user.department || 'General Staff'}</Badge>
+                                <Separator orientation="vertical" className="h-4 bg-white/20" />
+                                <span className="text-slate-400 text-xs font-medium">ID: {user.id}</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 w-full md:w-auto">
-                        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 flex items-center gap-3">
-                            <div className="p-2 bg-emerald-500/20 rounded-lg">
-                                <Calendar className="w-5 h-5 text-emerald-400" />
+                    <div className="grid grid-cols-2 gap-8 w-full md:w-auto">
+                        <div className="bg-white/5 rounded-2xl p-6 border border-white/10 flex items-center gap-4 hover:bg-white/10 transition-all cursor-default">
+                            <div className="p-4 bg-blue-500/20 rounded-xl">
+                                <Activity className="w-6 h-6 text-blue-400" />
                             </div>
                             <div>
-                                <div className="text-[10px] text-indigo-300 uppercase font-black tracking-tighter">Attendance</div>
-                                <div className="text-lg font-black text-white leading-none">96.4%</div>
+                                <div className="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Persistence</div>
+                                <div className="text-2xl font-bold text-white tracking-tight">96.4%</div>
                             </div>
                         </div>
-                        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 flex items-center gap-3">
-                            <div className="p-2 bg-amber-500/20 rounded-lg">
-                                <Target className="w-5 h-5 text-amber-400" />
+                        <div className="bg-white/5 rounded-2xl p-6 border border-white/10 flex items-center gap-4 hover:bg-white/10 transition-all cursor-default">
+                            <div className="p-4 bg-blue-500/20 rounded-xl">
+                                <Zap className="w-6 h-6 text-blue-400" />
                             </div>
                             <div>
-                                <div className="text-[10px] text-indigo-300 uppercase font-black tracking-tighter">Current Appraisal</div>
-                                <div className="text-lg font-black text-white leading-none">Phase 2</div>
+                                <div className="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Appraisal</div>
+                                <div className="text-2xl font-bold text-white tracking-tight">Phase 2</div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Employee Quick Actions/Prompts */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="bg-indigo-50/50 border-indigo-100 shadow-sm relative overflow-hidden group">
-                    <CardContent className="p-6">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-white rounded-xl shadow-sm text-indigo-600">
-                                <Award className="w-6 h-6" />
+            {/* Quick Actions & High-Contrast Notifications */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                {[
+                    { title: "Certificate Trace", desc: "React Professional Persistence", icon: Award, color: "indigo", route: "/skill-pathways", badge: "New" },
+                    { title: "Strategic Review", desc: "2 Pending Mid-Cycle Goals", icon: Target, color: "emerald", route: "/appraisal", badge: "Active" },
+                    { title: "Sentiment Audit", desc: "Institutional Leadership FB", icon: MessageSquare, color: "orange", route: "/feedback", badge: "Action Required" }
+                ].map((action, i) => (
+                    <Card key={i} className="group relative p-1 transition-all duration-300 border border-slate-200 shadow-md hover:shadow-xl overflow-hidden rounded-3xl">
+                        <div className={`absolute top-0 left-0 w-1.5 h-full bg-${action.color}-500 group-hover:w-2 transition-all duration-300`} />
+                        <CardContent className="p-8 relative z-10 flex flex-col justify-between h-full bg-white">
+                            <div className="flex items-center justify-between mb-8">
+                                <div className={`p-6 bg-white rounded-3xl p-6 bg-white rounded-3xl text-${action.color}-600 shadow-inner border border-slate-50 group-hover:scale-110 group-hover:rotate-6 transition-all duration-700`}>
+                                    <action.icon className="w-8 h-8" />
+                                </div>
+                                <Badge className={`bg-${action.color}-50 text-${action.color}-600 border-none rounded-lg text-[9px] font-black uppercase tracking-widest px-3 py-1`}>{action.badge}</Badge>
                             </div>
-                            <div>
-                                <h4 className="font-black text-slate-900 text-sm">New Certification!</h4>
-                                <p className="text-xs text-slate-500">You've completed React Advanced.</p>
+                            <div className="space-y-1">
+                                <h4 className="text-lg font-bold text-slate-900 tracking-tight">{action.title}</h4>
+                                <p className="text-xs text-slate-500 mt-1">{action.desc}</p>
                             </div>
-                        </div>
-                        <Button variant="ghost" size="sm" className="mt-4 w-full text-xs font-bold text-indigo-600 border border-indigo-200 bg-white hover:bg-indigo-50" onClick={() => navigate('/learning-development')}>
-                            View Certification
-                        </Button>
-                    </CardContent>
-                </Card>
-                <Card className="bg-emerald-50/50 border-emerald-100 shadow-sm">
-                    <CardContent className="p-6">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-white rounded-xl shadow-sm text-emerald-600">
-                                <Target className="w-6 h-6" />
-                            </div>
-                            <div>
-                                <h4 className="font-black text-slate-900 text-sm">Goal Setting Active</h4>
-                                <p className="text-xs text-slate-500">2 goals pending for Mid-Year review.</p>
-                            </div>
-                        </div>
-                        <Button variant="ghost" size="sm" className="mt-4 w-full text-xs font-bold text-emerald-600 border border-emerald-200 bg-white hover:bg-emerald-50" onClick={() => navigate('/appraisal')}>
-                            Update Goals
-                        </Button>
-                    </CardContent>
-                </Card>
-                <Card className="bg-slate-50 border-slate-200 shadow-sm">
-                    <CardContent className="p-6">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-white rounded-xl shadow-sm text-slate-600">
-                                <MessageSquare className="w-6 h-6" />
-                            </div>
-                            <div>
-                                <h4 className="font-black text-slate-900 text-sm">Feedback Pending</h4>
-                                <p className="text-xs text-slate-500">Share your thoughts on the last event.</p>
-                            </div>
-                        </div>
-                        <Button variant="ghost" size="sm" className="mt-4 w-full text-xs font-bold text-slate-600 border border-slate-200 bg-white hover:bg-slate-50" onClick={() => navigate('/feedback')}>
-                            Give Feedback
-                        </Button>
-                    </CardContent>
-                </Card>
+                            <Button 
+                                className={`mt-8 w-full h-12 rounded-xl bg-${action.color === 'indigo' ? 'blue' : action.color}-600 hover:bg-slate-900 text-white font-bold transition-all flex items-center justify-center gap-2`}
+                                onClick={() => navigate(action.route)}
+                            >
+                                Take Action
+                                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            </Button>
+                        </CardContent>
+                    </Card>
+                ))}
             </div>
 
-            {/* Categorized Modules for Employee */}
+            {/* Premium Institutional Module Grid */}
             {employeeCategories.map((category) => (
-                <div key={category.name} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="p-2.5 rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
-                            <category.icon className="h-5 w-5 text-indigo-600" />
+                <div key={category.name} className="animate-in slide-in-from-bottom-8 duration-1000">
+                    <div className="flex items-center gap-6 mb-8">
+                        <div className="p-4 rounded-xl bg-slate-900 text-white shadow-lg">
+                            <category.icon className="h-6 w-6" />
                         </div>
-                        <h3 className="text-xl font-black text-slate-900 tracking-tight">{category.name}</h3>
-                        <div className="flex-1 h-px bg-slate-200 ml-4"></div>
+                        <div className="space-y-1">
+                            <h3 className="text-2xl font-bold text-slate-900 tracking-tight">
+                                {category.name}
+                            </h3>
+                            <p className="text-xs font-medium text-slate-400">Institutional Module Cluster</p>
+                        </div>
+                        <div className="flex-1 h-px bg-slate-100 ml-4 rounded-full"></div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
                         {category.modules.map((module) => (
                             <Card
                                 key={module.path}
-                                className="group relative cursor-pointer overflow-hidden border border-slate-200 bg-white transition-all duration-300 hover:shadow-xl hover:border-indigo-200 hover:-translate-y-1"
+                                className="group relative cursor-pointer overflow-hidden border border-slate-200 transition-all duration-300 hover:shadow-xl hover:border-blue-200 rounded-2xl min-h-[260px]"
                                 onClick={() => navigate(module.path)}
                             >
-                                <CardContent className="p-6">
-                                    <div className="flex items-start gap-4">
-                                        <div className="p-4 rounded-2xl bg-slate-50 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 shadow-sm">
-                                            <module.icon className="h-6 w-6 text-slate-400 group-hover:text-white transition-all duration-300" />
+                                <div className={`absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:scale-150 group-hover:bg-indigo-500/10 transition-all duration-1000`} />
+                                <CardContent className="p-8 flex flex-col justify-between h-full relative z-10">
+                                    <div className="flex justify-between items-start">
+                                        <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 group-hover:bg-blue-600 transition-all duration-300">
+                                            <module.icon className="h-6 w-6 text-blue-600 group-hover:text-white" />
                                         </div>
-                                        <div className="flex-1">
-                                            <div className="flex items-center justify-between mb-1">
-                                                <h4 className="font-black text-slate-900 group-hover:text-indigo-600 transition-colors uppercase tracking-tight text-sm">{module.title}</h4>
-                                                <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-indigo-400 transition-all group-hover:translate-x-1" />
-                                            </div>
-                                            <p className="text-xs font-medium text-slate-500 leading-relaxed line-clamp-2">
-                                                {module.description}
-                                            </p>
+                                        <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-blue-100 transition-all duration-300">
+                                            <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-blue-600 transition-all group-hover:translate-x-0.5" />
                                         </div>
                                     </div>
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-6 h-0.5 bg-blue-600 rounded-full" />
+                                            <h4 className="text-[10px] font-bold text-blue-800 uppercase tracking-widest">{module.title}</h4>
+                                        </div>
+                                        <p className="text-xl font-bold text-slate-900 leading-tight tracking-tight">
+                                            {module.title}
+                                        </p>
+                                        <p className="text-xs text-slate-500 leading-relaxed font-medium">
+                                            {module.description}
+                                        </p>
+                                    </div>
                                 </CardContent>
-                                {/* Decorative elements */}
-                                <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-700"></div>
+                                <div className="absolute bottom-0 left-0 w-0 h-1.5 bg-indigo-600 group-hover:w-full transition-all duration-1000" />
                             </Card>
                         ))}
                     </div>

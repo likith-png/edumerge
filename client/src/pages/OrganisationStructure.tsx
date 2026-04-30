@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import Layout from '../components/Layout';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import {
     Plus, Search, Users, Landmark,
     Briefcase, Trash2, Edit3,
-    Building2, School, Home, Phone, Mail, UserPlus,
+    Building2, School, Phone, Mail, UserPlus,
     Settings, Shield, LayoutGrid, List, BookOpen, ArrowRight,
     History as HistoryIcon
 } from 'lucide-react';
@@ -58,7 +59,7 @@ const GovernanceMindmap: React.FC<{ heads: string[], blockTitle: string }> = ({ 
 
                 {/* Central Node */}
                 <g transform="translate(400, 200)">
-                    <circle r="50" fill="white" stroke="#6366f1" strokeWidth="4" className="shadow-lg" />
+                    <circle r="50" fill="white" stroke="#6366f1" strokeWidth="4" className="shadow-sm" />
                     <text
                         textAnchor="middle"
                         dominantBaseline="middle"
@@ -298,51 +299,39 @@ const OrganisationStructure: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col h-screen bg-[#F8FAFC] font-sans selection:bg-indigo-100 selection:text-indigo-900">
-            <main className="flex-1 overflow-y-auto custom-scrollbar p-8 max-w-7xl mx-auto space-y-8">
-                {/* Header Section */}
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-6">
+        <Layout
+            title="Organisation Structure"
+            description="Institutional governance, leadership hierarchy, and academic departments."
+            headerActions={
+                <div className="flex items-center gap-4">
+                    <div className="flex bg-slate-100 p-1.5 rounded-2xl">
                         <button
-                            onClick={() => window.location.href = '/'}
-                            className="w-12 h-12 rounded-2xl bg-white shadow-xl shadow-slate-200/50 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:scale-110 transition-all border border-slate-50"
+                            onClick={() => setActiveTab('hierarchy')}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'hierarchy' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
                         >
-                            <Home className="w-5 h-5" />
+                            <LayoutGrid className="w-4 h-4" /> Hierarchy
                         </button>
-                        <div className="space-y-1">
-                            <h2 className="text-3xl font-[950] text-slate-900 tracking-tight uppercase">Organisation Structure</h2>
-                            <p className="text-slate-500 font-medium">Institutional governance, leadership hierarchy, and academic departments.</p>
-                        </div>
+                        <button
+                            onClick={() => setActiveTab('directory')}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'directory' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
+                        >
+                            <List className="w-4 h-4" /> Directory
+                        </button>
                     </div>
-
-                    <div className="flex items-center gap-4">
-                        <div className="flex bg-slate-100 p-1.5 rounded-2xl">
-                            <button
-                                onClick={() => setActiveTab('hierarchy')}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'hierarchy' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
-                            >
-                                <LayoutGrid className="w-4 h-4" /> Hierarchy
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('directory')}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'directory' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
-                            >
-                                <List className="w-4 h-4" /> Directory
-                            </button>
-                        </div>
-                        {isHR && (
-                            <button
-                                onClick={() => setIsConfigModalOpen(true)}
-                                className="w-11 h-11 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center justify-center text-slate-400 hover:text-indigo-600 transition-all"
-                            >
-                                <Settings className="w-5 h-5" />
-                            </button>
-                        )}
-                    </div>
+                    {isHR && (
+                        <button
+                            onClick={() => setIsConfigModalOpen(true)}
+                            className="w-11 h-11 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-400 hover:text-indigo-600 transition-all"
+                        >
+                            <Settings className="w-5 h-5" />
+                        </button>
+                    )}
                 </div>
-
+            }
+        >
+            <div className="space-y-8">
                 {/* Sub Header / Search */}
-                <div className="flex items-center justify-between bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
+                <div className="flex items-center justify-between bg-white p-4 rounded-3xl shadow-sm border border-slate-100 sticky top-0 z-10">
                     <div className="relative flex-1 max-w-xl">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                         <input
@@ -388,7 +377,7 @@ const OrganisationStructure: React.FC = () => {
                                                             <block.icon className="w-8 h-8 text-slate-900" />
                                                         </div>
                                                         <div>
-                                                            <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">{block.title}</h3>
+                                                            <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter">{block.title}</h3>
                                                             <div className="flex items-center gap-2">
                                                                 {block.departments.length > 0 && (
                                                                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{block.departments.length} Sub-Entities</p>
@@ -434,14 +423,14 @@ const OrganisationStructure: React.FC = () => {
                                                     <div className="h-full min-h-[400px] flex flex-col items-center justify-center p-8 bg-slate-50/50 rounded-[32px] border-2 border-dashed border-slate-200 relative overflow-hidden group">
                                                         <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                                         <div className="relative z-10 flex flex-col items-center text-center max-w-xs">
-                                                            <div className="w-20 h-20 rounded-[32px] bg-white shadow-xl shadow-slate-200/50 flex items-center justify-center mb-6 border border-slate-100">
+                                                            <div className="w-20 h-20 rounded-[32px] bg-white shadow-xl shadow-slate-200/50 flex items-center justify-center mb-4 border border-slate-100">
                                                                 <Landmark className="w-10 h-10 text-indigo-600" />
                                                             </div>
                                                             <h4 className="text-xl font-black text-slate-900 uppercase tracking-tighter mb-2">Governance Board</h4>
-                                                            <p className="text-xs font-medium text-slate-400 mb-8 leading-relaxed">Visualize the highest authority levels and institutional leadership in an interactive format.</p>
+                                                            <p className="text-xs font-medium text-slate-400 mb-4 leading-relaxed">Visualize the highest authority levels and institutional leadership in an interactive format.</p>
                                                             <Button
                                                                 onClick={() => setIsMindmapOpen(true)}
-                                                                className="rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase text-[10px] tracking-widest px-8 py-6 h-auto shadow-lg shadow-indigo-100 group/btn"
+                                                                className="rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase text-[10px] tracking-widest px-8 py-6 h-auto shadow-sm shadow-indigo-100 group/btn"
                                                             >
                                                                 Launch Mindmap
                                                                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -451,7 +440,7 @@ const OrganisationStructure: React.FC = () => {
                                                 ) : (
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                         {block.departments.map(dept => (
-                                                            <div key={dept.id} className="p-6 rounded-[32px] bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-xl hover:shadow-slate-200/50 transition-all border-dashed hover:border-solid hover:border-indigo-200 group/dept">
+                                                            <div key={dept.id} className="px-4 py-4 rounded-[32px] bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-xl hover:shadow-slate-200/50 transition-all border-dashed hover:border-solid hover:border-indigo-200 group/dept">
                                                                 <div className="flex justify-between items-start mb-4">
                                                                     <div className="space-y-1">
                                                                         <Badge className="bg-indigo-50 text-indigo-600 border-none font-black text-[9px] uppercase tracking-widest mb-1">DEPARTMENT</Badge>
@@ -539,7 +528,7 @@ const OrganisationStructure: React.FC = () => {
                                                         {isHR && (
                                                             <button
                                                                 onClick={() => { setActiveBlockId(block.id); setEditingItem(null); setIsDeptModalOpen(true); }}
-                                                                className="flex flex-col items-center justify-center p-6 rounded-[32px] border-2 border-dashed border-slate-200 text-slate-400 hover:border-indigo-400 hover:text-indigo-600 hover:bg-slate-50 transition-all group min-h-[160px]"
+                                                                className="flex flex-col items-center justify-center px-4 py-4 rounded-[32px] border-2 border-dashed border-slate-200 text-slate-400 hover:border-indigo-400 hover:text-indigo-600 hover:bg-slate-50 transition-all group min-h-[160px]"
                                                             >
                                                                 <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-3 group-hover:bg-indigo-50">
                                                                     <Plus className="w-6 h-6" />
@@ -562,7 +551,7 @@ const OrganisationStructure: React.FC = () => {
                         {(isManager || isEmployee) && !searchQuery && (
                             <div className="space-y-6">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-200">
+                                    <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-sm shadow-indigo-200">
                                         <Users className="w-5 h-5" />
                                     </div>
                                     <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter">My Team Members</h3>
@@ -579,7 +568,7 @@ const OrganisationStructure: React.FC = () => {
                         <div className="space-y-6">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-2xl bg-slate-900 flex items-center justify-center text-white shadow-lg shadow-slate-200">
+                                    <div className="w-10 h-10 rounded-2xl bg-slate-900 flex items-center justify-center text-white shadow-sm shadow-slate-200">
                                         <Briefcase className="w-5 h-5" />
                                     </div>
                                     <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter">
@@ -603,7 +592,7 @@ const OrganisationStructure: React.FC = () => {
                         </div>
                     </div>
                 )}
-            </main>
+            </div>
 
             {/* Full-Screen Governance Mindmap */}
             <Dialog open={isMindmapOpen} onOpenChange={setIsMindmapOpen}>
@@ -611,11 +600,11 @@ const OrganisationStructure: React.FC = () => {
                     <div className="h-full flex flex-col">
                         <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center text-white shadow-lg shadow-slate-200">
+                                <div className="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center text-white shadow-sm shadow-slate-200">
                                     <Landmark className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">Institutional Governance</h3>
+                                    <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter">Institutional Governance</h3>
                                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Main Governance Body & Board Members</p>
                                 </div>
                             </div>
@@ -708,7 +697,7 @@ const OrganisationStructure: React.FC = () => {
                 isOpen={!!selectedHistoryBlock}
                 onClose={() => setSelectedHistoryBlock(null)}
             />
-        </div>
+        </Layout>
     );
 };
 
@@ -722,16 +711,16 @@ const MemberQuickViewModal = ({ member, isOpen, onClose }: any) => {
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="rounded-[40px] border-none shadow-2xl p-0 overflow-hidden max-w-md">
                 <div className="h-24 bg-gradient-to-r from-indigo-600 to-violet-700 relative">
-                    <button onClick={onClose} className="absolute right-6 top-6 w-8 h-8 rounded-full bg-black/20 text-white flex items-center justify-center hover:bg-black/40 transition-all">
+                    <button onClick={onClose} className="absolute right-6 topx-4 py-4 w-8 h-8 rounded-full bg-black/20 text-white flex items-center justify-center hover:bg-black/40 transition-all">
                         <Plus className="w-4 h-4 rotate-45" />
                     </button>
                 </div>
                 <div className="px-8 pb-8 -mt-12 text-center">
-                    <div className="w-24 h-24 rounded-[32px] bg-white border-4 border-white shadow-xl mx-auto flex items-center justify-center font-black text-3xl text-indigo-600 mb-4 overflow-hidden">
+                    <div className="w-24 h-24 rounded-[32px] bg-white border-4 border-white shadow-xl mx-auto flex items-center justify-center font-black text-xl text-indigo-600 mb-4 overflow-hidden">
                         {member.photo || member.name[0]}
                     </div>
                     <div className="space-y-1">
-                        <h4 className="text-2xl font-black text-slate-900 uppercase tracking-tight">{member.name}</h4>
+                        <h4 className="text-xl font-black text-slate-900 uppercase tracking-tight">{member.name}</h4>
                         <p className="text-sm font-bold text-indigo-600 uppercase tracking-widest">{member.designation}</p>
                         <Badge variant="outline" className="mt-2 text-[10px] font-black border-slate-100 text-slate-400 uppercase tracking-widest">{member.department}</Badge>
                     </div>
@@ -797,7 +786,7 @@ const EmployeeCard = ({ employee, config }: { employee: any, config: any }) => {
                     </div>
                 </div>
             )}
-            <div className="p-6">
+            <div className="px-4 py-4">
                 <div className="flex items-center gap-4 mb-4">
                     <div className="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center font-black text-lg text-indigo-600 uppercase border border-indigo-100">
                         {employee.photo}
@@ -854,7 +843,7 @@ const ConfigModal = ({ isOpen, onClose, config, onSave }: any) => {
                     <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
                         <Shield className="w-6 h-6 text-slate-900" />
                     </div>
-                    <DialogTitle className="text-2xl font-[950] uppercase tracking-tight text-slate-900">Directory Visibility</DialogTitle>
+                    <DialogTitle className="text-xl font-[950] uppercase tracking-tight text-slate-900">Directory Visibility</DialogTitle>
                     <p className="text-sm font-bold text-slate-400">Configure which employee details are visible to the company.</p>
                 </DialogHeader>
                 <div className="space-y-4 py-6">
@@ -889,7 +878,7 @@ const BlockModal = ({ isOpen, onClose, onSave, editingData }: any) => {
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="rounded-[32px] border-none shadow-2xl p-8">
                 <DialogHeader>
-                    <DialogTitle className="text-2xl font-[950] uppercase tracking-tight text-slate-900">
+                    <DialogTitle className="text-xl font-[950] uppercase tracking-tight text-slate-900">
                         {editingData ? 'Edit Block' : 'New Leadership Block'}
                     </DialogTitle>
                 </DialogHeader>
@@ -925,7 +914,7 @@ const DeptModal = ({ isOpen, onClose, onSave, editingData }: any) => {
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="rounded-[32px] border-none shadow-2xl p-8">
                 <DialogHeader>
-                    <DialogTitle className="text-2xl font-[950] uppercase tracking-tight text-slate-900">
+                    <DialogTitle className="text-xl font-[950] uppercase tracking-tight text-slate-900">
                         {editingData ? 'Edit Dept' : 'New Department'}
                     </DialogTitle>
                 </DialogHeader>
@@ -975,7 +964,7 @@ const UnitModal = ({ isOpen, onClose, onSave, editingData }: any) => {
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="rounded-[32px] border-none shadow-2xl p-8">
                 <DialogHeader>
-                    <DialogTitle className="text-2xl font-[950] uppercase tracking-tight text-slate-900">
+                    <DialogTitle className="text-xl font-[950] uppercase tracking-tight text-slate-900">
                         {editingData ? 'Edit Coordinator Role' : 'New Coordinator Assignment'}
                     </DialogTitle>
                 </DialogHeader>
@@ -1006,7 +995,7 @@ const GovernanceHistoryModal = ({ block, isOpen, onClose }: any) => {
             <DialogContent className="rounded-[40px] border-none shadow-2xl p-0 overflow-hidden max-w-lg">
                 <div className={`h-24 bg-gradient-to-r ${block.color} relative`}>
                     <div className="absolute inset-0 bg-black/20" />
-                    <button onClick={onClose} className="absolute right-6 top-6 w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center hover:bg-white/40 transition-all z-10">
+                    <button onClick={onClose} className="absolute right-6 topx-4 py-4 w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center hover:bg-white/40 transition-all z-10">
                         <Plus className="w-4 h-4 rotate-45" />
                     </button>
                     <div className="absolute bottom-4 left-8">
@@ -1042,7 +1031,7 @@ const GovernanceHistoryModal = ({ block, isOpen, onClose }: any) => {
                     </div>
                     <Button
                         onClick={onClose}
-                        className="w-full h-12 rounded-2xl bg-slate-900 hover:bg-black text-white font-black uppercase text-xs tracking-widest shadow-lg"
+                        className="w-full h-12 rounded-2xl bg-slate-900 hover:bg-black text-white font-black uppercase text-xs tracking-widest shadow-sm"
                     >
                         Close History Archive
                     </Button>

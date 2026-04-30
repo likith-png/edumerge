@@ -4,15 +4,15 @@ import { Card, CardContent } from '../ui/card';
 
 const Stage5Probation = ({ onComplete }: any) => {
     return (
-        <div className="p-6">
+        <div className="px-4 py-4">
             <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                 <CheckCircle className="w-5 h-5 text-emerald-600" /> Probation & Confirmation
             </h2>
-            <p className="text-slate-500 mb-6 text-sm">Final step: Evaluate performance and confirm employment.</p>
+            <p className="text-slate-500 mb-4 text-sm">Final step: Evaluate performance and confirm employment.</p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gapx-4 py-4 mb-4">
                 <Card className="border-l-4 border-l-emerald-500 shadow-sm">
-                    <CardContent className="p-6">
+                    <CardContent className="px-4 pb-4">
                         <h4 className="font-bold text-slate-900 mb-2">Performance Review</h4>
                         <p className="text-sm text-slate-600 mb-4">Manager has submitted positive feedback. All KPIs met.</p>
                         <div className="flex gap-2">
@@ -23,7 +23,7 @@ const Stage5Probation = ({ onComplete }: any) => {
                 </Card>
 
                 <Card className="bg-slate-50 border border-slate-200 shadow-sm">
-                    <CardContent className="p-6">
+                    <CardContent className="px-4 pb-4">
                         <h4 className="font-bold text-slate-900 mb-2">Completion Checklist</h4>
                         <ul className="space-y-2 text-sm text-slate-600">
                             <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-500" /> Documents Verified</li>

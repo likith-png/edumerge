@@ -1,19 +1,16 @@
 import React, { useState, useEffect } from 'react';
-
-const Card: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => (
-    <div className={`glass-card p-6 relative overflow-hidden group hover:shadow-xl transition-all duration-300 ${className || ''}`}>
-        <div className="absolute -top-10 -right-10 w-32 h-32 bg-indigo-200/20 rounded-full blur-2xl pointer-events-none group-hover:bg-indigo-300/30 transition-colors"></div>
-        <div className="relative z-10">{children}</div>
-    </div>
-);
-const CardHeader: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => <div className={`mb-4 ${className || ''}`}>{children}</div>;
-const CardTitle: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => <h3 className={`text-base font-black text-indigo-950 drop-shadow-sm uppercase tracking-wider flex items-center gap-2 ${className || ''}`}>{children}</h3>;
-const CardContent: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => <div className={className}>{children}</div>;
 import { Button } from '../ui/button';
 import { Label } from '../ui/label';
-
 import { getExitInterview, updateExitInterview } from '../../services/exitService';
-import { MessageSquare, Star, CheckCircle, UserCog, ClipboardList } from 'lucide-react';
+import { 
+    ChevronDown, ChevronUp, Download, CheckCircle2,
+    Calendar, Clock, User, MessageSquare, ClipboardList,
+    ShieldCheck, Star, Target, Info, AlertCircle, HelpCircle, ArrowLeft, ArrowRight, Save, Send, Heart,
+    Users, Activity
+} from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardContent } from '../ui/card';
+import { Badge } from '../ui/badge';
+import { Separator } from '../ui/separator';
 
 interface ExitInterviewProps {
     exitId?: number;
@@ -100,7 +97,6 @@ const ExitInterview: React.FC<ExitInterviewProps> = ({ exitId, onSuccess }) => {
         }
     };
 
-    // Group items by category
     const groupedQuestions = questions.reduce((acc: any, q: any) => {
         const cat = q.category || 'General';
         acc[cat] = acc[cat] || [];
@@ -108,115 +104,179 @@ const ExitInterview: React.FC<ExitInterviewProps> = ({ exitId, onSuccess }) => {
         return acc;
     }, {});
 
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center py-48 animate-in fade-in duration-500">
+                <div className="p-4 bg-slate-900 rounded-xl shadow-lg ring-4 ring-slate-100 mb-6">
+                    <MessageSquare className="w-10 h-10 text-white animate-pulse" />
+                </div>
+                <div className="text-center space-y-1">
+                    <p className="text-xs font-bold text-slate-900 uppercase tracking-widest">Loading Interview</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Retrieving survey data...</p>
+                </div>
+            </div>
+        );
+    }
+
     if (!exitId) {
         return (
-            <div className="text-center py-10">
-                <p className="text-slate-500">No active exit request found for interview.</p>
-                <p className="text-xs text-slate-400 mt-2">Submit a resignation request first.</p>
+            <div className="text-center py-32 space-y-8 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl">
+                <AlertCircle className="w-16 h-16 text-slate-300 mx-auto" />
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">No Active Exit Context</p>
             </div>
         );
     }
 
     return (
-        <div className="space-y-6">
-            <div className="flex justify-end mb-2">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setMode(mode === 'Employee' ? 'HR' : 'Employee')}
-                    className="flex items-center gap-2"
-                >
-                    <UserCog className="w-4 h-4" /> Switch to {mode === 'Employee' ? 'HR' : 'Employee'} Mode
-                </Button>
-            </div>
+        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 p-2">
+            {/* Control Section */}
+            <Card className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+                <div className="p-8 flex flex-col lg:flex-row justify-between items-center gap-6 bg-slate-50/50">
+                    <div className="flex items-center gap-5">
+                        <div className="p-3 bg-slate-900 rounded-lg shadow-sm">
+                            <MessageSquare className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                            <h2 className="text-lg font-bold text-slate-900 tracking-tight uppercase">
+                                {mode === 'HR' ? 'Governance Interview' : 'Exit Feedback'}
+                            </h2>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">
+                                {mode === 'HR' ? 'Institutional Risk Assessment' : 'Qualitative Feedback Collection'}
+                            </p>
+                        </div>
+                    </div>
 
-            <Card className={`border-slate-200 ${mode === 'HR' ? 'bg-orange-50/50' : 'bg-white'}`}>
-                <CardHeader className="py-4 px-6 bg-slate-50 border-b border-slate-100">
-                    <CardTitle className="text-lg font-semibold flex items-center text-slate-800">
-                        <MessageSquare className="w-5 h-5 mr-2 text-blue-600" />
-                        {mode === 'HR' ? 'HR-Led Exit Interview' : 'Exit Interview'}
-                    </CardTitle>
-                    <p className="text-sm text-slate-500">
-                        {mode === 'HR' ? 'Record candidate responses and internal risk assessment.' : 'Please provide your honest feedback to help us improve.'}
-                    </p>
-                </CardHeader>
-                <CardContent className="p-6 space-y-8">
-                    {loading ? <p>Loading questions...</p> : Object.keys(groupedQuestions).map((category) => (
-                        <div key={category} className="space-y-4">
-                            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider border-b pb-1">{category}</h3>
+                    <Button 
+                        variant="outline"
+                        onClick={() => setMode(mode === 'Employee' ? 'HR' : 'Employee')}
+                        className="h-12 px-6 border-slate-200 text-slate-600 rounded-lg font-bold text-[11px] uppercase tracking-wider hover:bg-slate-50 shadow-sm transition-all"
+                    >
+                        <User className="w-4 h-4 mr-2.5" />
+                        Switch to {mode === 'Employee' ? 'Admin' : 'Personal'} Mode
+                    </Button>
+                </div>
+            </Card>
+
+            {/* Questions Matrix */}
+            <div className="space-y-16">
+                {Object.keys(groupedQuestions).map((category) => (
+                    <div key={category} className="space-y-8 animate-in slide-in-from-left-4 duration-500">
+                        <div className="flex items-center gap-5">
+                            <div className="w-2 h-8 bg-slate-900 rounded-full shadow-sm" />
+                            <h3 className="text-xl font-bold text-slate-900 uppercase tracking-tight">{category} Phase</h3>
+                            <Separator className="flex-1 bg-slate-100" />
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-6">
                             {groupedQuestions[category].map((q: any) => (
-                                <div key={q.id} className="space-y-3 pb-4 border-b border-dashed border-slate-100 last:border-0 pl-2">
-                                    <Label className="text-base font-medium text-slate-800 block">
-                                        {q.question}
-                                    </Label>
-                                    <div className="space-y-4 pl-4">
-                                        <div>
-                                            <Label className="text-xs text-slate-500 mb-1.5 block">Response</Label>
-                                            <textarea
-                                                className="flex min-h-[60px] w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                                                placeholder={mode === 'HR' ? "Candidate's response..." : "Your answer..."}
-                                                value={q.answer || ''}
-                                                onChange={(e) => handleUpdate(q.id, 'answer', e.target.value)}
-                                                onBlur={(e) => handleUpdate(q.id, 'answer', e.target.value)}
-                                            />
+                                <Card key={q.id} className="bg-white border border-slate-200 rounded-xl shadow-sm hover:border-slate-300 transition-all duration-300">
+                                    <div className="p-8 space-y-8">
+                                        <Activity className="w-3.5 h-3.5 opacity-40" />
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Question Context</p>
+                                            <h4 className="text-lg font-bold text-slate-900 tracking-tight uppercase leading-snug">
+                                                {q.question}
+                                            </h4>
                                         </div>
-                                        <div>
-                                            <Label className="text-xs text-slate-500 mb-1.5 block">Rating</Label>
-                                            <div className="flex gap-1">
-                                                {[1, 2, 3, 4, 5].map((star) => (
-                                                    <button
-                                                        key={star}
-                                                        type="button"
-                                                        onClick={() => handleUpdate(q.id, 'rating', star)}
-                                                        className={`p-1 rounded-full hover:bg-slate-100 transition-colors ${(q.rating || 0) >= star ? 'text-yellow-400' : 'text-slate-300'}`}
-                                                    >
-                                                        <Star className="w-5 h-5 fill-current" />
-                                                    </button>
-                                                ))}
+
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                                            <div className="space-y-3">
+                                                <Label className="text-[9px] font-bold text-slate-900 uppercase tracking-widest ml-1">Your response</Label>
+                                                <textarea
+                                                    className="w-full min-h-[120px] bg-white border border-slate-200 rounded-xl p-6 font-bold text-slate-900 text-sm focus:ring-2 focus:ring-slate-100 transition-all resize-none shadow-sm placeholder:text-slate-300"
+                                                    placeholder={mode === 'HR' ? "Document response..." : "Provide your feedback..."}
+                                                    value={q.answer || ''}
+                                                    onChange={(e) => handleUpdate(q.id, 'answer', e.target.value)}
+                                                />
+                                            </div>
+
+                                            <div className="space-y-5">
+                                                <Label className="text-[9px] font-bold text-slate-900 uppercase tracking-widest ml-1">Rating Level</Label>
+                                                <div className="flex bg-slate-50 p-5 rounded-xl border border-slate-100 justify-between items-center transition-colors">
+                                                    <div className="flex gap-3">
+                                                        {[1, 2, 3, 4, 5].map((star) => (
+                                                            <button
+                                                                key={star}
+                                                                type="button"
+                                                                onClick={() => handleUpdate(q.id, 'rating', star)}
+                                                                className={`p-2.5 rounded-lg transition-all duration-300 transform hover:scale-110 ${
+                                                                    (q.rating || 0) >= star 
+                                                                        ? 'bg-slate-900 text-white shadow-md' 
+                                                                        : 'bg-white text-slate-200 border border-slate-100'
+                                                                }`}
+                                                            >
+                                                                <Star className={`w-5 h-5 ${ (q.rating || 0) >= star ? 'fill-white' : '' }`} />
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                    <Badge className="bg-white text-slate-600 border border-slate-100 px-3 py-1.5 rounded-lg text-[10px] font-bold tracking-wider uppercase">
+                                                        {q.rating || 0} / 5
+                                                    </Badge>
+                                                </div>
+                                                <div className="p-5 bg-slate-50/50 rounded-xl border border-dashed border-slate-200 flex items-center gap-3">
+                                                    <Info className="w-4 h-4 text-slate-400" />
+                                                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-relaxed">This rating helps us improve institutional processes.</p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                </Card>
                             ))}
                         </div>
-                    ))}
-
-                    {mode === 'HR' && (
-                        <div className="bg-white p-4 rounded-lg border border-orange-200 space-y-4">
-                            <h3 className="font-semibold text-orange-800 flex items-center">
-                                <ClipboardList className="w-4 h-4 mr-2" /> HR Assessment
-                            </h3>
-                            <div className="grid gap-2">
-                                <Label>Attrition Risk Rating</Label>
-                                <select
-                                    className="h-10 rounded-md border border-slate-200 px-3 py-2 text-sm"
-                                    value={riskRating}
-                                    onChange={(e) => setRiskRating(e.target.value)}
-                                >
-                                    <option value="Low">Low - Standard Exit</option>
-                                    <option value="Medium">Medium - Regrettable Loss</option>
-                                    <option value="High">High - Critical Impact / Key Talent</option>
-                                </select>
-                            </div>
-                            <div className="grid gap-2">
-                                <Label>HR Confidential Notes</Label>
-                                <textarea
-                                    className="flex min-h-[80px] w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm"
-                                    placeholder="Internal notes on retention attempts, future rehiring potential, etc."
-                                    value={hrNotes}
-                                    onChange={(e) => setHrNotes(e.target.value)}
-                                />
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="pt-4 flex justify-end">
-                        <Button className={mode === 'HR' ? "bg-orange-600 hover:bg-orange-700" : "bg-green-600 hover:bg-green-700"} onClick={handleSubmit}>
-                            <CheckCircle className="w-4 h-4 mr-2" /> {mode === 'HR' ? 'Finalize & Record Exit' : 'Submit Interview'}
-                        </Button>
                     </div>
-                </CardContent>
-            </Card>
+                ))}
+
+                {mode === 'HR' && (
+                    <Card className="bg-white border border-slate-200 rounded-xl shadow-md overflow-hidden mt-20">
+                        <CardHeader className="p-8 border-b border-slate-100 bg-slate-50/50">
+                            <CardTitle className="flex items-center gap-5 text-slate-900 text-lg font-bold uppercase tracking-tight">
+                                <div className="p-2.5 bg-slate-900 text-white rounded-lg shadow-sm"><ClipboardList className="w-5 h-5" /></div>
+                                Risk Assessment
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-8 space-y-10">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <div className="space-y-3">
+                                    <Label className="text-[9px] font-bold text-slate-900 uppercase tracking-widest ml-1">Attrition Risk Rating</Label>
+                                    <div className="relative">
+                                        <select
+                                            className="w-full h-12 bg-white border border-slate-200 text-slate-900 font-bold text-[11px] uppercase tracking-wider rounded-lg px-6 appearance-none cursor-pointer shadow-sm transition-all focus:ring-2 focus:ring-slate-100"
+                                            value={riskRating}
+                                            onChange={(e) => setRiskRating(e.target.value)}
+                                        >
+                                            <option value="Low">Low - Standard Exit</option>
+                                            <option value="Medium">Medium - Strategic Friction</option>
+                                            <option value="High">High - Critical Institutional breach</option>
+                                        </select>
+                                        <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                            <ChevronDown className="w-4 h-4" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="space-y-3">
+                                    <Label className="text-[9px] font-bold text-slate-900 uppercase tracking-widest ml-1">Administrative Notes</Label>
+                                    <textarea
+                                        className="w-full h-12 bg-white border border-slate-200 rounded-lg px-6 py-3 font-bold text-slate-900 text-sm focus:ring-2 focus:ring-slate-100 transition-all resize-none shadow-sm"
+                                        placeholder="Internal notes on exit..."
+                                        value={hrNotes}
+                                        onChange={(e) => setHrNotes(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
+                <div className="pt-12 flex justify-end">
+                    <Button 
+                        className="h-12 px-12 rounded-lg font-bold text-[11px] uppercase tracking-wider shadow-md transition-all active:scale-95 bg-slate-900 hover:bg-black text-white"
+                        onClick={handleSubmit}
+                    >
+                        <CheckCircle2 className="w-4 h-4 mr-2.5" />
+                        {mode === 'HR' ? 'Finalize Interview' : 'Submit Feedback'}
+                    </Button>
+                </div>
+            </div>
         </div>
     );
 };

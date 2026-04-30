@@ -4,6 +4,10 @@ export interface Publication {
     title: string;
     type: 'Journal' | 'Conference' | 'Book' | 'Book Chapter';
     journal_name?: string;
+    issn_isbn?: string;
+    indexing?: 'UGC CARE' | 'Scopus' | 'Web of Science' | 'Other';
+    is_peer_reviewed?: boolean;
+    ugc_care_listed?: boolean;
     impact_factor?: number;
     authorship: 'Principal' | 'Corresponding' | 'Co-Author';
     date: string;
@@ -14,6 +18,7 @@ export interface Publication {
     employee_name?: string;
     department?: string;
     designation?: string;
+    citations?: number;
 }
 
 export const submitPublication = async (data: any) => {

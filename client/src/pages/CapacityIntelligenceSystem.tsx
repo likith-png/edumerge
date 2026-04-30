@@ -79,7 +79,7 @@ const CapacityIntelligenceSystem: React.FC = () => {
                         <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100 flex justify-between items-center">
                             <div>
                                 <h4 className="font-bold text-slate-800">New Intake Batch Config</h4>
-                                <p className="text-sm text-slate-500">Configure capacity for upcoming academic year</p>
+                                <p className="text-xs text-slate-500">Configure capacity for upcoming academic year</p>
                             </div>
                             <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
                                 Add Intake
@@ -129,8 +129,8 @@ const CapacityIntelligenceSystem: React.FC = () => {
                             <button onClick={() => setSelectedDetail(null)} className="text-sm flex items-center gap-1 text-slate-500 hover:text-slate-700 bg-white px-3 py-1.5 rounded-lg shadow-sm border border-slate-200 transition-colors w-fit">
                                 <ChevronLeft className="w-4 h-4" /> Back to Overview
                             </button>
-                            <div className="bg-white border border-slate-200 p-6 rounded-xl">
-                                <div className="flex items-center gap-4 mb-6">
+                            <div className="bg-white border border-slate-200 px-4 py-4 rounded-xl">
+                                <div className="flex items-center gap-4 mb-4">
                                     <div className="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center text-xl font-bold text-indigo-700">{selectedDetail.initials}</div>
                                     <div>
                                         <h4 className="text-xl font-bold text-slate-800">{selectedDetail.name}</h4>
@@ -168,7 +168,7 @@ const CapacityIntelligenceSystem: React.FC = () => {
                         <div className="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 flex justify-between items-center">
                             <div>
                                 <h4 className="font-bold text-slate-800">Faculty Reassignment</h4>
-                                <p className="text-sm text-slate-500">Balance workload across departments</p>
+                                <p className="text-xs text-slate-500">Balance workload across departments</p>
                             </div>
                             <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">
                                 Reassign Load
@@ -208,7 +208,7 @@ const CapacityIntelligenceSystem: React.FC = () => {
                         <div className="bg-amber-50/50 p-4 rounded-xl border border-amber-100 flex justify-between items-center">
                             <div>
                                 <h4 className="font-bold text-slate-800">Conflict Matrix</h4>
-                                <p className="text-sm text-slate-500">Detect and resolve scheduling overlaps</p>
+                                <p className="text-xs text-slate-500">Detect and resolve scheduling overlaps</p>
                             </div>
                             <button className="px-4 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors">
                                 Auto-Resolve
@@ -220,7 +220,7 @@ const CapacityIntelligenceSystem: React.FC = () => {
                             <div className="flex flex-col items-center justify-center p-8 text-center bg-slate-50 rounded-xl border border-slate-200 border-dashed">
                                 <CheckCircle2 className="w-10 h-10 text-emerald-500 mb-3" />
                                 <h5 className="font-bold text-slate-800 mb-1">Clear Schedule</h5>
-                                <p className="text-sm text-slate-500">The current simulation shows zero faculty or infrastructure conflicts.</p>
+                                <p className="text-xs text-slate-500">The current simulation shows zero faculty or infrastructure conflicts.</p>
                             </div>
                         </div>
                         <div>
@@ -229,14 +229,14 @@ const CapacityIntelligenceSystem: React.FC = () => {
                                 <div className="p-4 border border-slate-200 rounded-xl flex justify-between items-center hover:bg-slate-50 cursor-pointer transition-colors">
                                     <div>
                                         <div className="font-bold text-slate-700">Substitute Finder</div>
-                                        <div className="text-sm text-slate-500">Simulate absence for today and find replacements.</div>
+                                        <div className="text-xs text-slate-500">Simulate absence for today and find replacements.</div>
                                     </div>
                                     <ChevronRight className="w-5 h-5 text-slate-400" />
                                 </div>
                                 <div className="p-4 border border-slate-200 rounded-xl flex justify-between items-center hover:bg-slate-50 cursor-pointer transition-colors">
                                     <div>
                                         <div className="font-bold text-slate-700">Parallel Section Test</div>
-                                        <div className="text-sm text-slate-500">Test infrastructure load if we run 3 sections simultaneously.</div>
+                                        <div className="text-xs text-slate-500">Test infrastructure load if we run 3 sections simultaneously.</div>
                                     </div>
                                     <ChevronRight className="w-5 h-5 text-slate-400" />
                                 </div>
@@ -250,7 +250,7 @@ const CapacityIntelligenceSystem: React.FC = () => {
                         <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 flex justify-between items-center">
                             <div>
                                 <h4 className="font-bold text-slate-800">Budget Baseline</h4>
-                                <p className="text-sm text-slate-500">Manage revenue streams and operational overhead</p>
+                                <p className="text-xs text-slate-500">Manage revenue streams and operational overhead</p>
                             </div>
                             <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors">
                                 Adjust Forecast
@@ -260,11 +260,11 @@ const CapacityIntelligenceSystem: React.FC = () => {
                         <div className="grid grid-cols-2 gap-4 mb-4">
                             <div className="p-4 border border-slate-200 rounded-xl bg-white">
                                 <div className="text-sm font-medium text-slate-500 mb-1">Total Expected Revenue</div>
-                                <div className="text-2xl font-black text-emerald-600">₹45.0M</div>
+                                <div className="text-xl font-black text-emerald-600">₹45.0M</div>
                             </div>
                             <div className="p-4 border border-slate-200 rounded-xl bg-white">
                                 <div className="text-sm font-medium text-slate-500 mb-1">Institutional Cost</div>
-                                <div className="text-2xl font-black text-red-600">₹38.0M</div>
+                                <div className="text-xl font-black text-red-600">₹38.0M</div>
                             </div>
                         </div>
 
@@ -308,7 +308,7 @@ const CapacityIntelligenceSystem: React.FC = () => {
                         <div className="bg-cyan-50/50 p-4 rounded-xl border border-cyan-100 flex justify-between items-center">
                             <div>
                                 <h4 className="font-bold text-slate-800">Enrolment Funnel</h4>
-                                <p className="text-sm text-slate-500">Track and predict conversion rates</p>
+                                <p className="text-xs text-slate-500">Track and predict conversion rates</p>
                             </div>
                             <button className="px-4 py-2 bg-cyan-600 text-white rounded-lg text-sm font-medium hover:bg-cyan-700 transition-colors">
                                 Add Campaign Data
@@ -357,7 +357,7 @@ const CapacityIntelligenceSystem: React.FC = () => {
                         <div className="bg-slate-100 p-4 rounded-xl border border-slate-200 flex justify-between items-center">
                             <div>
                                 <h4 className="font-bold text-slate-800">Norms Verification</h4>
-                                <p className="text-sm text-slate-500">Real-time check against {instType === 'School' ? 'CBSE' : 'AICTE'} guidelines</p>
+                                <p className="text-xs text-slate-500">Real-time check against {instType === 'School' ? 'CBSE' : 'AICTE'} guidelines</p>
                             </div>
                             <button className="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-medium hover:bg-slate-900 transition-colors">
                                 Upload Certificate
@@ -416,7 +416,7 @@ const CapacityIntelligenceSystem: React.FC = () => {
 
                 return (
                     <div className="space-y-6">
-                        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 rounded-xl text-white">
+                        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-4 py-4 rounded-xl text-white">
                             <h4 className="font-bold text-lg flex items-center gap-2 mb-2"><BrainCircuit className="w-6 h-6" /> Semantic Sandbox</h4>
                             <p className="text-blue-100 text-sm mb-4">Type a hypothetical scenario to simulate its impact across all capacity engines.</p>
 
@@ -439,7 +439,7 @@ const CapacityIntelligenceSystem: React.FC = () => {
                                     <div
                                         key={idx}
                                         onClick={() => setSelectedScenario(scenario)}
-                                        className={`p-4 border rounded-xl cursor-pointer hover:shadow-md transition-all group ${selectedScenario?.q === scenario.q ? 'border-indigo-500 bg-indigo-50/50 shadow-sm relative overflow-hidden' : 'border-slate-200 hover:border-blue-400'}`}
+                                        className={`p-4 border rounded-xl cursor-pointer hover:shadow-sm transition-all group ${selectedScenario?.q === scenario.q ? 'border-indigo-500 bg-indigo-50/50 shadow-sm relative overflow-hidden' : 'border-slate-200 hover:border-blue-400'}`}
                                     >
                                         {selectedScenario?.q === scenario.q && (
                                             <div className="absolute top-0 left-0 w-1 h-full bg-indigo-600"></div>
@@ -499,11 +499,11 @@ const CapacityIntelligenceSystem: React.FC = () => {
                 {/* Executive Control Header */}
                 <Card className="border-none shadow-sm ring-1 ring-slate-100 bg-gradient-to-r from-slate-900 to-indigo-900 text-white overflow-hidden relative">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500 rounded-full blur-3xl opacity-20 -mr-32 -mt-32"></div>
-                    <CardContent className="p-8 relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                    <CardContent className="p-8 relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gapx-4 py-4">
                         <div>
                             <div className="flex items-center gap-3 mb-2">
                                 <BrainCircuit className="w-8 h-8 text-blue-400" />
-                                <h2 className="text-3xl font-black tracking-tight">Executive AI Dashboard</h2>
+                                <h2 className="text-xl font-black tracking-tight">Executive AI Dashboard</h2>
                             </div>
                             <p className="text-slate-300 font-medium max-w-2xl">
                                 Real-time synthesis of academic, operational, and financial capacities.
@@ -514,13 +514,13 @@ const CapacityIntelligenceSystem: React.FC = () => {
                         <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md p-2 rounded-2xl border border-white/10">
                             <button
                                 onClick={() => setInstType('School')}
-                                className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${instType === 'School' ? 'bg-white text-slate-900 shadow-md' : 'text-slate-300 hover:text-white'}`}
+                                className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${instType === 'School' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-300 hover:text-white'}`}
                             >
                                 School View
                             </button>
                             <button
                                 onClick={() => setInstType('College')}
-                                className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${instType === 'College' ? 'bg-white text-slate-900 shadow-md' : 'text-slate-300 hover:text-white'}`}
+                                className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${instType === 'College' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-300 hover:text-white'}`}
                             >
                                 College View
                             </button>
@@ -532,9 +532,9 @@ const CapacityIntelligenceSystem: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
                     {/* Module 1: Academic Engine */}
-                    <Card onClick={() => setActiveModule('academic')} className="hover:shadow-lg transition-all border-none shadow-sm ring-1 ring-slate-100 group relative overflow-hidden cursor-pointer">
+                    <Card onClick={() => setActiveModule('academic')} className="hover:shadow-sm transition-all border-none shadow-sm ring-1 ring-slate-100 group relative overflow-hidden cursor-pointer">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <CardContent className="p-6 relative z-10">
+                        <CardContent className="px-4 py-4 relative z-10">
                             <div className="flex justify-between items-start mb-4">
                                 <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
                                     <Users className="w-6 h-6" />
@@ -544,7 +544,7 @@ const CapacityIntelligenceSystem: React.FC = () => {
                                 </span>
                             </div>
                             <h3 className="text-lg font-black text-slate-800 mb-1">Academic Capacity</h3>
-                            <p className="text-sm text-slate-500 mb-4">{instType === 'School' ? 'Grade & Section Load' : 'Program & Course Load'}</p>
+                            <p className="text-xs text-slate-500 mb-4">{instType === 'School' ? 'Grade & Section Load' : 'Program & Course Load'}</p>
 
                             <div className="space-y-3">
                                 <div>
@@ -565,8 +565,8 @@ const CapacityIntelligenceSystem: React.FC = () => {
                     </Card>
 
                     {/* Module 2: Faculty Engine */}
-                    <Card onClick={() => setActiveModule('faculty')} className="hover:shadow-lg transition-all border-none shadow-sm ring-1 ring-slate-100 group relative overflow-hidden cursor-pointer">
-                        <CardContent className="p-6">
+                    <Card onClick={() => setActiveModule('faculty')} className="hover:shadow-sm transition-all border-none shadow-sm ring-1 ring-slate-100 group relative overflow-hidden cursor-pointer">
+                        <CardContent className="px-4 pb-4">
                             <div className="flex justify-between items-start mb-4">
                                 <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
                                     <Activity className="w-6 h-6" />
@@ -576,12 +576,12 @@ const CapacityIntelligenceSystem: React.FC = () => {
                                 </span>
                             </div>
                             <h3 className="text-lg font-black text-slate-800 mb-1">Faculty Workload</h3>
-                            <p className="text-sm text-slate-500 mb-4">{instType === 'School' ? 'Period-based Allocation' : 'Credit-based Allocation'}</p>
+                            <p className="text-xs text-slate-500 mb-4">{instType === 'School' ? 'Period-based Allocation' : 'Credit-based Allocation'}</p>
 
                             <div className="space-y-3">
                                 <div className="flex items-center gap-3">
                                     <div className="flex-1">
-                                        <div className="text-2xl font-black text-slate-800">{facultyData.avgLoad}%</div>
+                                        <div className="text-xl font-black text-slate-800">{facultyData.avgLoad}%</div>
                                         <div className="text-xs font-medium text-slate-500">Avg Utilization</div>
                                     </div>
                                     <div className="w-px h-10 bg-slate-100"></div>
@@ -597,8 +597,8 @@ const CapacityIntelligenceSystem: React.FC = () => {
                     </Card>
 
                     {/* Module 3: Infrastructure Engine */}
-                    <Card onClick={() => setActiveModule('infra')} className="hover:shadow-lg transition-all border-none shadow-sm ring-1 ring-slate-100 group relative overflow-hidden cursor-pointer">
-                        <CardContent className="p-6">
+                    <Card onClick={() => setActiveModule('infra')} className="hover:shadow-sm transition-all border-none shadow-sm ring-1 ring-slate-100 group relative overflow-hidden cursor-pointer">
+                        <CardContent className="px-4 pb-4">
                             <div className="flex justify-between items-start mb-4">
                                 <div className="p-3 bg-fuchsia-50 text-fuchsia-600 rounded-xl">
                                     <Building2 className="w-6 h-6" />
@@ -608,7 +608,7 @@ const CapacityIntelligenceSystem: React.FC = () => {
                                 </span>
                             </div>
                             <h3 className="text-lg font-black text-slate-800 mb-1">Infrastructure</h3>
-                            <p className="text-sm text-slate-500 mb-4">Space & Facility Utilization</p>
+                            <p className="text-xs text-slate-500 mb-4">Space & Facility Utilization</p>
 
                             <div className="grid grid-cols-2 gap-2 text-sm">
                                 <div className="p-2 bg-slate-50 rounded-lg">
@@ -632,15 +632,15 @@ const CapacityIntelligenceSystem: React.FC = () => {
                     </Card>
 
                     {/* Module 4: Timetable & Sim */}
-                    <Card onClick={() => setActiveModule('timetable')} className="hover:shadow-lg transition-all border-none shadow-sm ring-1 ring-slate-100 group relative overflow-hidden cursor-pointer">
-                        <CardContent className="p-6">
+                    <Card onClick={() => setActiveModule('timetable')} className="hover:shadow-sm transition-all border-none shadow-sm ring-1 ring-slate-100 group relative overflow-hidden cursor-pointer">
+                        <CardContent className="px-4 pb-4">
                             <div className="flex justify-between items-start mb-4">
                                 <div className="p-3 bg-amber-50 text-amber-600 rounded-xl">
                                     <CalendarRange className="w-6 h-6" />
                                 </div>
                             </div>
                             <h3 className="text-lg font-black text-slate-800 mb-1">Timetable Engine</h3>
-                            <p className="text-sm text-slate-500 mb-4">Conflict & Simulation</p>
+                            <p className="text-xs text-slate-500 mb-4">Conflict & Simulation</p>
 
                             <div className="space-y-2 mt-4">
                                 <div className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer border border-transparent hover:border-slate-100">
@@ -659,8 +659,8 @@ const CapacityIntelligenceSystem: React.FC = () => {
                     </Card>
 
                     {/* Module 5: Financial Capacity */}
-                    <Card onClick={() => setActiveModule('finance')} className="hover:shadow-lg transition-all border-none shadow-sm ring-1 ring-slate-100 group relative overflow-hidden cursor-pointer">
-                        <CardContent className="p-6">
+                    <Card onClick={() => setActiveModule('finance')} className="hover:shadow-sm transition-all border-none shadow-sm ring-1 ring-slate-100 group relative overflow-hidden cursor-pointer">
+                        <CardContent className="px-4 pb-4">
                             <div className="flex justify-between items-start mb-4">
                                 <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
                                     <PieChart className="w-6 h-6" />
@@ -670,10 +670,10 @@ const CapacityIntelligenceSystem: React.FC = () => {
                                 </span>
                             </div>
                             <h3 className="text-lg font-black text-slate-800 mb-1">Financial Capacity</h3>
-                            <p className="text-sm text-slate-500 mb-4">Revenue vs Institutional Cost</p>
+                            <p className="text-xs text-slate-500 mb-4">Revenue vs Institutional Cost</p>
 
                             <div className="mt-4">
-                                <div className="text-3xl font-black text-slate-800 mb-1">{financeData.sustainabilityRatio}x</div>
+                                <div className="text-xl font-black text-slate-800 mb-1">{financeData.sustainabilityRatio}x</div>
                                 <div className="text-xs font-medium text-slate-500 flex items-center gap-1">
                                     Sustainability Ratio (Rev/Cost)
                                 </div>
@@ -682,8 +682,8 @@ const CapacityIntelligenceSystem: React.FC = () => {
                     </Card>
 
                     {/* Module 6: Admission Forecasting */}
-                    <Card onClick={() => setActiveModule('admission')} className="hover:shadow-lg transition-all border-none shadow-sm ring-1 ring-slate-100 group relative overflow-hidden cursor-pointer">
-                        <CardContent className="p-6">
+                    <Card onClick={() => setActiveModule('admission')} className="hover:shadow-sm transition-all border-none shadow-sm ring-1 ring-slate-100 group relative overflow-hidden cursor-pointer">
+                        <CardContent className="px-4 pb-4">
                             <div className="flex justify-between items-start mb-4">
                                 <div className="p-3 bg-cyan-50 text-cyan-600 rounded-xl">
                                     <LineChart className="w-6 h-6" />
@@ -693,10 +693,10 @@ const CapacityIntelligenceSystem: React.FC = () => {
                                 </div>
                             </div>
                             <h3 className="text-lg font-black text-slate-800 mb-1">Demand Forecast</h3>
-                            <p className="text-sm text-slate-500 mb-4">Next Year Intake Prediction</p>
+                            <p className="text-xs text-slate-500 mb-4">Next Year Intake Prediction</p>
 
                             <div className="mt-4">
-                                <div className="text-2xl font-black text-slate-800 mb-2">{admissionForecast.predictedIntake} <span className="text-sm font-medium text-slate-500"> projected</span></div>
+                                <div className="text-xl font-black text-slate-800 mb-2">{admissionForecast.predictedIntake} <span className="text-sm font-medium text-slate-500"> projected</span></div>
                                 <div className="text-xs font-medium text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-100">
                                     Trending: <span className="font-bold text-slate-800">{admissionForecast.popularCourse}</span>
                                 </div>
@@ -705,8 +705,8 @@ const CapacityIntelligenceSystem: React.FC = () => {
                     </Card>
 
                     {/* Module 7: Governance & Compliance */}
-                    <Card onClick={() => setActiveModule('compliance')} className="hover:shadow-lg transition-all border-none shadow-sm ring-1 ring-slate-100 group relative overflow-hidden cursor-pointer">
-                        <CardContent className="p-6">
+                    <Card onClick={() => setActiveModule('compliance')} className="hover:shadow-sm transition-all border-none shadow-sm ring-1 ring-slate-100 group relative overflow-hidden cursor-pointer">
+                        <CardContent className="px-4 pb-4">
                             <div className="flex justify-between items-start mb-4">
                                 <div className="p-3 bg-slate-100 text-slate-700 rounded-xl">
                                     <ShieldCheck className="w-6 h-6" />
@@ -716,11 +716,11 @@ const CapacityIntelligenceSystem: React.FC = () => {
                                 </span>
                             </div>
                             <h3 className="text-lg font-black text-slate-800 mb-1">Compliance Engine</h3>
-                            <p className="text-sm text-slate-500 mb-4">{instType === 'School' ? 'CBSE / Board Norms' : 'AICTE / Univ Norms'}</p>
+                            <p className="text-xs text-slate-500 mb-4">{instType === 'School' ? 'CBSE / Board Norms' : 'AICTE / Univ Norms'}</p>
 
                             <div className="flex items-end gap-3 mt-4">
                                 <div>
-                                    <div className="text-3xl font-black text-slate-800">{complianceData.score}</div>
+                                    <div className="text-xl font-black text-slate-800">{complianceData.score}</div>
                                     <div className="text-xs font-medium text-slate-500">Readiness Score</div>
                                 </div>
                             </div>
@@ -728,9 +728,9 @@ const CapacityIntelligenceSystem: React.FC = () => {
                     </Card>
 
                     {/* Module 8: AI What-If Dashboard */}
-                    <Card onClick={() => setActiveModule('ai')} className="hover:shadow-lg transition-all border-none ring-1 ring-blue-200 bg-gradient-to-br from-blue-600 to-indigo-700 text-white group relative overflow-hidden md:col-span-1 lg:col-span-1 cursor-pointer">
+                    <Card onClick={() => setActiveModule('ai')} className="hover:shadow-sm transition-all border-none ring-1 ring-blue-200 bg-gradient-to-br from-blue-600 to-indigo-700 text-white group relative overflow-hidden md:col-span-1 lg:col-span-1 cursor-pointer">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full blur-3xl opacity-10"></div>
-                        <CardContent className="p-6 relative z-10 flex flex-col h-full justify-between">
+                        <CardContent className="px-4 py-4 relative z-10 flex flex-col h-full justify-between">
                             <div>
                                 <div className="flex justify-between items-start mb-4">
                                     <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
@@ -771,7 +771,7 @@ const CapacityIntelligenceSystem: React.FC = () => {
                         {/* Panel */}
                         <div className={`relative w-full ${activeModule === 'infra' ? 'max-w-6xl' : 'max-w-2xl'} bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300`}>
                             {/* Header */}
-                            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                            <div className="px-4 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                                 <div className="flex items-center gap-3">
                                     <div className="p-2 bg-slate-100 text-slate-600 rounded-lg">
                                         <BrainCircuit className="w-5 h-5" />

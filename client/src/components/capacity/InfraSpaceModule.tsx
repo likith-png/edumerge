@@ -44,7 +44,7 @@ const InfraSpaceModule: React.FC = () => {
                 <Card className="border-none shadow-sm ring-1 ring-slate-100 bg-white">
                     <CardContent className="p-4">
                         <div className="text-sm font-medium text-slate-500 mb-1">Total Academic Capacity</div>
-                        <div className="text-2xl font-black text-slate-800">2,800 <span className="text-sm font-medium text-slate-500">seats</span></div>
+                        <div className="text-xl font-black text-slate-800">2,800 <span className="text-sm font-medium text-slate-500">seats</span></div>
                         <div className="w-full bg-slate-100 rounded-full h-1.5 mt-3">
                             <div className="bg-indigo-600 h-1.5 rounded-full" style={{ width: '85%' }}></div>
                         </div>
@@ -54,7 +54,7 @@ const InfraSpaceModule: React.FC = () => {
                 <Card className="border-none shadow-sm ring-1 ring-slate-100 bg-white">
                     <CardContent className="p-4">
                         <div className="text-sm font-medium text-slate-500 mb-1">Critical Zones</div>
-                        <div className="text-2xl font-black text-red-600 items-center flex gap-2">
+                        <div className="text-xl font-black text-red-600 items-center flex gap-2">
                             2 <AlertTriangle className="w-5 h-5" />
                         </div>
                         <div className="text-xs text-slate-500 mt-3">Blocks operating &gt; 95% capacity</div>
@@ -92,7 +92,7 @@ const InfraSpaceModule: React.FC = () => {
 
                 <div className="space-y-3">
                     {academicBlocks.filter(b => b.name.toLowerCase().includes(searchQuery.toLowerCase())).map((block) => (
-                        <div key={block.id} className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-xl hover:shadow-md transition-shadow group cursor-pointer">
+                        <div key={block.id} className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-xl hover:shadow-sm transition-shadow group cursor-pointer">
                             <div className="flex items-center gap-4">
                                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg
                                     ${block.status === 'High' ? 'bg-amber-100 text-amber-700' :
@@ -162,7 +162,7 @@ const InfraSpaceModule: React.FC = () => {
                             <div className="p-4 space-y-4">
                                 <div className="flex justify-between items-end">
                                     <div>
-                                        <div className="text-2xl font-black text-slate-800">{hostel.occupied}</div>
+                                        <div className="text-xl font-black text-slate-800">{hostel.occupied}</div>
                                         <div className="text-xs text-slate-500">Occupied of {hostel.capacity}</div>
                                     </div>
                                     <div className="text-right">
@@ -191,18 +191,18 @@ const InfraSpaceModule: React.FC = () => {
 
     const renderTransportFleet = () => (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-3 gap-4 mb-4">
                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
                     <div className="text-slate-500 text-sm mb-1">Active Fleet</div>
-                    <div className="text-2xl font-black text-slate-800">24 <span className="text-sm font-medium text-slate-500">Buses</span></div>
+                    <div className="text-xl font-black text-slate-800">24 <span className="text-sm font-medium text-slate-500">Buses</span></div>
                 </div>
                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
                     <div className="text-slate-500 text-sm mb-1">Total Routes</div>
-                    <div className="text-2xl font-black text-slate-800">12</div>
+                    <div className="text-xl font-black text-slate-800">12</div>
                 </div>
                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
                     <div className="text-slate-500 text-sm mb-1">Registrations</div>
-                    <div className="text-2xl font-black text-slate-800">840</div>
+                    <div className="text-xl font-black text-slate-800">840</div>
                 </div>
             </div>
 
@@ -263,7 +263,7 @@ const InfraSpaceModule: React.FC = () => {
 
             {/* Main Content Area */}
             <div className="flex-1 overflow-y-auto px-6 pb-6">
-                <div className="flex gap-6 h-full">
+                <div className="flex gapx-4 py-4 h-full">
                     {/* Left Column: Primary Content based on Tab */}
                     <div className="flex-1">
                         {activeTab === 'academic' && renderAcademicSpace()}
@@ -347,7 +347,7 @@ const HostelDetailsModal: React.FC<{ hostel: any; onClose: () => void }> = ({ ho
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-300 p-4">
             <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300">
                 {/* Header */}
-                <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-indigo-600 text-white">
+                <div className="px-4 py-4 border-b border-slate-100 flex justify-between items-center bg-indigo-600 text-white">
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
                             <BedDouble className="w-6 h-6 text-white" />

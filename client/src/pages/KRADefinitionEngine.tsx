@@ -115,7 +115,7 @@ const KRADefinitionEngine: React.FC = () => {
     return (
         <Layout title="KRA Definition Engine" description="Manage institution-level Key Result Areas" icon={Target} showBack>
             {/* Filters & Actions */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
                 <div className="flex flex-wrap gap-3">
                     <div className="flex items-center gap-2">
                         <Filter className="h-4 w-4 text-slate-500" />
@@ -233,7 +233,7 @@ const KRADefinitionEngine: React.FC = () => {
                             {categoryKRAs.map((kra) => {
                                 const linkedKPIs = getKPIsByKRA(kra.id);
                                 return (
-                                    <Card key={kra.id} className="border-slate-200 hover:shadow-md transition-all overflow-hidden group">
+                                    <Card key={kra.id} className="border-slate-200 hover:shadow-sm transition-all overflow-hidden group">
                                         <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                                         <CardHeader className="pb-3">
                                             <div className="flex items-start justify-between">

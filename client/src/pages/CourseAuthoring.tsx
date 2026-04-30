@@ -3,7 +3,7 @@ import {
     BookOpen, Settings, FileText, Upload,
     Plus, Trash2, GripVertical, ChevronDown, ChevronRight,
     CheckCircle, Video, File, Link as LinkIcon,
-    ChevronLeft, Mic, Layers, ArrowUp, ArrowDown, UserCheck, Award
+    ChevronLeft, Mic, Layers, UserCheck, Award
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -190,7 +190,7 @@ const CourseAuthoring: React.FC<CourseAuthoringProps> = ({ onBack }) => {
 
                         {selectedType === 'Video' && (
                             <div className="space-y-4 pt-4 border-t border-slate-100">
-                                <div className="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center hover:bg-slate-50 transition-colors cursor-pointer">
+                                <div className="border-2 border-dashed border-slate-200 rounded-xl px-4 py-4 text-center hover:bg-slate-50 transition-colors cursor-pointer">
                                     <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
                                     <p className="text-sm font-bold text-slate-700">Upload Video File</p>
                                     <p className="text-xs text-slate-400">MP4, WebM up to 2GB</p>
@@ -237,16 +237,6 @@ const CourseAuthoring: React.FC<CourseAuthoringProps> = ({ onBack }) => {
 
     const deleteSection = (sectionId: string) => {
         setSections(sections.filter(s => s.id !== sectionId));
-    };
-
-    const moveSection = (index: number, direction: 'up' | 'down') => {
-        if (direction === 'up' && index === 0) return;
-        if (direction === 'down' && index === sections.length - 1) return;
-
-        const newSections = [...sections];
-        const targetIndex = direction === 'up' ? index - 1 : index + 1;
-        [newSections[index], newSections[targetIndex]] = [newSections[targetIndex], newSections[index]];
-        setSections(newSections);
     };
 
     const deleteLesson = (sectionId: string, moduleId: string, lessonId: string) => {
@@ -314,103 +304,99 @@ const CourseAuthoring: React.FC<CourseAuthoringProps> = ({ onBack }) => {
             {/* Top Toolbar */}
             <div className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-30 shadow-sm">
                 <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="icon" onClick={onBack} className="rounded-full hover:bg-slate-100/80">
-                        <ChevronLeft className="w-5 h-5 text-slate-500" />
+                    <Button variant="ghost" size="icon" onClick={onBack} className="rounded-lg bg-white shadow-sm border border-slate-200 hover:bg-slate-50 transition-all w-10 h-10">
+                        <ChevronLeft className="w-5 h-5 text-slate-900" />
                     </Button>
                     <div>
                         <div className="flex items-center gap-2">
-                            <h1 className="text-xl font-black text-slate-900 tracking-tight">{metadata.title}</h1>
-                            <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-widest border-slate-200 text-slate-500">{workflowStatus}</Badge>
+                            <h1 className="text-xl font-bold text-slate-900">{metadata.title}</h1>
+                            <Badge className={`text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-100 ${
+                                workflowStatus === 'Draft' ? 'bg-slate-100 text-slate-500' :
+                                workflowStatus === 'Review' ? 'bg-amber-100 text-amber-700' :
+                                workflowStatus === 'Approved' ? 'bg-emerald-100 text-emerald-700' : 
+                                'bg-indigo-600 text-white'
+                            }`}>{workflowStatus}</Badge>
                         </div>
-                        <p className="text-xs font-bold text-slate-400">Last saved: Just now</p>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Authoring Hub</p>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-3">
-                    {/* Workflow Status Indicator */}
-                    <div className="flex items-center gap-2 bg-slate-100 rounded-lg p-1 px-3">
-                        <div className={`w-2 h-2 rounded-full ${workflowStatus === 'Draft' ? 'bg-slate-400' :
-                            workflowStatus === 'Review' ? 'bg-amber-500 animate-pulse' :
-                                workflowStatus === 'Approved' ? 'bg-emerald-500' : 'bg-indigo-600'
-                            }`} />
-                        <span className="text-xs font-black uppercase tracking-wider text-slate-600">{workflowStatus}</span>
-                    </div>
-
-                    <div className="h-8 w-px bg-slate-200 mx-2"></div>
-
                     {/* Workflow Actions */}
                     {workflowStatus === 'Draft' && (
                         <Button
                             onClick={() => setWorkflowStatus('Review')}
-                            className="gap-2 font-bold bg-amber-100 text-amber-900 hover:bg-amber-200 border border-amber-200"
+                            className="h-9 px-4 rounded-lg gap-2 font-bold text-[10px] uppercase tracking-widest bg-amber-500 hover:bg-amber-600 text-white shadow-sm"
                         >
-                            <Upload className="w-4 h-4" /> Submit for Review
+                            <Upload className="w-4 h-4" /> Submit Review
                         </Button>
                     )}
 
                     {workflowStatus === 'Review' && (
-                        <>
+                        <div className="flex items-center gap-2">
                             <Button
                                 variant="outline"
                                 onClick={() => setWorkflowStatus('Draft')}
-                                className="gap-2 font-bold text-red-600 hover:bg-red-50 border-red-100"
+                                className="h-9 px-4 rounded-lg font-bold text-[10px] uppercase tracking-widest text-red-600 border-red-100 hover:bg-red-50"
                             >
                                 Reject
                             </Button>
                             <Button
                                 onClick={() => setWorkflowStatus('Approved')}
-                                className="gap-2 font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-200"
+                                className="h-9 px-4 rounded-lg gap-2 font-bold text-[10px] uppercase tracking-widest bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
                             >
                                 <UserCheck className="w-4 h-4" /> Approve
                             </Button>
-                        </>
+                        </div>
                     )}
 
                     {workflowStatus === 'Approved' && (
                         <Button
                             onClick={() => setWorkflowStatus('Published')}
-                            className="gap-2 font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-200"
+                            className="h-9 px-4 rounded-lg gap-2 font-bold text-[10px] uppercase tracking-widest bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
                         >
-                            <Upload className="w-4 h-4" /> Publish Course
+                            <Upload className="w-4 h-4" /> Go Live
                         </Button>
                     )}
 
-                    <Button variant="ghost" size="icon" onClick={() => setActiveTab('settings')} className="text-slate-400 hover:text-slate-600">
-                        <Settings className="w-5 h-5" />
+                    <div className="h-6 w-px bg-slate-200 mx-1"></div>
+
+                    <Button variant="ghost" size="icon" onClick={() => setActiveTab('settings')} className="text-slate-400 hover:text-slate-900 transition-colors w-9 h-9 rounded-lg bg-slate-50 border border-slate-200">
+                        <Settings className="w-4 h-4" />
                     </Button>
                 </div>
             </div>
 
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar Nav */}
-                <div className="w-64 bg-white border-r border-slate-200 flex flex-col">
-                    <div className="p-4 space-y-1">
+                <div className="w-72 bg-white border-r border-slate-100 flex flex-col p-6 space-y-8">
+                    <div className="space-y-2">
                         {[
                             { id: 'curriculum', label: 'Curriculum', icon: BookOpen },
                             { id: 'assessments', label: 'Assessments', icon: CheckCircle },
-                            { id: 'settings', label: 'Settings', icon: Settings },
-                            { id: 'certification', label: 'Certification', icon: Award },
-                            { id: 'review', label: 'Review & Publish', icon: Upload },
+                            { id: 'settings', label: 'Basics', icon: Settings },
+                            { id: 'certification', label: 'Credentials', icon: Award },
+                            { id: 'review', label: 'Publishing', icon: Upload },
                         ].map((item) => (
                             <button
                                 key={item.id}
                                 onClick={() => setActiveTab(item.id)}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${activeTab === item.id
-                                    ? 'bg-indigo-50 text-indigo-700'
+                                className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === item.id
+                                    ? 'bg-indigo-600 text-white shadow-sm'
                                     : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
                                     }`}
                             >
-                                <item.icon className={`w-4 h-4 ${activeTab === item.id ? 'text-indigo-600' : 'text-slate-400'}`} />
+                                <item.icon className={`w-4 h-4 ${activeTab === item.id ? 'text-white' : 'text-slate-400'}`} />
                                 {item.label}
                             </button>
                         ))}
                     </div>
 
                     <div className="mt-auto p-4 border-t border-slate-100">
-                        <div className="bg-indigo-50 rounded-2xl p-4 text-center">
-                            <p className="text-xs font-bold text-indigo-900 mb-2">Need Help?</p>
-                            <Button size="sm" variant="outline" className="w-full bg-white border-indigo-200 text-indigo-600 text-xs font-bold h-8">
-                                Documentation
+                        <div className="bg-indigo-50 rounded-xl p-4 text-center">
+                            <p className="text-xs font-bold text-indigo-900 mb-2">Need Guidance?</p>
+                            <Button size="sm" variant="outline" className="w-full bg-white border-indigo-100 text-indigo-600 text-xs font-bold h-8 rounded-lg">
+                                Review Docs
                             </Button>
                         </div>
                     </div>
@@ -421,42 +407,48 @@ const CourseAuthoring: React.FC<CourseAuthoringProps> = ({ onBack }) => {
                     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in zoom-in-95 duration-300">
 
                         {activeTab === 'settings' && (
-                            <Card className="border-none shadow-xl rounded-[2rem]">
+                            <Card className="border border-slate-200 shadow-sm rounded-xl overflow-hidden bg-white">
                                 <CardHeader className="p-8 pb-4">
-                                    <CardTitle className="text-2xl font-black text-slate-900">Course Settings</CardTitle>
-                                    <CardDescription>Configure basic course information and compliance mapping.</CardDescription>
+                                    <div className="flex items-center gap-4 mb-2">
+                                        <div className="p-3 rounded-lg bg-indigo-50 text-indigo-600">
+                                            <Settings className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <CardTitle className="text-xl font-bold text-slate-900">System Basics</CardTitle>
+                                            <CardDescription className="text-xs font-medium text-slate-500">Foundational configuration for your course content</CardDescription>
+                                        </div>
+                                    </div>
                                 </CardHeader>
                                 <CardContent className="p-8 pt-4 space-y-6">
                                     <div className="space-y-2">
-                                        <Label>Course Title</Label>
+                                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-0.5">Course Title</Label>
                                         <Input
                                             value={metadata.title}
                                             onChange={(e) => setMetadata({ ...metadata, title: e.target.value })}
-                                            className="h-12 bg-slate-50 border-slate-200 font-bold text-lg"
-                                            placeholder="e.g. Advanced Classroom Management"
+                                            className="h-11 bg-white border-slate-200 focus:ring-1 focus:ring-indigo-500 font-semibold rounded-lg"
                                         />
                                     </div>
-                                    <div className="grid grid-cols-2 gap-6">
-                                        <div className="space-y-2">
-                                            <Label>Category</Label>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1.5">
+                                            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-0.5">Category</Label>
                                             <Select value={metadata.category} onValueChange={(v) => setMetadata({ ...metadata, category: v })}>
-                                                <SelectTrigger className="h-11 bg-slate-50 border-slate-200">
+                                                <SelectTrigger className="h-11 bg-white border-slate-200 rounded-lg font-semibold">
                                                     <SelectValue />
                                                 </SelectTrigger>
-                                                <SelectContent>
+                                                <SelectContent className="bg-white border-slate-200">
                                                     <SelectItem value="Pedagogy">Pedagogy</SelectItem>
                                                     <SelectItem value="Technology">Technology</SelectItem>
                                                     <SelectItem value="Leadership">Leadership</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        <div className="space-y-2">
-                                            <Label>Template</Label>
+                                        <div className="space-y-1.5">
+                                            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-0.5">Template</Label>
                                             <Select value={metadata.template} onValueChange={(v) => setMetadata({ ...metadata, template: v as any })}>
-                                                <SelectTrigger className="h-11 bg-slate-50 border-slate-200">
+                                                <SelectTrigger className="h-11 bg-white border-slate-200 rounded-lg font-semibold">
                                                     <SelectValue />
                                                 </SelectTrigger>
-                                                <SelectContent>
+                                                <SelectContent className="bg-white border-slate-200">
                                                     <SelectItem value="Standard">Standard Course</SelectItem>
                                                     <SelectItem value="CBSE">CBSE Compatible (50Hrs)</SelectItem>
                                                     <SelectItem value="FDP">Faculty Development Program</SelectItem>
@@ -464,19 +456,19 @@ const CourseAuthoring: React.FC<CourseAuthoringProps> = ({ onBack }) => {
                                             </Select>
                                         </div>
                                     </div>
-                                    <div className="space-y-4 pt-4 border-t border-slate-100">
-                                        <h3 className="font-bold text-slate-900 flex items-center gap-2">
-                                            <CheckCircle className="w-4 h-4 text-emerald-500" />
-                                            Compliance & Credit Mapping
+                                    <div className="space-y-4 pt-6 border-t border-slate-100">
+                                        <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                                            <CheckCircle className="w-4 h-4 text-emerald-600" />
+                                            Compliance Mapping
                                         </h3>
-                                        <div className="grid grid-cols-2 gap-6">
-                                            <div className="space-y-2">
-                                                <Label>Mapped Rule/Norm</Label>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-1.5">
+                                                <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-0.5">Norm/Rule</Label>
                                                 <Select value={metadata.complianceMap} onValueChange={(v) => setMetadata({ ...metadata, complianceMap: v })}>
-                                                    <SelectTrigger className="h-11 bg-slate-50 border-slate-200">
+                                                    <SelectTrigger className="h-11 bg-white border-slate-200 rounded-lg font-semibold">
                                                         <SelectValue placeholder="Select Rule..." />
                                                     </SelectTrigger>
-                                                    <SelectContent>
+                                                    <SelectContent className="bg-white border-slate-200">
                                                         <SelectItem value="N/A">Not Applicable</SelectItem>
                                                         <SelectItem value="CBSE-50h">CBSE 50 Hours Mandate</SelectItem>
                                                         <SelectItem value="NEP-2020">NEP 2020 Implementation</SelectItem>
@@ -484,22 +476,22 @@ const CourseAuthoring: React.FC<CourseAuthoringProps> = ({ onBack }) => {
                                                     </SelectContent>
                                                 </Select>
                                             </div>
-                                            <div className="space-y-2">
-                                                <Label>Credit Hours Awarded</Label>
+                                            <div className="space-y-1.5">
+                                                <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-0.5">Credit Hours</Label>
                                                 <Input
-                                                    className="h-11 bg-slate-50 border-slate-200"
+                                                    className="h-11 bg-white border-slate-200 rounded-lg font-semibold px-4"
                                                     placeholder="e.g. 5"
                                                     type="number"
                                                 />
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label>Description</Label>
+                                    <div className="space-y-1.5">
+                                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-0.5">Description</Label>
                                         <Textarea
                                             value={metadata.description}
                                             onChange={(e) => setMetadata({ ...metadata, description: e.target.value })}
-                                            className="min-h-[120px] bg-slate-50 border-slate-200 resize-none"
+                                            className="min-h-[120px] bg-white border-slate-200 rounded-lg resize-none p-4 font-medium"
                                             placeholder="Describe what learners will achieve..."
                                         />
                                     </div>
@@ -507,140 +499,76 @@ const CourseAuthoring: React.FC<CourseAuthoringProps> = ({ onBack }) => {
                             </Card>
                         )}
 
-                        {activeTab === 'certification' && (
-                            <Card className="border-none shadow-xl rounded-[2rem]">
-                                <CardHeader className="p-8 pb-4">
-                                    <CardTitle className="text-2xl font-black text-slate-900">Certification & Rewards</CardTitle>
-                                    <CardDescription>Configure automatic badge awards and issuance criteria.</CardDescription>
-                                </CardHeader>
-                                <CardContent className="p-8 pt-4 space-y-6">
-                                    <div className="p-4 bg-indigo-50 rounded-xl border border-indigo-100 mb-6">
-                                        <h3 className="font-bold text-indigo-900 flex items-center gap-2 mb-2">
-                                            <Award className="w-5 h-5" />
-                                            Auto-Issuance Rules
-                                        </h3>
-                                        <p className="text-xs text-indigo-700">Define the logic for awarding credentials upon course completion.</p>
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        <h3 className="font-bold text-slate-900 flex items-center gap-2">
-                                            <Award className="w-4 h-4 text-yellow-500" />
-                                            Available Badges
-                                        </h3>
-
-                                        <div className="flex items-center gap-4 p-4 bg-white rounded-xl border border-indigo-100 shadow-sm">
-                                            <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-500">
-                                                <Award className="w-6 h-6" />
-                                            </div>
-                                            <div className="flex-1">
-                                                <h4 className="font-bold text-slate-900">High Achiever (Silver)</h4>
-                                                <p className="text-xs text-slate-500">Awarded for &gt;90% score in assessments.</p>
-                                            </div>
-                                            <input type="checkbox" className="toggle toggle-indigo h-5 w-9 rounded-full bg-slate-200 checked:bg-indigo-600 cursor-pointer" />
-                                        </div>
-
-                                        <div className="flex items-center gap-4 p-4 bg-white rounded-xl border border-indigo-100 shadow-sm">
-                                            <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-600">
-                                                <Award className="w-6 h-6" />
-                                            </div>
-                                            <div className="flex-1">
-                                                <h4 className="font-bold text-slate-900">Master (Gold)</h4>
-                                                <p className="text-xs text-slate-500">Awarded for 100% score + Early Completion.</p>
-                                            </div>
-                                            <input type="checkbox" className="toggle toggle-indigo h-5 w-9 rounded-full bg-slate-200 checked:bg-indigo-600 cursor-pointer" />
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-4 pt-6 border-t border-slate-100">
-                                        <h3 className="font-bold text-slate-900">Certificate Template</h3>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="border-2 border-indigo-600 bg-indigo-50/50 rounded-xl p-4 text-center cursor-pointer">
-                                                <div className="h-24 bg-white border border-indigo-100 rounded-lg mb-2 mx-auto shadow-sm flex items-center justify-center text-[10px] text-slate-400">Preview</div>
-                                                <p className="text-xs font-bold text-indigo-700">Standard Certificate</p>
-                                            </div>
-                                            <div className="border border-slate-200 hover:border-indigo-300 rounded-xl p-4 text-center cursor-pointer transition-colors">
-                                                <div className="h-24 bg-slate-50 border border-slate-100 rounded-lg mb-2 mx-auto flex items-center justify-center text-[10px] text-slate-400">Preview</div>
-                                                <p className="text-xs font-bold text-slate-600">Clean Minimal</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        )}
-
                         {activeTab === 'curriculum' && (
                             <div className="space-y-6">
-                                <div className="flex items-center justify-between">
+                                <div className="flex items-center justify-between bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                                     <div>
-                                        <h2 className="text-2xl font-black text-slate-900">Curriculum Builder</h2>
-                                        <p className="text-slate-500 font-medium">Structure your course with sections, modules, and lessons.</p>
+                                        <h2 className="text-xl font-bold text-slate-900">Curriculum Hierarchy</h2>
+                                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Building functional knowledge modules</p>
                                     </div>
-                                    <Button onClick={addSection} className="bg-slate-900 text-white hover:bg-slate-800 font-bold gap-2">
-                                        <Plus className="w-4 h-4" /> Add Section
+                                    <Button onClick={addSection} className="h-10 px-6 rounded-lg bg-slate-900 text-white hover:bg-black font-bold text-xs gap-2">
+                                        <Plus className="w-4 h-4" /> New Section
                                     </Button>
                                 </div>
 
                                 <div className="space-y-4">
                                     {sections.map((section) => (
-                                        <div key={section.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden group/section">
+                                        <div key={section.id} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden group/section">
                                             <div
-                                                className="flex items-center gap-4 p-4 bg-slate-50/50 cursor-pointer hover:bg-slate-50 transition-colors"
+                                                className="flex items-center gap-4 p-5 bg-slate-50/50 cursor-pointer hover:bg-slate-50 transition-colors"
                                                 onClick={() => toggleSection(section.id)}
                                             >
-                                                <GripVertical className="w-5 h-5 text-slate-300 cursor-grab" />
-                                                <button className="p-1 rounded-md hover:bg-slate-200 text-slate-400">
-                                                    {expandedSections[section.id] ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                                                </button>
-                                                <div className="flex-1">
-                                                    <h3 className="font-bold text-slate-900 text-base">{section.title}</h3>
-                                                    <p className="text-xs text-slate-400 font-medium">{section.modules.length} Modules • {section.modules.reduce((acc, m) => acc + m.lessons.length, 0)} Lessons</p>
+                                                <GripVertical className="w-4 h-4 text-slate-300 cursor-grab" />
+                                                <div className="flex-1 flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-lg bg-white shadow-sm border border-slate-200 flex items-center justify-center">
+                                                        {expandedSections[section.id] ? <ChevronDown className="w-4 h-4 text-slate-900" /> : <ChevronRight className="w-4 h-4 text-slate-900" />}
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="font-bold text-slate-900 text-base">{section.title}</h3>
+                                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{section.modules.length} Modules • {section.modules.reduce((acc, m) => acc + m.lessons.length, 0)} Units</p>
+                                                    </div>
                                                 </div>
                                                 <div className="flex items-center gap-2 opacity-0 group-hover/section:opacity-100 transition-opacity">
-                                                    <div className="flex items-center mr-2 bg-slate-100 rounded-lg p-0.5">
-                                                        <Button size="icon" variant="ghost" onClick={(e) => { e.stopPropagation(); moveSection(sections.indexOf(section), 'up'); }} className="h-6 w-6 text-slate-400 hover:text-slate-600">
-                                                            <ArrowUp className="w-3.5 h-3.5" />
-                                                        </Button>
-                                                        <Button size="icon" variant="ghost" onClick={(e) => { e.stopPropagation(); moveSection(sections.indexOf(section), 'down'); }} className="h-6 w-6 text-slate-400 hover:text-slate-600">
-                                                            <ArrowDown className="w-3.5 h-3.5" />
-                                                        </Button>
-                                                    </div>
-                                                    <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); addModule(section.id); }} className="h-8 text-xs font-bold gap-1">
+                                                    <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); addModule(section.id); }} className="h-8 px-3 rounded-lg text-[10px] font-bold uppercase tracking-widest gap-1.5 border-slate-200 text-slate-700 hover:bg-white shadow-sm">
                                                         <Plus className="w-3 h-3" /> Module
                                                     </Button>
-                                                    <Button size="icon" variant="ghost" onClick={(e) => { e.stopPropagation(); deleteSection(section.id); }} className="h-8 w-8 text-slate-400 hover:text-red-500">
+                                                    <Button size="icon" variant="ghost" onClick={(e) => { e.stopPropagation(); deleteSection(section.id); }} className="h-8 w-8 text-slate-400 hover:text-red-600 transition-colors">
                                                         <Trash2 className="w-4 h-4" />
                                                     </Button>
                                                 </div>
                                             </div>
 
                                             {expandedSections[section.id] && (
-                                                <div className="p-4 space-y-4 bg-white">
+                                                <div className="p-6 space-y-4 bg-white">
                                                     {section.modules.length === 0 && (
-                                                        <div className="text-center py-6 border-2 border-dashed border-slate-100 rounded-xl">
-                                                            <p className="text-xs text-slate-400 font-bold mb-2">No modules yet</p>
-                                                            <Button size="sm" variant="ghost" onClick={() => addModule(section.id)} className="text-indigo-600 hover:bg-indigo-50 font-bold text-xs">
-                                                                Create First Module
+                                                        <div className="text-center py-8 border-2 border-dashed border-slate-100 rounded-xl bg-slate-50/50">
+                                                            <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center mx-auto mb-3 shadow-sm">
+                                                                <Layers className="w-5 h-5 text-slate-300" />
+                                                            </div>
+                                                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-3">No content modules established</p>
+                                                            <Button size="sm" variant="outline" onClick={() => addModule(section.id)} className="h-9 px-4 rounded-lg text-indigo-600 hover:bg-indigo-50 font-bold text-[10px] uppercase tracking-widest border-indigo-100">
+                                                                Add First Module
                                                             </Button>
                                                         </div>
                                                     )}
                                                     {section.modules.map((module) => (
-                                                        <div key={module.id} className="ml-8 border-l-2 border-slate-100 pl-6 relative">
-                                                            <div className="absolute -left-[7px] top-3 w-3 h-3 rounded-full bg-slate-200 border-2 border-white"></div>
-                                                            <div className="mb-3 flex items-center justify-between group/module">
+                                                        <div key={module.id} className="ml-8 border-l border-indigo-100 pl-6 relative pb-6 last:pb-2">
+                                                            <div className="absolute -left-[5px] top-0 w-2.5 h-2.5 rounded-full bg-white border-2 border-indigo-400 shadow-sm"></div>
+                                                            <div className="mb-4 flex items-center justify-between group/module">
                                                                 <div className="flex-1">
                                                                     <Input
                                                                         defaultValue={module.title}
-                                                                        className="h-9 border-transparent hover:border-slate-200 focus:border-indigo-500 bg-transparent font-bold text-slate-700 px-2 -ml-2 w-full max-w-md transition-all"
+                                                                        className="h-8 border-transparent hover:border-slate-200 focus:border-indigo-500 bg-transparent font-bold text-slate-700 px-0 w-full max-w-sm transition-all text-sm"
                                                                     />
                                                                 </div>
                                                                 <div className="flex items-center gap-2 opacity-0 group-hover/module:opacity-100 transition-opacity">
                                                                     <Dialog>
                                                                         <DialogTrigger asChild>
-                                                                            <Button size="sm" variant="ghost" className="h-7 text-xs font-bold text-indigo-600 hover:bg-indigo-50 gap-1">
-                                                                                <Plus className="w-3 h-3" /> Lesson
+                                                                            <Button size="sm" variant="ghost" className="h-8 px-3 rounded-lg text-[10px] font-bold uppercase tracking-widest text-indigo-600 hover:bg-indigo-50 gap-1.5 border border-indigo-100">
+                                                                                <Plus className="w-3.5 h-3.5" /> Unit
                                                                             </Button>
                                                                         </DialogTrigger>
-                                                                        <DialogContent className="sm:max-w-xl">
+                                                                        <DialogContent className="sm:max-w-lg rounded-xl p-6">
                                                                             <LessonContentDialog
                                                                                 onAdd={(type, title, duration) => addLesson(section.id, module.id, type, title, duration)}
                                                                             />
@@ -651,54 +579,58 @@ const CourseAuthoring: React.FC<CourseAuthoringProps> = ({ onBack }) => {
 
                                                             <div className="space-y-2">
                                                                 {module.lessons.map((lesson) => (
-                                                                    <div key={lesson.id} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg group/lesson hover:shadow-sm border border-transparent hover:border-slate-200 transition-all">
-                                                                        <GripVertical className="w-4 h-4 text-slate-300 cursor-grab" />
-                                                                        <div className="p-2 bg-white rounded-md shadow-sm">
+                                                                    <div key={lesson.id} className="flex items-center gap-3 p-3 bg-white rounded-lg group/lesson hover:shadow-sm border border-slate-100 transition-all">
+                                                                        <GripVertical className="w-3.5 h-3.5 text-slate-200 cursor-grab" />
+                                                                        <div className="p-2.5 bg-slate-50 rounded-lg group-hover:bg-indigo-50 transition-colors">
                                                                             {getIconForType(lesson.type)}
                                                                         </div>
-                                                                        <span className="text-sm font-medium text-slate-700 flex-1">{lesson.title}</span>
-                                                                        <Badge variant="secondary" className="text-[10px] font-bold bg-slate-200 text-slate-500">{lesson.duration}</Badge>
-                                                                        <div className="opacity-0 group-hover/lesson:opacity-100 flex gap-1">
+                                                                        <div className="flex-1">
+                                                                            <span className="text-sm font-bold text-slate-900 block">{lesson.title}</span>
+                                                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{lesson.type} • {lesson.duration}</span>
+                                                                        </div>
+                                                                        <div className="opacity-0 group-hover/lesson:opacity-100 flex gap-1 transition-opacity">
                                                                             <Dialog>
                                                                                 <DialogTrigger asChild>
-                                                                                    <Button size="icon" variant="ghost" onClick={() => setEditingLesson({ sectionId: section.id, moduleId: module.id, lesson })} className="h-7 w-7 text-slate-400 hover:text-indigo-600">
-                                                                                        <Settings className="w-3.5 h-3.5" />
+                                                                                    <Button size="icon" variant="ghost" onClick={() => setEditingLesson({ sectionId: section.id, moduleId: module.id, lesson })} className="h-8 w-8 text-slate-400 hover:text-indigo-600 rounded-lg">
+                                                                                        <Settings className="w-4 h-4" />
                                                                                     </Button>
                                                                                 </DialogTrigger>
-                                                                                <DialogContent>
+                                                                                <DialogContent className="rounded-xl p-8">
                                                                                     <DialogHeader>
-                                                                                        <DialogTitle>Edit Lesson Details</DialogTitle>
+                                                                                        <DialogTitle className="text-xl font-bold">Unit Configuration</DialogTitle>
                                                                                     </DialogHeader>
-                                                                                    <div className="space-y-4 py-4">
-                                                                                        <div className="space-y-2">
-                                                                                            <Label>Lesson Title</Label>
+                                                                                    <div className="space-y-5 py-5">
+                                                                                        <div className="space-y-1.5">
+                                                                                            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Unit Display Title</Label>
                                                                                             <Input
+                                                                                                className="h-11 rounded-lg bg-slate-50 border-slate-200 font-bold"
                                                                                                 value={editingLesson?.lesson?.title || ''}
                                                                                                 onChange={(e) => updateLesson({ title: e.target.value })}
                                                                                             />
                                                                                         </div>
-                                                                                        <div className="space-y-2">
-                                                                                            <Label>Duration</Label>
+                                                                                        <div className="space-y-1.5">
+                                                                                            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Duration</Label>
                                                                                             <Input
+                                                                                                className="h-11 rounded-lg bg-slate-50 border-slate-200 font-bold"
                                                                                                 value={editingLesson?.lesson?.duration || ''}
                                                                                                 onChange={(e) => updateLesson({ duration: e.target.value })}
                                                                                             />
                                                                                         </div>
-                                                                                        <div className="flex items-center gap-2">
+                                                                                        <div className="flex items-center gap-3 p-4 bg-slate-50/50 rounded-lg border border-slate-200">
                                                                                             <input
                                                                                                 type="checkbox"
                                                                                                 id="mandatory"
                                                                                                 checked={editingLesson?.lesson?.isMandatory}
                                                                                                 onChange={(e) => updateLesson({ isMandatory: e.target.checked })}
-                                                                                                className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                                                                                className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                                                                                             />
-                                                                                            <Label htmlFor="mandatory">Mandatory Lesson</Label>
+                                                                                            <Label htmlFor="mandatory" className="text-sm font-bold text-slate-700 cursor-pointer">Mark as Mandatory</Label>
                                                                                         </div>
                                                                                     </div>
                                                                                 </DialogContent>
                                                                             </Dialog>
-                                                                            <Button size="icon" variant="ghost" onClick={() => deleteLesson(section.id, module.id, lesson.id)} className="h-7 w-7 text-slate-400 hover:text-red-500">
-                                                                                <Trash2 className="w-3.5 h-3.5" />
+                                                                            <Button size="icon" variant="ghost" onClick={() => deleteLesson(section.id, module.id, lesson.id)} className="h-8 w-8 text-slate-300 hover:text-red-500 rounded-lg">
+                                                                                <Trash2 className="w-4 h-4" />
                                                                             </Button>
                                                                         </div>
                                                                     </div>

@@ -34,15 +34,15 @@ const ManagerTeamDashboard: React.FC = () => {
             description={`Managing ${user.department || 'Academic'} Department Team`}
             icon={Users}
         >
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gapx-4 py-4">
                 {/* Stats Overview */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <Card className="bg-blue-600 text-white border-none shadow-blue-200 shadow-lg group hover:scale-[1.02] transition-transform cursor-pointer">
+                    <Card className="bg-blue-600 text-white border-none shadow-blue-200 shadow-sm group hover:scale-[1.02] transition-transform cursor-pointer">
                         <CardContent className="pt-6">
                             <div className="flex justify-between items-start">
                                 <div>
                                     <p className="text-blue-100 text-xs font-bold uppercase tracking-wider">Total Team</p>
-                                    <h3 className="text-3xl font-bold mt-1">12</h3>
+                                    <h3 className="text-xl font-bold mt-1">12</h3>
                                 </div>
                                 <div className="p-2 bg-white/20 rounded-lg">
                                     <Users className="h-5 w-5" />
@@ -55,12 +55,12 @@ const ManagerTeamDashboard: React.FC = () => {
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-white border-slate-200 group hover:shadow-md transition-shadow cursor-pointer">
+                    <Card className="bg-white border-slate-200 group hover:shadow-sm transition-shadow cursor-pointer">
                         <CardContent className="pt-6">
                             <div className="flex justify-between items-start">
                                 <div>
                                     <p className="text-slate-500 text-xs font-bold uppercase tracking-wider">Avg. Performance</p>
-                                    <h3 className="text-3xl font-bold mt-1 text-slate-900">82%</h3>
+                                    <h3 className="text-xl font-bold mt-1 text-slate-900">82%</h3>
                                 </div>
                                 <div className="p-2 bg-green-50 rounded-lg">
                                     <TrendingUp className="h-5 w-5 text-green-600" />
@@ -73,12 +73,12 @@ const ManagerTeamDashboard: React.FC = () => {
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-white border-slate-200 group hover:shadow-md transition-shadow cursor-pointer">
+                    <Card className="bg-white border-slate-200 group hover:shadow-sm transition-shadow cursor-pointer">
                         <CardContent className="pt-6">
                             <div className="flex justify-between items-start">
                                 <div>
                                     <p className="text-slate-500 text-xs font-bold uppercase tracking-wider">Pending Tasks</p>
-                                    <h3 className="text-3xl font-bold mt-1 text-slate-900">08</h3>
+                                    <h3 className="text-xl font-bold mt-1 text-slate-900">08</h3>
                                 </div>
                                 <div className="p-2 bg-amber-50 rounded-lg">
                                     <Clock className="h-5 w-5 text-amber-600" />
@@ -91,12 +91,12 @@ const ManagerTeamDashboard: React.FC = () => {
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-white border-slate-200 group hover:shadow-md transition-shadow cursor-pointer">
+                    <Card className="bg-white border-slate-200 group hover:shadow-sm transition-shadow cursor-pointer">
                         <CardContent className="pt-6">
                             <div className="flex justify-between items-start">
                                 <div>
                                     <p className="text-slate-500 text-xs font-bold uppercase tracking-wider">Retention Health</p>
-                                    <h3 className="text-3xl font-bold mt-1 text-slate-900">High</h3>
+                                    <h3 className="text-xl font-bold mt-1 text-slate-900">High</h3>
                                 </div>
                                 <div className="p-2 bg-indigo-50 rounded-lg">
                                     <Star className="h-5 w-5 text-indigo-600" />
@@ -110,7 +110,7 @@ const ManagerTeamDashboard: React.FC = () => {
                     </Card>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gapx-4 py-4">
                     {/* Team List Widget */}
                     <Card className="lg:col-span-2 border-slate-200">
                         <CardHeader className="flex flex-row items-center justify-between">

@@ -64,7 +64,7 @@ const KRAKPIApprovalDashboard: React.FC = () => {
             icon={Target}
             showBack
         >
-            <div className="flex gap-4 mb-6">
+            <div className="flex gap-4 mb-4">
                 <Button
                     variant={activeTab === 'kra' ? 'default' : 'outline'}
                     onClick={() => setActiveTab('kra')}
@@ -81,7 +81,7 @@ const KRAKPIApprovalDashboard: React.FC = () => {
                 </Button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gapx-4 py-4">
                 {/* List View */}
                 <div className="space-y-4">
                     {activeTab === 'kra' ? (
@@ -94,7 +94,7 @@ const KRAKPIApprovalDashboard: React.FC = () => {
                             pendingKRAs.map(kra => (
                                 <Card
                                     key={kra.id}
-                                    className={`cursor-pointer border-slate-200 hover:shadow-md transition-all ${selectedKRA?.id === kra.id ? 'ring-2 ring-blue-500' : ''}`}
+                                    className={`cursor-pointer border-slate-200 hover:shadow-sm transition-all ${selectedKRA?.id === kra.id ? 'ring-2 ring-blue-500' : ''}`}
                                     onClick={() => setSelectedKRA(kra)}
                                 >
                                     <CardContent className="p-4">
@@ -121,7 +121,7 @@ const KRAKPIApprovalDashboard: React.FC = () => {
                             pendingKPIs.map(kpi => (
                                 <Card
                                     key={kpi.id}
-                                    className={`cursor-pointer border-slate-200 hover:shadow-md transition-all ${selectedKPI?.id === kpi.id ? 'ring-2 ring-indigo-500' : ''}`}
+                                    className={`cursor-pointer border-slate-200 hover:shadow-sm transition-all ${selectedKPI?.id === kpi.id ? 'ring-2 ring-indigo-500' : ''}`}
                                     onClick={() => setSelectedKPI(kpi)}
                                 >
                                     <CardContent className="p-4">

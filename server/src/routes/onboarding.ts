@@ -37,51 +37,56 @@ router.post('/initiate', (req, res) => {
 
 // 2. Get Dashboard Stats & List
 router.get('/dashboard', (req, res) => {
-    const sql = `
-        SELECT 
-            e.id, e.name, e.department, e.designation, e.joining_date, e.status, e.email,
-            ow.current_stage, ow.stage_status, ow.updated_at
-        FROM employees e
-        INNER JOIN onboarding_workflow ow ON e.id = ow.employee_id
-    `;
-
-    db.all(sql, [], (err, rows: any[]) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
+    // First fetch config for SLAs
+    db.get("SELECT value FROM configurations WHERE key = 'onboarding_stages'", (confErr, confRow: any) => {
+        let stageSlas: any[] = [];
+        if (!confErr && confRow) {
+            try { stageSlas = JSON.parse(confRow.value); } catch(e) {}
         }
 
-        // Helper to calc SLA breach (if stage not updated in 5 days)
-        const checkSlaBreach = (updatedAt: string) => {
-            if (!updatedAt) return false;
-            const lastUpdate = new Date(updatedAt).getTime();
-            const now = new Date().getTime();
-            const diffDays = (now - lastUpdate) / (1000 * 3600 * 24);
-            return diffDays > 5;
-        };
+        const sql = `
+            SELECT 
+                e.id, e.name, e.department, e.designation, e.joining_date, e.status, e.email,
+                ow.current_stage, ow.stage_status, ow.updated_at
+            FROM employees e
+            INNER JOIN onboarding_workflow ow ON e.id = ow.employee_id
+            WHERE e.status = 'Onboarding'
+        `;
 
-        const activeRows = rows.filter(r => r.status === 'Onboarding');
+        db.all(sql, [], (err, rows: any[]) => {
+            if (err) {
+                res.status(500).json({ error: err.message });
+                return;
+            }
 
-        const stats = {
-            total: activeRows.length,
-            stage1: activeRows.filter(r => r.current_stage === 1).length,
-            stage2: activeRows.filter(r => r.current_stage === 2).length,
-            stage3: activeRows.filter(r => r.current_stage === 3).length,
-            stage4: activeRows.filter(r => r.current_stage === 4).length,
-            stage5: activeRows.filter(r => r.current_stage === 5).length,
+            const checkSlaBreach = (stageId: number, updatedAt: string) => {
+                if (!updatedAt) return false;
+                const stageConf = stageSlas.find(s => s.id === stageId);
+                const slaDays = stageConf ? stageConf.sla : 5; // Default to 5 if not found
+                
+                const lastUpdate = new Date(updatedAt).getTime();
+                const now = new Date().getTime();
+                const diffDays = (now - lastUpdate) / (1000 * 3600 * 24);
+                return diffDays > slaDays;
+            };
 
-            // New Metrics
-            slaBreaches: activeRows.filter(r => checkSlaBreach(r.updated_at)).length,
-            probationDue: activeRows.filter(r => r.current_stage === 5).length, // Simplified: Everyone in Stage 5 is "Due"
+            const stats = {
+                total: rows.length,
+                stage1: rows.filter(r => r.current_stage === 1).length,
+                stage2: rows.filter(r => r.current_stage === 2).length,
+                stage3: rows.filter(r => r.current_stage === 3).length,
+                stage4: rows.filter(r => r.current_stage === 4).length,
+                stage5: rows.filter(r => r.current_stage === 5).length,
+                slaBreaches: rows.filter(r => checkSlaBreach(r.current_stage, r.updated_at)).length,
+                probationDue: rows.filter(r => r.current_stage === 5).length,
+                documentPendingPercent: 34,
+                assetPendingPercent: 12,
+                trainingCompletionPercent: 78,
+                earlyDropoff: 2
+            };
 
-            // Tracking percentages
-            documentPendingPercent: 34,
-            assetPendingPercent: 12,
-            trainingCompletionPercent: 78,
-            earlyDropoff: 2
-        };
-
-        res.json({ stats, candidates: rows });
+            res.json({ stats, candidates: rows });
+        });
     });
 });
 

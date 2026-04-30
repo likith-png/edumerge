@@ -3,13 +3,13 @@ import { BadgeCheck, XCircle } from 'lucide-react';
 
 const Stage2Verification = ({ onComplete }: any) => {
     return (
-        <div className="p-6">
+        <div className="px-4 py-4">
             <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                 <BadgeCheck className="w-5 h-5 text-blue-600" /> HR Verification
             </h2>
-            <p className="text-slate-500 mb-6 text-sm">Review submitted documents and approve to proceed to asset assignment.</p>
+            <p className="text-slate-500 mb-4 text-sm">Review submitted documents and approve to proceed to asset assignment.</p>
 
-            <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 mb-6">
+            <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 mb-4">
                 <h4 className="font-semibold text-sm mb-2">Documents for Review</h4>
                 <ul className="space-y-2 text-sm text-slate-700">
                     <li className="flex justify-between items-center py-2 border-b border-slate-100">

@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from 'react';
-
-const Card: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => (
-    <div className={`glass-card p-6 relative overflow-hidden group hover:shadow-xl transition-all duration-300 ${className || ''}`}>
-        <div className="absolute -top-10 -right-10 w-32 h-32 bg-indigo-200/20 rounded-full blur-2xl pointer-events-none group-hover:bg-indigo-300/30 transition-colors"></div>
-        <div className="relative z-10">{children}</div>
-    </div>
-);
-const CardHeader: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => <div className={`mb-4 ${className || ''}`}>{children}</div>;
-const CardTitle: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => <h3 className={`text-base font-black text-indigo-950 drop-shadow-sm uppercase tracking-wider flex items-center gap-2 ${className || ''}`}>{children}</h3>;
-const CardContent: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => <div className={className}>{children}</div>;
 import { Button } from '../ui/button';
 import {
-    Banknote, CheckCircle, Clock, DollarSign,
-    TrendingUp, TrendingDown, Edit, Send
+    CheckCircle, Calendar, Settings, Star, Rocket,
+    ArrowRight, ArrowLeft, Target, TrendingUp, Users, Award,
+    CheckCircle2, AlertCircle, Info, Activity, History,
+    Eye, Trash2, XCircle, ShieldCheck, Zap,
+    ChevronRight, LayoutGrid, Clock, Sparkles, Plus,
+    Banknote, DollarSign, TrendingDown, Edit, Send,
+    Wallet, FileText, Search, Filter, Download, Printer,
+    AlertTriangle, Building2, UserCircle2, Mail, Phone,
+    ChevronDown
 } from 'lucide-react';
 import {
     calculateSettlement,
@@ -22,6 +19,11 @@ import {
     processPayment,
     sendSettlementNotification
 } from '../../services/settlementService';
+import { Card, CardHeader, CardTitle, CardContent } from '../ui/card';
+import { Badge } from '../ui/badge';
+import { Separator } from '../ui/separator';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
 
 interface SettlementDashboardProps {
     exitId: number;
@@ -56,7 +58,6 @@ const SettlementDashboard: React.FC<SettlementDashboardProps> = ({ exitId, viewM
     const handleCalculate = async () => {
         setLoading(true);
         try {
-            // Prompt for employee salary and leaves
             const salary = prompt('Enter Monthly Salary (₹):');
             const leaves = prompt('Enter Pending Leaves (days):');
 
@@ -130,41 +131,38 @@ const SettlementDashboard: React.FC<SettlementDashboardProps> = ({ exitId, viewM
         }
     };
 
-    const getStatusBadge = (status: string) => {
-        const styles = {
-            'Pending': 'bg-gray-100 text-gray-700',
-            'Calculated': 'bg-blue-100 text-blue-700',
-            'Approved': 'bg-green-100 text-green-700',
-            'Paid': 'bg-emerald-100 text-emerald-700'
-        };
-        return styles[status as keyof typeof styles] || styles.Pending;
-    };
-
-    const timeline = settlement ? [
-        { label: 'Calculated', status: settlement.status !== 'Pending' ? 'completed' : 'pending', date: settlement.calculated_date },
-        { label: 'Approved', status: settlement.status === 'Approved' || settlement.status === 'Paid' ? 'completed' : settlement.status === 'Calculated' ? 'current' : 'pending', date: settlement.approved_date },
-        { label: 'Payment Processed', status: settlement.status === 'Paid' ? 'completed' : settlement.status === 'Approved' ? 'current' : 'pending', date: settlement.payment_date }
-    ] : [];
-
     if (loading && !settlement) {
         return (
-            <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            <div className="flex flex-col items-center justify-center py-48 animate-in fade-in duration-500">
+                <div className="p-4 bg-slate-900 rounded-xl shadow-lg ring-4 ring-slate-100 mb-6">
+                    <Wallet className="w-10 h-10 text-white animate-pulse" />
+                </div>
+                <div className="text-center space-y-1">
+                    <p className="text-xs font-bold text-slate-900 uppercase tracking-widest">Processing Settlement</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Syncing fiscal registry...</p>
+                </div>
             </div>
         );
     }
 
     if (!settlement) {
         return (
-            <Card className="border-dashed">
-                <CardContent className="text-center py-12">
-                    <Banknote className="w-16 h-16 mx-auto text-slate-300 mb-4" />
-                    <h3 className="text-lg font-semibold text-slate-700 mb-2">No Settlement Calculated Yet</h3>
-                    <p className="text-sm text-slate-500 mb-6">Calculate the full & final settlement for this exit</p>
+            <Card className="bg-white border-2 border-dashed border-slate-200 rounded-2xl shadow-sm">
+                <CardContent className="text-center py-32 space-y-10">
+                    <div className="w-20 h-20 bg-slate-50 text-slate-300 rounded-xl flex items-center justify-center mx-auto shadow-inner border border-slate-100">
+                        <Banknote className="h-10 w-10" />
+                    </div>
+                    <div className="space-y-2">
+                        <h3 className="text-2xl font-bold text-slate-900 uppercase tracking-tight">No Settlement Data</h3>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest max-w-sm mx-auto leading-relaxed">No calculations have been performed for this exit.</p>
+                    </div>
                     {viewMode === 'Admin' && (
-                        <Button onClick={handleCalculate} className="bg-indigo-600 hover:bg-indigo-700">
-                            <DollarSign className="w-4 h-4 mr-2" />
-                            Calculate Settlement
+                        <Button 
+                            onClick={handleCalculate} 
+                            className="h-12 px-10 bg-slate-900 hover:bg-black text-white rounded-lg font-bold text-[11px] uppercase tracking-wider shadow-md transition-all active:scale-[0.98]"
+                        >
+                            <DollarSign className="w-4 h-4 mr-2.5" />
+                            Run Calculation
                         </Button>
                     )}
                 </CardContent>
@@ -178,41 +176,56 @@ const SettlementDashboard: React.FC<SettlementDashboardProps> = ({ exitId, viewM
     const canProcess = isHR && settlement.status === 'Approved';
 
     return (
-        <div className="space-y-6">
-            {/* Header with Status */}
-            <div className="flex justify-between items-start">
-                <div>
-                    <h2 className="text-2xl font-bold text-slate-900">Full & Final Settlement</h2>
-                    <p className="text-sm text-slate-500 mt-1">{settlement.employee_name} • {settlement.department}</p>
+        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 p-2">
+            {/* Header / Command Center */}
+            <div className="flex flex-col lg:flex-row justify-between items-center gap-8 bg-white border border-slate-200 p-8 rounded-xl shadow-sm">
+                <div className="flex items-center gap-6">
+                    <div className="p-3.5 bg-slate-900 rounded-lg shadow-md">
+                        <Wallet className="w-7 h-7 text-white" />
+                    </div>
+                    <div className="space-y-1">
+                        <h2 className="text-xl font-bold text-slate-900 tracking-tight uppercase">Full & Final Settlement</h2>
+                        <div className="flex items-center gap-3">
+                            <Badge className="bg-slate-100 text-slate-600 border-none px-3 py-0.5 rounded text-[9px] uppercase tracking-widest">{settlement.employee_name}</Badge>
+                            <div className="w-1 h-1 bg-slate-300 rounded-full" />
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{settlement.department}</p>
+                        </div>
+                    </div>
                 </div>
-                <div className="flex items-center gap-3">
-                    <span className={`px-4 py-2 rounded-full text-xs font-semibold ${getStatusBadge(settlement.status)}`}>
+
+                <div className="flex items-center gap-4 bg-slate-50 p-3 rounded-xl border border-slate-100 shadow-sm">
+                    <Badge className={`px-6 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-widest border-none shadow-sm
+                        ${settlement.status === 'Pending' ? 'bg-orange-500 text-white' :
+                          settlement.status === 'Calculated' ? 'bg-slate-900 text-white' :
+                          settlement.status === 'Approved' ? 'bg-emerald-600 text-white' : 
+                          'bg-slate-950 text-white'}`}>
                         {settlement.status}
-                    </span>
+                    </Badge>
+                    
                     {isHR && (
-                        <div className="flex gap-2">
+                        <div className="flex gap-3 pr-1">
                             {settlement.status === 'Calculated' && (
-                                <Button size="sm" variant="outline" onClick={() => setIsEditing(!isEditing)}>
-                                    <Edit className="w-4 h-4 mr-1" />
-                                    {isEditing ? 'Cancel Edit' : 'Edit'}
+                                <Button size="sm" variant="outline" onClick={() => setIsEditing(!isEditing)} className="h-10 px-5 border-slate-200 text-slate-600 rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-white shadow-sm transition-all">
+                                    <Activity className="w-3.5 h-3.5 opacity-40" />
+                                    {isEditing ? 'Cancel Edit' : 'Edit Data'}
                                 </Button>
                             )}
                             {canApprove && !isEditing && (
-                                <Button size="sm" onClick={handleApprove} className="bg-green-600 hover:bg-green-700">
-                                    <CheckCircle className="w-4 h-4 mr-1" />
+                                <Button size="sm" onClick={handleApprove} className="h-10 px-6 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-[10px] uppercase tracking-widest shadow-sm active:scale-95">
+                                    <CheckCircle className="w-3.5 h-3.5 mr-2" />
                                     Approve
                                 </Button>
                             )}
                             {canProcess && (
-                                <Button size="sm" onClick={handleProcessPayment} className="bg-emerald-600 hover:bg-emerald-700">
-                                    <Banknote className="w-4 h-4 mr-1" />
-                                    Mark Paid
+                                <Button size="sm" onClick={handleProcessPayment} className="h-10 px-6 bg-slate-900 hover:bg-black text-white rounded-lg font-bold text-[10px] uppercase tracking-widest shadow-sm active:scale-95">
+                                    <Banknote className="w-3.5 h-3.5 mr-2" />
+                                    Pay Now
                                 </Button>
                             )}
                             {(settlement.status === 'Approved' || settlement.status === 'Paid') && (
-                                <Button size="sm" variant="outline" onClick={handleNotify}>
-                                    <Send className="w-4 h-4 mr-1" />
-                                    Send to Employee
+                                <Button size="sm" variant="outline" onClick={handleNotify} className="h-10 px-5 border-slate-200 text-slate-600 rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-white shadow-sm transition-all">
+                                    <Send className="w-3.5 h-3.5 mr-2" />
+                                    Notify
                                 </Button>
                             )}
                         </div>
@@ -220,111 +233,131 @@ const SettlementDashboard: React.FC<SettlementDashboardProps> = ({ exitId, viewM
                 </div>
             </div>
 
-            {/* Net Settlement Amount - Prominent Display */}
-            <Card className="border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50">
-                <CardContent className="p-8 text-center">
-                    <p className="text-sm font-medium text-indigo-600 mb-2">Net Settlement Amount</p>
-                    <h1 className="text-5xl font-bold text-slate-900 mb-2">
-                        ₹{settlement.net_settlement?.toLocaleString('en-IN') || '0'}
-                    </h1>
-                    {settlement.payment_date && (
-                        <p className="text-sm text-slate-600">Paid on {new Date(settlement.payment_date).toLocaleDateString()}</p>
-                    )}
+            {/* Net Settlement Payload */}
+            <Card className="bg-white border border-slate-200 rounded-xl shadow-md overflow-hidden bg-gradient-to-br from-slate-50 to-white">
+                <CardContent className="p-12 text-center space-y-6 relative z-10">
+                    <div className="w-16 h-16 bg-white border border-slate-100 rounded-2xl shadow-sm flex items-center justify-center mx-auto ring-4 ring-slate-50 transition-transform duration-500">
+                        <DollarSign className="w-8 h-8 text-emerald-600" />
+                    </div>
+                    <div className="space-y-2">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Net Settlement Amount</p>
+                        <h1 className="text-5xl font-bold text-slate-900 tracking-tight leading-none">
+                            ₹{settlement.net_settlement?.toLocaleString('en-IN') || '0'}
+                        </h1>
+                        <div className="pt-2">
+                            {settlement.payment_date ? (
+                                <Badge className="bg-emerald-100 text-emerald-700 border-none px-4 py-1.5 rounded text-[9px] font-bold tracking-wider uppercase">
+                                    Payment Confirmed: {new Date(settlement.payment_date).toLocaleDateString()}
+                                </Badge>
+                            ) : (
+                                <Badge className="bg-slate-100 text-slate-400 border-none px-4 py-1.5 rounded text-[9px] font-bold tracking-wider uppercase">
+                                    Awaiting Payment
+                                </Badge>
+                            )}
+                        </div>
+                    </div>
                 </CardContent>
             </Card>
 
-            {/* Breakdown Cards */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Earnings Card */}
-                <Card>
-                    <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 border-b">
-                        <CardTitle className="flex items-center gap-2 text-green-800">
-                            <TrendingUp className="w-5 h-5" />
-                            Earnings
+            {/* Earnings & Deductions - Dual Matrix */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                {/* Earnings Matrix */}
+                <Card className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden group/earning">
+                    <CardHeader className="p-8 bg-slate-900 border-b border-slate-800">
+                        <CardTitle className="flex items-center gap-4 text-white text-lg font-bold uppercase tracking-tight">
+                            <div className="p-2 bg-white/10 rounded-lg"><TrendingUp className="w-5 h-5 text-emerald-400" /></div>
+                            Earnings Components
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-6">
-                        <div className="space-y-4">
-                            {[
-                                { label: 'Salary Due', value: settlement.salary_due, detail: 'Pro-rata salary' },
-                                { label: 'Leave Encashment', value: settlement.leave_encashment, detail: `${settlement.pending_leaves || 0} days` },
-                                { label: 'Bonus', value: settlement.bonus, detail: settlement.bonus_remarks },
-                                { label: 'Gratuity', value: settlement.gratuity, detail: settlement.gratuity_eligible ? `${settlement.years_of_service} years` : 'Not eligible' },
-                                { label: 'PF Amount', value: settlement.pf_amount, detail: 'Provident Fund' },
-                                { label: 'ESI', value: settlement.esi_amount, detail: 'Employee State Insurance' },
-                                { label: 'Other Dues', value: settlement.other_dues, detail: settlement.other_dues_remarks }
-                            ].map((item, idx) => (
-                                <div key={idx} className="flex justify-between items-start pb-3 border-b border-slate-100 last:border-0">
-                                    <div>
-                                        <p className="text-sm font-medium text-slate-700">{item.label}</p>
-                                        {item.detail && <p className="text-xs text-slate-500 mt-0.5">{item.detail}</p>}
+                    <CardContent className="p-8 space-y-6">
+                        {[
+                            { label: 'Salary Due', value: settlement.salary_due, detail: 'Pro-rata monthly salary', icon: Activity },
+                            { label: 'Leave Encashment', value: settlement.leave_encashment, detail: `${settlement.pending_leaves || 0} Days`, icon: Calendar },
+                            { label: 'Bonus', value: settlement.bonus, detail: settlement.bonus_remarks || 'Performance / Appraisal', icon: StarIcon },
+                            { label: 'Gratuity', value: settlement.gratuity, detail: settlement.gratuity_eligible ? `${settlement.years_of_service} Years Service` : 'Not Eligible', icon: ShieldCheck },
+                            { label: 'PF Amount', value: settlement.pf_amount, detail: 'Provident Fund', icon: Database },
+                            { label: 'ESI Amount', value: settlement.esi_amount, detail: 'Insurance Contribution', icon: HeartPulse },
+                            { label: 'Other Dues', value: settlement.other_dues, detail: settlement.other_dues_remarks || 'Manual Adjustment', icon: Plus }
+                        ].map((item, idx) => (
+                            <div key={idx} className="flex justify-between items-center p-3.5 hover:bg-slate-50 rounded-xl transition-all border-b border-slate-50 last:border-0">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-2.5 bg-slate-50 border border-slate-100 rounded-lg group-hover/item:scale-110 transition-all">
+                                        <item.icon className="w-3.5 h-3.5 text-slate-600" />
                                     </div>
-                                    {isEditing && canEdit ? (
-                                        <input
-                                            type="number"
-                                            className="w-24 px-2 py-1 border rounded text-right text-sm"
-                                            value={editData[item.label.toLowerCase().replace(/ /g, '_')] || 0}
-                                            onChange={(e) => setEditData({ ...editData, [item.label.toLowerCase().replace(/ /g, '_')]: parseFloat(e.target.value) || 0 })}
-                                        />
-                                    ) : (
-                                        <span className="text-sm font-semibold text-green-700">₹{item.value?.toLocaleString('en-IN') || '0'}</span>
-                                    )}
+                                    <div className="space-y-0.5">
+                                        <p className="text-[11px] font-bold text-slate-900 uppercase tracking-tight">{item.label}</p>
+                                        {item.detail && <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-none">{item.detail}</p>}
+                                    </div>
                                 </div>
-                            ))}
-                            <div className="pt-3 border-t-2 border-green-200 mt-4">
-                                <div className="flex justify-between items-center">
-                                    <p className="font-bold text-green-800">Gross Settlement</p>
-                                    <p className="text-lg font-bold text-green-800">₹{settlement.gross_settlement?.toLocaleString('en-IN') || '0'}</p>
-                                </div>
+                                {isEditing && canEdit ? (
+                                    <Input
+                                        type="number"
+                                        className="w-32 h-9 text-right font-bold border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-100"
+                                        value={editData[item.label.toLowerCase().replace(/ /g, '_')] || 0}
+                                        onChange={(e) => setEditData({ ...editData, [item.label.toLowerCase().replace(/ /g, '_')]: parseFloat(e.target.value) || 0 })}
+                                    />
+                                ) : (
+                                    <span className="text-base font-bold text-slate-900 tracking-tight">₹{item.value?.toLocaleString('en-IN') || '0'}</span>
+                                )}
+                            </div>
+                        ))}
+                        <div className="pt-6 mt-2 border-t border-slate-100">
+                            <div className="flex justify-between items-center">
+                                <p className="text-[11px] font-bold text-slate-900 uppercase tracking-wider">Gross Total</p>
+                                <p className="text-2xl font-bold text-emerald-600 tracking-tight">₹{settlement.gross_settlement?.toLocaleString('en-IN') || '0'}</p>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                {/* Deductions Card */}
-                <Card>
-                    <CardHeader className="bg-gradient-to-r from-orange-50 to-red-50 border-b">
-                        <CardTitle className="flex items-center gap-2 text-red-800">
-                            <TrendingDown className="w-5 h-5" />
-                            Deductions
+                {/* Deductions Matrix */}
+                <Card className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden group/deduction">
+                    <CardHeader className="p-8 bg-slate-900 border-b border-slate-800">
+                        <CardTitle className="flex items-center gap-4 text-white text-lg font-bold uppercase tracking-tight">
+                            <div className="p-2 bg-white/10 rounded-lg"><TrendingDown className="w-5 h-5 text-rose-400" /></div>
+                            Deductions Components
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-6">
-                        <div className="space-y-4">
-                            {[
-                                { label: 'Notice Shortfall', value: settlement.notice_shortfall_deduction, detail: 'Notice period buyout' },
-                                { label: 'Advances', value: settlement.advance_deductions, detail: 'Salary advances' },
-                                { label: 'Other Deductions', value: settlement.other_deductions, detail: settlement.deduction_remarks }
-                            ].map((item, idx) => (
-                                <div key={idx} className="flex justify-between items-start pb-3 border-b border-slate-100 last:border-0">
-                                    <div>
-                                        <p className="text-sm font-medium text-slate-700">{item.label}</p>
-                                        {item.detail && <p className="text-xs text-slate-500 mt-0.5">{item.detail}</p>}
+                    <CardContent className="p-8 space-y-6">
+                        {[
+                            { label: 'Notice Shortfall', value: settlement.notice_shortfall_deduction, detail: 'Short notice period buyout', icon: Clock },
+                            { label: 'Advance Deductions', value: settlement.advance_deductions, detail: 'Loan / Advance offsets', icon: History },
+                            { label: 'Other Deductions', value: settlement.other_deductions, detail: settlement.deduction_remarks || 'Regulatory adjustments', icon: AlertCircle }
+                        ].map((item, idx) => (
+                            <div key={idx} className="flex justify-between items-center p-3.5 hover:bg-slate-50 rounded-xl transition-all border-b border-slate-50 last:border-0">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-2.5 bg-slate-50 border border-slate-100 rounded-lg group-hover/item:scale-110 transition-all">
+                                        <item.icon className="w-3.5 h-3.5 text-slate-600" />
                                     </div>
-                                    {isEditing && canEdit ? (
-                                        <input
-                                            type="number"
-                                            className="w-24 px-2 py-1 border rounded text-right text-sm"
-                                            value={editData[item.label.toLowerCase().replace(/ /g, '_')] || 0}
-                                            onChange={(e) => setEditData({ ...editData, [item.label.toLowerCase().replace(/ /g, '_')]: parseFloat(e.target.value) || 0 })}
-                                        />
-                                    ) : (
-                                        <span className="text-sm font-semibold text-red-700">₹{item.value?.toLocaleString('en-IN') || '0'}</span>
-                                    )}
+                                    <div className="space-y-0.5">
+                                        <p className="text-[11px] font-bold text-slate-900 uppercase tracking-tight">{item.label}</p>
+                                        {item.detail && <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-none">{item.detail}</p>}
+                                    </div>
                                 </div>
-                            ))}
-                            <div className="pt-3 border-t-2 border-red-200 mt-4">
-                                <div className="flex justify-between items-center">
-                                    <p className="font-bold text-red-800">Total Deductions</p>
-                                    <p className="text-lg font-bold text-red-800">₹{settlement.total_deductions?.toLocaleString('en-IN') || '0'}</p>
-                                </div>
+                                {isEditing && canEdit ? (
+                                    <Input
+                                        type="number"
+                                        className="w-32 h-9 text-right font-bold border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-100"
+                                        value={editData[item.label.toLowerCase().replace(/ /g, '_')] || 0}
+                                        onChange={(e) => setEditData({ ...editData, [item.label.toLowerCase().replace(/ /g, '_')]: parseFloat(e.target.value) || 0 })}
+                                    />
+                                ) : (
+                                    <span className="text-base font-bold text-rose-600 tracking-tight">₹{item.value?.toLocaleString('en-IN') || '0'}</span>
+                                )}
+                            </div>
+                        ))}
+                        <div className="pt-6 mt-2 border-t border-slate-100">
+                            <div className="flex justify-between items-center">
+                                <p className="text-[11px] font-bold text-slate-900 uppercase tracking-wider">Total Deductions</p>
+                                <p className="text-2xl font-bold text-rose-600 tracking-tight">₹{settlement.total_deductions?.toLocaleString('en-IN') || '0'}</p>
                             </div>
                         </div>
 
                         {isEditing && canEdit && (
-                            <div className="mt-6 pt-6 border-t">
-                                <Button onClick={handleUpdate} className="w-full bg-indigo-600 hover:bg-indigo-700">
-                                    Save Changes
+                            <div className="pt-8">
+                                <Button onClick={handleUpdate} className="w-full h-12 bg-slate-900 hover:bg-black text-white rounded-lg font-bold text-[11px] uppercase tracking-wider shadow-md transition-all active:scale-[0.98]">
+                                    Save Settlement Audit
+                                    <ArrowRight className="w-4 h-4 ml-3" />
                                 </Button>
                             </div>
                         )}
@@ -332,44 +365,45 @@ const SettlementDashboard: React.FC<SettlementDashboardProps> = ({ exitId, viewM
                 </Card>
             </div>
 
-            {/* Timeline Section */}
-            <Card>
-                <CardHeader>
-                    <button
-                        onClick={() => setShowTimeline(!showTimeline)}
-                        className="w-full flex items-center justify-between text-left"
-                    >
-                        <CardTitle className="flex items-center gap-2">
-                            <Clock className="w-5 h-5" />
+            {/* Timeline */}
+            <Card className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+                <CardHeader className="p-6 border-b border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => setShowTimeline(!showTimeline)}>
+                    <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center gap-4 text-lg font-bold uppercase tracking-tight text-slate-900">
+                            <History className="w-5 h-5 text-slate-900" />
                             Settlement Timeline
                         </CardTitle>
-                        <span className="text-sm text-indigo-600">{showTimeline ? '▼' : '▶'} {showTimeline ? 'Hide' : 'Show'}</span>
-                    </button>
+                        <div className="p-2 bg-white border border-slate-100 rounded-lg shadow-sm">
+                            <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform duration-500 ${showTimeline ? 'rotate-180' : ''}`} />
+                        </div>
+                    </div>
                 </CardHeader>
                 {showTimeline && (
-                    <CardContent className="p-6">
-                        <div className="relative pl-8 border-l-2 border-slate-200 ml-2 space-y-6">
-                            {timeline.map((step, idx) => (
+                    <CardContent className="p-10 animate-in slide-in-from-top-4 duration-500">
+                        <div className="relative pl-8 border-l-2 border-slate-100 ml-4 space-y-10">
+                            {[
+                                { label: 'Calculation Completed', status: settlement.status !== 'Pending' ? 'completed' : 'pending', date: settlement.calculated_date },
+                                { label: 'Final Approval', status: settlement.status === 'Approved' || settlement.status === 'Paid' ? 'completed' : settlement.status === 'Calculated' ? 'current' : 'pending', date: settlement.approved_date },
+                                { label: 'Payment Processed', status: settlement.status === 'Paid' ? 'completed' : settlement.status === 'Approved' ? 'current' : 'pending', date: settlement.payment_date }
+                            ].map((step, idx) => (
                                 <div key={idx} className="relative">
-                                    <div className={`absolute -left-[37px] w-6 h-6 rounded-full border-2 flex items-center justify-center ${step.status === 'completed' ? 'bg-green-500 border-green-500' :
-                                        step.status === 'current' ? 'bg-indigo-500 border-indigo-500 animate-pulse' :
-                                            'bg-slate-200 border-slate-300'
-                                        }`}>
-                                        {step.status === 'completed' && <CheckCircle className="w-4 h-4 text-white" />}
-                                        {step.status === 'current' && <Clock className="w-4 h-4 text-white" />}
+                                    <div className={`absolute -left-[45px] w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-300 shadow-sm
+                                        ${step.status === 'completed' ? 'bg-emerald-600 border-emerald-100 text-white' :
+                                          step.status === 'current' ? 'bg-slate-900 border-slate-100 text-white animate-pulse' :
+                                          'bg-white border-slate-100 text-slate-200'}`}>
+                                        {step.status === 'completed' ? <CheckCircle className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
                                     </div>
-                                    <div className={`pb-6 ${step.status === 'current' ? 'bg-indigo-50 -ml-6 pl-6 pr-4 py-3 rounded-r-lg' : ''}`}>
-                                        <p className={`text-sm font-semibold ${step.status === 'completed' ? 'text-green-700' :
-                                            step.status === 'current' ? 'text-indigo-700' :
-                                                'text-slate-400'
-                                            }`}>
+                                    <div className={`space-y-1 p-5 rounded-xl transition-all duration-300 ${step.status === 'current' ? 'bg-slate-50 border border-slate-100 shadow-sm' : 'hover:bg-slate-50'}`}>
+                                        <p className={`text-base font-bold uppercase tracking-tight ${step.status === 'completed' ? 'text-emerald-700' : step.status === 'current' ? 'text-slate-900' : 'text-slate-300'}`}>
                                             {step.label}
                                         </p>
                                         {step.date && (
-                                            <p className="text-xs text-slate-500 mt-1">{new Date(step.date).toLocaleString()}</p>
+                                            <Badge variant="outline" className="px-3 py-0.5 rounded border-slate-200 text-[9px] font-bold tracking-wider uppercase bg-white/50">
+                                                {new Date(step.date).toLocaleString()}
+                                            </Badge>
                                         )}
                                         {step.status === 'current' && (
-                                            <p className="text-xs text-indigo-600 mt-1 font-medium">⏳ Awaiting action</p>
+                                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-1">Action Required</p>
                                         )}
                                     </div>
                                 </div>
@@ -379,31 +413,36 @@ const SettlementDashboard: React.FC<SettlementDashboardProps> = ({ exitId, viewM
                 )}
             </Card>
 
-            {/* Employee Info */}
-            <Card className="bg-slate-50">
-                <CardContent className="p-4">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                        <div>
-                            <p className="text-slate-500">Monthly Salary</p>
-                            <p className="font-semibold">₹{settlement.monthly_salary?.toLocaleString('en-IN')}</p>
-                        </div>
-                        <div>
-                            <p className="text-slate-500">Years of Service</p>
-                            <p className="font-semibold">{settlement.years_of_service} years</p>
-                        </div>
-                        <div>
-                            <p className="text-slate-500">Joining Date</p>
-                            <p className="font-semibold">{settlement.joining_date && new Date(settlement.joining_date).toLocaleDateString()}</p>
-                        </div>
-                        <div>
-                            <p className="text-slate-500">Last Working Day</p>
-                            <p className="font-semibold">{settlement.lwd_approved && new Date(settlement.lwd_approved).toLocaleDateString()}</p>
-                        </div>
+            {/* Metadata Footer */}
+            <Card className="bg-slate-900 border-none rounded-xl overflow-hidden shadow-lg">
+                <CardContent className="p-8 relative">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
+                        {[
+                            { label: 'Base Salary', value: settlement.monthly_salary, icon: Wallet },
+                            { label: 'Tenure', value: `${settlement.years_of_service} Years`, icon: Activity },
+                            { label: 'Joining Date', value: settlement.joining_date && new Date(settlement.joining_date).toLocaleDateString(), icon: Calendar },
+                            { label: 'Last Working Day', value: settlement.lwd_approved && new Date(settlement.lwd_approved).toLocaleDateString(), icon: AlertCircle }
+                        ].map((item, idx) => (
+                            <div key={idx} className="space-y-2">
+                                <div className="flex items-center gap-2.5 text-slate-400">
+                                    <item.icon className="w-3.5 h-3.5" />
+                                    <p className="text-[9px] font-bold uppercase tracking-widest">{item.label}</p>
+                                </div>
+                                <p className="text-lg font-bold text-white tracking-tight">
+                                    {typeof item.value === 'number' ? `₹${item.value.toLocaleString('en-IN')}` : item.value || 'N/A'}
+                                </p>
+                            </div>
+                        ))}
                     </div>
                 </CardContent>
             </Card>
         </div>
     );
 };
+
+// Mock Icons for demonstration
+const StarIcon = (props: any) => <Activity {...props} />;
+const HeartPulse = (props: any) => <Activity {...props} />;
+const Database = (props: any) => <Activity {...props} />;
 
 export default SettlementDashboard;

@@ -12,15 +12,7 @@ import { Separator } from '../ui/separator';
 import { getExitConfig, updateExitConfig } from '../../services/exitService';
 
 // Proxy UI components to apply Glassmorphism globally in this file
-const Card: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => (
-    <div className={`glass-card p-6 relative overflow-hidden group hover:shadow-xl transition-all duration-300 ${className || ''}`}>
-        <div className="absolute -top-10 -right-10 w-32 h-32 bg-indigo-200/20 rounded-full blur-2xl pointer-events-none group-hover:bg-indigo-300/30 transition-colors"></div>
-        <div className="relative z-10">{children}</div>
-    </div>
-);
-const CardHeader: React.FC<{ children: React.ReactNode }> = ({ children }) => <div className="mb-4">{children}</div>;
-const CardTitle: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => <h3 className={`text-base font-black text-indigo-950 drop-shadow-sm uppercase tracking-wider ${className || ''}`}>{children}</h3>;
-const CardContent: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => <div className={className}>{children}</div>;
+import { Card, CardHeader, CardTitle, CardContent } from '../ui/card';
 
 const ExitConfiguration: React.FC = () => {
     const [activeSection, setActiveSection] = useState('integrations'); // Default to new section
@@ -209,11 +201,11 @@ const ExitConfiguration: React.FC = () => {
     };
 
     const sections = [
-        { id: 'integrations', label: 'Module Integrations', icon: Workflow, description: 'Connect with core system modules' },
+        { id: 'integrations', label: 'Integrations', icon: Workflow, description: 'Connect with core system modules' },
         { id: 'general', label: 'General Rules', icon: Shield, description: 'Basic exit eligibility and rules' },
         { id: 'noticePeriod', label: 'Notice Period', icon: Clock, description: 'Duration and buyout policies' },
         { id: 'workflow', label: 'Approval Workflow', icon: GitMerge, description: 'Routing and authority matrix' },
-        { id: 'academic', label: 'Academic Safeguards', icon: GraduationCap, description: 'Exam and admission cycle protection' },
+        { id: 'academic', label: 'Academic Rules', icon: GraduationCap, description: 'Exam and admission cycle protection' },
         { id: 'handover', label: 'Knowledge Handover', icon: BookOpen, description: 'Asset and file transfer protocols' },
         { id: 'noc', label: 'Department NOC', icon: Building, description: 'Clearance from various departments' },
         { id: 'interview', label: 'Exit Interview', icon: MessageSquare, description: 'Feedback collection and analysis' },
@@ -227,59 +219,28 @@ const ExitConfiguration: React.FC = () => {
         switch (activeSection) {
             case 'integrations':
                 return (
-                    <div className="space-y-6 animate-in fade-in duration-500">
-                        <SectionHeader title="Module Integrations" description="Manage connections with other system modules for seamless data flow." />
+                    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <SectionHeader title="Module Integrations" description="Manage synchronization with core system modules for automated offboarding." />
                         <div className="grid grid-cols-1 gap-4">
-                            <Card className={`${config.integrations.orgStructure ? 'border-indigo-200 bg-indigo-50/50' : ''}`}>
-                                <CardContent className="pt-6">
-                                    <ToggleItem
-                                        label="Organisation Structure"
-                                        description="Sync approval routing and hierarchy from Core HR."
-                                        checked={config.integrations.orgStructure}
-                                        onChange={() => handleToggle('integrations', 'orgStructure')}
-                                    />
-                                </CardContent>
-                            </Card>
-                            <Card className={`${config.integrations.academicCalendar ? 'border-indigo-200 bg-indigo-50/50' : ''}`}>
-                                <CardContent className="pt-6">
-                                    <ToggleItem
-                                        label="Academic Calendar"
-                                        description="Enforce exit restrictions based on Exam and Admission cycles."
-                                        checked={config.integrations.academicCalendar}
-                                        onChange={() => handleToggle('integrations', 'academicCalendar')}
-                                    />
-                                </CardContent>
-                            </Card>
-                            <Card className={`${config.integrations.payroll ? 'border-indigo-200 bg-indigo-50/50' : ''}`}>
-                                <CardContent className="pt-6">
-                                    <ToggleItem
-                                        label="Payroll System"
-                                        description="Automate Full & Final (F&F) settlement calculations."
-                                        checked={config.integrations.payroll}
-                                        onChange={() => handleToggle('integrations', 'payroll')}
-                                    />
-                                </CardContent>
-                            </Card>
-                            <Card className={`${config.integrations.accessManagement ? 'border-indigo-200 bg-indigo-50/50' : ''}`}>
-                                <CardContent className="pt-6">
-                                    <ToggleItem
-                                        label="Access Management"
-                                        description="Trigger IT offboarding and system access revocation."
-                                        checked={config.integrations.accessManagement}
-                                        onChange={() => handleToggle('integrations', 'accessManagement')}
-                                    />
-                                </CardContent>
-                            </Card>
-                            <Card className={`${config.integrations.workforcePlanning ? 'border-indigo-200 bg-indigo-50/50' : ''}`}>
-                                <CardContent className="pt-6">
-                                    <ToggleItem
-                                        label="Workforce Planning"
-                                        description="Automatically trigger vacancy creation and hiring workflows."
-                                        checked={config.integrations.workforcePlanning}
-                                        onChange={() => handleToggle('integrations', 'workforcePlanning')}
-                                    />
-                                </CardContent>
-                            </Card>
+                            {[
+                                { id: 'orgStructure', label: 'Organisation Structure', description: 'Synchronize authority matrix and approval hierarchy from the central HR registry.' },
+                                { id: 'academicCalendar', label: 'Academic Calendar', description: 'Enforce exit restrictions based on examination cycles and institutional calendars.' },
+                                { id: 'payroll', label: 'Payroll Integration', description: 'Automate Full & Final (F&F) calculations via the integrated payroll module.' },
+                                { id: 'accessManagement', label: 'Access Management', description: 'Trigger automatic revocation of network, email, and ERP credentials.' },
+                                { id: 'workforcePlanning', label: 'Workforce Planning', description: 'Automatically broadcast vacancy alerts and trigger recruitment cycles on departure.' }
+                            ].map((item) => (
+                                <Card key={item.id} className={`bg-white border transition-all duration-300 overflow-hidden relative ${(config.integrations as any)[item.id] ? 'border-indigo-200 bg-indigo-50/20' : 'border-slate-200'}`}>
+                                    <CardContent className="p-8">
+                                        <ToggleItem
+                                            label={item.label}
+                                            description={item.description}
+                                            checked={(config.integrations as any)[item.id]}
+                                            onChange={() => handleToggle('integrations', item.id)}
+                                        />
+                                    </CardContent>
+                                    {(config.integrations as any)[item.id] && <div className="absolute top-0 right-0 p-4"><div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" /></div>}
+                                </Card>
+                            ))}
                         </div>
                     </div>
                 );
@@ -287,13 +248,13 @@ const ExitConfiguration: React.FC = () => {
                 return (
                     <div className="space-y-6 animate-in fade-in duration-500">
                         <SectionHeader title="General Configuration" description="Define the foundational rules for the exit management process." />
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base font-semibold text-slate-900">Module Activation</CardTitle>
+                        <Card className="bg-white border border-slate-200">
+                            <CardHeader className="bg-slate-50 border-b border-slate-100">
+                                <CardTitle className="text-sm font-bold text-slate-900 uppercase tracking-wider">Module Activation</CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-4">
+                            <CardContent className="p-8">
                                 <ToggleItem
-                                    label="Enable Exit Management Module"
+                                    label="Enable Exit Management"
                                     description="Turn off to disable all exit-related workflows system-wide."
                                     checked={config.general.enableExitManagement}
                                     onChange={() => handleToggle('general', 'enableExitManagement')}
@@ -301,25 +262,24 @@ const ExitConfiguration: React.FC = () => {
                             </CardContent>
                         </Card>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="text-base font-semibold text-slate-900">Applicable Employee Types</CardTitle>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+                            <Card className="bg-white border border-slate-200">
+                                <CardHeader className="bg-slate-50 border-b border-slate-100">
+                                    <CardTitle className="text-sm font-bold text-slate-900 uppercase tracking-wider">Applicable Employee Types</CardTitle>
                                 </CardHeader>
-                                <CardContent className="space-y-3">
+                                <CardContent className="p-8 space-y-3">
                                     <CheckboxItem label="Teaching Staff" checked={config.general.allowedEmployeeTypes.teaching} onChange={() => handleToggle('general', 'allowedEmployeeTypes', 'teaching')} />
                                     <CheckboxItem label="Non-Teaching Staff" checked={config.general.allowedEmployeeTypes.nonTeaching} onChange={() => handleToggle('general', 'allowedEmployeeTypes', 'nonTeaching')} />
                                     <CheckboxItem label="Contract / Guest Faculty" checked={config.general.allowedEmployeeTypes.contract} onChange={() => handleToggle('general', 'allowedEmployeeTypes', 'contract')} />
                                 </CardContent>
                             </Card>
-
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="text-base font-semibold text-slate-900">Allowed Exit Types</CardTitle>
+                            <Card className="bg-white border border-slate-200">
+                                <CardHeader className="bg-slate-50 border-b border-slate-100">
+                                    <CardTitle className="text-sm font-bold text-slate-900 uppercase tracking-wider">Allowed Exit Types</CardTitle>
                                 </CardHeader>
-                                <CardContent className="space-y-3">
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <CheckboxItem label="Voluntary Resignation" checked={config.general.allowedExitTypes.voluntary} onChange={() => handleToggle('general', 'allowedExitTypes', 'voluntary')} />
+                                <CardContent className="p-8 space-y-4">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <CheckboxItem label="Resignation" checked={config.general.allowedExitTypes.voluntary} onChange={() => handleToggle('general', 'allowedExitTypes', 'voluntary')} />
                                         <CheckboxItem label="End of Contract" checked={config.general.allowedExitTypes.contractEnd} onChange={() => handleToggle('general', 'allowedExitTypes', 'contractEnd')} />
                                         <CheckboxItem label="Retirement" checked={config.general.allowedExitTypes.retirement} onChange={() => handleToggle('general', 'allowedExitTypes', 'retirement')} />
                                         <CheckboxItem label="Termination" checked={config.general.allowedExitTypes.termination} onChange={() => handleToggle('general', 'allowedExitTypes', 'termination')} />
@@ -328,16 +288,16 @@ const ExitConfiguration: React.FC = () => {
                             </Card>
                         </div>
 
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base font-semibold text-slate-900">Eligibility Criteria</CardTitle>
+                        <Card className="bg-white border border-slate-200">
+                            <CardHeader className="bg-slate-50 border-b border-slate-100">
+                                <CardTitle className="text-sm font-bold text-slate-900 uppercase tracking-wider">Eligibility Criteria</CardTitle>
                             </CardHeader>
-                            <CardContent>
-                                <div className="flex items-center gap-4">
-                                    <Label className="w-48">Minimum Service Period (Months)</Label>
+                            <CardContent className="p-8">
+                                <div className="flex items-center gap-6">
+                                    <Label className="w-48 text-sm font-bold text-slate-600">Minimum Service (Months)</Label>
                                     <input
                                         type="number"
-                                        className="flex h-10 w-24 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                        className="flex h-10 w-24 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-100 outline-none"
                                         value={config.general.minServicePeriod}
                                         onChange={(e) => handleChange('general', 'minServicePeriod', parseInt(e.target.value))}
                                     />
@@ -350,255 +310,270 @@ const ExitConfiguration: React.FC = () => {
                 return (
                     <div className="space-y-6 animate-in fade-in duration-500">
                         <SectionHeader title="Notice Period Settings" description="Configure duration and waiver policies for different staff categories." />
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base font-semibold text-slate-900">Notice Duration (Days)</CardTitle>
+                        <Card className="bg-white border border-slate-200">
+                            <CardHeader className="bg-slate-50 border-b border-slate-100">
+                                <CardTitle className="text-sm font-bold text-slate-900 uppercase tracking-wider">Notice Duration (Days)</CardTitle>
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className="p-8">
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div className="space-y-2">
-                                        <Label>Teaching Staff</Label>
+                                        <Label className="text-xs font-bold text-slate-500 uppercase">Teaching Staff</Label>
                                         <div className="relative">
                                             <input
                                                 type="number"
-                                                className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm pr-12 focus:ring-indigo-500 focus:border-indigo-500"
+                                                className="flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm pr-12 focus:ring-2 focus:ring-indigo-100 outline-none font-bold"
                                                 value={config.noticePeriod.teachingDays}
                                                 onChange={(e) => handleChange('noticePeriod', 'teachingDays', parseInt(e.target.value))}
                                             />
-                                            <span className="absolute right-3 top-2.5 text-xs text-slate-400">Days</span>
+                                            <span className="absolute right-3 top-2.5 text-[10px] uppercase font-bold text-slate-300">Days</span>
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>Non-Teaching Staff</Label>
+                                        <Label className="text-xs font-bold text-slate-500 uppercase">Non-Teaching</Label>
                                         <div className="relative">
                                             <input
                                                 type="number"
-                                                className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm pr-12 focus:ring-indigo-500 focus:border-indigo-500"
+                                                className="flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm pr-12 focus:ring-2 focus:ring-indigo-100 outline-none font-bold"
                                                 value={config.noticePeriod.nonTeachingDays}
                                                 onChange={(e) => handleChange('noticePeriod', 'nonTeachingDays', parseInt(e.target.value))}
                                             />
-                                            <span className="absolute right-3 top-2.5 text-xs text-slate-400">Days</span>
+                                            <span className="absolute right-3 top-2.5 text-[10px] uppercase font-bold text-slate-300">Days</span>
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>Contract Staff</Label>
+                                        <Label className="text-xs font-bold text-slate-500 uppercase">Contract Staff</Label>
                                         <div className="relative">
                                             <input
                                                 type="number"
-                                                className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm pr-12 focus:ring-indigo-500 focus:border-indigo-500"
+                                                className="flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm pr-12 focus:ring-2 focus:ring-indigo-100 outline-none font-bold"
                                                 value={config.noticePeriod.contractDays}
                                                 onChange={(e) => handleChange('noticePeriod', 'contractDays', parseInt(e.target.value))}
                                             />
-                                            <span className="absolute right-3 top-2.5 text-xs text-slate-400">Days</span>
+                                            <span className="absolute right-3 top-2.5 text-[10px] uppercase font-bold text-slate-300">Days</span>
                                         </div>
                                     </div>
                                 </div>
                             </CardContent>
                         </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base font-semibold text-slate-900">Exceptions & Buyout Rules</CardTitle>
+ 
+                        <Card className="bg-white border border-slate-200">
+                            <CardHeader className="bg-slate-50 border-b border-slate-100">
+                                <CardTitle className="text-sm font-bold text-slate-900 uppercase tracking-wider">Exceptions & Buyout Rules</CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-4">
-                                <ToggleItem label="Allow Notice Period Buyout" description="Enable employees to pay for shortfall in notice period" checked={config.noticePeriod.allowBuyout} onChange={() => handleToggle('noticePeriod', 'allowBuyout')} />
-                                <Separator />
-                                <ToggleItem label="Allow Early Release" description="Manager can waive off remaining notice days" checked={config.noticePeriod.allowEarlyRelease} onChange={() => handleToggle('noticePeriod', 'allowEarlyRelease')} />
-                                <Separator />
-                                <ToggleItem label="Allow Leave during Warning Period" description="Employees can take leave during notice period" checked={config.noticePeriod.allowLeave} onChange={() => handleToggle('noticePeriod', 'allowLeave')} />
+                            <CardContent className="p-8 space-y-4">
+                                <ToggleItem label="Notice Period Buyout" description="Enable employees to pay for shortfall in notice period" checked={config.noticePeriod.allowBuyout} onChange={() => handleToggle('noticePeriod', 'allowBuyout')} />
+                                <Separator className="opacity-50" />
+                                <ToggleItem label="Early Release" description="Manager can waive off remaining notice days" checked={config.noticePeriod.allowEarlyRelease} onChange={() => handleToggle('noticePeriod', 'allowEarlyRelease')} />
+                                <Separator className="opacity-50" />
+                                <ToggleItem label="Leave during Warning Period" description="Employees can take leave during notice period" checked={config.noticePeriod.allowLeave} onChange={() => handleToggle('noticePeriod', 'allowLeave')} />
                             </CardContent>
                         </Card>
                     </div>
                 );
             case 'workflow':
                 return (
-                    <div className="space-y-6 animate-in fade-in duration-500">
-                        <SectionHeader title="Approval Workflow" description="Set up the routing logic for exit approvals." />
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base font-semibold text-slate-900">Flow Configuration</CardTitle>
+                    <div className="space-y-8 animate-in fade-in duration-500">
+                        <SectionHeader title="Approval Workflows" description="Configure sequential or parallel approval routes and establish service level agreements." />
+                        
+                        <Card className="bg-white border border-slate-200">
+                            <CardHeader className="bg-slate-50 border-b border-slate-100">
+                                <CardTitle className="text-sm font-bold text-slate-900 uppercase tracking-wider">Routing Strategy</CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-6">
-                                <div className="space-y-2">
-                                    <Label>Workflow Type</Label>
+                            <CardContent className="p-8 space-y-8">
+                                <div className="space-y-4">
+                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Routing Protocol</Label>
                                     <select
                                         value={config.workflow.type}
                                         onChange={(e) => handleChange('workflow', 'type', e.target.value)}
-                                        className="flex h-10 w-full max-w-sm rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                        className="h-12 w-full max-w-md rounded-lg bg-white border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50/20 text-sm font-bold text-slate-900 px-4 outline-none cursor-pointer"
                                     >
-                                        <option value="Sequential">Sequential (Chain of Command)</option>
-                                        <option value="Parallel">Parallel (Simultaneous Approval)</option>
+                                        <option value="Sequential">Sequential (Step-by-Step)</option>
+                                        <option value="Parallel">Parallel (Simultaneous broadcast)</option>
                                     </select>
-                                    <p className="text-xs text-slate-500">
-                                        Sequential: Request moves to next approver only after current approval.
-                                        Parallel: All approvers receive request simultaneously.
-                                    </p>
                                 </div>
-
-                                <div className="rounded-lg bg-slate-50 border border-slate-200 p-4">
-                                    <h4 className="text-xs font-bold text-slate-500 uppercase mb-3">Teaching Staff Matrix</h4>
-                                    <div className="flex items-center gap-3 overflow-x-auto pb-2">
-                                        <Badge>HoD</Badge>
-                                        <ChevronRight className="w-4 h-4 text-slate-400" />
-                                        <Badge>Principal</Badge>
-                                        <ChevronRight className="w-4 h-4 text-slate-400" />
-                                        <Badge>HR Manager</Badge>
+ 
+                                <div className="p-8 bg-slate-900 rounded-xl shadow-lg relative overflow-hidden">
+                                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">Approval Hierarchy</h4>
+                                    <div className="flex items-center gap-4 overflow-x-auto pb-4 no-scrollbar">
+                                        <Badge className="bg-slate-800 text-white border-slate-700">Originator</Badge>
+                                        <ChevronRight className="w-4 h-4 text-slate-700" />
+                                        <Badge className="bg-slate-800 text-white border-slate-700">HoD / Manager</Badge>
+                                        <ChevronRight className="w-4 h-4 text-slate-700" />
+                                        <Badge className="bg-slate-800 text-white border-slate-700">Principal / Director</Badge>
+                                        <ChevronRight className="w-4 h-4 text-slate-700" />
+                                        <Badge className="bg-slate-800 text-white border-slate-700">HR Admin</Badge>
                                     </div>
                                 </div>
-                                <ToggleItem label="Require 1:1 Exit Meeting" description="Manager must schedule and complete a 1:1 meeting before processing F&F." checked={config.workflow.requireOneOnOne} onChange={() => handleToggle('workflow', 'requireOneOnOne')} />
+                                <ToggleItem label="Mandatory 1-on-1 Session" description="Enforce a mandatory meeting before final approval." checked={config.workflow.requireOneOnOne} onChange={() => handleToggle('workflow', 'requireOneOnOne')} />
                             </CardContent>
                         </Card>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base font-semibold text-slate-900">SLA & Automation</CardTitle>
+ 
+                        <Card className="bg-white border border-slate-200">
+                            <CardHeader className="bg-slate-50 border-b border-slate-100">
+                                <CardTitle className="text-sm font-bold text-slate-900 uppercase tracking-wider">Temporal Compliance (SLA)</CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="flex items-center gap-4">
-                                    <Label className="w-48">Approval SLA (Days)</Label>
-                                    <input
-                                        type="number"
-                                        className="flex h-10 w-24 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-indigo-500"
-                                        value={config.workflow.slaDays}
-                                        onChange={(e) => handleChange('workflow', 'slaDays', parseInt(e.target.value))}
-                                    />
+                            <CardContent className="p-8 space-y-8">
+                                <div className="flex items-center gap-8">
+                                    <div className="space-y-1 flex-1">
+                                        <Label className="text-sm font-bold text-slate-900">Standard Approval SLA</Label>
+                                        <p className="text-xs text-slate-500 italic">Maximum permissible duration for each node.</p>
+                                    </div>
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            className="h-12 w-24 rounded-lg bg-white border border-slate-200 text-xl font-bold text-slate-900 text-center focus:border-indigo-500 outline-none"
+                                            value={config.workflow.slaDays}
+                                            onChange={(e) => handleChange('workflow', 'slaDays', parseInt(e.target.value))}
+                                        />
+                                        <span className="absolute -bottom-5 left-0 w-full text-center text-[8px] font-bold text-slate-300 uppercase tracking-widest">Days</span>
+                                    </div>
                                 </div>
-                                <ToggleItem label="Auto-approve if SLA breached" description="Automatically approve request if no action taken within SLA" checked={config.workflow.autoApproveBreach} onChange={() => handleToggle('workflow', 'autoApproveBreach')} />
+                                <Separator className="opacity-50" />
+                                <ToggleItem label="Auto-Approve on Breach" description="Automatically approve if no action is taken within the SLA window." checked={config.workflow.autoApproveBreach} onChange={() => handleToggle('workflow', 'autoApproveBreach')} />
                             </CardContent>
                         </Card>
                     </div>
                 );
             case 'noc':
                 return (
-                    <div className="space-y-6 animate-in fade-in duration-500">
-                        <SectionHeader title="Department NOC Settings" description="Manage clearance requirements from various internal departments." />
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base font-semibold text-slate-900">Global Settings</CardTitle>
+                    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <SectionHeader title="Departmental Clearance" description="Manage No-Objection Certificate (NOC) requirements across departments." />
+                        
+                        <Card className="bg-white border border-slate-200">
+                            <CardHeader className="bg-slate-50 border-b border-slate-100">
+                                <CardTitle className="text-sm font-bold text-slate-900 uppercase tracking-wider">Clearance Parameters</CardTitle>
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className="p-8">
                                 <ToggleItem
-                                    label="Enable NOC Management"
-                                    description="Require clearances from support departments before final settlement."
+                                    label="Enable NOC Workflow"
+                                    description="Enable system-wide tracking of departmental assets and fiscal clearances."
                                     checked={config.noc.enabled}
                                     onChange={() => handleToggle('noc', 'enabled')}
                                 />
                             </CardContent>
                         </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base font-semibold text-slate-900">Departments Requiring Clearance</CardTitle>
+ 
+                        <Card className="bg-white border border-slate-200">
+                            <CardHeader className="bg-slate-50 border-b border-slate-100">
+                                <CardTitle className="text-sm font-bold text-slate-900 uppercase tracking-wider">Required Departments</CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-3">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <CheckboxItem label="IT" checked={config.noc.departments.it} onChange={() => handleToggle('noc', 'departments', 'it')} />
-                                    <CheckboxItem label="Admin" checked={config.noc.departments.admin} onChange={() => handleToggle('noc', 'departments', 'admin')} />
-                                    <CheckboxItem label="Finance" checked={config.noc.departments.finance} onChange={() => handleToggle('noc', 'departments', 'finance')} />
-                                    <CheckboxItem label="HOD/Dept" checked={config.noc.departments.hod} onChange={() => handleToggle('noc', 'departments', 'hod')} />
-                                    <CheckboxItem label="Library" checked={config.noc.departments.library} onChange={() => handleToggle('noc', 'departments', 'library')} />
-                                    <CheckboxItem label="Payroll" checked={config.noc.departments.payroll} onChange={() => handleToggle('noc', 'departments', 'payroll')} />
-                                </div>
+                            <CardContent className="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {[
+                                    { id: 'it', label: 'IT Assets' },
+                                    { id: 'admin', label: 'Administration' },
+                                    { id: 'finance', label: 'Finance' },
+                                    { id: 'hod', label: 'Academic HOD' },
+                                    { id: 'library', label: 'Library' },
+                                    { id: 'payroll', label: 'Payroll' }
+                                ].map(dept => (
+                                    <CheckboxItem key={dept.id} label={dept.label} checked={(config.noc.departments as any)[dept.id]} onChange={() => handleToggle('noc', 'departments', dept.id)} />
+                                ))}
                             </CardContent>
                         </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base font-semibold text-slate-900">SLA & Automation</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="flex items-center gap-4">
-                                    <Label className="w-48">NOC SLA per Dept (Days)</Label>
-                                    <input
-                                        type="number"
-                                        className="flex h-10 w-24 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-indigo-500"
-                                        value={config.noc.slaDays}
-                                        onChange={(e) => handleChange('noc', 'slaDays', parseInt(e.target.value))}
+ 
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <Card className="bg-white border border-slate-200">
+                                <CardHeader className="bg-slate-50 border-b border-slate-100">
+                                    <CardTitle className="text-sm font-bold text-slate-900 uppercase tracking-wider">NOC SLA</CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-8 space-y-6">
+                                    <div className="flex items-center justify-between">
+                                        <Label className="text-sm font-bold text-slate-600 uppercase tracking-tight">Department SLA (Days)</Label>
+                                        <input
+                                            type="number"
+                                            className="h-10 w-24 rounded-lg bg-white border border-slate-200 text-base font-bold text-slate-900 text-center focus:border-indigo-500 outline-none"
+                                            value={config.noc.slaDays}
+                                            onChange={(e) => handleChange('noc', 'slaDays', parseInt(e.target.value))}
+                                        />
+                                    </div>
+                                    <ToggleItem label="Auto-Clear" description="Auto-clear if no assets are recorded in the repository." checked={config.noc.autoClearNoAssets} onChange={() => handleToggle('noc', 'autoClearNoAssets')} />
+                                </CardContent>
+                            </Card>
+ 
+                            <Card className="bg-white border border-slate-200">
+                                <CardHeader className="bg-slate-50 border-b border-slate-100">
+                                    <CardTitle className="text-sm font-bold text-slate-900 uppercase tracking-wider">System Behavior</CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-8 space-y-4">
+                                    <ToggleItem
+                                        label="Automated Tasks"
+                                        description="Broadcast clearance requests immediately upon initiation."
+                                        checked={config.noc.systemBehavior.autoCreateTasks}
+                                        onChange={() => handleToggle('noc', 'systemBehavior', 'autoCreateTasks')}
                                     />
-                                </div>
-                                <ToggleItem label="Auto-clear if no assets assigned" description="Automatically clear NOC if employee has no borrowed items from department" checked={config.noc.autoClearNoAssets} onChange={() => handleToggle('noc', 'autoClearNoAssets')} />
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base font-semibold text-slate-900">System Behavior</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <ToggleItem
-                                    label="Auto-create NOC tasks"
-                                    description="Automatically generate NOC tasks for departments upon exit approval."
-                                    checked={config.noc.systemBehavior.autoCreateTasks}
-                                    onChange={() => handleToggle('noc', 'systemBehavior', 'autoCreateTasks')}
-                                />
-                                <Separator />
-                                <ToggleItem
-                                    label="Escalate overdue clearances"
-                                    description="Notify Admin/HR if NOC is not cleared within SLA days."
-                                    checked={config.noc.systemBehavior.escalateOverdue}
-                                    onChange={() => handleToggle('noc', 'systemBehavior', 'escalateOverdue')}
-                                />
-                            </CardContent>
-                        </Card>
+                                    <Separator className="opacity-50" />
+                                    <ToggleItem
+                                        label="Escalate Overdue"
+                                        description="Alert HR Admin if NOC remains pending beyond SLA."
+                                        checked={config.noc.systemBehavior.escalateOverdue}
+                                        onChange={() => handleToggle('noc', 'systemBehavior', 'escalateOverdue')}
+                                    />
+                                </CardContent>
+                            </Card>
+                        </div>
                     </div>
                 );
             case 'academic':
                 return (
-                    <div className="space-y-6 animate-in fade-in duration-500">
-                        <SectionHeader title="Academic Safeguards" description="Enforce policies to prevent disruptions during critical academic periods." />
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base font-semibold text-slate-900">Timing Restrictions</CardTitle>
+                    <div className="space-y-8 animate-in fade-in duration-500">
+                        <SectionHeader title="Academic Continuity" description="Enforce safeguards to protect institutional stability during critical cycles." />
+                        
+                        <Card className="bg-white border border-slate-200">
+                            <CardHeader className="bg-slate-50 border-b border-slate-100">
+                                <CardTitle className="text-sm font-bold text-slate-900 uppercase tracking-wider">Blackout Windows</CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-4">
-                                <ToggleItem label="Restrict Exits during Exam Periods" description="Block LWDs falling within 15 days of major exams based on Academic Calendar." checked={config.academic.restrictExamPeriods} onChange={() => handleToggle('academic', 'restrictExamPeriods')} />
-                                <Separator />
-                                <ToggleItem label="Restrict Exits during Admission Cycles" description="Prevent key admission staff from exiting during peak enrollment." checked={config.academic.restrictAdmissionCycles} onChange={() => handleToggle('academic', 'restrictAdmissionCycles')} />
-                                <Separator />
-                                <ToggleItem label="Restrict Exits during Audits" description="Hold exits for staff involved in active compliance or financial audits." checked={config.academic.restrictAudits} onChange={() => handleToggle('academic', 'restrictAudits')} />
+                            <CardContent className="p-8 space-y-2">
+                                <ToggleItem label="Restrict during Examinations" description="Intercept LWDs falling within active exam schedules." checked={config.academic.restrictExamPeriods} onChange={() => handleToggle('academic', 'restrictExamPeriods')} />
+                                <ToggleItem label="Protect Admission Cycles" description="Restrict critical staff from departing during peak enrollment." checked={config.academic.restrictAdmissionCycles} onChange={() => handleToggle('academic', 'restrictAdmissionCycles')} />
+                                <ToggleItem label="Hold during Audits" description="Prevent separation for stakeholders involved in active audits." checked={config.academic.restrictAudits} onChange={() => handleToggle('academic', 'restrictAudits')} />
                             </CardContent>
                         </Card>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base font-semibold text-slate-900">Exceptions & Succession</CardTitle>
+ 
+                        <Card className="bg-white border border-slate-200">
+                            <CardHeader className="bg-slate-50 border-b border-slate-100">
+                                <CardTitle className="text-sm font-bold text-slate-900 uppercase tracking-wider">Overrides</CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-4">
-                                <ToggleItem label="Allow Principal Override" description="Principal/Director can bypass timing restrictions under exceptional circumstances." checked={config.academic.principalOverride} onChange={() => handleToggle('academic', 'principalOverride')} />
-                                <Separator />
-                                <ToggleItem label="Mandatory Replacement Assigned" description="Require a designated successor before allowing LWD for teaching staff." checked={config.academic.mandatoryReplacement} onChange={() => handleToggle('academic', 'mandatoryReplacement')} />
+                            <CardContent className="p-8 space-y-4">
+                                <ToggleItem label="Executive Override" description="Principal or Director can manually bypass restrictions." checked={config.academic.principalOverride} onChange={() => handleToggle('academic', 'principalOverride')} />
+                                <Separator className="opacity-50" />
+                                <ToggleItem label="Succession Lock" description="Require a verified replacement candidate before authorizing separation." checked={config.academic.mandatoryReplacement} onChange={() => handleToggle('academic', 'mandatoryReplacement')} />
                             </CardContent>
                         </Card>
                     </div>
                 );
             case 'handover':
                 return (
-                    <div className="space-y-6 animate-in fade-in duration-500">
-                        <SectionHeader title="Knowledge Handover" description="Manage requirements for passing on duties, files, and assets." />
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base font-semibold text-slate-900">Handover Applicability</CardTitle>
+                    <div className="space-y-8 animate-in fade-in duration-500">
+                        <SectionHeader title="Knowledge Transfer" description="Orchestrate the migration of assets and operational responsibilities." />
+                        
+                        <Card className="bg-white border border-slate-200 overflow-hidden">
+                            <CardHeader className="bg-slate-900 p-8">
+                                <CardTitle className="text-sm font-bold text-white uppercase tracking-wider">Handover Rules</CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-4">
-                                <ToggleItem label="Enable Handover Workflows" description="Require formal handover documentation before NOC clearance." checked={config.handover.enabled} onChange={() => handleToggle('handover', 'enabled')} />
+                            <CardContent className="p-8 space-y-8">
+                                <ToggleItem label="Enforce Handover" description="Require documentation of duties prior to NOC clearance." checked={config.handover.enabled} onChange={() => handleToggle('handover', 'enabled')} />
+                                
                                 {config.handover.enabled && (
-                                    <div className="pt-4 border-t border-slate-100">
-                                        <Label className="text-sm font-semibold mb-3 block">Mandatory For:</Label>
+                                    <div className="p-6 bg-slate-50 border border-slate-100 rounded-xl space-y-4">
+                                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Mandatory Rules</Label>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <CheckboxItem label="Teaching Staff" checked={config.handover.mandatoryFor.teaching} onChange={() => handleToggle('handover', 'mandatoryFor', 'teaching')} />
-                                            <CheckboxItem label="Administrative Staff" checked={config.handover.mandatoryFor.admin} onChange={() => handleToggle('handover', 'mandatoryFor', 'admin')} />
+                                            <CheckboxItem label="Admin Staff" checked={config.handover.mandatoryFor.admin} onChange={() => handleToggle('handover', 'mandatoryFor', 'admin')} />
                                         </div>
                                     </div>
                                 )}
                             </CardContent>
                         </Card>
+ 
                         {config.handover.enabled && (
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="text-base font-semibold text-slate-900">Handover Approvals Required</CardTitle>
+                            <Card className="bg-white border border-slate-200">
+                                <CardHeader className="bg-slate-50 border-b border-slate-100">
+                                    <CardTitle className="text-sm font-bold text-slate-900 uppercase tracking-wider">Sign-off Matrix</CardTitle>
                                 </CardHeader>
-                                <CardContent className="space-y-3">
-                                    <CheckboxItem label="Successor Sign-off" checked={config.handover.approvalRequired.successor} onChange={() => handleToggle('handover', 'approvalRequired', 'successor')} />
-                                    <CheckboxItem label="Reporting Manager / HoD" checked={config.handover.approvalRequired.hod} onChange={() => handleToggle('handover', 'approvalRequired', 'hod')} />
-                                    <CheckboxItem label="HR Verification" checked={config.handover.approvalRequired.hr} onChange={() => handleToggle('handover', 'approvalRequired', 'hr')} />
+                                <CardContent className="p-8 space-y-4">
+                                    <CheckboxItem label="Successor Validation" checked={config.handover.approvalRequired.successor} onChange={() => handleToggle('handover', 'approvalRequired', 'successor')} />
+                                    <CheckboxItem label="HOD Verification" checked={config.handover.approvalRequired.hod} onChange={() => handleToggle('handover', 'approvalRequired', 'hod')} />
+                                    <CheckboxItem label="HR Compliance" checked={config.handover.approvalRequired.hr} onChange={() => handleToggle('handover', 'approvalRequired', 'hr')} />
                                 </CardContent>
                             </Card>
                         )}
@@ -606,180 +581,191 @@ const ExitConfiguration: React.FC = () => {
                 );
             case 'interview':
                 return (
-                    <div className="space-y-6 animate-in fade-in duration-500">
-                        <SectionHeader title="Exit Interview" description="Configure how departure feedback is collected and analyzed." />
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base font-semibold text-slate-900">Process Settings</CardTitle>
+                    <div className="space-y-8 animate-in fade-in duration-500">
+                        <SectionHeader title="Feedback Collection" description="Gather critical feedback and analyze reason for departure." />
+                        
+                        <Card className="bg-white border border-slate-200">
+                            <CardHeader className="bg-slate-50 border-b border-slate-100">
+                                <CardTitle className="text-sm font-bold text-slate-900 uppercase tracking-wider">Interview Mode</CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-4">
-                                <ToggleItem label="Mandatory Exit Interview" description="Employees cannot proceed to F&F settlement without completing an interview." checked={config.interview.mandatory} onChange={() => handleToggle('interview', 'mandatory')} />
-
-                                <div className="space-y-2 mt-4">
-                                    <Label>Interview Mode</Label>
+                            <CardContent className="p-8 space-y-8">
+                                <ToggleItem label="Mandatory Feedback" description="Employees must complete exit survey before settlement." checked={config.interview.mandatory} onChange={() => handleToggle('interview', 'mandatory')} />
+ 
+                                <div className="space-y-4">
+                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Interview Mode</Label>
                                     <select
                                         value={config.interview.mode}
                                         onChange={(e) => handleChange('interview', 'mode', e.target.value)}
-                                        className="flex h-10 w-full max-w-sm rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                        className="h-12 w-full max-w-md rounded-lg bg-white border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50/20 text-sm font-bold text-slate-900 px-4 outline-none cursor-pointer"
                                     >
-                                        <option value="Self-Service">Self-Service (Online Form Only)</option>
-                                        <option value="HR Interview">1-on-1 with HR Only</option>
-                                        <option value="Hybrid">Hybrid (Form + Optional HR Meeting)</option>
+                                        <option value="Self-Service">Digital Form Only</option>
+                                        <option value="HR Interview">1-on-1 with HR</option>
+                                        <option value="Hybrid">Hybrid (Form + Review)</option>
                                     </select>
                                 </div>
                             </CardContent>
                         </Card>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base font-semibold text-slate-900">Form Configuration</CardTitle>
+ 
+                        <Card className="bg-white border border-slate-200">
+                            <CardHeader className="bg-slate-50 border-b border-slate-100">
+                                <CardTitle className="text-sm font-bold text-slate-900 uppercase tracking-wider">Privacy & Audit</CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-4">
-                                <ToggleItem label="Allow Anonymous Feedback" description="Employee name will be hidden in sentiment analysis and management reports." checked={config.interview.anonymous} onChange={() => handleToggle('interview', 'anonymous')} />
-                                <Separator />
-                                <ToggleItem label="HR Review Mandatory" description="Require HR to review and categorize the interview feedback before marking it complete." checked={config.interview.hrReviewMandatory} onChange={() => handleToggle('interview', 'hrReviewMandatory')} />
+                            <CardContent className="p-8 space-y-4">
+                                <ToggleItem label="Anonymized Data" description="Mask identities during sentiment analysis." checked={config.interview.anonymous} onChange={() => handleToggle('interview', 'anonymous')} />
+                                <Separator className="opacity-50" />
+                                <ToggleItem label="HR Review Mandatory" description="Require HR to validate feedback before closure." checked={config.interview.hrReviewMandatory} onChange={() => handleToggle('interview', 'hrReviewMandatory')} />
                             </CardContent>
                         </Card>
                     </div>
                 );
             case 'settlement':
                 return (
-                    <div className="space-y-6 animate-in fade-in duration-500">
-                        <SectionHeader title="Final Settlement (F&F)" description="Configure financial clearance and automated component calculation." />
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base font-semibold text-slate-900">Financial Systems</CardTitle>
+                    <div className="space-y-8 animate-in fade-in duration-500">
+                        <SectionHeader title="Final Settlement" description="Configure calculation vectors for Full & Final (F&F) settlement." />
+                        
+                        <Card className="bg-white border border-slate-200">
+                            <CardHeader className="bg-slate-50 border-b border-slate-100">
+                                <CardTitle className="text-sm font-bold text-slate-900 uppercase tracking-wider">Financial Setup</CardTitle>
                             </CardHeader>
-                            <CardContent>
-                                <ToggleItem label="Enable Direct Payroll Integration" description="Automatically fetch pending salaries and dues directly from the integrated Payroll engine." checked={config.settlement.payrollIntegration} onChange={() => handleToggle('settlement', 'payrollIntegration')} />
+                            <CardContent className="p-8">
+                                <ToggleItem label="Payroll Integration" description="Fetch dues and deductions directly from core Payroll." checked={config.settlement.payrollIntegration} onChange={() => handleToggle('settlement', 'payrollIntegration')} />
                             </CardContent>
                         </Card>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base font-semibold text-slate-900">Automated F&F Components</CardTitle>
+ 
+                        <Card className="bg-white border border-slate-200">
+                            <CardHeader className="bg-slate-50 border-b border-slate-100">
+                                <CardTitle className="text-sm font-bold text-slate-900 uppercase tracking-wider">Settlement Components</CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-3">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <CheckboxItem label="Salary Till LWD" checked={config.settlement.components.salaryLwd} onChange={() => handleToggle('settlement', 'components', 'salaryLwd')} />
-                                    <CheckboxItem label="Leave Encashment" checked={config.settlement.components.encashment} onChange={() => handleToggle('settlement', 'components', 'encashment')} />
-                                    <CheckboxItem label="Asset Deduction Penalties" checked={config.settlement.components.deductions} onChange={() => handleToggle('settlement', 'components', 'deductions')} />
-                                    <CheckboxItem label="Gratuity Clearance" checked={config.settlement.components.gratuity} onChange={() => handleToggle('settlement', 'components', 'gratuity')} />
-                                </div>
+                            <CardContent className="p-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <CheckboxItem label="Prorated Salary" checked={config.settlement.components.salaryLwd} onChange={() => handleToggle('settlement', 'components', 'salaryLwd')} />
+                                <CheckboxItem label="Leave Encashment" checked={config.settlement.components.encashment} onChange={() => handleToggle('settlement', 'components', 'encashment')} />
+                                <CheckboxItem label="Deductions" checked={config.settlement.components.deductions} onChange={() => handleToggle('settlement', 'components', 'deductions')} />
+                                <CheckboxItem label="Gratuity" checked={config.settlement.components.gratuity} onChange={() => handleToggle('settlement', 'components', 'gratuity')} />
                             </CardContent>
                         </Card>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base font-semibold text-slate-900">Settlement Approval Chain</CardTitle>
+ 
+                        <Card className="bg-white border border-slate-200">
+                            <CardHeader className="bg-slate-50 border-b border-slate-100">
+                                <CardTitle className="text-sm font-bold text-slate-900 uppercase tracking-wider">Approval Chain</CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-3">
-                                <CheckboxItem label="HR Approval" checked={config.settlement.approvalLevels.hr} onChange={() => handleToggle('settlement', 'approvalLevels', 'hr')} />
-                                <CheckboxItem label="Finance Approval" checked={config.settlement.approvalLevels.finance} onChange={() => handleToggle('settlement', 'approvalLevels', 'finance')} />
-                                <CheckboxItem label="Management / Director Approval" checked={config.settlement.approvalLevels.management} onChange={() => handleToggle('settlement', 'approvalLevels', 'management')} />
+                            <CardContent className="p-8 space-y-4">
+                                <CheckboxItem label="HR Admin Review" checked={config.settlement.approvalLevels.hr} onChange={() => handleToggle('settlement', 'approvalLevels', 'hr')} />
+                                <CheckboxItem label="Finance Sign-off" checked={config.settlement.approvalLevels.finance} onChange={() => handleToggle('settlement', 'approvalLevels', 'finance')} />
+                                <CheckboxItem label="Management Approval" checked={config.settlement.approvalLevels.management} onChange={() => handleToggle('settlement', 'approvalLevels', 'management')} />
                             </CardContent>
                         </Card>
                     </div>
                 );
             case 'documents':
                 return (
-                    <div className="space-y-6 animate-in fade-in duration-500">
-                        <SectionHeader title="Post-Exit Documents" description="Manage relieving letters and employment certificates." />
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base font-semibold text-slate-900">Automatic Generation</CardTitle>
-                                <p className="text-sm text-slate-500 mt-1">Select documents to auto-generate upon F&F clearance.</p>
+                    <div className="space-y-8 animate-in fade-in duration-500">
+                        <SectionHeader title="Document Generation" description="Manage the automated generation of letters and certificates." />
+                        
+                        <Card className="bg-white border border-slate-200">
+                            <CardHeader className="bg-slate-50 border-b border-slate-100">
+                                <CardTitle className="text-sm font-bold text-slate-900 uppercase tracking-wider">Automated Letters</CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <CheckboxItem label="Relieving Letter" checked={config.documents.autoGenerate.relievingLetter} onChange={() => handleToggle('documents', 'autoGenerate', 'relievingLetter')} />
-                                    <CheckboxItem label="Experience Certificate" checked={config.documents.autoGenerate.experienceCert} onChange={() => handleToggle('documents', 'autoGenerate', 'experienceCert')} />
-                                    <CheckboxItem label="Service Certificate" checked={config.documents.autoGenerate.serviceCert} onChange={() => handleToggle('documents', 'autoGenerate', 'serviceCert')} />
-                                </div>
+                            <CardContent className="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <CheckboxItem label="Relieving Letter" checked={config.documents.autoGenerate.relievingLetter} onChange={() => handleToggle('documents', 'autoGenerate', 'relievingLetter')} />
+                                <CheckboxItem label="Experience Cert" checked={config.documents.autoGenerate.experienceCert} onChange={() => handleToggle('documents', 'autoGenerate', 'experienceCert')} />
+                                <CheckboxItem label="Service Cert" checked={config.documents.autoGenerate.serviceCert} onChange={() => handleToggle('documents', 'autoGenerate', 'serviceCert')} />
                             </CardContent>
                         </Card>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base font-semibold text-slate-900">Document Issuance Rules</CardTitle>
+ 
+                        <Card className="bg-white border border-slate-200">
+                            <CardHeader className="bg-slate-50 border-b border-slate-100">
+                                <CardTitle className="text-sm font-bold text-slate-900 uppercase tracking-wider">Rules</CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-4">
-                                <ToggleItem label="Require Digital Signature" description="HR must digitally sign the auto-generated documents before they become accessible to the employee." checked={config.documents.digitalSignature} onChange={() => handleToggle('documents', 'digitalSignature')} />
-                                <Separator />
-                                <ToggleItem label="Allow Manual Override/Upload" description="Allow HR to upload physically signed or custom written physical letters instead of system templates." checked={config.documents.manualUpload} onChange={() => handleToggle('documents', 'manualUpload')} />
+                            <CardContent className="p-8 space-y-4">
+                                <ToggleItem label="Digital Signature" description="Enforce digital signing for all generated documents." checked={config.documents.digitalSignature} onChange={() => handleToggle('documents', 'digitalSignature')} />
+                                <Separator className="opacity-50" />
+                                <ToggleItem label="Legacy Manual Upload" description="Allow custom letter uploads." checked={config.documents.manualUpload} onChange={() => handleToggle('documents', 'manualUpload')} />
                             </CardContent>
                         </Card>
                     </div>
                 );
             case 'access':
                 return (
-                    <div className="space-y-6 animate-in fade-in duration-500">
-                        <SectionHeader title="Access Control" description="IT revocation and security protocols post-employment." />
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base font-semibold text-slate-900">Revocation Triggers</CardTitle>
+                    <div className="space-y-8 animate-in fade-in duration-500">
+                        <SectionHeader title="Access Governance" description="Orchestrate security protocols and automated credential revocation." />
+                        
+                        <Card className="bg-white border border-slate-200">
+                            <CardHeader className="bg-slate-50 border-b border-slate-100">
+                                <CardTitle className="text-sm font-bold text-slate-900 uppercase tracking-wider">Revocation Setup</CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-4">
-                                <ToggleItem label="Auto-Revoke System Access" description="Automatically block login capability for ERP, LMS, and Email servers based on mapping." checked={config.access.autoRevoke} onChange={() => handleToggle('access', 'autoRevoke')} />
-
+                            <CardContent className="p-8 space-y-8">
+                                <ToggleItem label="System Auto-Block" description="Automatically decommission active sessions and login capabilities." checked={config.access.autoRevoke} onChange={() => handleToggle('access', 'autoRevoke')} />
+ 
                                 {config.access.autoRevoke && (
-                                    <div className="space-y-2 mt-4 pt-4 border-t border-slate-100">
-                                        <Label>Revocation Timing</Label>
+                                    <div className="space-y-4 p-6 bg-slate-50 border border-slate-100 rounded-xl">
+                                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Timing Trigger</Label>
                                         <select
                                             value={config.access.timing}
                                             onChange={(e) => handleChange('access', 'timing', e.target.value)}
-                                            className="flex h-10 w-full max-w-sm rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                            className="h-12 w-full max-w-md rounded-lg bg-white border border-slate-200 focus:border-indigo-500 text-sm font-bold text-slate-900 px-4 transition-all outline-none appearance-none cursor-pointer"
                                         >
-                                            <option value="On LWD">End of Last Working Day (LWD)</option>
-                                            <option value="After F&F">After Final Settlement Clearance</option>
+                                            <option value="On LWD">End of Last Working Day</option>
+                                            <option value="After F&F">Following Final Settlement</option>
                                         </select>
                                     </div>
                                 )}
                             </CardContent>
                         </Card>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base font-semibold text-slate-900">Audit & Compliance</CardTitle>
+ 
+                        <Card className="bg-white border border-slate-200">
+                            <CardHeader className="bg-slate-50 border-b border-slate-100">
+                                <CardTitle className="text-sm font-bold text-slate-900 uppercase tracking-wider">Audit Compliance</CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="flex items-center gap-4">
-                                    <Label className="w-56">Data Retention Period (Years)</Label>
-                                    <input
-                                        type="number"
-                                        className="flex h-10 w-24 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-indigo-500"
-                                        value={config.access.auditRetention}
-                                        onChange={(e) => handleChange('access', 'auditRetention', parseInt(e.target.value))}
-                                    />
+                            <CardContent className="p-8 space-y-8">
+                                <div className="flex items-center gap-8">
+                                    <div className="space-y-1 flex-1">
+                                        <Label className="text-sm font-bold text-slate-900">Retention Threshold</Label>
+                                        <p className="text-xs text-slate-500 italic">Years for retaining separation audit trails.</p>
+                                    </div>
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            className="h-12 w-24 rounded-lg bg-white border border-slate-200 text-xl font-bold text-slate-900 text-center focus:border-indigo-500 outline-none"
+                                            value={config.access.auditRetention}
+                                            onChange={(e) => handleChange('access', 'auditRetention', parseInt(e.target.value))}
+                                        />
+                                        <span className="absolute -bottom-5 left-0 w-full text-center text-[8px] font-bold text-slate-300 uppercase tracking-widest">Years</span>
+                                    </div>
                                 </div>
-                                <ToggleItem label="Strict Compliance Archival" description="Convert employee records to Read-Only archives rather than deletion." checked={config.access.complianceMode} onChange={() => handleToggle('access', 'complianceMode')} />
+                                <Separator className="opacity-50" />
+                                <ToggleItem label="Archival Mode" description="Transition individuals to read-only compliance clusters." checked={config.access.complianceMode} onChange={() => handleToggle('access', 'complianceMode')} />
                             </CardContent>
                         </Card>
                     </div>
                 );
             case 'notifications':
                 return (
-                    <div className="space-y-6 animate-in fade-in duration-500">
-                        <SectionHeader title="Notifications Framework" description="Configure communication channels and critical event triggers." />
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base font-semibold text-slate-900">Communication Channels</CardTitle>
+                    <div className="space-y-8 animate-in fade-in duration-500">
+                        <SectionHeader title="System Notifications" description="Manage broadcast triggers and communication channels." />
+                        
+                        <Card className="bg-white border border-slate-200">
+                            <CardHeader className="bg-slate-50 border-b border-slate-100">
+                                <CardTitle className="text-sm font-bold text-slate-900 uppercase tracking-wider">Distribution Channels</CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-3">
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <CheckboxItem label="Push / In-App" checked={config.notifications.channels.inApp} onChange={() => handleToggle('notifications', 'channels', 'inApp')} />
-                                    <CheckboxItem label="Email" checked={config.notifications.channels.email} onChange={() => handleToggle('notifications', 'channels', 'email')} />
-                                    <CheckboxItem label="SMS Gateway" checked={config.notifications.channels.sms} onChange={() => handleToggle('notifications', 'channels', 'sms')} />
-                                </div>
+                            <CardContent className="p-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <CheckboxItem label="Push / In-App" checked={config.notifications.channels.inApp} onChange={() => handleToggle('notifications', 'channels', 'inApp')} />
+                                <CheckboxItem label="Email" checked={config.notifications.channels.email} onChange={() => handleToggle('notifications', 'channels', 'email')} />
+                                <CheckboxItem label="SMS" checked={config.notifications.channels.sms} onChange={() => handleToggle('notifications', 'channels', 'sms')} />
                             </CardContent>
                         </Card>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base font-semibold text-slate-900">Important Alert Triggers</CardTitle>
+ 
+                        <Card className="bg-white border border-slate-200">
+                            <CardHeader className="bg-slate-50 border-b border-slate-100">
+                                <CardTitle className="text-sm font-bold text-slate-900 uppercase tracking-wider">Broadcast Triggers</CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-4">
-                                <ToggleItem label="New Resignation Submitted" description="Notify HoD and HR immediately." checked={config.notifications.alerts.submitted} onChange={() => handleToggle('notifications', 'alerts', 'submitted')} />
-                                <Separator />
-                                <ToggleItem label="Approval Action Required" description="Remind managers if a step requires their input before SLA breaches." checked={config.notifications.alerts.approvalPending} onChange={() => handleToggle('notifications', 'alerts', 'approvalPending')} />
-                                <Separator />
-                                <ToggleItem label="NOC Clearance Overdue" description="Notify Departments if they have failed to clear NOCs." checked={config.notifications.alerts.nocOverdue} onChange={() => handleToggle('notifications', 'alerts', 'nocOverdue')} />
-                                <Separator />
-                                <ToggleItem label="Incomplete Handover approaching LWD" description="Warn employees and successors 3 days prior to LWD if handover is unsigned." checked={config.notifications.alerts.handoverIncomplete} onChange={() => handleToggle('notifications', 'alerts', 'handoverIncomplete')} />
+                            <CardContent className="p-8 space-y-4">
+                                <ToggleItem label="New Resignation" description="Notify supervisors and HR Admin immediately." checked={config.notifications.alerts.submitted} onChange={() => handleToggle('notifications', 'alerts', 'submitted')} />
+                                <Separator className="opacity-50" />
+                                <ToggleItem label="Pending Approvals" description="Remind supervisors of pending actions before SLA breach." checked={config.notifications.alerts.approvalPending} onChange={() => handleToggle('notifications', 'alerts', 'approvalPending')} />
+                                <Separator className="opacity-50" />
+                                <ToggleItem label="NOC Overdue" description="Notify departments if NOC remains pending beyond SLA." checked={config.notifications.alerts.nocOverdue} onChange={() => handleToggle('notifications', 'alerts', 'nocOverdue')} />
+                                <Separator className="opacity-50" />
+                                <ToggleItem label="Handover Threshold" description="Warning 72 hours prior to LWD if handover is incomplete." checked={config.notifications.alerts.handoverIncomplete} onChange={() => handleToggle('notifications', 'alerts', 'handoverIncomplete')} />
                             </CardContent>
                         </Card>
                     </div>
@@ -798,62 +784,60 @@ const ExitConfiguration: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col md:flex-row h-[calc(100vh-8rem)] bg-white/10 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/40 shadow-2xl relative">
-            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-400/20 rounded-full blur-[100px] pointer-events-none"></div>
-            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-400/20 rounded-full blur-[100px] pointer-events-none"></div>
-
+        <div className="flex flex-col md:flex-row h-[calc(100vh-8rem)] bg-slate-50 rounded-2xl overflow-hidden border border-slate-200 shadow-xl relative">
+            
             {/* Sidebar Navigation */}
-            <div className="w-full md:w-80 bg-white/40 backdrop-blur-md border-r border-white/50 flex flex-col z-10">
-                <div className="p-6 border-b border-white/50 bg-white/20">
-                    <h2 className="text-xl font-black text-slate-800 drop-shadow-sm flex items-center gap-2">
-                        <Settings className="w-5 h-5 text-indigo-600" /> Configuration
+            <div className="w-full md:w-[320px] bg-white border-r border-slate-200 flex flex-col z-10">
+                <div className="px-8 py-8 border-b border-slate-100 bg-slate-50/30">
+                    <h2 className="text-xl font-bold text-slate-900 uppercase tracking-tight flex items-center gap-3">
+                        <Settings className="w-5 h-5 text-indigo-600" /> Registry
                     </h2>
-                    <p className="text-xs font-bold text-slate-500 mt-1 drop-shadow-sm">Manage system-wide exit policies</p>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1 ml-1 opacity-70">Configuration Engine</p>
                 </div>
-                <nav className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
+                <nav className="flex-1 overflow-y-auto p-4 space-y-1 custom-scrollbar">
                     {sections.map(section => (
                         <button
                             key={section.id}
                             onClick={() => setActiveSection(section.id)}
-                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm transition-all duration-300 group
+                            className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm transition-all duration-300 group
                                 ${activeSection === section.id
-                                    ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-lg shadow-indigo-200/50 scale-[1.02]'
-                                    : 'bg-white/40 text-slate-600 hover:bg-white/80 hover:scale-[1.01] hover:shadow-sm border border-white/50'}`}
+                                    ? 'bg-slate-900 text-white shadow-lg'
+                                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}
                         >
-                            <div className={`p-2 rounded-lg transition-colors ${activeSection === section.id ? 'bg-white/20 text-white shadow-inner' : 'bg-white shadow-sm text-indigo-500 group-hover:bg-indigo-50'}`}>
-                                <section.icon className="w-4 h-4 drop-shadow-sm" />
+                            <div className={`p-2 rounded-lg transition-all ${activeSection === section.id ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-400 group-hover:bg-white'}`}>
+                                <section.icon className="w-4 h-4" />
                             </div>
                             <div className="text-left flex-1 min-w-0">
                                 <span className="block font-bold truncate">{section.label}</span>
-                                <span className={`text-[10px] uppercase font-bold tracking-wider block truncate mt-0.5 ${activeSection === section.id ? 'text-indigo-100' : 'text-slate-400'}`}>
+                                <span className={`text-[8px] uppercase font-bold tracking-wider block truncate mt-0.5 opacity-50`}>
                                     {section.description}
                                 </span>
                             </div>
-                            {activeSection === section.id && <ChevronRight className="w-4 h-4 opacity-70" />}
                         </button>
                     ))}
                 </nav>
             </div>
-
+ 
             {/* Main Content Area */}
-            <div className="flex-1 flex flex-col h-full overflow-hidden relative z-10">
+            <div className="flex-1 flex flex-col h-full overflow-hidden relative z-10 bg-white">
                 {/* Header Actions */}
-                <div className="bg-white/40 backdrop-blur-md border-b border-white/50 px-8 py-5 flex justify-between items-center sticky top-0 shadow-sm">
+                <div className="bg-white border-b border-slate-100 px-10 py-6 flex justify-between items-center sticky top-0 z-20 shadow-sm">
                     <div>
-                        <h2 className="text-xl font-black text-slate-800 tracking-tight drop-shadow-sm">{sections.find(s => s.id === activeSection)?.label}</h2>
+                        <h2 className="text-2xl font-bold text-slate-900 tracking-tight uppercase">{sections.find(s => s.id === activeSection)?.label}</h2>
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 ml-0.5">Global Protocol Editor</p>
                     </div>
-                    <div className="flex gap-4">
-                        <Button variant="outline" size="sm" className="h-10 bg-white/60 border-white/80 hover:bg-white text-slate-700 font-bold shadow-sm rounded-xl px-5 transition-all">
-                            <RotateCcw className="w-4 h-4 mr-2" /> Revert
+                    <div className="flex gap-3">
+                        <Button variant="outline" size="sm" className="h-10 px-6 border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[9px] rounded-lg hover:bg-slate-50">
+                            <RotateCcw className="w-3.5 h-3.5 mr-2" /> Reset
                         </Button>
-                        <Button size="sm" className="h-10 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-bold shadow-lg shadow-indigo-200/50 rounded-xl px-6 transition-all" onClick={handleSave} disabled={loading}>
-                            <Save className="w-4 h-4 mr-2 drop-shadow-sm" /> {loading ? 'Saving...' : 'Publish Rulebook'}
+                        <Button size="sm" className="h-10 px-8 bg-indigo-600 hover:bg-indigo-700 text-white font-bold uppercase tracking-wider text-[9px] rounded-lg shadow-md transition-all active:scale-95" onClick={handleSave} disabled={loading}>
+                            <Save className="w-3.5 h-3.5 mr-2" /> {loading ? 'Saving...' : 'Save Configuration'}
                         </Button>
                     </div>
                 </div>
-
+ 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto p-10 custom-scrollbar bg-slate-50/30">
                     <div className="max-w-4xl mx-auto pb-20">
                         {renderContent()}
                     </div>
@@ -866,46 +850,43 @@ const ExitConfiguration: React.FC = () => {
 // --- Sub-components for Cleaner Code ---
 
 const SectionHeader: React.FC<{ title: string; description: string }> = ({ title, description }) => (
-    <div className="mb-8 glass-panel p-5 border-l-4 border-l-indigo-500 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-100/30 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
-        <h3 className="text-xl font-black text-slate-900 drop-shadow-sm mb-1">{title}</h3>
-        <p className="text-sm font-medium text-slate-600">{description}</p>
+    <div className="mb-8 p-8 bg-white border border-slate-200 rounded-xl shadow-md relative overflow-hidden group">
+        <h3 className="text-xl font-bold text-slate-900 uppercase tracking-tight mb-2 leading-none">{title}</h3>
+        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{description}</p>
     </div>
 );
-
+ 
 const ToggleItem: React.FC<{ label: string; description?: string; checked: boolean; onChange: () => void }> = ({ label, description, checked, onChange }) => (
-    <div className="flex items-center justify-between py-3 group">
-        <div className="space-y-1 pr-4">
-            <Label className="text-sm font-bold text-slate-800 drop-shadow-sm block">{label}</Label>
-            {description && <p className="text-xs font-medium text-slate-500 leading-relaxed">{description}</p>}
+    <div className="flex items-center justify-between py-4 group border-b border-slate-50 last:border-0">
+        <div className="space-y-1 pr-6 flex-1">
+            <Label className="text-sm font-bold text-slate-900 uppercase tracking-tight block">{label}</Label>
+            {description && <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-relaxed">{description}</p>}
         </div>
         <div
             onClick={onChange}
-            className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-all duration-300 shadow-inner ${checked ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-indigo-300/50' : 'bg-slate-300 hover:bg-slate-400'}`}
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ${checked ? 'bg-slate-900 shadow-lg' : 'bg-slate-200'}`}
         >
             <span
-                className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-md ring-0 transition duration-300 ease-in-out flex items-center justify-center ${checked ? 'translate-x-5' : 'translate-x-0'}`}
-            >
-               {checked && <div className="w-2 h-2 rounded-full bg-indigo-500"></div>}
-            </span>
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${checked ? 'translate-x-5' : 'translate-x-0'}`}
+            />
         </div>
     </div>
 );
-
+ 
 const CheckboxItem: React.FC<{ label: string; checked: boolean; onChange: () => void }> = ({ label, checked, onChange }) => (
     <div
         onClick={onChange}
-        className={`flex items-center space-x-4 p-4 rounded-xl border border-white/60 shadow-sm cursor-pointer transition-all duration-300 hover:scale-[1.02] ${checked ? 'bg-indigo-50/80 backdrop-blur-md shadow-indigo-100/50' : 'bg-white/50 backdrop-blur-md hover:bg-white/80'}`}
+        className={`flex items-center space-x-4 p-4 rounded-xl border transition-all duration-200 cursor-pointer shadow-sm ${checked ? 'bg-slate-900 border-slate-900' : 'bg-white border-slate-200 hover:border-slate-300'}`}
     >
-        <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors shadow-inner ${checked ? 'bg-indigo-600 border-indigo-600' : 'bg-white border-slate-300'}`}>
-            {checked && <Check className="w-4 h-4 text-white drop-shadow-sm" />}
+        <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${checked ? 'bg-white border-white' : 'bg-slate-50 border-slate-200'}`}>
+            {checked && <Check className="w-3.5 h-3.5 text-slate-900 stroke-[4px]" />}
         </div>
-        <span className={`text-sm font-bold transition-colors ${checked ? 'text-indigo-950' : 'text-slate-700'}`}>{label}</span>
+        <span className={`text-[10px] font-bold uppercase tracking-wider transition-colors ${checked ? 'text-white' : 'text-slate-600'}`}>{label}</span>
     </div>
 );
-
-const Badge: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <span className="inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50/80 backdrop-blur-sm px-3 py-1 text-xs font-black text-indigo-800 shadow-sm uppercase tracking-wider">
+ 
+const Badge: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className }) => (
+    <span className={`inline-flex items-center rounded-lg bg-slate-100 border border-slate-200 text-slate-600 px-3 py-1 text-[9px] font-bold uppercase tracking-wider ${className}`}>
         {children}
     </span>
 );

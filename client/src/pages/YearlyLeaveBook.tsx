@@ -223,7 +223,7 @@ export default function YearlyLeaveBook() {
               <Button variant="outline" onClick={() => { setDeptFilter('All'); setTypeFilter('All'); setSearch(''); }} className="bg-white text-sm">
                 <RefreshCw className="w-4 h-4 mr-2" /> Reset
               </Button>
-              <Button onClick={handleExport} className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20 font-bold">
+              <Button onClick={handleExport} className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-500/20 font-bold">
                 <FileSpreadsheet className="w-4 h-4 mr-2" /> Export to Excel
               </Button>
             </div>

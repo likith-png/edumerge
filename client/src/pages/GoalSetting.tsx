@@ -112,22 +112,22 @@ const GoalSetting: React.FC = () => {
     return (
         <Layout title="Goal Setting & Target Management" description="Set SMART goals aligned with institutional objectives" icon={Flag} showBack>
             {/* Stats & Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                 <Card className="border-blue-200 bg-blue-50">
                     <CardContent className="pt-4">
-                        <div className="text-2xl font-bold text-blue-900">{goals.filter(g => g.status === 'Approved' || g.status === 'In Progress').length}</div>
+                        <div className="text-xl font-bold text-blue-900">{goals.filter(g => g.status === 'Approved' || g.status === 'In Progress').length}</div>
                         <div className="text-xs text-blue-700">Active Goals</div>
                     </CardContent>
                 </Card>
                 <Card className="border-amber-200 bg-amber-50">
                     <CardContent className="pt-4">
-                        <div className="text-2xl font-bold text-amber-900">{goals.filter(g => g.status === 'Pending Approval').length}</div>
+                        <div className="text-xl font-bold text-amber-900">{goals.filter(g => g.status === 'Pending Approval').length}</div>
                         <div className="text-xs text-amber-700">Pending Approval</div>
                     </CardContent>
                 </Card>
                 <Card className="border-green-200 bg-green-50">
                     <CardContent className="pt-4">
-                        <div className="text-2xl font-bold text-green-900">{goals.filter(g => g.status === 'Completed').length}</div>
+                        <div className="text-xl font-bold text-green-900">{goals.filter(g => g.status === 'Completed').length}</div>
                         <div className="text-xs text-green-700">Completed</div>
                     </CardContent>
                 </Card>
@@ -154,7 +154,7 @@ const GoalSetting: React.FC = () => {
             {/* Goals List */}
             <div className="space-y-4">
                 {goals.map((goal) => (
-                    <Card key={goal.id} className="border-slate-200 hover:shadow-md transition-shadow">
+                    <Card key={goal.id} className="border-slate-200 hover:shadow-sm transition-shadow">
                         <CardHeader className="pb-3">
                             <div className="flex items-start justify-between">
                                 <div className="flex-1">

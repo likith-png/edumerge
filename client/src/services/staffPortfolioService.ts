@@ -1,3 +1,6 @@
+
+
+
 // Staff Portfolio Service
 // Aggregates data from all modules to create a comprehensive staff profile
 
@@ -13,6 +16,9 @@ export interface StaffMember {
     qualification: string;
     reportingManager: string;
     status: 'Active' | 'Probation' | 'Notice Period' | 'Resigned';
+    isOnboardingComplete?: boolean;
+    [key: string]: any; // Allow for flexible mock data assignment
+
     reportDetails?: {
         dob: string;
         education: { others: string; ug: string; pg: string; doct: string; spec: string; };
@@ -178,17 +184,19 @@ export interface StaffPortfolioData {
 const mockStaffMembers: StaffMember[] = [
     // Administration Department
     {
-        id: 'NH-0010',
-        name: 'ABC',
+        id: '101',
+        name: 'Ms. Reshma Binu Prasad',
         photo: '/api/placeholder/100/100',
-        designation: 'Registrar',
-        department: 'Administration',
-        joiningDate: '2006-03-29',
-        email: 'abc.nh0010@college.edu',
-        phone: '+91 90000 00010',
-        qualification: 'SSLC, PUC, B. Com, MBA',
-        reportingManager: 'Principal',
-        status: 'Active',
+        designation: 'Asst. Professor',
+        department: 'Computer Science',
+        joiningDate: '2024-01-10',
+        email: 'reshma.binu@college.edu',
+        phone: '+91 90000 00101',
+        qualification: 'M.Tech, PhD',
+        reportingManager: 'HOD CSE',
+        status: 'Probation',
+        isOnboardingComplete: true,
+
         reportDetails: {
             dob: '23-Nov-1975',
             education: { others: 'SSLC, PUC', ug: 'B. Com', pg: 'MBA', doct: '-', spec: '-' },
@@ -207,6 +215,8 @@ const mockStaffMembers: StaffMember[] = [
         qualification: 'SSLC, PUC, B.COM',
         reportingManager: 'ABC',
         status: 'Active',
+        isOnboardingComplete: true,
+
         reportDetails: {
             dob: '07-Dec-1971',
             education: { others: 'SSLC, PUC', ug: 'B.COM', pg: '-', doct: '-', spec: 'COMMERCE' },
@@ -225,6 +235,8 @@ const mockStaffMembers: StaffMember[] = [
         qualification: 'SSLC, DIP, B.COM',
         reportingManager: 'DEF',
         status: 'Active',
+        isOnboardingComplete: true,
+
         reportDetails: {
             dob: '20-Jun-1989',
             education: { others: 'SSLC, DIP', ug: 'B.COM', pg: '-', doct: '-', spec: 'ACCOUNTANCY' },
@@ -243,6 +255,8 @@ const mockStaffMembers: StaffMember[] = [
         qualification: 'SSLC, BA',
         reportingManager: 'DEF',
         status: 'Active',
+        isOnboardingComplete: true,
+
         reportDetails: {
             dob: '21-Jun-1976',
             education: { others: 'SSLC', ug: 'BA', pg: '-', doct: '-', spec: 'ARTS' },
@@ -262,6 +276,8 @@ const mockStaffMembers: StaffMember[] = [
         qualification: 'SSLC, PUC, BE, M. Tech, Ph. D',
         reportingManager: 'Board of Directors',
         status: 'Active',
+        isOnboardingComplete: true,
+
         reportDetails: {
             dob: '01-May-1977',
             education: { others: 'SSLC, PUC', ug: 'BE', pg: 'M. Tech', doct: 'Ph. D', spec: 'Manufacturing Engineering' },
@@ -282,6 +298,8 @@ const mockStaffMembers: StaffMember[] = [
         qualification: '10th, puc, B.E, ME, Ph. D',
         reportingManager: 'Principal',
         status: 'Active',
+        isOnboardingComplete: true,
+
         reportDetails: {
             dob: '13-Dec-1965',
             education: { others: '10th, puc', ug: 'B.E', pg: 'ME', doct: 'Ph. D', spec: 'Computer Science' },
@@ -300,6 +318,8 @@ const mockStaffMembers: StaffMember[] = [
         qualification: '10th, 12th, B E, M Tech',
         reportingManager: 'jlksdlj',
         status: 'Active',
+        isOnboardingComplete: true,
+
         reportDetails: {
             dob: '15-Apr-1980',
             education: { others: '10th, 12th', ug: 'B E', pg: 'M Tech', doct: '-', spec: 'CSE' },
@@ -318,6 +338,8 @@ const mockStaffMembers: StaffMember[] = [
         qualification: 'SSLC, HSC, B.E, M Tech, Ph.D',
         reportingManager: 'jlksdlj',
         status: 'Active',
+        isOnboardingComplete: true,
+
         reportDetails: {
             dob: '30-Jul-1976',
             education: { others: 'SSLC, HSC', ug: 'B.E', pg: 'M Tech', doct: 'Ph.D', spec: 'CSE' },
@@ -336,6 +358,8 @@ const mockStaffMembers: StaffMember[] = [
         qualification: 'SSLC, Pre Degree, BTech, M TECH, (PhD)',
         reportingManager: 'jlksdlj',
         status: 'Active',
+        isOnboardingComplete: true,
+
         reportDetails: {
             dob: '01-Jun-1979',
             education: { others: 'SSLC, Pre Degree', ug: 'BTech', pg: 'M TECH', doct: '(PhD)', spec: 'CSE' },
@@ -354,6 +378,8 @@ const mockStaffMembers: StaffMember[] = [
         qualification: 'SSLC, Diploma',
         reportingManager: 'HLJHFJKH',
         status: 'Active',
+        isOnboardingComplete: true,
+
         reportDetails: {
             dob: '30-Jul-1980',
             education: { others: 'SSLC, Diploma', ug: '-', pg: '-', doct: '-', spec: '-' },
@@ -373,6 +399,8 @@ const mockStaffMembers: StaffMember[] = [
         qualification: 'SSLC',
         reportingManager: 'UOUEOOI',
         status: 'Active',
+        isOnboardingComplete: true,
+
         reportDetails: {
             dob: '22-Nov-1968',
             education: { others: 'SSLC', ug: '-', pg: '-', doct: '-', spec: '-' },
@@ -392,6 +420,8 @@ const mockStaffMembers: StaffMember[] = [
         qualification: 'SSLC, PUC, BBM, MBA, MPhil',
         reportingManager: 'Principal',
         status: 'Active',
+        isOnboardingComplete: true,
+
         reportDetails: {
             dob: '10-Mar-1983',
             education: { others: 'SSLC, PUC', ug: 'BBM', pg: 'MBA, MPhil', doct: '-', spec: 'Marketing, Management' },
@@ -410,6 +440,8 @@ const mockStaffMembers: StaffMember[] = [
         qualification: 'SSLC, PUC, BA, MLISc, KSET',
         reportingManager: 'UOUEOOI',
         status: 'Active',
+        isOnboardingComplete: true,
+
         reportDetails: {
             dob: '28-May-1986',
             education: { others: 'SSLC, PUC', ug: 'BA', pg: 'MLISc, KSET', doct: '-', spec: 'Web Designing' },
@@ -428,6 +460,8 @@ const mockStaffMembers: StaffMember[] = [
         qualification: 'SSLC, PUC, BA, B.PEd, M P Ed, KSET, (Ph.D)',
         reportingManager: 'UOUEOOI',
         status: 'Active',
+        isOnboardingComplete: true,
+
         reportDetails: {
             dob: '12-Apr-1983',
             education: { others: 'SSLC, PUC', ug: 'BA, B.PEd', pg: 'M P Ed, KSET', doct: '(Ph.D)', spec: 'Physical Education' },
@@ -441,14 +475,33 @@ const mockStaffMembers: StaffMember[] = [
  * Get all staff members
  */
 export function getAllStaff(): StaffMember[] {
-    return mockStaffMembers;
+    const saved = localStorage.getItem('onboarded_staff_ids');
+    const onboardedIds = saved ? JSON.parse(saved) : [];
+    
+    return mockStaffMembers.map(member => ({
+        ...member,
+        isOnboardingComplete: onboardedIds.includes(member.id) || member.isOnboardingComplete
+    }));
 }
 
 /**
  * Get staff member by ID
  */
 export function getStaffMember(id: string): StaffMember | null {
-    return mockStaffMembers.find(member => member.id === id) || null;
+    const staff = getAllStaff();
+    return staff.find(member => member.id === id) || null;
+}
+
+/**
+ * Update staff onboarding complete
+ */
+export function completeStaffOnboarding(id: string): void {
+    const saved = localStorage.getItem('onboarded_staff_ids');
+    const onboardedIds = saved ? JSON.parse(saved) : [];
+    if (!onboardedIds.includes(id)) {
+        onboardedIds.push(id);
+        localStorage.setItem('onboarded_staff_ids', JSON.stringify(onboardedIds));
+    }
 }
 
 /**

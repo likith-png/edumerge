@@ -4,7 +4,13 @@ import { Button } from '../ui/button';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { getSettlement, updateSettlement, getNOCRequests } from '../../services/exitService';
-import { Calculator, Download, DollarSign, FileText, AlertTriangle } from 'lucide-react';
+import { 
+    Calculator, Download, DollarSign, FileText, AlertTriangle,
+    ShieldCheck, ExternalLink, IndianRupee, Printer, 
+    CheckCircle, AlertCircle, Clock, Trash2, ArrowLeft, Send, Activity, XCircle, Wallet
+} from 'lucide-react';
+import { Badge } from '../ui/badge';
+import { Separator } from '../ui/separator';
 
 interface FinalSettlementProps {
     exitId?: number;
@@ -39,13 +45,11 @@ const FinalSettlement: React.FC<FinalSettlementProps> = ({ exitId, viewMode }) =
     const checkNOC = async () => {
         if (!exitId) return;
         try {
-            // Fetch all NOCs for this exit (Mock implementation: fetches all and filters)
-            // In real app, we would have a specific endpoint or the list would be filtered by exitId on server
             const data = await getNOCRequests();
             const myNocs = data.data.filter((n: any) => n.exit_id === exitId);
 
             if (myNocs.length === 0) {
-                setNocStatus('Pending'); // Assume pending if no records
+                setNocStatus('Pending');
                 return;
             }
 
@@ -70,175 +74,211 @@ const FinalSettlement: React.FC<FinalSettlementProps> = ({ exitId, viewMode }) =
         }
     };
 
-    if (!exitId) return <div className="p-10 text-center text-slate-500">No approved exit request found for settlement processing.</div>;
-    if (loading || !settlement) return <div className="p-4">Loading settlement details...</div>;
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center py-48 space-y-4 animate-in fade-in duration-500">
+                <div className="w-12 h-12 bg-slate-900 rounded-lg flex items-center justify-center shadow-sm">
+                    <Calculator className="w-6 h-6 text-white animate-pulse" />
+                </div>
+                <div className="text-center space-y-1">
+                    <p className="text-xs font-bold text-slate-900 uppercase tracking-wider">Calculating Settlement</p>
+                    <p className="text-[10px] font-medium text-slate-400 uppercase tracking-tight">Please wait...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (!exitId) {
+        return (
+            <div className="text-center py-32 space-y-6 bg-slate-50 border border-slate-200 rounded-lg">
+                <AlertCircle className="w-16 h-16 text-slate-300 mx-auto" />
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">No Active Exit Context</p>
+            </div>
+        );
+    }
+
+    const netPayable = (
+        (settlement?.salary_due || 0) +
+        (settlement?.leave_encashment || 0) +
+        (settlement?.bonus || 0) -
+        (settlement?.deductions || 0)
+    );
 
     return (
-        <div className="space-y-6">
-
-            {/* NOC Warning */}
-            {nocStatus !== 'Cleared' && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 flex items-start">
-                    <AlertTriangle className="w-5 h-5 text-yellow-600 mr-3 mt-0.5" />
-                    <div>
-                        <h4 className="text-sm font-semibold text-yellow-800">NOC Clearance Pending</h4>
-                        <p className="text-xs text-yellow-700 mt-1">
-                            Final settlement cannot be processed until all No Objection Certificates (NOCs) are cleared.
-                            Current Status: <span className="font-bold">{nocStatus}</span>
-                        </p>
-                    </div>
+        <div className="space-y-10 p-2">
+            
+            {/* NOC Status Alert */}
+            <div className={`p-5 rounded-lg border flex items-start gap-4 shadow-sm
+                ${nocStatus === 'Cleared' 
+                    ? 'bg-emerald-50 border-emerald-200' 
+                    : nocStatus === 'Rejected' 
+                    ? 'bg-rose-50 border-rose-200' 
+                    : 'bg-amber-50 border-amber-200'}`}>
+                <div className={`p-2 rounded-md ${
+                    nocStatus === 'Cleared' ? 'bg-emerald-600 text-white' :
+                    nocStatus === 'Rejected' ? 'bg-rose-600 text-white' :
+                    'bg-amber-600 text-white'
+                }`}>
+                    {nocStatus === 'Cleared' ? <ShieldCheck className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
                 </div>
-            )}
+                <div>
+                    <h4 className={`text-sm font-bold uppercase tracking-tight ${
+                        nocStatus === 'Cleared' ? 'text-emerald-900' : 
+                        nocStatus === 'Rejected' ? 'text-rose-900' : 'text-amber-900'}`}>
+                        {nocStatus === 'Cleared' ? 'Clearance Issued' : 'Clearance Pending'}
+                    </h4>
+                    <p className={`text-[10px] font-medium opacity-80 mt-0.5 ${
+                        nocStatus === 'Cleared' ? 'text-emerald-700' : 
+                        nocStatus === 'Rejected' ? 'text-rose-700' : 'text-amber-700'}`}>
+                        {nocStatus === 'Cleared' 
+                            ? 'All departmental NOCs have been verified. Settlement can proceed.' 
+                            : 'Settlement is on hold until all departmental clearances are obtained.'}
+                    </p>
+                </div>
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Breakdown Card */}
-                <Card className="border-slate-200 shadow-sm">
-                    <CardHeader className="py-4 px-6 bg-slate-50 border-b border-slate-100">
-                        <CardTitle className="text-lg font-semibold flex items-center text-slate-800">
-                            <Calculator className="w-5 h-5 mr-2 text-blue-600" /> Settlement Breakdown
+                <Card className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+                    <CardHeader className="p-6 bg-slate-50 border-b border-slate-200">
+                        <CardTitle className="flex items-center gap-3 text-slate-900 text-sm font-bold uppercase tracking-wider">
+                            <Calculator className="w-4 h-4 text-slate-500" />
+                            Settlement Ledger
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-6 space-y-4">
-                        <div className="grid grid-cols-2 gap-4 items-center">
-                            <Label>Salary Due (Pro-rata)</Label>
-                            <div className="relative">
-                                <span className="absolute left-3 top-2.5 text-slate-500">₹</span>
-                                <Input
-                                    type="number"
-                                    className="pl-7"
-                                    value={settlement.salary_due}
-                                    readOnly={!isFinanceAdmin}
-                                    onChange={(e) => setSettlement({ ...settlement, salary_due: parseFloat(e.target.value) })}
-                                />
+                        {[
+                            { label: 'Pro-Rata Salary', key: 'salary_due', icon: Activity },
+                            { label: 'Leave Encashment', key: 'leave_encashment', icon: Clock },
+                            { label: 'Incentive / Bonus', key: 'bonus', icon: DollarSign },
+                            { label: 'Deductions', key: 'deductions', icon: XCircle, isNegative: true }
+                        ].map((item, idx) => (
+                            <div key={idx} className="flex justify-between items-center p-3 border border-transparent hover:border-slate-100 hover:bg-slate-50 rounded-lg transition-all">
+                                <div className="flex items-center gap-3">
+                                    <item.icon className={`w-4 h-4 ${item.isNegative ? 'text-rose-500' : 'text-slate-500'}`} />
+                                    <p className="text-[10px] font-bold text-slate-600 uppercase tracking-wide">{item.label}</p>
+                                </div>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-medium text-slate-400">₹</span>
+                                    <Input
+                                        type="number"
+                                        className={`w-32 h-9 pl-7 text-right text-xs font-bold border-slate-200 rounded-md
+                                            ${item.isNegative ? 'text-rose-600' : 'text-slate-900'}`}
+                                        value={settlement[item.key]}
+                                        readOnly={!isFinanceAdmin}
+                                        onChange={(e) => setSettlement({ ...settlement, [item.key]: parseFloat(e.target.value) })}
+                                    />
+                                </div>
                             </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 items-center">
-                            <Label>Leave Encashment</Label>
-                            <div className="relative">
-                                <span className="absolute left-3 top-2.5 text-slate-500">₹</span>
-                                <Input
-                                    type="number"
-                                    className="pl-7"
-                                    value={settlement.leave_encashment}
-                                    readOnly={!isFinanceAdmin}
-                                    onChange={(e) => setSettlement({ ...settlement, leave_encashment: parseFloat(e.target.value) })}
-                                />
+                        ))}
+ 
+                        <div className="pt-6 border-t border-slate-100 flex justify-between items-center">
+                            <div>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Net Payable</p>
                             </div>
+                            <p className="text-3xl font-bold text-slate-900 tracking-tight">
+                                ₹{netPayable.toLocaleString()}
+                            </p>
                         </div>
-
-                        <div className="grid grid-cols-2 gap-4 items-center">
-                            <Label>Bonus / Incentives</Label>
-                            <div className="relative">
-                                <span className="absolute left-3 top-2.5 text-slate-500">₹</span>
-                                <Input
-                                    type="number"
-                                    className="pl-7"
-                                    value={settlement.bonus}
-                                    readOnly={!isFinanceAdmin}
-                                    onChange={(e) => setSettlement({ ...settlement, bonus: parseFloat(e.target.value) })}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 items-center">
-                            <Label className="text-red-600">Deductions (Asset/Advance)</Label>
-                            <div className="relative">
-                                <span className="absolute left-3 top-2.5 text-slate-500">-₹</span>
-                                <Input
-                                    type="number"
-                                    className="pl-7 border-red-200 text-red-600"
-                                    value={settlement.deductions}
-                                    readOnly={!isFinanceAdmin}
-                                    onChange={(e) => setSettlement({ ...settlement, deductions: parseFloat(e.target.value) })}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="pt-4 border-t border-slate-100 mt-4">
-                            <div className="flex justify-between items-center">
-                                <span className="text-lg font-bold text-slate-800">Net Payable</span>
-                                <span className="text-2xl font-bold text-green-600">
-                                    ₹{(
-                                        (settlement.salary_due || 0) +
-                                        (settlement.leave_encashment || 0) +
-                                        (settlement.bonus || 0) -
-                                        (settlement.deductions || 0)
-                                    ).toLocaleString()}
-                                </span>
-                            </div>
-                        </div>
-
+ 
                         {isFinanceAdmin && (
-                            <Button onClick={handleUpdate} className="w-full mt-4" disabled={nocStatus !== 'Cleared'}>
-                                {nocStatus !== 'Cleared' ? 'Complete NOC Clearance First' : 'Update Calculation'}
-                            </Button>
+                            <div className="pt-4">
+                                <Button 
+                                    onClick={handleUpdate} 
+                                    disabled={nocStatus !== 'Cleared'}
+                                    className="h-10 w-full bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-bold text-[11px] uppercase tracking-wider shadow-sm disabled:opacity-40 transition-all"
+                                >
+                                    <ShieldCheck className="w-4 h-4 mr-2" />
+                                    {nocStatus !== 'Cleared' ? 'Clearance Required' : 'Process Settlement'}
+                                </Button>
+                            </div>
                         )}
                     </CardContent>
                 </Card>
 
+
                 {/* Status & Remarks Card */}
-                <Card className="border-slate-200 shadow-sm h-fit">
-                    <CardHeader className="py-4 px-6 bg-slate-50 border-b border-slate-100">
-                        <CardTitle className="text-lg font-semibold flex items-center text-slate-800">
-                            <DollarSign className="w-5 h-5 mr-2 text-green-600" /> Payment Status
+                <Card className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden h-fit">
+                    <CardHeader className="p-6 bg-slate-50 border-b border-slate-200">
+                        <CardTitle className="flex items-center gap-3 text-slate-900 text-sm font-bold uppercase tracking-wider">
+                            <Wallet className="w-4 h-4 text-slate-500" />
+                            Disbursement
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-6 space-y-6">
                         <div className="space-y-2">
-                            <Label>Settlement Status</Label>
+                            <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-1">Payment Status</Label>
                             {isFinanceAdmin ? (
-                                <select
-                                    className="w-full h-10 rounded-md border border-slate-200 px-3"
-                                    value={settlement.status}
-                                    disabled={nocStatus !== 'Cleared'}
-                                    onChange={(e) => setSettlement({ ...settlement, status: e.target.value })}
-                                >
-                                    <option value="Pending">Pending</option>
-                                    <option value="Processed">Processed</option>
-                                    <option value="Paid">Paid</option>
-                                </select>
-                            ) : (
-                                <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
-                                    ${settlement.status === 'Paid' ? 'bg-green-100 text-green-800' :
-                                        settlement.status === 'Processed' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                                    {settlement.status}
+                                <div className="relative">
+                                    <select
+                                        className="w-full h-10 bg-slate-50 border border-slate-200 text-slate-900 font-bold text-[11px] uppercase tracking-wide rounded-md px-4 outline-none focus:ring-2 focus:ring-slate-900/10 appearance-none cursor-pointer"
+                                        value={settlement.status}
+                                        disabled={nocStatus !== 'Cleared'}
+                                        onChange={(e) => setSettlement({ ...settlement, status: e.target.value })}
+                                    >
+                                        <option value="Pending">Pending</option>
+                                        <option value="Processed">Processed</option>
+                                        <option value="Paid">Paid</option>
+                                    </select>
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                        <ChevronDown className="w-4 h-4" />
+                                    </div>
                                 </div>
+                            ) : (
+                                <Badge variant="outline" className={`px-4 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider
+                                    ${settlement.status === 'Paid' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' :
+                                      settlement.status === 'Processed' ? 'border-blue-200 bg-blue-50 text-blue-700' : 
+                                      'border-slate-200 bg-slate-50 text-slate-500'}`}>
+                                    {settlement.status}
+                                </Badge>
                             )}
                         </div>
-
+ 
                         <div className="space-y-2">
-                            <Label>Finance Remarks</Label>
+                            <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-1">Remarks</Label>
                             <textarea
-                                className="w-full min-h-[100px] rounded-md border border-slate-200 p-3 text-sm"
-                                placeholder="Add payment reference number or notes..."
+                                className="w-full min-h-[100px] bg-slate-50 border border-slate-200 rounded-md p-4 text-xs text-slate-900 focus:ring-2 focus:ring-slate-900/10 outline-none resize-none transition-all placeholder:text-slate-400"
+                                placeholder="Enter payment references or notes..."
                                 value={settlement.remarks || ''}
                                 readOnly={!isFinanceAdmin}
                                 onChange={(e) => setSettlement({ ...settlement, remarks: e.target.value })}
                             />
                         </div>
-
+ 
                         {settlement.status === 'Paid' && (
-                            <div className="bg-green-50 p-4 rounded-md border border-green-100">
-                                <p className="text-sm text-green-800 font-medium">Payment Disbursed</p>
-                                <p className="text-xs text-green-600 mt-1">Date: {settlement.payment_date}</p>
+                            <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-100 flex items-center gap-3 animate-in zoom-in-95 duration-500">
+                                <CheckCircle className="w-5 h-5 text-emerald-600" />
+                                <div>
+                                    <p className="text-xs font-bold text-emerald-950 uppercase tracking-wider">Disbursement Confirmed</p>
+                                    <p className="text-[9px] text-emerald-600 font-medium uppercase tracking-wider mt-0.5">Trans. Date: {settlement.payment_date}</p>
+                                </div>
                             </div>
                         )}
-
-                        <Button variant="outline" className="w-full">
-                            <Download className="w-4 h-4 mr-2" /> Download Payslip
-                        </Button>
-
-                        {settlement.status === 'Paid' && (
-                            <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white">
-                                <FileText className="w-4 h-4 mr-2" /> Download Relieving Letter
+ 
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <Button variant="outline" className="h-10 border-slate-200 text-slate-600 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-slate-50 transition-all">
+                                <Download className="w-4 h-4 mr-2" />
+                                Export Ledger
                             </Button>
-                        )}
+                            {settlement.status === 'Paid' && (
+                                <Button className="h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all">
+                                    <FileText className="w-4 h-4 mr-2" />
+                                    Relieving Letter
+                                </Button>
+                            )}
+                        </div>
                     </CardContent>
                 </Card>
             </div>
         </div>
     );
 };
+
+// Mock Icons for demonstration
+const ChevronDown = (props: any) => (
+    <svg {...props} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-down">
+        <path d="m6 9 6 6 6-6"/>
+    </svg>
+);
 
 export default FinalSettlement;

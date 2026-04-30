@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { getAllExits, updateExitStatus, approveWaiver } from '../../services/exitService';
-import { CheckCircle, XCircle } from 'lucide-react';
-
+import { 
+    CheckCircle, XCircle, ChevronRight, UserMinus, ShieldCheck, 
+    AlertTriangle, Clock, ArrowRight, UserCheck, ClipboardCheck,
+    Shield, Briefcase, FileText
+} from 'lucide-react';
+import { Badge } from '../ui/badge';
+import { Card, CardContent } from '../ui/card';
+import { Separator } from '../ui/separator';
 
 const ApprovalList: React.FC = () => {
     const [exits, setExits] = useState<any[]>([]);
@@ -18,7 +24,6 @@ const ApprovalList: React.FC = () => {
         setLoading(true);
         try {
             const data = await getAllExits();
-            // Filter only pending or relevant statuses for approval view
             setExits(data.data.filter((e: any) => e.status !== 'Withdrawn'));
         } catch (error) {
             console.error(error);
@@ -36,7 +41,7 @@ const ApprovalList: React.FC = () => {
                 status,
                 lwd_approved: status === 'Approved' ? (lwd || new Date().toISOString().split('T')[0]) : undefined,
                 comments,
-                approver_role: simulatedRole // Pass the simulated role
+                approver_role: simulatedRole
             });
             alert(`Action ${status} submitted successfully`);
             fetchExits();
@@ -45,15 +50,10 @@ const ApprovalList: React.FC = () => {
         }
     };
 
-    // Filter exits based on simulated role
     const filteredExits = exits.filter(exit => {
-        // HR should see waiver requests regardless of resignation stage
         if (simulatedRole === 'HR' && exit.waiver_requested && !exit.waiver_approved) return true;
+        if (exit.status === 'Approved' || exit.status === 'Rejected') return true; 
 
-        if (exit.status === 'Approved' || exit.status === 'Rejected') return true; // Show history
-        if (!exit.current_approver_role) return true; // Fallback
-
-        // Match role map
         const roleMap: any = {
             'Reporting Manager': ['Reporting Manager'],
             'Head of Department': ['Head of Department'],
@@ -74,7 +74,6 @@ const ApprovalList: React.FC = () => {
         }
     };
 
-    // Generate timeline steps based on V1.2 PRD
     const getTimeline = (exit: any) => {
         const timeline = [
             { label: 'Initiation Triggered', status: 'completed', date: exit.submission_date || exit.resignation_date },
@@ -86,140 +85,166 @@ const ApprovalList: React.FC = () => {
         return timeline;
     };
 
-    return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <div>
-                    <h2 className="text-2xl font-bold text-slate-900">Exit Approvals</h2>
-                    <p className="text-sm text-slate-500">Review and process resignation requests</p>
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center py-48 animate-in fade-in duration-500">
+                <div className="p-4 bg-slate-900 rounded-xl shadow-lg ring-4 ring-slate-100 mb-6">
+                    <ShieldCheck className="w-10 h-10 text-white animate-pulse" />
                 </div>
-                <select
-                    className="px-4 py-2 border border-slate-200 rounded-lg text-sm bg-white shadow-sm hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    value={simulatedRole}
-                    onChange={(e) => setSimulatedRole(e.target.value)}
-                >
-                    <option value="Reporting Manager">View as: Reporting Manager</option>
-                    <option value="Head of Department">View as: Head of Department</option>
-                    <option value="Principal">View as: Principal</option>
-                    <option value="HR">View as: HR</option>
-                </select>
+                <div className="text-center space-y-1">
+                    <p className="text-xs font-bold text-slate-900 uppercase tracking-widest">Loading Validations</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Please wait...</p>
+                </div>
             </div>
+        );
+    }
 
-            {loading ? (
-                <div className="text-center py-12 glass-panel shadow-sm">
-                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-200 border-t-indigo-600 shadow-sm"></div>
-                    <p className="mt-4 font-bold text-slate-600 animate-pulse">Loading approvals...</p>
+        return (
+            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500 p-2">
+            {/* Persona Management Block */}
+            {/* Persona Selection Block */}
+            <Card className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+                <div className="p-8 flex flex-col md:flex-row justify-between items-center gap-6 bg-slate-50/50">
+                    <div className="flex items-center gap-5">
+                        <div className="p-3 bg-slate-900 rounded-lg shadow-sm">
+                            <UserCheck className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                        <h3 className="text-lg font-bold text-slate-900 tracking-tight uppercase">Simulated Role</h3>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">Reviewing as different authority</p>
+                        </div>
+                    </div>
+                    <div className="relative w-full md:w-auto">
+                        <select
+                            className="w-full md:w-64 h-11 bg-white border border-slate-200 text-slate-900 font-bold text-[11px] uppercase tracking-wider rounded-lg px-5 outline-none focus:ring-2 focus:ring-slate-100"
+                            value={simulatedRole}
+                            onChange={(e) => setSimulatedRole(e.target.value)}
+                        >
+                            <option value="Reporting Manager">Reporting Manager</option>
+                            <option value="Head of Department">Head of Department</option>
+                            <option value="Principal">Principal</option>
+                            <option value="HR">HR View</option>
+                        </select>
+                        <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                            <ChevronRight className="w-4 h-4 rotate-90" />
+                        </div>
+                    </div>
                 </div>
-            ) : filteredExits.length === 0 ? (
-                <div className="glass-panel text-center py-16 shadow-lg relative overflow-hidden">
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-emerald-400/20 rounded-full blur-3xl"></div>
-                    <CheckCircle className="w-16 h-16 mx-auto text-emerald-400 mb-4 drop-shadow-md relative z-10" />
-                    <p className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent relative z-10">Inbox Zero!</p>
-                    <p className="text-sm font-medium text-slate-500 mt-2 relative z-10">No pending approvals for {simulatedRole}</p>
+            </Card>
+
+            {filteredExits.length === 0 ? (
+                <div className="text-center py-20 bg-slate-50 border border-slate-200 rounded-xl shadow-sm">
+                    <div className="w-16 h-16 bg-white border border-slate-100 text-slate-200 rounded-lg flex items-center justify-center mx-auto mb-6">
+                        <ClipboardCheck className="h-8 w-8" />
+                    </div>
+                    <div className="space-y-1">
+                        <p className="text-lg font-bold text-slate-900 uppercase tracking-tight">No Pending Approvals</p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider max-w-sm mx-auto">Tasks are completed for <span className="text-indigo-600 font-bold">{simulatedRole}</span>.</p>
+                    </div>
                 </div>
             ) : (
-                <div className="space-y-6">
+                <div className="grid gap-8">
                     {filteredExits.map(exit => {
+                        const canApprove = (simulatedRole === exit.current_approver_role) || 
+                                         (simulatedRole === 'HR' && exit.current_approver_role === 'HR');
                         const timeline = getTimeline(exit);
                         const isExpanded = expandedExit === exit.id;
-                        const canApprove = exit.status === 'Pending' && exit.current_approver_role === simulatedRole;
-
+                        
                         return (
-                            <div key={exit.id} className="glass-card overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 group">
-                                <div className="p-6 bg-white/40 backdrop-blur-md border-b border-white/60 relative overflow-hidden">
-                                    <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-300/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-                                    <div className="flex justify-between items-start relative z-10">
+                            <Card key={exit.id} className="bg-white border border-slate-200 rounded-xl shadow-sm hover:border-slate-300 transition-all duration-300">
+                                <div className="p-10 space-y-10">
+                                    {/* Record Header */}
+                                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                                         <div className="flex items-center gap-5">
-                                            <div className="relative">
-                                                <div className="absolute inset-0 bg-indigo-400 rounded-full blur opacity-40 group-hover:opacity-60 transition-opacity"></div>
-                                                <img
-                                                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${exit.employee_name}`}
-                                                    className="w-14 h-14 rounded-full border-2 border-white shadow-md relative z-10"
-                                                    alt={exit.employee_name}
-                                                />
+                                            <div className="w-16 h-16 rounded-xl bg-slate-900 p-0.5 shadow-sm">
+                                                <div className="w-full h-full rounded-lg overflow-hidden bg-white">
+                                                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${exit.employee_name}`} alt={exit.employee_name} />
+                                                </div>
                                             </div>
-                                            <div>
-                                                <h3 className="text-xl font-bold text-slate-900 drop-shadow-sm">{exit.employee_name}</h3>
-                                                <p className="text-sm font-medium text-slate-600">{exit.department} • {exit.designation || 'Employee'}</p>
+                                            <div className="space-y-0.5">
+                                                <h3 className="text-xl font-bold text-slate-900 tracking-tight uppercase">{exit.employee_name}</h3>
+                                                <div className="flex items-center gap-3">
+                                                    <Badge className="bg-slate-100 text-slate-600 border-none px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider shadow-none">{exit.department}</Badge>
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{exit.designation}</span>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="text-right">
-                                            <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-xs font-bold shadow-sm ${exit.status === 'Approved' ? 'bg-emerald-100/90 text-emerald-900 border border-emerald-200' :
-                                                    exit.status === 'Rejected' ? 'bg-rose-100/90 text-rose-900 border border-rose-200' :
-                                                        exit.status === 'Manager_Approved' ? 'bg-blue-100/90 text-blue-900 border border-blue-200' :
-                                                            exit.status === 'HR_Approved' ? 'bg-cyan-100/90 text-cyan-900 border border-cyan-200' :
-                                                                'bg-amber-100/90 text-amber-900 border border-amber-200'
-                                                }`}>
+                                        <div className="flex flex-col items-end gap-2 w-full md:w-auto">
+                                            <Badge className={`px-4 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider border-none shadow-sm
+                                                ${exit.status === 'Pending' ? 'bg-orange-100 text-orange-700' :
+                                                  exit.status.includes('Approved') ? 'bg-indigo-100 text-indigo-700' :
+                                                  'bg-rose-100 text-rose-700'}`}>
                                                 {exit.status}
-                                            </span>
-                                            <p className="text-xs font-bold text-slate-500 mt-2">Submitted: {exit.resignation_date}</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="p-6 space-y-8 bg-white/20">
-                                    {/* Key Information Grid */}
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <div className="bg-white/40 rounded-xl p-5 shadow-inner border border-white/60">
-                                            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Reason</p>
-                                            <p className="text-base font-bold text-slate-800">{exit.reason}</p>
-                                        </div>
-                                        <div className="bg-white/40 rounded-xl p-5 shadow-inner border border-white/60">
-                                            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Proposed LWD</p>
-                                            <p className="text-base font-bold text-slate-800 flex items-center gap-2">
-                                                <CheckCircle className="w-4 h-4 text-slate-400" /> {exit.lwd_proposed}
+                                            </Badge>
+                                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                                                <Clock className="w-3.5 h-3.5" /> Filed: <span className="text-slate-900">{exit.resignation_date}</span>
                                             </p>
                                         </div>
-                                        <div className="bg-white/40 rounded-xl p-5 shadow-inner border border-white/60 relative overflow-hidden">
-                                            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Current Approver</p>
-                                            <p className="text-base font-black bg-gradient-to-r from-indigo-700 to-indigo-500 bg-clip-text text-transparent relative z-10">{exit.current_approver_role || 'Completed ✅'}</p>
-                                            <div className="absolute top-1/2 -right-4 w-16 h-16 bg-indigo-200 rounded-full blur-xl opacity-40"></div>
+                                    </div>
+
+                                    {/* Analysis Grid */}
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        <div className="p-6 bg-slate-50 rounded-xl border border-slate-100 shadow-sm transition-all">
+                                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                                <FileText className="w-3.5 h-3.5" /> Reason
+                                            </p>
+                                            <p className="text-[11px] font-bold text-slate-900 uppercase leading-relaxed tracking-tight line-clamp-2">{exit.reason}</p>
+                                        </div>
+                                        <div className="p-6 bg-slate-50 rounded-xl border border-slate-100 shadow-sm transition-all">
+                                            <p className="text-[9px] font-bold text-orange-600 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                                <Clock className="w-3.5 h-3.5" /> Proposed LWD
+                                            </p>
+                                            <p className="text-2xl font-bold text-orange-600 leading-none tracking-tight">{exit.lwd_proposed}</p>
+                                        </div>
+                                        <div className="p-6 bg-slate-900 rounded-xl shadow-md">
+                                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                                <Shield className="w-3.5 h-3.5" /> Current Status
+                                            </p>
+                                            <p className="text-[11px] font-bold text-white uppercase tracking-wider">{exit.current_approver_role || 'Approved'}</p>
                                         </div>
                                     </div>
 
-                                    {/* Timeline View */}
-                                    <div className="bg-white/30 rounded-xl p-6 border border-white/50 shadow-sm relative overflow-hidden">
-                                        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-200/30 rounded-full blur-3xl pointer-events-none"></div>
+                                    {/* Timeline Toggle */}
+                                    <div className="space-y-4">
                                         <button
                                             onClick={() => setExpandedExit(isExpanded ? null : exit.id)}
-                                            className="flex items-center justify-between w-full text-left"
+                                            className="w-full h-14 bg-slate-50 border border-slate-100 hover:bg-slate-100 rounded-xl px-6 flex items-center justify-between transition-all active:scale-[0.99]"
                                         >
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 shadow-sm">
-                                                    <span className={`transform transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>▼</span>
+                                                <div className={`p-1.5 rounded-lg transition-all ${isExpanded ? 'bg-slate-900 text-white rotate-90' : 'bg-white text-slate-400 border border-slate-100'}`}>
+                                                    <ChevronRight className="w-4 h-4" />
                                                 </div>
-                                                <span className="text-base font-bold text-slate-800 tracking-wide">{isExpanded ? 'Hide' : 'Show'} Cinematic Timeline</span>
+                                                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600">Approval Workflow</span>
                                             </div>
-                                            <div className="flex gap-1.5 hidden sm:flex">
+                                            <div className="flex gap-1.5">
                                                 {timeline.map((s: any, i: number) => (
-                                                    <div key={i} className={`w-2 h-2 rounded-full ${s.status === 'completed' ? 'bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)]' : s.status === 'current' ? 'bg-indigo-500 animate-pulse shadow-[0_0_5px_rgba(99,102,241,0.5)]' : 'bg-white/60 border border-slate-200'}`}></div>
+                                                    <div key={i} className={`w-1.5 h-1.5 rounded-full ${s.status === 'completed' ? 'bg-emerald-500' : s.status === 'current' ? 'bg-blue-600 animate-pulse' : 'bg-slate-200'}`} />
                                                 ))}
                                             </div>
                                         </button>
 
                                         {isExpanded && (
-                                            <div className="relative pl-8 border-l-2 border-indigo-200 ml-4 mt-8 space-y-8 animate-in fade-in slide-in-from-top-4 duration-500">
+                                            <div className="p-8 bg-slate-50 rounded-xl space-y-10 animate-in slide-in-from-top-2 duration-300 border border-slate-100">
                                                 {timeline.map((step, idx) => (
-                                                    <div key={idx} className="relative group/timeline">
-                                                        <div className={`absolute -left-[41px] w-8 h-8 rounded-full border-4 flex items-center justify-center transition-all duration-300 ${step.status === 'completed' ? 'bg-emerald-500 border-emerald-200 shadow-[0_0_15px_rgba(16,185,129,0.5)] scale-110' :
-                                                                step.status === 'current' ? 'bg-indigo-500 border-indigo-200 animate-pulse shadow-[0_0_15px_rgba(99,102,241,0.6)] scale-125 z-10' :
-                                                                    'bg-slate-100 border-white shadow-sm'
-                                                            }`}>
-                                                            {step.status === 'completed' && <CheckCircle className="w-4 h-4 text-white drop-shadow-sm" />}
+                                                    <div key={idx} className="flex gap-8 group/step relative">
+                                                        {idx !== timeline.length - 1 && <div className="absolute left-[21px] top-12 bottom-0 w-0.5 bg-slate-200 rounded-full" />}
+                                                        <div className={`w-11 h-11 rounded-lg flex items-center justify-center shrink-0 shadow-sm border-2
+                                                            ${step.status === 'completed' ? 'bg-emerald-500 border-emerald-50 text-white' :
+                                                              step.status === 'current' ? 'bg-slate-900 border-slate-800 text-white scale-105 z-10' :
+                                                              'bg-white border-slate-100 text-slate-200'}`}>
+                                                            {step.status === 'completed' ? <CheckCircle className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
                                                         </div>
-                                                        <div className={`ml-2 transition-all duration-300 ${step.status === 'current' ? 'bg-white/60 px-5 py-4 rounded-xl shadow-lg border border-indigo-100/50 backdrop-blur-sm -translate-y-2' : 'group-hover/timeline:translate-x-1'}`}>
-                                                            <p className={`text-base font-black ${step.status === 'completed' ? 'text-emerald-700' :
-                                                                    step.status === 'current' ? 'bg-gradient-to-r from-indigo-700 to-purple-600 bg-clip-text text-transparent' :
-                                                                        'text-slate-400'
-                                                                }`}>
-                                                                {step.label}
-                                                            </p>
-                                                            {step.date && (
-                                                                <p className="text-xs font-bold text-slate-500 mt-1">{new Date(step.date).toLocaleDateString()}</p>
-                                                            )}
-                                                            {step.status === 'current' && (
-                                                                <p className="text-xs font-bold text-indigo-500 mt-2 bg-indigo-50 inline-block px-2 py-1 rounded-sm border border-indigo-100/50 shadow-sm uppercase tracking-wide">⏳ Awaiting action</p>
-                                                            )}
+                                                        <div className="flex-1 space-y-1 pt-1.5">
+                                                            <div className="flex items-center justify-between">
+                                                                <h4 className={`text-md font-bold tracking-tight uppercase transition-colors
+                                                                    ${step.status === 'completed' ? 'text-emerald-700' : step.status === 'current' ? 'text-slate-900' : 'text-slate-300'}`}>
+                                                                    {step.label}
+                                                                </h4>
+                                                                {step.status === 'current' && <Badge className="bg-orange-500 text-white border-none font-bold text-[8px] uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm">Required</Badge>}
+                                                            </div>
+                                                            {step.date && <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                                                {new Date(step.date).toLocaleDateString()}
+                                                            </p>}
                                                         </div>
                                                     </div>
                                                 ))}
@@ -227,96 +252,84 @@ const ApprovalList: React.FC = () => {
                                         )}
                                     </div>
 
-                                    {/* Waiver Request Details */}
+                                    {/* Waiver Block */}
                                     {exit.waiver_requested === 1 && (
-                                        <div className="bg-amber-50/80 backdrop-blur-sm border border-amber-200/50 rounded-xl p-5 shadow-sm relative overflow-hidden">
-                                            <div className="absolute -top-4 -right-4 w-24 h-24 bg-amber-400/20 rounded-full blur-xl pointer-events-none"></div>
-                                            <p className="font-black text-amber-900 mb-3 flex items-center gap-3 text-lg drop-shadow-sm">
-                                                <span className="w-3 h-3 bg-amber-500 rounded-full shadow-[0_0_10px_rgba(245,158,11,0.5)] animate-pulse"></span>
-                                                Waiver Requested
-                                            </p>
-                                            <p className="text-sm font-medium text-slate-700 italic border-l-2 border-amber-300 pl-3 py-1 mb-4 bg-white/40 rounded-r-lg">"{exit.waiver_reason}"</p>
-                                            <div className="flex gap-6 text-xs text-slate-700 bg-white/40 p-3 rounded-lg border border-white/50">
-                                                <span className="font-medium">Shortfall: <strong className="font-black text-rose-600 text-sm ml-1">{exit.shortfall_days} days</strong></span>
-                                                <span className="font-medium">Buyout Amount: <strong className="font-black text-rose-600 text-sm ml-1">₹{exit.buyout_amount}</strong></span>
-                                            </div>
-                                            <div className="mt-4 border-t border-amber-200/50 pt-4">
-                                                {exit.waiver_approved === 1 ? (
-                                                    <span className="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 shadow-sm border border-emerald-200">
-                                                        <CheckCircle className="w-4 h-4 mr-1.5" /> Waiver Approved
-                                                    </span>
-                                                ) : exit.waiver_approved === 0 ? (
-                                                    <span className="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 shadow-sm border border-amber-200 animate-pulse">
-                                                        Pending Review
-                                                    </span>
-                                                ) : (
-                                                    <span className="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 shadow-sm border border-rose-200">
-                                                        <XCircle className="w-4 h-4 mr-1.5" /> Waiver Rejected
-                                                    </span>
+                                        <Card className="bg-orange-50/50 border-orange-100 rounded-xl overflow-hidden">
+                                            <div className="p-8 space-y-8">
+                                                <div className="flex items-center gap-5">
+                                                    <div className="p-3 bg-orange-600 text-white rounded-lg shadow-sm">
+                                                        <AlertTriangle className="w-6 h-6" />
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-xl font-bold text-orange-950 uppercase tracking-tight">Waiver Request</h4>
+                                                        <p className="text-[10px] font-bold text-orange-600 uppercase tracking-widest mt-0.5">Approval required</p>
+                                                    </div>
+                                                </div>
+                                                <div className="p-6 bg-white border border-orange-100 rounded-lg shadow-sm">
+                                                    <p className="text-[9px] font-bold text-orange-400 uppercase tracking-widest mb-2">Request Reason:</p>
+                                                    <p className="text-[13px] font-bold text-slate-900 uppercase leading-snug tracking-tight">"{exit.waiver_reason}"</p>
+                                                </div>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                                    <div className="p-5 bg-white border border-orange-50 rounded-lg">
+                                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Notice Shortfall</p>
+                                                        <h5 className="text-3xl font-bold text-rose-600 tracking-tight mt-1">{exit.shortfall_days} <span className="text-sm opacity-50">Days</span></h5>
+                                                    </div>
+                                                    <div className="p-5 bg-white border border-orange-50 rounded-lg">
+                                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Buyout Amount</p>
+                                                        <h5 className="text-3xl font-bold text-rose-600 tracking-tight mt-1">₹{exit.buyout_amount}</h5>
+                                                    </div>
+                                                </div>
+                                                
+                                                {simulatedRole === 'HR' && exit.waiver_approved === 0 && (
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                                                        <Button
+                                                            className="h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-[11px] uppercase tracking-wider shadow-md transition-all active:scale-[0.98]"
+                                                            onClick={() => handleWaiver(exit.id, true)}
+                                                        >
+                                                            Approve Waiver
+                                                        </Button>
+                                                        <Button
+                                                            variant="outline"
+                                                            className="h-12 border-slate-200 text-slate-600 hover:bg-slate-50 rounded-lg font-bold text-[11px] uppercase tracking-wider transition-all"
+                                                            onClick={() => handleWaiver(exit.id, false)}
+                                                        >
+                                                            Reject Waiver
+                                                        </Button>
+                                                    </div>
                                                 )}
                                             </div>
-                                        </div>
+                                        </Card>
                                     )}
 
-                                    {/* Action Buttons */}
-                                    <div className="flex flex-col sm:flex-row gap-4 pt-6 mt-2 border-t border-white/40 relative z-20">
-                                        {/* Waiver Actions for HR */}
-                                        {simulatedRole === 'HR' && exit.waiver_requested === 1 && exit.waiver_approved === 0 && (
-                                            <>
-                                                <Button
-                                                    className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg shadow-emerald-500/30 rounded-full h-12 text-sm font-bold transition-all hover:scale-[1.02]"
-                                                    onClick={() => handleWaiver(exit.id, true)}
-                                                >
-                                                    <CheckCircle className="w-5 h-5 mr-2 drop-shadow-sm" />
-                                                    Approve Waiver
-                                                </Button>
-                                                <Button
-                                                    variant="outline"
-                                                    className="flex-1 border-rose-200 text-rose-600 bg-white/60 hover:bg-rose-50 rounded-full h-12 text-sm font-bold shadow-sm backdrop-blur-sm transition-all hover:scale-[1.02]"
-                                                    onClick={() => handleWaiver(exit.id, false)}
-                                                >
-                                                    <XCircle className="w-5 h-5 mr-2" />
-                                                    Reject Waiver
-                                                </Button>
-                                            </>
-                                        )}
-
-                                        {/* Resignation Approval Actions */}
+                                    <div className="pt-8 border-t border-slate-100">
                                         {canApprove ? (
-                                            <>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                                 <Button
-                                                    className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg shadow-indigo-500/30 rounded-full h-12 text-sm font-bold transition-all hover:scale-[1.02]"
+                                                    className="h-14 bg-slate-900 hover:bg-black text-white rounded-lg font-bold text-[12px] uppercase tracking-widest shadow-md transition-all active:scale-[0.98]"
                                                     onClick={() => handleApproval(exit.id, 'Approved', exit.lwd_proposed)}
                                                 >
-                                                    <CheckCircle className="w-5 h-5 mr-2 drop-shadow-sm" />
-                                                    Approve Resignation
+                                                    Approve
+                                                    <ArrowRight className="w-5 h-5 ml-3" />
                                                 </Button>
                                                 <Button
                                                     variant="destructive"
-                                                    className="flex-1 shadow-lg shadow-rose-500/30 rounded-full h-12 text-sm font-bold bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 transition-all hover:scale-[1.02]"
+                                                    className="h-14 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold text-[12px] uppercase tracking-widest shadow-sm transition-all active:scale-[0.98]"
                                                     onClick={() => handleApproval(exit.id, 'Rejected')}
                                                 >
-                                                    <XCircle className="w-5 h-5 mr-2 drop-shadow-sm" />
-                                                    Reject Request
+                                                    Reject
                                                 </Button>
-                                            </>
+                                            </div>
                                         ) : (
-                                            <div className="flex-1 text-center bg-white/40 backdrop-blur-sm p-3 rounded-full border border-white/60 shadow-inner">
-                                                {exit.status !== 'Pending' ? (
-                                                    <span className="inline-flex items-center gap-2 text-slate-600 font-bold text-sm">
-                                                        <CheckCircle className="w-5 h-5 text-emerald-500" />
-                                                        Action Successfully Logged
-                                                    </span>
-                                                ) : (
-                                                    <span className="text-slate-500 font-bold text-sm">
-                                                        Awaiting Action from <span className="text-indigo-600">{exit.current_approver_role}</span>
-                                                    </span>
-                                                )}
+                                            <div className="w-full h-14 bg-slate-50 rounded-lg flex items-center justify-center border border-dashed border-slate-200">
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-3">
+                                                    <Shield className="w-4 h-4" />
+                                                    {exit.status !== 'Pending' ? 'Processed' : `Pending: ${exit.current_approver_role}`}
+                                                </p>
                                             </div>
                                         )}
                                     </div>
                                 </div>
-                            </div>
+                            </Card>
                         );
                     })}
                 </div>

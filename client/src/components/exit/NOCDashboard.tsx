@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { getNOCRequests, updateNOCStatus } from '../../services/exitService';
-import { CheckCircle, XCircle, Filter, ChevronDown, ChevronUp, ShieldCheck } from 'lucide-react';
+import { 
+    CheckCircle, XCircle, Filter, ChevronDown, ChevronUp, ChevronRight,
+    ShieldCheck, ClipboardList, Briefcase, Info, AlertCircle,
+    Building2, UserCheck, Search, Clock
+} from 'lucide-react';
 import { Label } from '../ui/label';
+import { Card } from '../ui/card';
+import { Badge } from '../ui/badge';
+import { Separator } from '../ui/separator';
 
-// Let's use standard native checkbox since ui/checkbox might not be available
 const NOCDashboard: React.FC = () => {
     const [requests, setRequests] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
@@ -20,7 +26,7 @@ const NOCDashboard: React.FC = () => {
             const department = filterDept === 'All' ? undefined : filterDept;
             const data = await getNOCRequests(department);
 
-            // Inject mock tasks into the data since backend doesn't have them yet
+            // Inject mock tasks
             const requestsWithTasks = data.data.map((req: any) => {
                 let tasks = [];
                 if (req.department === 'IT') {
@@ -73,7 +79,7 @@ const NOCDashboard: React.FC = () => {
     const handleAction = async (id: number, status: 'Cleared' | 'Rejected') => {
         const remarks = prompt("Enter remarks (optional):") || "";
         try {
-            await updateNOCStatus(id, { status, remarks, cleared_by: 999 }); // Mock ID
+            await updateNOCStatus(id, { status, remarks, cleared_by: 999 }); 
             alert(`NOC ${status} successfully`);
             fetchNOCs();
         } catch (error) {
@@ -101,81 +107,128 @@ const NOCDashboard: React.FC = () => {
 
     const departments = ['All', 'IT', 'Admin', 'Finance', 'HOD', 'Library', 'Payroll'];
 
-    return (
-        <div className="space-y-6">
-            <div className="glass-panel p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm z-10 relative">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 bg-indigo-100 rounded-xl">
-                        <ShieldCheck className="w-5 h-5 text-indigo-700" />
-                    </div>
-                    <div>
-                        <h2 className="text-lg font-bold text-slate-900 drop-shadow-sm">Departmental Clearances</h2>
-                        <p className="text-xs font-medium text-slate-500">Manage NOC tasks & approvals</p>
-                    </div>
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center py-48 animate-in fade-in duration-500">
+                <div className="p-4 bg-slate-900 rounded-xl shadow-lg ring-4 ring-slate-100 mb-6">
+                    <ShieldCheck className="w-10 h-10 text-white animate-pulse" />
                 </div>
-                <div className="flex items-center gap-3 bg-white/50 backdrop-blur-md px-4 py-2 rounded-full border border-white/60 shadow-inner">
-                    <Filter className="w-4 h-4 text-slate-500" />
-                    <Label className="text-sm font-bold text-slate-700">Filter:</Label>
-                    <select
-                        className="bg-transparent border-none text-sm font-medium text-indigo-900 focus:outline-none focus:ring-0 cursor-pointer"
-                        value={filterDept}
-                        onChange={(e) => setFilterDept(e.target.value)}
-                    >
-                        {departments.map(d => <option key={d} value={d}>{d}</option>)}
-                    </select>
+                <div className="text-center space-y-1">
+                    <p className="text-xs font-bold text-slate-900 uppercase tracking-widest">Loading Clearances</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Updating pipeline...</p>
                 </div>
             </div>
+        );
+    }
 
-            {loading ? (
-                <div className="text-center py-12 glass-panel shadow-sm object-center flex flex-col items-center">
-                    <div className="inline-block animate-spin-slow rounded-full h-10 w-10 border-4 border-indigo-200 border-t-indigo-600 shadow-sm"></div>
-                    <p className="mt-4 font-bold text-slate-600 animate-pulse">Loading clearance data...</p>
+        return (
+            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500 p-2">
+            {/* Header / Filter Block */}
+            {/* Filter Section */}
+            <Card className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+                <div className="p-8 flex flex-col lg:flex-row justify-between items-center gap-6 bg-slate-50/50">
+                    <div className="flex items-center gap-5">
+                        <div className="p-3 bg-slate-900 rounded-lg shadow-sm">
+                            <ShieldCheck className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                            <h2 className="text-lg font-bold text-slate-900 tracking-tight uppercase">Departmental NOC</h2>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">Manage institutional clearances</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-6 bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+                        <div className="p-2.5 bg-slate-100 rounded-lg text-slate-600">
+                            <Filter className="w-4 h-4" />
+                        </div>
+                        <div className="space-y-0.5 pr-6 border-r border-slate-100">
+                            <Label className="text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-none">Filter Department</Label>
+                            <select
+                                className="bg-transparent border-none text-[11px] font-bold text-slate-900 focus:outline-none focus:ring-0 cursor-pointer uppercase tracking-wider p-0 min-w-[110px]"
+                                value={filterDept}
+                                onChange={(e) => setFilterDept(e.target.value)}
+                            >
+                                {departments.map(d => <option key={d} value={d}>{d}</option>)}
+                            </select>
+                        </div>
+                        <div className="pl-4">
+                            <Badge className="bg-slate-900 text-white border-none px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider">
+                                {requests.length} Requests
+                            </Badge>
+                        </div>
+                    </div>
                 </div>
-            ) : requests.length === 0 ? (
-                <div className="glass-panel text-center py-16 shadow-lg relative overflow-hidden">
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-emerald-400/20 rounded-full blur-3xl"></div>
-                    <ShieldCheck className="w-16 h-16 mx-auto text-emerald-400 mb-4 drop-shadow-md relative z-10" />
-                    <p className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent relative z-10">All Clear!</p>
-                    <p className="text-sm font-medium text-slate-500 mt-2 relative z-10">No pending clearance requests found.</p>
+            </Card>
+
+            {requests.length === 0 ? (
+                <div className="text-center py-20 bg-slate-50 border border-slate-200 rounded-xl">
+                    <div className="w-16 h-16 bg-white border border-slate-100 text-slate-200 rounded-xl flex items-center justify-center mx-auto mb-6">
+                        <UserCheck className="h-8 w-8" />
+                    </div>
+                    <div className="space-y-1">
+                        <p className="text-lg font-bold text-slate-900 uppercase tracking-tight">Pipeline Empty</p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider max-w-sm mx-auto">No pending clearance requests found.</p>
+                    </div>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-8">
                     {requests.map(req => (
-                        <div key={req.id} className="glass-card overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 group">
+                        <Card key={req.id} className="bg-white border border-slate-200 rounded-xl shadow-sm hover:border-slate-300 transition-all duration-300">
                             <div
-                                className="p-5 bg-white/40 backdrop-blur-md border-b border-white/60 relative overflow-hidden flex flex-row justify-between items-center cursor-pointer hover:bg-white/60 transition-colors"
+                                className="p-6 flex flex-col md:flex-row justify-between items-center gap-6 cursor-pointer hover:bg-slate-50/50 transition-all"
                                 onClick={() => toggleExpand(req.id)}
                             >
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-300/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/3"></div>
-                                <div className="flex items-center gap-4 relative z-10">
-                                    <div className="p-2 bg-white/60 rounded-xl shadow-sm border border-white/80 group-hover:scale-110 transition-transform">
-                                        {req.expanded ? <ChevronUp className="w-5 h-5 text-indigo-600 drop-shadow-sm" /> : <ChevronDown className="w-5 h-5 text-indigo-600 drop-shadow-sm" />}
+                                <div className="flex items-center gap-6 w-full md:w-auto">
+                                    <div className={`p-1.5 rounded-lg transition-all ${req.expanded ? 'bg-slate-900 text-white rotate-90' : 'bg-white text-slate-400 border border-slate-100'}`}>
+                                        <ChevronRight className="w-4 h-4" />
                                     </div>
-                                    <div>
-                                        <span className="font-bold text-base text-slate-900 block drop-shadow-sm">{req.employee_name}</span>
-                                        <span className="text-[10px] uppercase tracking-wider font-bold px-3 py-1 mt-1.5 inline-block bg-indigo-100/80 text-indigo-800 rounded-full border border-indigo-200/50 shadow-sm">{req.department} Dept</span>
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-14 h-14 rounded-xl bg-slate-900 p-0.5 shadow-sm">
+                                            <div className="w-full h-full rounded-lg overflow-hidden bg-white">
+                                                <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${req.employee_name}`} alt={req.employee_name} />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-0.5">
+                                            <h3 className="text-lg font-bold text-slate-900 tracking-tight uppercase">{req.employee_name}</h3>
+                                            <div className="flex items-center gap-3">
+                                                <Badge className="bg-slate-100 text-slate-600 border-none px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider shadow-none">{req.department}</Badge>
+                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                                    <Clock className="w-3.5 h-3.5" /> LWD: <span className="text-slate-900">{req.resignation_date}</span>
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="text-right relative z-10">
-                                    <span className="text-xs font-bold text-slate-500 block">LWD: {req.resignation_date}</span>
-                                    <span className={`px-3 py-1 rounded-full text-[10px] uppercase font-bold mt-1.5 inline-block shadow-sm border
-                                        ${req.status === 'Pending' ? 'bg-amber-100/80 text-amber-800 border-amber-200/50' :
-                                            req.status === 'Cleared' ? 'bg-emerald-100/80 text-emerald-800 border-emerald-200/50' : 'bg-rose-100/80 text-rose-800 border-rose-200/50'}`}>
+                                <div className="flex items-center gap-6 w-full md:w-auto justify-end">
+                                    <Badge className={`px-4 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider border-none shadow-sm
+                                        ${req.status === 'Pending' ? 'bg-orange-100 text-orange-700' :
+                                          req.status === 'Cleared' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
                                         {req.status}
-                                    </span>
+                                    </Badge>
                                 </div>
                             </div>
-
-                            {req.expanded && (
-                                <div className="p-0 animate-in slide-in-from-top-2 duration-300 bg-white/20">
-                                    <div className="p-6 bg-white/30 border-b border-white/50 relative overflow-hidden">
-                                        <div className="absolute top-1/2 -right-10 w-32 h-32 bg-indigo-200/20 rounded-full blur-2xl pointer-events-none"></div>
-                                        <h4 className="text-xs font-black text-indigo-900/50 uppercase tracking-widest mb-4 drop-shadow-sm flex items-center gap-2">
-                                            <CheckCircle className="w-4 h-4" /> Clearance Checklist
-                                        </h4>
-                                        <div className="space-y-3 relative z-10">
+                                {req.expanded && (
+                                <div className="p-8 space-y-10 animate-in slide-in-from-top-2 duration-300 bg-slate-50/30 border-t border-slate-100">
+                                    <div className="space-y-6">
+                                        <div className="flex items-center justify-between">
+                                            <h4 className="text-lg font-bold text-slate-900 tracking-tight uppercase flex items-center gap-3">
+                                                <ClipboardList className="w-5 h-5 text-slate-900" />
+                                                Checklist
+                                            </h4>
+                                            <Badge className="bg-white text-slate-600 border border-slate-200 px-3 py-1 rounded-full text-[9px] font-bold tracking-wider uppercase shadow-sm">
+                                                {req.tasks.filter((t: any) => t.completed).length} / {req.tasks.length} Done
+                                            </Badge>
+                                        </div>
+                                        
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                                             {req.tasks.map((task: any) => (
-                                                <label key={task.id} htmlFor={`task-${task.id}`} className="group/task flex items-center p-3 bg-white/50 hover:bg-white/70 backdrop-blur-sm rounded-xl border border-white/60 shadow-sm cursor-pointer transition-all hover:scale-[1.01]">
+                                                <label 
+                                                    key={task.id} 
+                                                    htmlFor={`task-${task.id}`} 
+                                                    className={`group/task flex items-center p-6 rounded-xl border-2 transition-all cursor-pointer shadow-sm
+                                                        ${task.completed || req.status === 'Cleared' 
+                                                            ? 'bg-emerald-50 border-emerald-100 opacity-60' 
+                                                            : 'bg-white border-white hover:border-slate-200 hover:shadow-md transition-all'}`}
+                                                >
                                                     <div className="relative flex items-center justify-center">
                                                         <input
                                                             type="checkbox"
@@ -185,11 +238,14 @@ const NOCDashboard: React.FC = () => {
                                                             onChange={() => toggleTask(req.id, task.id)}
                                                             className="peer sr-only"
                                                         />
-                                                        <div className="w-6 h-6 rounded-md border-2 border-indigo-200 bg-white shadow-inner flex items-center justify-center peer-checked:bg-indigo-500 peer-checked:border-indigo-500 transition-colors">
-                                                            <CheckCircle className="w-4 h-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
+                                                        <div className={`w-6 h-6 rounded-md border-2 transition-all flex items-center justify-center
+                                                            ${task.completed || req.status === 'Cleared'
+                                                                ? 'bg-emerald-600 border-emerald-600'
+                                                                : 'bg-slate-50 border-slate-200 group-hover/task:border-slate-900'}`}>
+                                                            <CheckCircle className={`w-4 h-4 text-white transition-opacity ${task.completed || req.status === 'Cleared' ? 'opacity-100' : 'opacity-0'}`} />
                                                         </div>
                                                     </div>
-                                                    <span className={`ml-4 text-sm font-bold transition-all ${task.completed || req.status === 'Cleared' ? 'text-slate-400 line-through decoration-slate-300' : 'text-slate-800 group-hover/task:text-indigo-900'}`}>
+                                                    <span className={`ml-4 text-[11px] font-bold transition-all uppercase tracking-tight ${task.completed || req.status === 'Cleared' ? 'text-emerald-700 line-through' : 'text-slate-900'}`}>
                                                         {task.name}
                                                     </span>
                                                 </label>
@@ -197,38 +253,50 @@ const NOCDashboard: React.FC = () => {
                                         </div>
 
                                         {req.status === 'Pending' && req.tasks.length > 0 && !req.tasks.every((t: any) => t.completed) && (
-                                            <p className="text-xs font-bold text-amber-700 mt-5 bg-amber-50/80 backdrop-blur-sm p-3 rounded-xl border border-amber-200/60 shadow-inner flex items-center gap-2">
-                                                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                                                Please complete all checklist items to clear NOC.
-                                            </p>
+                                            <Card className="p-5 bg-orange-50 border-orange-100 rounded-lg shadow-sm flex items-center gap-4">
+                                                <div className="p-2 bg-orange-600 rounded-lg text-white">
+                                                    <Info className="w-4 h-4" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-[10px] font-bold text-orange-950 uppercase tracking-wider">Incomplete Sequence</p>
+                                                    <p className="text-[9px] text-orange-600 font-bold uppercase tracking-wider mt-0.5">Please complete all checklist items to process the NOC.</p>
+                                                </div>
+                                            </Card>
                                         )}
                                     </div>
 
-                                    <div className="p-5 bg-white/40 backdrop-blur-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-                                        <div className="flex-1 w-full text-center sm:text-left">
-                                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Status Summary</p>
-                                            <span className={`px-3 py-1 rounded-full text-xs font-black shadow-sm border inline-flex items-center gap-1.5
-                                                ${req.status === 'Pending' ? 'bg-amber-100/80 text-amber-900 border-amber-200' :
-                                                    req.status === 'Cleared' ? 'bg-emerald-100/80 text-emerald-900 border-emerald-200' : 'bg-rose-100/80 text-rose-900 border-rose-200'}`}>
-                                                {req.status === 'Cleared' && <CheckCircle className="w-3.5 h-3.5" />}
-                                                {req.status === 'Rejected' && <XCircle className="w-3.5 h-3.5" />}
-                                                {req.status}
-                                            </span>
-                                            {req.remarks && <p className="text-xs font-medium text-slate-600 mt-2 bg-white/60 p-2 rounded-lg border border-white/80 shadow-inner italic">"{req.remarks}"</p>}
+                                    <div className="pt-8 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-6">
+                                        <div className="flex-1 w-full space-y-2">
+                                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Record Info</p>
+                                            <div className="flex flex-wrap gap-2">
+                                                <Badge className={`px-4 py-1 rounded-full text-[9px] font-bold shadow-sm border-none uppercase tracking-wider
+                                                    ${req.status === 'Pending' ? 'bg-orange-100 text-orange-700' :
+                                                      req.status === 'Cleared' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                                                    {req.status}
+                                                </Badge>
+                                                {req.remarks && (
+                                                    <Badge variant="outline" className="px-3 py-0.5 rounded-full text-[9px] font-bold text-slate-600 border-slate-200 bg-white">
+                                                        "{req.remarks}"
+                                                    </Badge>
+                                                )}
+                                            </div>
                                         </div>
                                         <div className="flex gap-3 shrink-0 w-full sm:w-auto">
                                             {req.status === 'Pending' && (
                                                 <>
                                                     <Button
-                                                        size="sm"
-                                                        className="flex-1 sm:flex-none text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-md rounded-xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:grayscale"
-                                                        onClick={() => handleAction(req.id, 'Cleared')}
+                                                        className="h-11 flex-1 sm:flex-none px-8 bg-slate-900 hover:bg-black text-white rounded-lg font-bold text-[11px] uppercase tracking-wider shadow-md transition-all active:scale-[0.98] disabled:opacity-40"
+                                                        onClick={(e) => { e.stopPropagation(); handleAction(req.id, 'Cleared'); }}
                                                         disabled={!req.tasks.every((t: any) => t.completed)}
                                                     >
-                                                        <CheckCircle className="w-4 h-4 mr-1.5 drop-shadow-sm" /> Clear NOC
+                                                        Review & Issue
                                                     </Button>
-                                                    <Button size="sm" variant="outline" className="flex-1 sm:flex-none text-rose-600 border-rose-200 bg-white/80 hover:bg-rose-50 shadow-sm rounded-xl font-bold transition-all" onClick={() => handleAction(req.id, 'Rejected')}>
-                                                        <XCircle className="w-4 h-4 mr-1.5" /> Reject
+                                                    <Button 
+                                                        variant="outline" 
+                                                        className="h-11 flex-1 sm:flex-none px-8 border-slate-200 text-slate-600 hover:bg-slate-50 rounded-lg font-bold text-[11px] uppercase tracking-wider transition-all" 
+                                                        onClick={(e) => { e.stopPropagation(); handleAction(req.id, 'Rejected'); }}
+                                                    >
+                                                        Reject
                                                     </Button>
                                                 </>
                                             )}
@@ -236,7 +304,7 @@ const NOCDashboard: React.FC = () => {
                                     </div>
                                 </div>
                             )}
-                        </div>
+                        </Card>
                     ))}
                 </div>
             )}

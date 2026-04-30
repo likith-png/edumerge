@@ -4,13 +4,13 @@ import { Card, CardContent } from '../ui/card';
 
 const Stage3Assets = ({ onComplete }: any) => {
     return (
-        <div className="p-6">
+        <div className="px-4 py-4">
             <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                 <Monitor className="w-5 h-5 text-purple-600" /> Asset Assignment
             </h2>
-            <p className="text-slate-500 mb-6 text-sm">Assign digital and physical assets to the employee.</p>
+            <p className="text-slate-500 mb-4 text-sm">Assign digital and physical assets to the employee.</p>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <Card className="border border-slate-200">
                     <CardContent className="p-4 text-center">
                         <div className="w-10 h-10 mx-auto bg-purple-100 rounded-full flex items-center justify-center text-purple-600 mb-3">

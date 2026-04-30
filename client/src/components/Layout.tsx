@@ -10,6 +10,7 @@ interface LayoutProps {
     icon?: React.ElementType;
     showBack?: boolean;
     showHome?: boolean;
+    headerActions?: React.ReactNode;
 }
 
 const Layout: React.FC<LayoutProps> = ({
@@ -18,66 +19,69 @@ const Layout: React.FC<LayoutProps> = ({
     description,
     icon: Icon,
     showBack = false,
-    showHome = false
+    showHome = false,
+    headerActions
 }) => {
     const navigate = useNavigate();
 
     return (
-        <div className="h-screen flex flex-col bg-slate-50 overflow-hidden">
+        <div className="h-screen flex flex-col bg-slate-50/50">
             {/* Page Header (Fixed) */}
-            <header className="shrink-0 bg-white border-b border-slate-200 z-10">
-                <div className="relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 via-white to-slate-50/50"></div>
-                    <div className="max-w-7xl mx-auto px-4 lg:px-6 py-3 relative">
-                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-                            <div className="flex items-center gap-3">
-                                {/* Optional Home button */}
-                                {showHome && (
-                                    <button
-                                        onClick={() => navigate('/')}
-                                        className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                                    >
-                                        <Home className="w-4 h-4" />
-                                    </button>
-                                )}
+            <header className="shrink-0 bg-white border-b border-slate-200 z-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                            {/* Optional Home button */}
+                            {showHome && (
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="rounded-lg border-slate-200 h-9 w-9 text-slate-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-colors"
+                                    onClick={() => navigate('/')}
+                                >
+                                    <Home className="h-4 w-4" />
+                                </Button>
+                            )}
 
-                                {/* Optional back button */}
-                                {showBack && (
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="rounded-full hover:bg-slate-100 h-8 w-8"
-                                        onClick={() => navigate(-1)}
-                                    >
-                                        <ArrowLeft className="h-4 w-4" />
-                                    </Button>
-                                )}
+                            {/* Optional back button */}
+                            {showBack && (
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="rounded-full hover:bg-slate-100 h-9 w-9 text-slate-600"
+                                    onClick={() => navigate(-1)}
+                                >
+                                    <ArrowLeft className="h-4 w-4" />
+                                </Button>
+                            )}
 
-                                {/* Icon chip */}
-                                {Icon && (
-                                    <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-md shadow-blue-500/20">
-                                        <Icon className="h-5 w-5 text-white" />
-                                    </div>
-                                )}
-
-                                {/* Title block */}
-                                <div>
-                                    <h1 className="text-lg lg:text-xl font-bold tracking-tight text-slate-900">{title}</h1>
-                                    {description && <p className="text-slate-500 text-xs">{description}</p>}
+                            {/* Icon chip */}
+                            {Icon && (
+                                <div className="p-2 bg-slate-900 rounded-lg shadow-lg shadow-slate-900/10">
+                                    <Icon className="h-5 w-5 text-white" />
                                 </div>
-                            </div>
+                            )}
 
-                            {/* Action buttons - Hidden by design request */}
-                            <div className="flex items-center gap-2">
+                            {/* Title block */}
+                            <div>
+                                <h1 className="text-lg font-bold text-slate-900 leading-none">{title}</h1>
+                                {description && <p className="text-slate-500 text-xs font-medium mt-1">{description}</p>}
                             </div>
                         </div>
+
+                        {/* Action buttons */}
+                        {headerActions && (
+                            <div className="flex items-center gap-2">
+                                {headerActions}
+                            </div>
+                        )}
                     </div>
                 </div>
             </header>
 
             {/* Scrollable Content Area */}
-            <main className="flex-grow overflow-y-auto bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
-                <div className="max-w-7xl mx-auto px-4 lg:px-6 py-4">
+            <main className="flex-grow overflow-y-auto no-scrollbar">
+                <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
                     {children}
                 </div>
             </main>

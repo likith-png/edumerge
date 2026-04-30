@@ -6,7 +6,6 @@ import apiRoutes from './routes/api';
 import exitRoutes from './routes/exit';
 import employeeRoutes from './routes/employee';
 import researchRoutes from './routes/research';
-
 dotenv.config();
 
 const app = express();
@@ -21,6 +20,7 @@ import onboardingRoutes from './routes/onboarding';
 
 import talentRoutes from './routes/talent';
 import probationRoutes from './routes/probation';
+import vehicleRoutes from './routes/vehicle';
 
 app.use('/api', apiRoutes);
 app.use('/api/exit', exitRoutes);
@@ -29,6 +29,7 @@ app.use('/api/research', researchRoutes);
 app.use('/api/onboarding', onboardingRoutes);
 app.use('/api/talent', talentRoutes);
 app.use('/api/probation', probationRoutes);
+app.use('/api/vehicle', vehicleRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

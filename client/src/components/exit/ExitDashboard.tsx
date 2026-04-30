@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from 'react';
-
 import { Button } from '../ui/button';
 import {
-    Calendar, Clock, CheckCircle, FileText, ShieldAlert, Briefcase, ChevronRight, MoreHorizontal, UserMinus, BarChart
+    Calendar, Clock, CheckCircle, FileText, ShieldAlert, Briefcase, 
+    ChevronRight, MoreHorizontal, UserMinus, BarChart, ArrowRight,
+    TrendingUp, ShieldCheck, Activity, Users, ClipboardCheck,
+    CheckCircle2, XCircle, AlertTriangle, MessageSquare, Shield
 } from 'lucide-react';
 import { getExitDetails, getHandoverItems, getExitInterview } from '../../services/exitService';
+import { Badge } from '../ui/badge';
+import { Card, CardContent } from '../ui/card';
+import { Separator } from '../ui/separator';
 
 interface ExitDashboardProps {
     setActiveTab: (tab: string) => void;
@@ -18,7 +23,6 @@ const ExitDashboard: React.FC<ExitDashboardProps> = ({ setActiveTab, activeExit,
     const [handoverStatus, setHandoverStatus] = useState({ total: 0, completed: 0 });
     const [interviewStatus, setInterviewStatus] = useState<boolean>(false);
 
-
     useEffect(() => {
         if (activeExit?.id) {
             fetchDashboardData();
@@ -27,11 +31,9 @@ const ExitDashboard: React.FC<ExitDashboardProps> = ({ setActiveTab, activeExit,
 
     const fetchDashboardData = async () => {
         try {
-            // 1. Get NOCs (via Exit Details)
             const exitDetails = await getExitDetails(activeExit.id);
             if (exitDetails.noc) setNocData(exitDetails.noc);
 
-            // 2. Get Handover Status
             const handoverItems = await getHandoverItems(activeExit.id);
             if (handoverItems.data) {
                 const total = handoverItems.data.length;
@@ -39,19 +41,15 @@ const ExitDashboard: React.FC<ExitDashboardProps> = ({ setActiveTab, activeExit,
                 setHandoverStatus({ total, completed });
             }
 
-            // 3. Get Interview Status
             const interviewData = await getExitInterview(activeExit.id);
-            // Check if any answer is provided or if status is completed (mocking 'completed' if any answer exists for now)
             if (interviewData.data && interviewData.data.some((q: any) => q.answer && q.answer.length > 0)) {
                 setInterviewStatus(true);
             }
-
         } catch (error) {
             console.error("Failed to fetch dashboard data", error);
         }
     };
 
-    // Calculate Days Left
     const calculateDaysLeft = () => {
         if (!activeExit?.lwd_proposed) return 0;
         const lwd = new Date(activeExit.lwd_approved || activeExit.lwd_proposed);
@@ -69,26 +67,24 @@ const ExitDashboard: React.FC<ExitDashboardProps> = ({ setActiveTab, activeExit,
 
     const upcomingEvents = [];
     if (activeExit?.meeting_status === 'Pending') {
-        upcomingEvents.push({ title: "1:1 Exit Meeting", time: "Pending Scheduling", type: "meeting" });
+        upcomingEvents.push({ title: "1:1 Exit Meeting", time: "Pending Scheduling", type: "MEET" });
     }
     if (!interviewStatus && activeExit?.status === 'Approved') {
-        upcomingEvents.push({ title: "Exit Interview", time: "Pending", type: "meeting" });
+        upcomingEvents.push({ title: "Exit Interview", time: "Available", type: "TASK" });
     }
     if (handoverStatus.completed < handoverStatus.total) {
-        upcomingEvents.push({ title: "Asset Handover", time: "In Progress", type: "task" });
+        upcomingEvents.push({ title: "Asset Handover", time: "In Progress", type: "HAND" });
     }
     if (activeExit?.status === 'Approved') {
-        upcomingEvents.push({ title: "Final Settlement", time: activeExit.lwd_approved ? new Date(activeExit.lwd_approved).toLocaleDateString() : "Pending", type: "event" });
+        upcomingEvents.push({ title: "Final Settlement", time: activeExit.lwd_approved ? new Date(activeExit.lwd_approved).toLocaleDateString() : "TBD", type: "FIN" });
     }
 
     // HR Admin Dashboard View
-    if (viewMode === 'Admin') {
-        // Calculate KPIs from all exits
+    if (viewMode === 'Admin' || viewMode === 'Manager') {
         const activeExits = allExits.filter(e => ['Pending', 'Approved', 'Manager_Approved', 'HR_Approved'].includes(e.status));
         const pendingApprovals = allExits.filter(e => e.status === 'Pending' || e.status === 'Manager_Approved').length;
         const completedExits = allExits.filter(e => e.status === 'Completed').length;
 
-        // Calculate average notice period
         const avgNoticePeriod = activeExits.length > 0
             ? Math.round(activeExits.reduce((sum, e) => {
                 if (e.lwd_proposed) {
@@ -101,509 +97,423 @@ const ExitDashboard: React.FC<ExitDashboardProps> = ({ setActiveTab, activeExit,
             }, 0) / activeExits.length)
             : 0;
 
-        // Calculate attrition rate (mock: percentage of total employees)
-        const totalEmployees = 150; // Mock data
+        const totalEmployees = 150; 
         const attritionRate = ((allExits.length / totalEmployees) * 100).toFixed(1);
 
-        // Workflow stages count based on PRD v1.2
         const workflowStages = [
-            { label: 'Initiated', count: allExits.filter(e => e.status === 'Pending').length },
-            { label: 'Pre-Approval (1:1)', count: allExits.filter(e => e.meeting_status === 'Pending').length },
-            { label: 'Approved & Active', count: allExits.filter(e => ['Approved', 'Manager_Approved', 'HR_Approved'].includes(e.status)).length },
-            { label: 'Parallel Clearances', count: allExits.filter(e => e.status === 'Approved').length }, // NOC & Handover
-            { label: 'F&F & Completed', count: completedExits },
+            { label: 'Initiated', count: allExits.filter(e => e.status === 'Pending').length, color: 'bg-indigo-600' },
+            { label: 'Pre-Approval (1:1)', count: allExits.filter(e => e.meeting_status === 'Pending').length, color: 'bg-emerald-600' },
+            { label: 'Approved & Active', count: allExits.filter(e => ['Approved', 'Manager_Approved', 'HR_Approved'].includes(e.status)).length, color: 'bg-sky-600' },
+            { label: 'Clearance Pipeline', count: allExits.filter(e => e.status === 'Approved').length, color: 'bg-violet-600' },
+            { label: 'F&F & Completed', count: completedExits, color: 'bg-indigo-950' },
         ];
 
-        // Department breakdown
         const deptBreakdown: { [key: string]: number } = {};
         allExits.forEach(e => {
             const dept = e.department || 'Unknown';
             deptBreakdown[dept] = (deptBreakdown[dept] || 0) + 1;
         });
 
-        // Recent activity
         const recentActivity = allExits.slice(0, 5).map(e => ({
             employee: e.employee_name,
-            action: `Resignation ${e.status}`,
-            time: e.submission_date ? new Date(e.submission_date).toLocaleDateString() : 'Recently',
+            action: `Protocol: ${e.status}`,
+            time: e.submission_date ? new Date(e.submission_date).toLocaleDateString() : 'Active',
             status: e.status
         }));
 
         return (
-            <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                    <div>
-                        <h2 className="text-2xl font-bold text-slate-900">HR Exit Dashboard</h2>
-                        <p className="text-sm text-slate-500">Organizational exit management overview</p>
-                    </div>
+            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500 p-2">
+                {/* Administrative Stats Header */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {[
+                        { label: 'Ongoing Departures', value: activeExits.length, icon: UserMinus, color: 'text-blue-600', bgColor: 'bg-blue-50', badge: 'Active' },
+                        { label: 'Pending Validations', value: pendingApprovals, icon: ClipboardCheck, color: 'text-orange-600', bgColor: 'bg-orange-50', badge: 'Action Required' },
+                        { label: 'Avg Notice Days', value: avgNoticePeriod, icon: Clock, color: 'text-emerald-600', bgColor: 'bg-emerald-50', badge: 'Policy Avg' },
+                        { label: 'Attrition Metric', value: `${attritionRate}%`, icon: TrendingUp, color: 'text-rose-600', bgColor: 'bg-rose-50', badge: 'Risk Index' }
+                    ].map((stat, i) => (
+                        <Card key={i} className="bg-white border border-slate-200 rounded-xl shadow-sm hover:border-slate-300 transition-all duration-300">
+                            <div className="p-8 flex flex-col justify-between h-full bg-slate-50/10">
+                                <div className="flex justify-between items-start">
+                                    <div className={`p-3 ${stat.bgColor} ${stat.color} rounded-lg border border-slate-100 shadow-sm`}>
+                                        <stat.icon className="w-6 h-6" />
+                                    </div>
+                                    <Badge className="bg-slate-900 text-white font-bold text-[8px] uppercase tracking-wider px-3 py-1 rounded-full shadow-sm">{stat.badge}</Badge>
+                                </div>
+                                <div className="mt-8 space-y-1">
+                                    <h3 className="text-4xl font-bold text-slate-900 tracking-tight">{stat.value}</h3>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{stat.label}</p>
+                                </div>
+                            </div>
+                        </Card>
+                    ))}
                 </div>
 
-                {/* KPI Cards Row */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    {/* Active Exits */}
-                    <div className="glass-card p-6 bg-gradient-to-br from-indigo-500/20 to-indigo-600/5 relative group">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 bg-white/40 backdrop-blur-md rounded-xl shadow-sm group-hover:bg-white/60 transition-colors">
-                                <UserMinus className="w-5 h-5 text-indigo-700" />
+                {/* Workflow Funnel & Department Analysis */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <Card className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+                        <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                            <div className="flex items-center gap-4">
+                                <div className="p-2.5 bg-slate-900 rounded-lg shadow-sm">
+                                    <Activity className="w-5 h-5 text-white" />
+                                </div>
+                                <h3 className="text-lg font-bold text-slate-900 tracking-tight uppercase">Workflow Progress</h3>
                             </div>
-                            <span className="text-xs font-bold text-indigo-900 bg-white/50 backdrop-blur-sm px-2 py-1 rounded-full shadow-sm">+{((activeExits.length / allExits.length) * 100 || 0).toFixed(0)}%</span>
+                            <Badge className="bg-slate-100 text-slate-600 border border-slate-200 font-bold text-[8px] uppercase tracking-wider px-3 py-1 rounded-full">Pipeline Stats</Badge>
                         </div>
-                        <h3 className="text-4xl font-black bg-gradient-to-br from-indigo-900 to-indigo-600 bg-clip-text text-transparent drop-shadow-sm">{activeExits.length}</h3>
-                        <p className="text-sm font-medium text-slate-700 mt-1">Active Exits</p>
-                        <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-indigo-400 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
-                    </div>
-
-                    {/* Pending Approvals */}
-                    <div className="glass-card p-6 bg-gradient-to-br from-amber-500/20 to-amber-600/5 relative group">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 bg-white/40 backdrop-blur-md rounded-xl shadow-sm group-hover:bg-white/60 transition-colors">
-                                <CheckCircle className="w-5 h-5 text-amber-700" />
-                            </div>
-                            {pendingApprovals > 0 && <span className="text-xs font-bold text-amber-900 bg-white/50 backdrop-blur-sm px-2 py-1 rounded-full shadow-sm animate-pulse">Action Needed</span>}
-                        </div>
-                        <h3 className="text-4xl font-black bg-gradient-to-br from-amber-900 to-amber-600 bg-clip-text text-transparent drop-shadow-sm">{pendingApprovals}</h3>
-                        <p className="text-sm font-medium text-slate-700 mt-1">Pending Approvals</p>
-                        <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-amber-400 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
-                    </div>
-
-                    {/* Avg Notice Period */}
-                    <div className="glass-card p-6 bg-gradient-to-br from-cyan-500/20 to-cyan-600/5 relative group">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 bg-white/40 backdrop-blur-md rounded-xl shadow-sm group-hover:bg-white/60 transition-colors">
-                                <Clock className="w-5 h-5 text-cyan-700" />
-                            </div>
-                        </div>
-                        <h3 className="text-4xl font-black bg-gradient-to-br from-cyan-900 to-cyan-600 bg-clip-text text-transparent drop-shadow-sm">{avgNoticePeriod}</h3>
-                        <p className="text-sm font-medium text-slate-700 mt-1">Avg Notice Days</p>
-                        <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-cyan-400 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
-                    </div>
-
-                    {/* Attrition Rate */}
-                    <div className="glass-card p-6 bg-gradient-to-br from-rose-500/20 to-rose-600/5 relative group">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 bg-white/40 backdrop-blur-md rounded-xl shadow-sm group-hover:bg-white/60 transition-colors">
-                                <BarChart className="w-5 h-5 text-rose-700" />
-                            </div>
-                        </div>
-                        <h3 className="text-4xl font-black bg-gradient-to-br from-rose-900 to-rose-600 bg-clip-text text-transparent drop-shadow-sm">{attritionRate}%</h3>
-                        <p className="text-sm font-medium text-slate-700 mt-1">Attrition Rate</p>
-                        <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-rose-400 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
-                    </div>
-                </div>
-
-                {/* Workflow Funnel & Department Breakdown */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Workflow Funnel */}
-                    <div className="glass-panel p-6 shadow-xl relative z-10 overflow-hidden">
-                        <h3 className="font-bold text-xl text-slate-900 mb-6 drop-shadow-sm">Exit Workflow Funnel</h3>
-                        <div className="space-y-5">
+                        <CardContent className="p-8 space-y-8">
                             {workflowStages.map((stage, idx) => {
                                 const maxCount = Math.max(...workflowStages.map(s => s.count), 1);
                                 const widthPercent = (stage.count / maxCount) * 100;
                                 return (
-                                    <div key={idx} className="relative z-10">
-                                        <div className="flex justify-between text-sm mb-2">
-                                            <span className="font-bold text-slate-800">{stage.label}</span>
-                                            <span className="text-slate-600 font-medium bg-white/50 px-2 py-0.5 rounded backdrop-blur-sm">{stage.count} Active</span>
+                                    <div key={idx} className="space-y-3">
+                                        <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider">
+                                            <span className="text-slate-600">{stage.label}</span>
+                                            <span className="text-slate-400">{stage.count} Records</span>
                                         </div>
-                                        <div className="h-4 w-full bg-white/30 rounded-full overflow-hidden shadow-inner border border-white/40">
+                                        <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden flex">
                                             <div
-                                                className="h-full bg-gradient-to-r from-indigo-500 to-indigo-400 rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(99,102,241,0.5)]"
+                                                className={`h-full ${stage.color.replace('indigo-600', 'blue-600').replace('emerald-600', 'emerald-500').replace('sky-600', 'sky-500').replace('violet-600', 'violet-500').replace('indigo-950', 'slate-800')} rounded-full transition-all duration-700 ease-out`}
                                                 style={{ width: `${widthPercent}%` }}
-                                            ></div>
+                                            />
                                         </div>
                                     </div>
                                 );
                             })}
-                        </div>
-                        <div className="absolute top-1/2 -right-10 w-48 h-48 bg-indigo-300 rounded-full blur-3xl opacity-20"></div>
-                    </div>
+                        </CardContent>
+                    </Card>
 
-                    {/* Department Breakdown */}
-                    <div className="glass-panel p-6 shadow-xl relative z-10 overflow-hidden">
-                        <h3 className="font-bold text-xl text-slate-900 mb-6 drop-shadow-sm">Department Breakdown</h3>
-                        <div className="space-y-5">
-                            {Object.entries(deptBreakdown).map(([dept, count], idx) => {
-                                const total = allExits.length;
-                                const percentage = ((count / total) * 100).toFixed(0);
-                                const colors = ['from-purple-500 to-purple-400', 'from-blue-500 to-blue-400', 'from-emerald-500 to-emerald-400', 'from-orange-500 to-orange-400', 'from-pink-500 to-pink-400'];
-                                const dotColors = ['bg-purple-500', 'bg-blue-500', 'bg-emerald-500', 'bg-orange-500', 'bg-pink-500'];
-                                return (
-                                    <div key={idx} className="flex items-center gap-4 relative z-10">
-                                        <div className={`w-4 h-4 rounded-full ${dotColors[idx % dotColors.length]} shadow-sm`}></div>
-                                        <div className="flex-1">
-                                            <div className="flex justify-between text-sm mb-1">
-                                                <span className="font-bold text-slate-800">{dept}</span>
-                                                <span className="text-slate-600 font-medium bg-white/50 px-2 py-0.5 rounded backdrop-blur-sm">{count} ({percentage}%)</span>
-                                            </div>
-                                            <div className="h-3 w-full bg-white/30 rounded-full overflow-hidden shadow-inner border border-white/40">
-                                                <div
-                                                    className={`h-full bg-gradient-to-r ${colors[idx % colors.length]} rounded-full transition-all duration-1000 ease-out shadow-sm`}
-                                                    style={{ width: `${percentage}%` }}
-                                                ></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                        <div className="absolute top-1/2 -left-10 w-48 h-48 bg-emerald-300 rounded-full blur-3xl opacity-20"></div>
-                    </div>
-                </div>
-
-                {/* Pending Actions & Recent Activity */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Pending Actions Table */}
-                    <div className="lg:col-span-2 glass-panel p-6 shadow-xl relative z-10">
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="font-bold text-xl text-slate-900 drop-shadow-sm">Pending Actions</h3>
-                            <button onClick={() => setActiveTab('approvals')} className="text-sm font-bold text-indigo-700 bg-white/60 hover:bg-white/80 px-4 py-2 rounded-full backdrop-blur-md shadow-sm transition-all flex items-center">
-                                View All <ChevronRight className="w-4 h-4 ml-1" />
-                            </button>
-                        </div>
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="border-b border-white/40 text-left">
-                                        <th className="pb-3 text-xs font-bold text-slate-500 uppercase">Employee</th>
-                                        <th className="pb-3 text-xs font-bold text-slate-500 uppercase">Department</th>
-                                        <th className="pb-3 text-xs font-bold text-slate-500 uppercase">Status</th>
-                                        <th className="pb-3 text-xs font-bold text-slate-500 uppercase">LWD</th>
-                                        <th className="pb-3 text-xs font-bold text-slate-500 uppercase">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {allExits.filter(e => ['Pending', 'Manager_Approved'].includes(e.status)).slice(0, 5).map((exit, idx) => (
-                                        <tr key={idx} className="border-b border-white/20 hover:bg-white/30 transition-colors group">
-                                            <td className="py-3">
-                                                <div className="flex items-center gap-3">
-                                                    <img
-                                                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${exit.employee_name}`}
-                                                        className="w-10 h-10 rounded-full border-2 border-white/50 shadow-sm"
-                                                        alt={exit.employee_name}
-                                                    />
-                                                    <span className="text-sm font-bold text-slate-800">{exit.employee_name}</span>
-                                                </div>
-                                            </td>
-                                            <td className="py-3 text-sm font-medium text-slate-600">{exit.department}</td>
-                                            <td className="py-3">
-                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold shadow-sm ${exit.status === 'Pending' ? 'bg-amber-100/80 text-amber-900 border border-amber-200' :
-                                                    exit.status === 'Manager_Approved' ? 'bg-blue-100/80 text-blue-900 border border-blue-200' :
-                                                        'bg-emerald-100/80 text-emerald-900 border border-emerald-200'
-                                                    }`}>
-                                                    {exit.status}
-                                                </span>
-                                            </td>
-                                            <td className="py-3 text-sm font-medium text-slate-600">{exit.lwd_proposed || 'TBD'}</td>
-                                            <td className="py-3">
-                                                <button
-                                                    onClick={() => setActiveTab('approvals')}
-                                                    className="px-4 py-1.5 bg-white/50 hover:bg-white text-indigo-700 font-bold rounded-full text-xs shadow-sm transition-all border border-indigo-100"
-                                                >
-                                                    Review
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                    {allExits.filter(e => ['Pending', 'Manager_Approved'].includes(e.status)).length === 0 && (
-                                        <tr>
-                                            <td colSpan={5} className="py-8 text-center text-sm font-medium text-slate-500">
-                                                No pending actions at this time
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    {/* Recent Activity Feed */}
-                    <div className="glass-panel p-6 shadow-xl relative z-10 overflow-hidden">
-                        <h3 className="font-bold text-xl text-slate-900 mb-6 drop-shadow-sm">Recent Activity</h3>
-                        <div className="space-y-4">
-                            {recentActivity.map((activity, idx) => (
-                                <div key={idx} className="flex gap-4 p-3 bg-white/30 rounded-xl border border-white/40 shadow-sm hover:bg-white/50 transition-colors cursor-pointer">
-                                    <div className="flex-shrink-0 mt-1">
-                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center shadow-inner">
-                                            <div className="w-2 h-2 bg-white rounded-full"></div>
-                                        </div>
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-bold text-slate-800 truncate">{activity.employee}</p>
-                                        <p className="text-xs font-medium text-slate-600 mt-0.5">{activity.action}</p>
-                                        <p className="text-xs font-bold text-slate-400 mt-1 flex items-center gap-1">
-                                            <Clock className="w-3 h-3" />
-                                            {activity.time}
-                                        </p>
-                                    </div>
+                    <Card className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+                        <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                            <div className="flex items-center gap-4">
+                                <div className="p-2.5 bg-slate-900 rounded-lg shadow-sm">
+                                    <Users className="w-5 h-5 text-white" />
                                 </div>
-                            ))}
-                            {recentActivity.length === 0 && (
-                                <p className="text-sm font-medium text-slate-500 text-center py-4">No recent activity</p>
-                            )}
+                                <h3 className="text-lg font-bold text-slate-900 tracking-tight uppercase">Departmental Analysis</h3>
+                            </div>
+                            <Badge className="bg-slate-100 text-slate-600 border border-slate-200 font-bold text-[8px] uppercase tracking-wider px-3 py-1 rounded-full">Impact Matrix</Badge>
                         </div>
-                    </div>
+                        <CardContent className="p-8 space-y-8">
+                            {Object.entries(deptBreakdown).map(([dept, count], idx) => {
+                                const total = allExits.length || 1;
+                                const percentage = ((count / total) * 100).toFixed(0);
+                                const colors = ['bg-blue-600', 'bg-emerald-500', 'bg-orange-500', 'bg-rose-500', 'bg-violet-500'];
+                                return (
+                                    <div key={idx} className="space-y-3">
+                                        <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider">
+                                            <span className="text-slate-600">{dept}</span>
+                                            <span className="text-slate-400">{percentage}% Impact</span>
+                                        </div>
+                                        <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                                            <div
+                                                className={`h-full ${colors[idx % colors.length]} rounded-full transition-all duration-700 ease-out`}
+                                                style={{ width: `${percentage}%` }}
+                                            />
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </CardContent>
+                    </Card>
                 </div>
+
+                {/* Validation Pipeline Table */}
+                <Card className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+                    <div className="px-10 py-8 border-b border-slate-100 flex flex-col md:flex-row items-center justify-between bg-slate-50/50 gap-6">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-slate-900 rounded-lg shadow-sm">
+                                <ShieldCheck className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-900 tracking-tight uppercase">Separation Logs</h3>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">Validated record archives</p>
+                            </div>
+                        </div>
+                        <Button variant="outline" onClick={() => setActiveTab('approvals')} className="h-11 bg-white border-slate-200 hover:bg-slate-50 rounded-lg px-8 font-bold text-[10px] uppercase tracking-wider text-slate-900 shadow-sm transition-all active:scale-[0.98]">
+                            Full View
+                        </Button>
+                    </div>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm text-left">
+                            <thead className="bg-slate-50 text-slate-500 font-bold text-[10px] uppercase tracking-wider border-b border-slate-100">
+                                <tr>
+                                    <th className="px-10 py-6">EMPLOYEE</th>
+                                    <th className="px-10 py-6">DEPARTMENT</th>
+                                    <th className="px-10 py-6">STATUS</th>
+                                    <th className="px-10 py-6">LWD</th>
+                                    <th className="px-10 py-6">ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {allExits.filter(e => ['Pending', 'Manager_Approved'].includes(e.status)).slice(0, 5).map((exit, idx) => (
+                                    <tr key={idx} className="hover:bg-slate-50/50 transition-all group cursor-pointer">
+                                        <td className="px-10 py-8">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-12 h-12 bg-white rounded-lg overflow-hidden shadow-sm border border-slate-100">
+                                                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${exit.employee_name}`} alt={exit.employee_name} />
+                                                </div>
+                                                <div className="font-bold text-lg text-slate-900 tracking-tight uppercase">{exit.employee_name}</div>
+                                            </div>
+                                        </td>
+                                        <td className="px-10 py-8">
+                                            <div className="text-[10px] font-bold text-slate-600 uppercase tracking-wider bg-slate-100 px-4 py-1.5 rounded-full border border-slate-200">{exit.department}</div>
+                                        </td>
+                                        <td className="px-10 py-8">
+                                            <Badge className={`px-4 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider border-none shadow-sm ${
+                                                exit.status === 'Pending' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'
+                                            }`}>
+                                                {exit.status}
+                                            </Badge>
+                                        </td>
+                                        <td className="px-10 py-8">
+                                            <div className="text-slate-900 font-bold tracking-tight text-lg">{exit.lwd_proposed || 'TBD'}</div>
+                                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-1">Proposed LWD</p>
+                                        </td>
+                                        <td className="px-10 py-8">
+                                            <Button
+                                                onClick={() => setActiveTab('approvals')}
+                                                className="h-11 bg-slate-900 hover:bg-black text-white px-8 rounded-lg font-bold text-[10px] uppercase tracking-wider shadow-md transition-all group/btn active:scale-[0.98]"
+                                            >
+                                                Approve
+                                                <ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {allExits.filter(e => ['Pending', 'Manager_Approved'].includes(e.status)).length === 0 && (
+                                    <tr>
+                                        <td colSpan={5} className="px-10 py-16 text-center">
+                                            <div className="w-16 h-16 bg-slate-50 rounded-xl flex items-center justify-center mx-auto mb-4 border border-slate-100">
+                                                <XCircle className="w-8 h-8 text-slate-200" />
+                                            </div>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">No pending records found.</p>
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </Card>
             </div>
         );
     }
 
-    if (!activeExit) {
-        return (
-            <div className="text-center py-12">
-                <h2 className="text-xl font-semibold text-slate-700">No Active Exit Request</h2>
-                <p className="text-slate-500 mb-6">You are currently not in an exit process.</p>
-                <Button onClick={() => setActiveTab('submit')}>Initiate Resignation</Button>
-            </div>
-        );
-    }
+    // Faculty Dashboard View
+    if (!activeExit) return null;
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
-            {/* Left Column (Main Content) */}
-            <div className="lg:col-span-2 space-y-6">
-
-                {/* Welcome Header */}
-                <div className="flex justify-between items-center">
-                    <div>
-                        <h1 className="text-2xl font-bold text-slate-900">Welcome, {activeExit.employee_name || 'Employee'}</h1>
-                        <p className="text-slate-500">Your transition dashboard overview</p>
-                    </div>
-                    {/* Search bar placeholder as per design */}
-                    <div className="hidden md:flex items-center bg-white rounded-full px-4 py-2 border border-slate-200 shadow-sm w-64">
-                        <span className="text-slate-400">🔍</span>
-                        <input type="text" placeholder="Search..." className="ml-2 outline-none text-sm w-full" />
-                    </div>
-                </div>
-
-                {/* Top Cards Row */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Profile Card */}
-                    <div className="glass-card p-6 flex flex-col items-center text-center relative z-10 overflow-hidden group">
-                        <div className="absolute top-4 right-4 text-indigo-400 cursor-pointer hover:text-indigo-600 transition-colors">↻</div>
-                        <div className="relative w-24 h-24 mb-4 mt-2">
-                            <div className="absolute inset-0 rounded-full border-4 border-white/40 border-t-indigo-500 animate-spin-slow shadow-lg"></div>
-                            <img
-                                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${activeExit.employee_name}`}
-                                alt="Profile"
-                                className="w-full h-full rounded-full p-1 border-2 border-white/60 shadow-inner"
-                            />
-                            <div className="absolute bottom-0 right-0 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-full p-1 border-2 border-white/80 shadow-md">
-                                <span className="text-[10px] font-bold block w-4 h-4 leading-4">★</span>
-                            </div>
-                        </div>
-                        <h3 className="font-bold text-xl text-slate-900 drop-shadow-sm">{activeExit.employee_name}</h3>
-                        <p className="text-sm font-medium text-slate-600 mb-4">{activeExit.department || 'Department'}</p>
-
-                        <div className="flex justify-center gap-8 w-full mt-2">
-                            <div className="text-center">
-                                <span className="block font-black text-2xl text-slate-800">{handoverStatus.total}</span>
-                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Tasks</span>
-                            </div>
-                            <div className="text-center">
-                                <span className="block font-black text-2xl text-slate-800">{overallProgress}%</span>
-                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Score</span>
-                            </div>
-                        </div>
-                        <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-indigo-300 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
-                    </div>
-
-                    {/* Gradient Card 1 (Prioritized Tasks) */}
-                    <div className="glass-card bg-gradient-to-br from-indigo-500/10 to-purple-500/10 p-6 flex flex-col justify-between shadow-sm relative overflow-hidden group">
-                        <div className="flex justify-between items-start z-10">
-                            <h3 className="font-bold text-lg text-indigo-900 w-2/3 drop-shadow-sm">Exit Checklist Progress</h3>
-                            <div className="p-3 bg-white/40 rounded-xl backdrop-blur-md shadow-sm">
-                                <Clock className="w-5 h-5 text-indigo-700" />
-                            </div>
-                        </div>
-                        <div className="z-10 mt-6">
-                            <h2 className="text-5xl font-black bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent drop-shadow-sm mb-1">{overallProgress}%</h2>
-                            <p className="text-sm font-bold text-slate-600 mt-1">Completion Rate</p>
-                        </div>
-
-                        {/* Abstract blobs for gradient effect */}
-                        <div className="absolute -top-10 -right-10 w-40 h-40 bg-indigo-400 rounded-full blur-3xl opacity-30 group-hover:opacity-50 transition-opacity"></div>
-                        <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-400 rounded-full blur-3xl opacity-30 group-hover:opacity-50 transition-opacity"></div>
-                    </div>
-
-                    {/* Gradient Card 2 (Notice Period / Shortfall) */}
-                    <div className="glass-card bg-gradient-to-br from-cyan-500/10 to-blue-500/10 p-6 flex flex-col justify-between shadow-sm relative overflow-hidden group">
-                        <div className="flex justify-between items-start z-10">
-                            <h3 className="font-bold text-lg text-cyan-900 w-2/3 drop-shadow-sm">Notice Period Tracking</h3>
-                            <div className="p-3 bg-white/40 rounded-xl backdrop-blur-md shadow-sm">
-                                <CheckCircle className="w-5 h-5 text-cyan-700" />
-                            </div>
-                        </div>
-                        <div className="z-10 mt-6">
-                            {activeExit.shortfall_days > 0 ? (
-                                <div>
-                                    <h2 className="text-4xl font-black text-rose-600 drop-shadow-sm">{activeExit.shortfall_days} Days</h2>
-                                    <p className="text-xs font-bold text-rose-500">Shortfall Detected</p>
-                                    <p className="text-xs font-medium text-slate-600 mt-1">Buyout: ₹{activeExit.buyout_amount}</p>
-                                    {!activeExit.waiver_requested ? (
-                                        <button
-                                            className="mt-3 px-4 py-1.5 text-xs font-bold rounded-full bg-white/50 text-rose-600 border border-rose-200 hover:bg-rose-50 hover:border-rose-300 transition-all shadow-sm"
-                                            onClick={() => {
-                                                const reason = prompt("Enter reason for waiver request:");
-                                                if (reason) {
-                                                    // Request waiver logic here
-                                                    import('../../services/exitService').then(({ requestWaiver }) => {
-                                                        requestWaiver(activeExit.id, reason)
-                                                            .then(() => alert("Waiver requested"))
-                                                            .catch(err => alert(err.message));
-                                                    });
-                                                }
-                                            }}
-                                        >
-                                            Request Waiver
-                                        </button>
-                                    ) : (
-                                        <span className="text-[10px] font-bold bg-amber-100 text-amber-800 px-3 py-1 rounded-full mt-3 inline-block shadow-sm">
-                                            Waiver Pending
-                                        </span>
-                                    )}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 animate-in fade-in slide-in-from-bottom-4 duration-500 p-2">
+            {/* Transition Intelligence Section */}
+            <div className="lg:col-span-2 space-y-12">
+                
+                {/* Personal Status Cluster */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <Card className="bg-white border border-slate-200 rounded-xl shadow-sm">
+                        <div className="p-8 space-y-6 flex flex-col justify-between h-full">
+                            <div className="flex justify-between items-start">
+                                <div className="p-3 bg-slate-100 text-slate-600 rounded-lg">
+                                    <TrendingUp className="w-6 h-6" />
                                 </div>
-                            ) : (
-                                <div>
-                                    <h2 className="text-5xl font-black bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent drop-shadow-sm mb-1">{daysLeft}</h2>
-                                    <p className="text-sm font-bold text-slate-600 mt-1">Days Remaining</p>
-                                    <p className="text-[11px] font-medium text-slate-500 mt-1 bg-white/50 inline-block px-2 py-0.5 rounded backdrop-blur-sm">LWD: {activeExit.lwd_approved || activeExit.lwd_proposed}</p>
+                                <div className="text-right">
+                                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Progress</div>
+                                    <h3 className="text-3xl font-bold text-slate-900 tracking-tight">{overallProgress}%</h3>
                                 </div>
-                            )}
-                        </div>
-
-                        {/* Abstract blobs */}
-                        <div className="absolute top-10 left-10 w-48 h-48 bg-cyan-400 rounded-full blur-3xl opacity-30 group-hover:opacity-50 transition-opacity"></div>
-                    </div>
-                </div>
-
-                {/* Connections / Quick Actions Row */}
-                <div className="glass-panel p-6 shadow-xl relative z-10 overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div>
-                        <h3 className="font-bold text-xl text-slate-900 drop-shadow-sm">Quick Actions</h3>
-                        <p className="text-sm font-medium text-slate-600">Frequently used modules</p>
-                    </div>
-                    <div className="flex gap-6">
-                        {[
-                            { label: 'Resign', icon: FileText, tab: 'submit', color: 'from-indigo-500 to-purple-500', iconColor: 'text-white' },
-                            { label: 'NOC', icon: ShieldAlert, tab: 'noc', color: 'from-emerald-500 to-teal-500', iconColor: 'text-white' },
-                            { label: 'Assets', icon: Briefcase, tab: 'handover', color: 'from-orange-500 to-amber-500', iconColor: 'text-white' },
-                            { label: 'Interview', icon: MoreHorizontal, tab: 'interview', color: 'from-slate-600 to-slate-500', iconColor: 'text-white' },
-                        ].map((action, i) => (
-                            <button
-                                key={i}
-                                onClick={() => setActiveTab(action.tab)}
-                                className="group flex flex-col items-center gap-3"
-                            >
-                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-[0_10px_20px_rgba(0,0,0,0.1)] bg-gradient-to-br ${action.color}`}>
-                                    <action.icon className={`w-6 h-6 ${action.iconColor} drop-shadow-sm`} />
-                                </div>
-                                <span className="text-xs font-bold text-slate-700">{action.label}</span>
-                            </button>
-                        ))}
-                    </div>
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-white/20 blur-3xl rounded-full pointer-events-none"></div>
-                </div>
-
-                {/* Focusing / Analytics Chart Section */}
-                <div className="glass-panel p-6 shadow-xl h-72 relative z-10 overflow-hidden">
-                    <div className="flex justify-between items-center mb-6 relative z-20">
-                        <div>
-                            <h3 className="font-bold text-xl text-slate-900 drop-shadow-sm">Activity Trends</h3>
-                            <p className="text-sm font-medium text-slate-600">Resignation & Clearance volume</p>
-                        </div>
-                        <select className="text-xs font-bold bg-white/50 border border-white/60 rounded-full px-4 py-2 text-slate-700 cursor-pointer outline-none backdrop-blur-md shadow-sm">
-                            <option>Last Month</option>
-                            <option>Last 3 Months</option>
-                        </select>
-                    </div>
-
-                    {/* Mock Chart Visualization (Wavy Line placeholder) */}
-                    <div className="absolute inset-x-6 bottom-6 h-36 flex items-end justify-between px-2 z-10">
-                        {/* Simple CSS-based bar chart to mimic the vibe */}
-                        {[40, 65, 45, 80, 55, 70, 40, 60, 75, 50, 65, 85].map((h, i) => (
-                            <div key={i} className="w-full mx-1 bg-white/20 rounded-t-md relative group h-full flex items-end overflow-hidden border border-white/10">
-                                <div
-                                    className="w-full bg-gradient-to-t from-indigo-600 to-indigo-400 rounded-t-md transition-all duration-1000 ease-out opacity-80 group-hover:opacity-100 group-hover:from-indigo-500 group-hover:to-indigo-300 shadow-[0_0_15px_rgba(99,102,241,0.3)]"
-                                    style={{ height: `${h}%` }}
-                                ></div>
                             </div>
-                        ))}
-                    </div>
-                    <div className="absolute bottom-6 right-8 text-right z-20 bg-white/70 p-4 rounded-2xl backdrop-blur-md shadow-lg border border-white/60">
-                        <h2 className="text-4xl font-black bg-gradient-to-r from-indigo-900 to-slate-800 bg-clip-text text-transparent drop-shadow-sm">{overallProgress}%</h2>
-                        <p className="text-xs font-bold text-slate-600 mt-1">Avg. Completion</p>
-                    </div>
+                            <div className="space-y-4">
+                                <div className="h-2 w-full bg-slate-50 rounded-full overflow-hidden">
+                                    <div 
+                                        className="h-full bg-blue-600 rounded-full transition-all duration-700"
+                                        style={{ width: `${overallProgress}%` }}
+                                    />
+                                </div>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                                    <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Clearance In Progress
+                                </p>
+                            </div>
+                        </div>
+                    </Card>
+
+                    <Card className="bg-white border border-slate-200 rounded-xl shadow-sm">
+                        <div className="p-8 space-y-6 flex flex-col justify-between h-full">
+                            <div className="flex justify-between items-start">
+                                <div className="p-3 bg-orange-50 text-orange-600 rounded-lg">
+                                    <Clock className="w-6 h-6" />
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Time Remaining</div>
+                                    <h3 className="text-3xl font-bold text-slate-900 tracking-tight">{daysLeft} Day{daysLeft !== 1 ? 's' : ''}</h3>
+                                </div>
+                            </div>
+                            <div className="space-y-3">
+                                <div className="text-[10px] font-bold text-slate-600 uppercase tracking-wider bg-slate-50 border border-slate-100 px-4 py-2 rounded-lg inline-block">
+                                    LWD: <span className="text-slate-900 ml-1 font-bold">{activeExit.lwd_approved || activeExit.lwd_proposed}</span>
+                                </div>
+                                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-1">Status: {activeExit.status}</p>
+                            </div>
+                        </div>
+                    </Card>
                 </div>
 
-            </div>
+                {/* Quick Access Section */}
+                <Card className="bg-slate-900 border-none rounded-xl overflow-hidden shadow-lg">
+                    <CardContent className="p-8 flex flex-col sm:flex-row items-center justify-between gap-8">
+                        <div className="space-y-1 text-center sm:text-left">
+                            <h3 className="text-xl font-bold text-white uppercase tracking-tight">Quick Actions</h3>
+                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Management portal</p>
+                        </div>
+                        <div className="flex flex-wrap justify-center gap-6">
+                            {[
+                                { label: 'Submit', icon: FileText, tab: 'submit' },
+                                { label: 'NOC', icon: ShieldAlert, tab: 'noc' },
+                                { label: 'Assets', icon: Briefcase, tab: 'handover' },
+                                { label: 'Interview', icon: MessageSquare, tab: 'interview' },
+                            ].map((action, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => setActiveTab(action.tab)}
+                                    className="flex flex-col items-center gap-3 group/action"
+                                >
+                                    <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center transition-all group-hover/action:bg-white/20 group-hover/action:scale-110">
+                                        <action.icon className="w-6 h-6 text-white" />
+                                    </div>
+                                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider group-hover/action:text-white transition-colors">{action.label}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
 
-            {/* Right Column (Sidebar) */}
-            <div className="space-y-6">
-
-                {/* My Meetings / Upcoming Events */}
-                <div className="glass-panel p-6 shadow-xl relative z-10 overflow-hidden">
-                    <div className="flex justify-between items-center mb-6">
-                        <h3 className="font-bold text-xl text-slate-900 drop-shadow-sm">Upcoming Events</h3>
-                        <button className="h-10 w-10 rounded-full border border-white/60 bg-white/40 flex items-center justify-center hover:bg-white/60 transition-colors shadow-sm">
-                            <Calendar className="w-5 h-5 text-indigo-700" />
-                        </button>
+                {/* Institutional Timeline */}
+                <Card className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+                    <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                        <div className="flex items-center gap-4">
+                            <div className="p-2.5 bg-slate-900 rounded-lg shadow-sm">
+                                <Activity className="w-5 h-5 text-white" />
+                            </div>
+                            <h3 className="text-lg font-bold text-slate-900 tracking-tight uppercase">Separation Timeline</h3>
+                        </div>
+                        <Badge className="bg-slate-100 text-slate-600 border border-slate-200 font-bold text-[8px] uppercase tracking-wider px-3 py-1 rounded-full">Record Log</Badge>
                     </div>
-
-                    <div className="space-y-4">
+                    <CardContent className="p-8 space-y-10">
                         {upcomingEvents.length > 0 ? upcomingEvents.map((event, i) => (
-                            <div key={i} className="flex items-center gap-4 p-3 bg-white/30 rounded-xl border border-white/40 shadow-sm hover:bg-white/50 transition-colors cursor-pointer group">
-                                <div className="flex flex-col items-center justify-center w-12 h-12 bg-white/60 rounded-lg shadow-inner">
-                                    <span className="text-[10px] font-black text-indigo-800 uppercase text-center block leading-none">{event.type.substring(0,3)}</span>
-                                    <div className="w-2 h-2 rounded-full bg-indigo-500 mt-1 shadow-[0_0_5px_rgba(99,102,241,0.8)]"></div>
+                            <div key={i} className="flex gap-6 group relative">
+                                {i !== upcomingEvents.length - 1 && <div className="absolute left-[23px] top-14 bottom-0 w-px bg-slate-100" />}
+                                <div className="w-12 h-12 bg-slate-50 rounded-lg border border-slate-100 flex items-center justify-center shrink-0 group-hover:bg-slate-900 group-hover:text-white transition-all duration-300">
+                                    <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-white" />
                                 </div>
-                                <div className="flex-1">
-                                    <h4 className="font-bold text-slate-800 text-sm group-hover:text-indigo-900 transition-colors">{event.title}</h4>
-                                    <p className="text-xs font-bold text-slate-500 mt-0.5 flex items-center">
-                                        <Clock className="w-3 h-3 mr-1 text-slate-400" /> {event.time}
+                                <div className="flex-1 space-y-1.5 pt-0.5 border-b border-slate-50 pb-6 group-last:border-none">
+                                    <div className="flex items-center justify-between">
+                                        <h4 className="text-lg font-bold text-slate-900 uppercase tracking-tight">{event.title}</h4>
+                                        <Badge className="bg-emerald-50 text-emerald-600 border border-emerald-100 text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">Active</Badge>
+                                    </div>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                                        <Clock className="w-3.5 h-3.5" /> Scheduled: <span className="text-slate-600">{event.time}</span>
                                     </p>
                                 </div>
-                                <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-indigo-600 transition-colors" />
                             </div>
                         )) : (
-                            <p className="text-sm font-medium text-slate-500 text-center py-4 bg-white/20 rounded-xl border border-white/30">No upcoming events.</p>
+                            <div className="text-center py-16 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+                                <Activity className="w-10 h-10 text-slate-200 mx-auto mb-4" />
+                                <p className="font-bold text-[10px] uppercase tracking-wider text-slate-400">No upcoming events</p>
+                            </div>
                         )}
-                    </div>
+                    </CardContent>
+                </Card>
+            </div>
 
-                    <div className="mt-6 pt-4 text-center border-t border-white/30">
-                        <button className="text-sm font-bold text-indigo-700 hover:text-indigo-900 flex items-center justify-center w-full transition-colors">
-                            See all events <ChevronRight className="w-4 h-4 ml-1" />
-                        </button>
+            {/* Persistence Side Column */}
+            <div className="space-y-12">
+                
+                {/* Profile Card */}
+                <Card className="bg-white border border-slate-200 rounded-xl shadow-sm">
+                    <div className="p-8 space-y-8 flex flex-col items-center text-center">
+                        <div className="relative">
+                            <div className="w-24 h-24 rounded-xl bg-slate-900 p-1 shadow-md ring-4 ring-slate-50">
+                                <div className="w-full h-full rounded-lg overflow-hidden bg-white">
+                                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${activeExit.employee_name}`} alt="Avatar" />
+                                </div>
+                            </div>
+                            <div className="absolute -bottom-2 -right-2 bg-emerald-500 text-white p-2 rounded-lg shadow-md ring-4 ring-white">
+                                <ShieldCheck className="w-4 h-4" />
+                            </div>
+                        </div>
+                        <div className="space-y-1">
+                            <h3 className="text-xl font-bold text-slate-900 tracking-tight uppercase">{activeExit.employee_name}</h3>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{activeExit.department || 'General'}</p>
+                        </div>
+                        <div className="grid grid-cols-2 gap-6 w-full pt-6 border-t border-slate-100">
+                            <div className="space-y-1">
+                                <div className="text-lg font-bold text-slate-900 tracking-tight">{handoverStatus.completed}/{handoverStatus.total}</div>
+                                <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Assets</div>
+                            </div>
+                            <div className="space-y-1">
+                                <div className="text-lg font-bold text-slate-900 tracking-tight">{overallProgress}%</div>
+                                <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Overall</div>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                </Card>
 
-                {/* Tracking / Developed Areas */}
-                <div className="glass-panel p-6 shadow-xl relative z-10 overflow-hidden">
-                    <div className="mb-6">
-                        <h3 className="font-bold text-xl text-slate-900 drop-shadow-sm">Clearance Status</h3>
-                        <p className="text-sm font-medium text-slate-600">Departmental approvals</p>
+                {/* Clearance Status */}
+                <Card className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+                    <div className="px-8 py-6 border-b border-slate-100 bg-slate-50/50">
+                        <div className="flex items-center gap-4">
+                            <div className="p-2.5 bg-slate-900 rounded-lg shadow-sm">
+                                <ShieldAlert className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-slate-900 tracking-tight uppercase">Clearances</h3>
+                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1">Status reports</p>
+                            </div>
+                        </div>
                     </div>
-
-                    <div className="space-y-5">
+                    <CardContent className="p-8 space-y-6">
                         {nocData.length > 0 ? nocData.map((dept, i) => (
-                            <div key={i} className="relative z-10">
-                                <div className="flex justify-between text-sm mb-2">
-                                    <span className="font-bold text-slate-800">{dept.department}</span>
-                                    <span className={`font-bold px-2 py-0.5 rounded backdrop-blur-sm text-[10px] uppercase tracking-wider ${dept.status === 'Cleared' ? 'bg-emerald-100/80 text-emerald-800 border border-emerald-200' : dept.status === 'Rejected' ? 'bg-rose-100/80 text-rose-800 border border-rose-200' : 'bg-amber-100/80 text-amber-800 border border-amber-200'}`}>{dept.status}</span>
+                            <div key={i} className="space-y-2.5">
+                                <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider">
+                                    <span className="text-slate-600">{dept.department}</span>
+                                    <Badge className={`px-2.5 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-wider border-none shadow-sm ${
+                                        dept.status === 'Cleared' ? 'bg-emerald-100 text-emerald-700' : 
+                                        dept.status === 'Rejected' ? 'bg-rose-100 text-rose-700' : 
+                                        'bg-orange-100 text-orange-700'
+                                    }`}>
+                                        {dept.status}
+                                    </Badge>
                                 </div>
-                                <div className="h-3 w-full bg-white/30 rounded-full overflow-hidden shadow-inner border border-white/40">
+                                <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
                                     <div
-                                        className={`h-full rounded-full transition-all duration-1000 ease-out shadow-sm ${dept.status === 'Cleared' ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : dept.status === 'Rejected' ? 'bg-gradient-to-r from-rose-500 to-rose-400' : 'bg-gradient-to-r from-amber-500 to-amber-400'}`}
+                                        className={`h-full rounded-full transition-all duration-700 ${
+                                            dept.status === 'Cleared' ? 'bg-emerald-500' : 
+                                            dept.status === 'Rejected' ? 'bg-rose-500' : 
+                                            'bg-orange-500'
+                                        }`}
                                         style={{ width: dept.status === 'Cleared' ? '100%' : '30%' }}
-                                    ></div>
+                                    />
                                 </div>
                             </div>
                         )) : (
-                            <p className="text-sm font-medium text-slate-500 text-center bg-white/20 p-4 rounded-xl border border-white/30">No clearance requests initiated.</p>
+                            <div className="text-center py-6 text-[9px] font-bold text-slate-400 uppercase tracking-widest">No clearance records.</div>
                         )}
-                    </div>
-                    <div className="absolute top-1/2 -right-10 w-48 h-48 bg-emerald-300 rounded-full blur-3xl opacity-20"></div>
-                </div>
+                        <Button variant="outline" className="w-full h-12 bg-white border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all shadow-sm active:scale-[0.98] mt-4">
+                            Detailed Report
+                        </Button>
+                    </CardContent>
+                </Card>
+
+                {/* Warning Card */}
+                <Card className="bg-rose-600 rounded-xl shadow-lg border-none overflow-hidden group">
+                    <CardContent className="p-8 space-y-4">
+                        <div className="flex items-center gap-4">
+                            <div className="p-2.5 bg-white/20 text-white rounded-lg">
+                                <AlertTriangle className="w-5 h-5" />
+                            </div>
+                            <h4 className="text-lg font-bold text-white uppercase tracking-tight">Requirement</h4>
+                        </div>
+                        <p className="text-[10px] font-medium text-rose-100 uppercase tracking-wider leading-relaxed">Please ensure all tasks are completed in the given sequence to avoid processing delays.</p>
+                        <Button className="w-full h-11 bg-white text-rose-600 hover:bg-rose-50 rounded-lg font-bold text-[10px] uppercase tracking-widest transition-all shadow-md active:scale-[0.98]">
+                            View Sequence
+                        </Button>
+                    </CardContent>
+                </Card>
 
             </div>
         </div>

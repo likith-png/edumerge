@@ -105,56 +105,56 @@ const LearningDelivery: React.FC<LearningDeliveryProps> = ({ onBack }) => {
         const activeContent = COURSE_CONTENT; // In real app, fetch based on ID
 
         return (
-            <div className="flex flex-col h-screen bg-slate-50 animate-in fade-in zoom-in-95 duration-300">
+            <div className="flex flex-col h-screen bg-slate-50">
                 {/* Player Header */}
-                <div className="bg-slate-900 text-white px-4 py-3 flex items-center justify-between shadow-md z-20">
+                <div className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between z-20 shadow-sm">
                     <div className="flex items-center gap-4">
-                        <Button variant="ghost" size="icon" onClick={() => setViewMode('dashboard')} className="text-slate-300 hover:text-white hover:bg-white/10 rounded-full">
+                        <Button variant="ghost" size="icon" onClick={() => setViewMode('dashboard')} className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg border border-slate-200 w-10 h-10 shadow-sm">
                             <ChevronLeft className="w-5 h-5" />
                         </Button>
                         <div>
-                            <h1 className="font-bold text-sm md:text-base line-clamp-1">{activeCourse.title}</h1>
-                            <div className="flex items-center gap-2 text-xs text-slate-400">
+                            <h1 className="font-bold text-slate-900 text-base line-clamp-1">{activeCourse.title}</h1>
+                            <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                                 <span className="flex items-center gap-1"><User className="w-3 h-3" /> {activeCourse.instructor}</span>
                                 <span>•</span>
                                 <span>{activeCourse.progress}% Completed</span>
                             </div>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Button size="sm" variant="ghost" className="hidden md:flex text-slate-300 hover:text-white hover:bg-white/10">
-                            <Share2 className="w-4 h-4 mr-2" /> Share
+                    <div className="flex items-center gap-3">
+                        <Button size="sm" variant="outline" className="hidden md:flex h-10 rounded-lg border-slate-200 font-bold px-4 text-xs gap-2">
+                            <Share2 className="w-4 h-4 ml-0" /> Share
                         </Button>
-                        <Button size="sm" variant="secondary" className="bg-indigo-600 hover:bg-indigo-700 text-white border-none font-bold">
-                            Next Lesson <ChevronRight className="w-4 h-4 ml-1" />
+                        <Button size="sm" className="h-10 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 text-xs gap-2">
+                            Next Unit <ChevronRight className="w-4 h-4" />
                         </Button>
                     </div>
                 </div>
 
                 <div className="flex flex-1 overflow-hidden">
                     {/* Course Sidebar */}
-                    <div className={`${sidebarOpen ? 'w-80' : 'w-0'} bg-white border-r border-slate-200 flex flex-col transition-all duration-300 overflow-hidden`}>
-                        <div className="p-4 border-b border-slate-100 bg-slate-50/50">
-                            <h3 className="font-black text-slate-900 text-sm uppercase tracking-wider mb-2">Course Content</h3>
-                            <Progress value={activeCourse.progress} className="h-2 mb-2" />
-                            <p className="text-xs text-slate-500 font-medium text-right">{activeCourse.completedLessons}/{activeCourse.totalLessons} Lessons</p>
+                    <div className={`${sidebarOpen ? 'w-80' : 'w-0'} bg-white border-r border-slate-200 flex flex-col transition-all duration-300 overflow-hidden shadow-md`}>
+                        <div className="p-6 border-b border-slate-100 bg-slate-50/50">
+                            <h3 className="font-bold text-slate-900 text-xs uppercase tracking-widest mb-3">Course Curriculum</h3>
+                            <Progress value={activeCourse.progress} className="h-1.5 mb-3" />
+                            <p className="text-[10px] text-slate-500 font-bold text-right uppercase tracking-widest">{activeCourse.completedLessons}/{activeCourse.totalLessons} Units Completed</p>
                         </div>
-                        <div className="flex-1 overflow-auto p-4 space-y-6">
+                        <div className="flex-1 overflow-auto p-4 space-y-4">
                             {activeContent.sections.map((section) => (
-                                <div key={section.id}>
-                                    <h4 className="font-bold text-slate-800 text-sm mb-3 px-2">{section.title}</h4>
+                                <div key={section.id} className="space-y-2">
+                                    <h4 className="font-bold text-slate-400 text-[10px] uppercase tracking-widest px-2 mb-1">{section.title}</h4>
                                     <div className="space-y-1">
                                         {section.lessons.map((lesson) => (
                                             <button
                                                 key={lesson.id}
-                                                className={`w-full flex items-start gap-3 p-3 rounded-lg text-left transition-colors ${lesson.current
-                                                    ? 'bg-indigo-50 border-indigo-100 text-indigo-900'
+                                                className={`w-full flex items-start gap-4 p-4 rounded-xl text-left transition-all ${lesson.current
+                                                    ? 'bg-indigo-50 text-indigo-900 shadow-sm'
                                                     : 'hover:bg-slate-50 text-slate-600'
                                                     }`}
                                             >
-                                                <div className="mt-0.5">
+                                                <div className="mt-1">
                                                     {lesson.completed ? (
-                                                        <CheckCircle className="w-4 h-4 text-emerald-500" />
+                                                        <CheckCircle className="w-4 h-4 text-emerald-600" />
                                                     ) : lesson.type === 'Video' ? (
                                                         <PlayCircle className={`w-4 h-4 ${lesson.current ? 'text-indigo-600' : 'text-slate-400'}`} />
                                                     ) : (
@@ -162,8 +162,8 @@ const LearningDelivery: React.FC<LearningDeliveryProps> = ({ onBack }) => {
                                                     )}
                                                 </div>
                                                 <div className="flex-1">
-                                                    <p className={`text-sm font-medium ${lesson.current ? 'font-bold' : ''}`}>{lesson.title}</p>
-                                                    <span className="text-xs text-slate-400 flex items-center gap-1 mt-1">
+                                                    <p className={`text-sm ${lesson.current ? 'font-bold' : 'font-medium'}`}>{lesson.title}</p>
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 mt-1.5">
                                                         <Clock className="w-3 h-3" /> {lesson.duration}
                                                     </span>
                                                 </div>
@@ -176,36 +176,36 @@ const LearningDelivery: React.FC<LearningDeliveryProps> = ({ onBack }) => {
                     </div>
 
                     {/* Main Content Area */}
-                    <div className="flex-1 flex flex-col min-w-0 bg-black/95 relative">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="absolute top-4 left-4 z-10 text-white/50 hover:text-white bg-black/20 hover:bg-black/40 rounded-full"
-                            onClick={() => setSidebarOpen(!sidebarOpen)}
-                        >
-                            {sidebarOpen ? <ChevronLeft /> : <ChevronRight />}
-                        </Button>
+                    <div className="flex-1 flex flex-col min-w-0 bg-slate-900 overflow-y-auto">
+                        <div className="flex-1 flex items-center justify-center p-4 lg:p-12 relative">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="absolute top-6 left-6 z-10 text-white/40 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg w-10 h-10 transition-all shadow-xl"
+                                onClick={() => setSidebarOpen(!sidebarOpen)}
+                            >
+                                {sidebarOpen ? <ChevronLeft /> : <ChevronRight />}
+                            </Button>
 
-                        <div className="flex-1 flex items-center justify-center p-8">
-                            {/* Mock Video Player */}
-                            <div className="w-full max-w-4xl aspect-video bg-slate-900 rounded-xl shadow-2xl relative group overflow-hidden border border-white/10">
+                            {/* Video Player Mockup */}
+                            <div className="w-full max-w-5xl aspect-video bg-black rounded-xl shadow-2xl relative group overflow-hidden border border-white/5">
                                 <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="w-20 h-20 rounded-full bg-indigo-600/90 flex items-center justify-center cursor-pointer hover:scale-110 transition-transform shadow-lg shadow-indigo-500/30">
-                                        <PlayCircle className="w-10 h-10 text-white ml-1" />
+                                    <div className="w-20 h-20 rounded-full bg-indigo-600/90 flex items-center justify-center cursor-pointer hover:scale-110 transition-all shadow-2xl shadow-indigo-500/30">
+                                        <PlayCircle className="w-12 h-12 text-white ml-1" />
                                     </div>
                                 </div>
-                                <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <div className="h-1 bg-white/30 rounded-full mb-4 cursor-pointer overflow-hidden">
+                                <div className="absolute bottom-0 left-0 right-0 px-6 py-6 bg-gradient-to-t from-black to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="h-1 bg-white/20 rounded-full mb-4 cursor-pointer overflow-hidden">
                                         <div className="h-full w-1/3 bg-indigo-500" />
                                     </div>
                                     <div className="flex items-center justify-between text-white">
-                                        <div className="flex items-center gap-4">
-                                            <span className="font-bold text-sm">05:20 / 18:00</span>
+                                        <div className="flex items-center gap-6">
+                                            <span className="font-bold text-sm tracking-tight">05:20 / 18:00</span>
                                         </div>
                                         <div className="flex items-center gap-4">
-                                            <span className="text-xs font-bold bg-white/20 px-2 py-1 rounded">1.0x</span>
-                                            <span className="text-xs font-bold bg-white/20 px-2 py-1 rounded">CC</span>
-                                            <Layout className="w-5 h-5 cursor-pointer" />
+                                            <span className="text-[10px] font-bold bg-white/10 px-2 py-1 rounded uppercase tracking-widest">1.0x Speed</span>
+                                            <span className="text-[10px] font-bold bg-white/10 px-2 py-1 rounded uppercase tracking-widest">Closed Captions</span>
+                                            <Layout className="w-5 h-5 cursor-pointer hover:text-indigo-400 transition-colors" />
                                         </div>
                                     </div>
                                 </div>
@@ -213,17 +213,17 @@ const LearningDelivery: React.FC<LearningDeliveryProps> = ({ onBack }) => {
                         </div>
 
                         {/* Player Tabs (Notes, Q&A) */}
-                        <div className="h-1/3 bg-white border-t border-slate-200 flex flex-col">
+                        <div className="bg-white border-t border-slate-200">
                             <Tabs defaultValue="overview" className="flex-1 flex flex-col">
-                                <div className="px-6 pt-2 border-b border-slate-100">
-                                    <TabsList className="bg-transparent h-12">
-                                        <TabsTrigger value="overview" className="data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-600 font-bold">Overview</TabsTrigger>
-                                        <TabsTrigger value="qa" className="data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-600 font-bold">Q&A</TabsTrigger>
-                                        <TabsTrigger value="notes" className="data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-600 font-bold">My Notes</TabsTrigger>
-                                        <TabsTrigger value="resources" className="data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-600 font-bold">Resources</TabsTrigger>
+                                <div className="px-6 pt-2 border-b border-slate-100 bg-slate-50/50">
+                                    <TabsList className="bg-transparent h-12 gap-6">
+                                        <TabsTrigger value="overview" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-md rounded-lg h-9 px-6 font-bold text-[10px] uppercase tracking-widest transition-all">Overview</TabsTrigger>
+                                        <TabsTrigger value="qa" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-md rounded-lg h-9 px-6 font-bold text-[10px] uppercase tracking-widest transition-all">Q&A Hub</TabsTrigger>
+                                        <TabsTrigger value="notes" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-md rounded-lg h-9 px-6 font-bold text-[10px] uppercase tracking-widest transition-all">Personal Notes</TabsTrigger>
+                                        <TabsTrigger value="resources" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-md rounded-lg h-9 px-6 font-bold text-[10px] uppercase tracking-widest transition-all">Downloads</TabsTrigger>
                                     </TabsList>
                                 </div>
-                                <div className="flex-1 overflow-auto p-6">
+                                <div className="flex-1 overflow-auto px-4 py-4">
                                     <TabsContent value="overview" className="mt-0 space-y-4">
                                         <h2 className="text-xl font-bold text-slate-900">Module 2: Proactive Strategies</h2>
                                         <p className="text-slate-600 leading-relaxed">
@@ -266,16 +266,16 @@ const LearningDelivery: React.FC<LearningDeliveryProps> = ({ onBack }) => {
 
     // --- Dashboard View ---
     return (
-        <div className="min-h-screen bg-slate-50 animate-in fade-in slide-in-from-right-4 duration-500 p-8 space-y-8">
+        <div className="min-h-screen bg-slate-50 p-8 space-y-8">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="icon" onClick={onBack} className="rounded-full hover:bg-slate-200">
-                        <ChevronLeft className="w-6 h-6 text-slate-600" />
+                    <Button variant="ghost" size="icon" onClick={onBack} className="rounded-lg bg-white shadow-sm border border-slate-200 hover:bg-slate-50 transition-all w-10 h-10">
+                        <ChevronLeft className="w-5 h-5 text-slate-900" />
                     </Button>
                     <div>
-                        <h1 className="text-3xl font-black text-slate-900 tracking-tight">My Learning</h1>
-                        <p className="text-slate-500 font-medium">Track your progress and continue learning.</p>
+                        <h1 className="text-2xl font-bold text-slate-900">My Curriculum</h1>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Learner Dashboard • Track your progress</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -290,62 +290,61 @@ const LearningDelivery: React.FC<LearningDeliveryProps> = ({ onBack }) => {
             </div>
 
             {/* Dashboard Tabs */}
-            <Tabs defaultValue="in-progress" onValueChange={setActiveTab} className="space-y-6">
-                <TabsList className="bg-white p-1 h-12 rounded-xl shadow-sm border border-slate-100 inline-flex">
-                    <TabsTrigger value="in-progress" className="rounded-lg h-10 px-6 font-bold data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-600">
+            <Tabs defaultValue="in-progress" onValueChange={setActiveTab} className="space-y-8">
+                <TabsList className="bg-slate-100 p-1.5 h-12 rounded-xl border border-slate-200 inline-flex shadow-inner">
+                    <TabsTrigger value="in-progress" className="rounded-lg h-9 px-8 font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-md">
                         In Progress
                     </TabsTrigger>
-                    <TabsTrigger value="assigned" className="rounded-lg h-10 px-6 font-bold data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-600">
-                        Assigned <Badge className="ml-2 bg-indigo-100 text-indigo-600 hover:bg-indigo-100 border-none h-5 px-1.5">2</Badge>
+                    <TabsTrigger value="assigned" className="rounded-lg h-9 px-8 font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-md">
+                        Assigned <Badge className="ml-2 bg-indigo-50 text-indigo-600 border-none h-4 px-1.5 text-[8px] font-bold tracking-normal">2</Badge>
                     </TabsTrigger>
-                    <TabsTrigger value="completed" className="rounded-lg h-10 px-6 font-bold data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-600">
+                    <TabsTrigger value="completed" className="rounded-lg h-9 px-8 font-bold text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-md">
                         Completed
                     </TabsTrigger>
                 </TabsList>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {MY_COURSES.filter(c => {
                         if (activeTab === 'in-progress') return c.status === 'In Progress';
                         if (activeTab === 'assigned') return c.status === 'Assigned';
                         return c.status === 'Completed';
                     }).map((course) => (
-                        <Card key={course.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden border-slate-200 rounded-2xl flex flex-col">
-                            <div className="relative h-48 overflow-hidden">
-                                <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                                <div className="absolute bottom-4 left-4 right-4 text-white">
-                                    <Badge className="bg-white/20 backdrop-blur-md border-white/20 text-white mb-2 hover:bg-white/30">
+                        <Card key={course.id} className="group hover:shadow-xl transition-all duration-500 overflow-hidden border-slate-200 rounded-xl flex flex-col bg-white">
+                            <div className="relative h-44 overflow-hidden">
+                                <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                                <div className="absolute top-4 left-4">
+                                    <Badge className="bg-white/90 text-slate-900 border-none font-bold text-[8px] uppercase tracking-widest shadow-lg">
                                         {course.status}
                                     </Badge>
                                 </div>
                             </div>
                             <CardContent className="flex-1 p-6 flex flex-col">
-                                <h3 className="text-lg font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors line-clamp-2">
+                                <h3 className="text-base font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-tight">
                                     {course.title}
                                 </h3>
-                                <p className="text-sm text-slate-500 mb-6 flex items-center gap-2">
+                                <p className="text-xs text-slate-500 mb-4 flex items-center gap-2">
                                     <User className="w-4 h-4" /> {course.instructor}
                                 </p>
 
-                                <div className="mt-auto space-y-4">
+                                <div className="mt-auto space-y-5 pt-4 border-t border-slate-100">
                                     <div className="space-y-2">
-                                        <div className="flex justify-between text-xs font-bold text-slate-600">
-                                            <span>{course.progress}% Complete</span>
-                                            <span>{course.completedLessons}/{course.totalLessons} Lessons</span>
+                                        <div className="flex justify-between text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                            <span>{course.progress}% Completed</span>
+                                            <span>{course.completedLessons}/{course.totalLessons} Units</span>
                                         </div>
-                                        <Progress value={course.progress} className="h-2" />
+                                        <Progress value={course.progress} className="h-1.5" />
                                     </div>
 
                                     {course.status === 'Completed' ? (
-                                        <Button className="w-full bg-emerald-600 hover:bg-emerald-700 font-bold text-white shadow-lg shadow-emerald-200 gap-2">
+                                        <Button className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 font-bold text-white shadow-sm rounded-lg gap-2 text-[10px] uppercase tracking-widest">
                                             <Award className="w-4 h-4" /> View Certificate
                                         </Button>
                                     ) : (
                                         <Button
                                             onClick={() => handleStartCourse(course.id)}
-                                            className="w-full bg-indigo-600 hover:bg-indigo-700 font-bold text-white shadow-lg shadow-indigo-200 gap-2 group-hover:translate-y-[-2px] transition-transform"
+                                            className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 font-bold text-white shadow-sm rounded-lg gap-2 text-[10px] uppercase tracking-widest transition-all hover:translate-y-[-1px]"
                                         >
-                                            {course.progress > 0 ? 'Resume Learning' : 'Start Course'} <PlayCircle className="w-4 h-4" />
+                                            {course.progress > 0 ? 'Resume Unit' : 'Start Curriculum'} <PlayCircle className="w-4 h-4" />
                                         </Button>
                                     )}
                                 </div>

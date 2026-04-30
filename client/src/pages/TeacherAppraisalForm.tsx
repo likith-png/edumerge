@@ -24,7 +24,7 @@ const TeacherAppraisalForm: React.FC = () => {
     return (
         <Layout title="Teaching Staff Appraisal" description="Complete your self-assessment for Academic Year 2024-25" icon={UserCheck} showBack>
             {/* Progress Tracker */}
-            <Card className="mb-6 border-blue-200 bg-blue-50">
+            <Card className="mb-4 border-blue-200 bg-blue-50">
                 <CardContent className="pt-6">
                     <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-medium text-blue-900">Overall Progress</span>
@@ -39,13 +39,13 @@ const TeacherAppraisalForm: React.FC = () => {
             </Card>
 
             {/* Section Navigation */}
-            <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+            <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
                 {sections.map((section) => (
                     <button
                         key={section.id}
                         onClick={() => setActiveSection(section.id)}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition-all ${activeSection === section.id
-                            ? 'bg-blue-600 text-white shadow-md'
+                            ? 'bg-blue-600 text-white shadow-sm'
                             : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
                             }`}
                     >

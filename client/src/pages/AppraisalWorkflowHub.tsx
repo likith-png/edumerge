@@ -96,7 +96,7 @@ const AppraisalWorkflowHub: React.FC = () => {
             icon={Target}
         >
             {/* Active Cycle Info Banner */}
-            <Card className="mb-6 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+            <Card className="mb-4 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
                 <CardContent className="pt-4">
                     <div className="flex items-start justify-between">
                         <div>
@@ -130,14 +130,14 @@ const AppraisalWorkflowHub: React.FC = () => {
             </Card>
 
             {/* Workflow Timeline Stepper */}
-            <Card className="mb-6">
+            <Card className="mb-4">
                 <CardHeader>
                     <CardTitle className="text-base">Workflow Progress</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="relative">
                         {/* Progress Line */}
-                        <div className="absolute top-6 left-0 right-0 h-1 bg-slate-200">
+                        <div className="absolute topx-4 py-4 left-0 right-0 h-1 bg-slate-200">
                             <div
                                 className="h-full bg-blue-600 transition-all"
                                 style={{ width: `${(currentPhaseIndex / (workflowPhases.length - 1)) * 100}%` }}
@@ -161,7 +161,7 @@ const AppraisalWorkflowHub: React.FC = () => {
                                             className={`w-12 h-12 rounded-full flex items-center justify-center border-4 border-white transition-all ${status === 'completed'
                                                 ? 'bg-green-600 text-white'
                                                 : status === 'current'
-                                                    ? `${phaseConfig.color} text-white shadow-lg scale-110`
+                                                    ? `${phaseConfig.color} text-white shadow-sm scale-110`
                                                     : status === 'locked'
                                                         ? 'bg-slate-300 text-slate-500'
                                                         : 'bg-slate-100 text-slate-400'
@@ -192,7 +192,7 @@ const AppraisalWorkflowHub: React.FC = () => {
                 </CardContent>
             </Card>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gapx-4 py-4">
                 {/* My Appraisal Status */}
                 <Card className="lg:col-span-2 border-slate-200">
                     <CardHeader className="pb-3">
@@ -225,7 +225,7 @@ const AppraisalWorkflowHub: React.FC = () => {
                                     </div>
                                     {myAppraisal.finalRating && (
                                         <div className="text-right">
-                                            <div className="text-3xl font-bold text-blue-900">{myAppraisal.finalRating.toFixed(1)}</div>
+                                            <div className="text-xl font-bold text-blue-900">{myAppraisal.finalRating.toFixed(1)}</div>
                                             <div className="text-xs text-blue-600">Final Rating</div>
                                         </div>
                                     )}
@@ -312,7 +312,7 @@ const AppraisalWorkflowHub: React.FC = () => {
             {/* Quick Access Modules */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
                 <Card
-                    className="cursor-pointer border-slate-200 hover:shadow-md transition-all"
+                    className="cursor-pointer border-slate-200 hover:shadow-sm transition-all"
                     onClick={() => navigate('/appraisal/kra')}
                 >
                     <CardContent className="pt-6 text-center">
@@ -321,7 +321,7 @@ const AppraisalWorkflowHub: React.FC = () => {
                     </CardContent>
                 </Card>
                 <Card
-                    className="cursor-pointer border-slate-200 hover:shadow-md transition-all"
+                    className="cursor-pointer border-slate-200 hover:shadow-sm transition-all"
                     onClick={() => navigate('/appraisal/kpi')}
                 >
                     <CardContent className="pt-6 text-center">
@@ -330,7 +330,7 @@ const AppraisalWorkflowHub: React.FC = () => {
                     </CardContent>
                 </Card>
                 <Card
-                    className="cursor-pointer border-slate-200 hover:shadow-md transition-all"
+                    className="cursor-pointer border-slate-200 hover:shadow-sm transition-all"
                     onClick={() => navigate('/appraisal/analytics')}
                 >
                     <CardContent className="pt-6 text-center">
@@ -340,7 +340,7 @@ const AppraisalWorkflowHub: React.FC = () => {
                 </Card>
                 {myAppraisal.isPIP && (
                     <Card
-                        className="cursor-pointer border-red-200 bg-red-50 hover:shadow-md transition-all"
+                        className="cursor-pointer border-red-200 bg-red-50 hover:shadow-sm transition-all"
                         onClick={() => navigate('/appraisal/pip')}
                     >
                         <CardContent className="pt-6 text-center">

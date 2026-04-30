@@ -98,7 +98,7 @@ const CalibrationDashboard: React.FC = () => {
             showBack
         >
             {/* Controls */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                     <Label className="text-sm">Department:</Label>
                     <select
@@ -136,10 +136,10 @@ const CalibrationDashboard: React.FC = () => {
             </div>
 
             {/* Distribution Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                 <Card className="border-green-200 bg-green-50">
                     <CardContent className="pt-4">
-                        <div className="text-2xl font-bold text-green-900">
+                        <div className="text-xl font-bold text-green-900">
                             {distributionStats.outstanding}
                         </div>
                         <div className="text-xs text-green-700">Outstanding ({getPercentage(distributionStats.outstanding)}%)</div>
@@ -148,7 +148,7 @@ const CalibrationDashboard: React.FC = () => {
                 </Card>
                 <Card className="border-blue-200 bg-blue-50">
                     <CardContent className="pt-4">
-                        <div className="text-2xl font-bold text-blue-900">
+                        <div className="text-xl font-bold text-blue-900">
                             {distributionStats.excellent}
                         </div>
                         <div className="text-xs text-blue-700">Excellent ({getPercentage(distributionStats.excellent)}%)</div>
@@ -157,14 +157,14 @@ const CalibrationDashboard: React.FC = () => {
                 </Card>
                 <Card className="border-amber-200 bg-amber-50">
                     <CardContent className="pt-4">
-                        <div className="text-2xl font-bold text-amber-900">{distributionStats.good}</div>
+                        <div className="text-xl font-bold text-amber-900">{distributionStats.good}</div>
                         <div className="text-xs text-amber-700">Good ({getPercentage(distributionStats.good)}%)</div>
                         <div className="text-[10px] text-amber-600 mt-1">Target: 40-50%</div>
                     </CardContent>
                 </Card>
                 <Card className="border-slate-200 bg-slate-50">
                     <CardContent className="pt-4">
-                        <div className="text-2xl font-bold text-slate-900">
+                        <div className="text-xl font-bold text-slate-900">
                             {distributionStats.satisfactory}
                         </div>
                         <div className="text-xs text-slate-700">Satisfactory ({getPercentage(distributionStats.satisfactory)}%)</div>
@@ -174,7 +174,7 @@ const CalibrationDashboard: React.FC = () => {
             </div>
 
             {/* Bell Curve Visualization */}
-            <Card className="mb-6">
+            <Card className="mb-4">
                 <CardHeader>
                     <CardTitle className="text-base">Performance Distribution</CardTitle>
                 </CardHeader>

@@ -66,35 +66,35 @@ const HODReviewForm: React.FC = () => {
     return (
         <Layout title="HOD Review Dashboard" description="Review and approve teaching staff appraisals" icon={UserCog} showBack>
             {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <Card className="border-amber-200 bg-amber-50">
                     <CardContent className="pt-4">
-                        <div className="text-2xl font-bold text-amber-900">{pendingAppraisals.length}</div>
+                        <div className="text-xl font-bold text-amber-900">{pendingAppraisals.length}</div>
                         <div className="text-xs text-amber-700">Pending Review</div>
                     </CardContent>
                 </Card>
                 <Card className="border-green-200 bg-green-50">
                     <CardContent className="pt-4">
-                        <div className="text-2xl font-bold text-green-900">{reviewedAppraisals.length}</div>
+                        <div className="text-xl font-bold text-green-900">{reviewedAppraisals.length}</div>
                         <div className="text-xs text-green-700">Reviewed</div>
                     </CardContent>
                 </Card>
                 <Card className="border-blue-200 bg-blue-50">
                     <CardContent className="pt-4">
-                        <div className="text-2xl font-bold text-blue-900">5</div>
+                        <div className="text-xl font-bold text-blue-900">5</div>
                         <div className="text-xs text-blue-700">Faculty under Supervision</div>
                     </CardContent>
                 </Card>
             </div>
 
             {/* Tab Navigation */}
-            <div className="flex gap-2 mb-6">
+            <div className="flex gap-2 mb-4">
                 {tabs.map((tab) => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${activeTab === tab.id
-                            ? 'bg-blue-600 text-white shadow-md'
+                            ? 'bg-blue-600 text-white shadow-sm'
                             : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
                             }`}
                     >
@@ -106,13 +106,13 @@ const HODReviewForm: React.FC = () => {
             </div>
 
             {/* Appraisal List */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gapx-4 py-4">
                 {/* Faculty List */}
                 <div className="space-y-3">
                     {activeTab === 'pending' ? pendingAppraisals.map((appraisal) => (
                         <Card
                             key={appraisal.id}
-                            className={`cursor-pointer border-slate-200 hover:shadow-md transition-all ${selectedFaculty?.id === appraisal.id ? 'ring-2 ring-blue-500' : ''
+                            className={`cursor-pointer border-slate-200 hover:shadow-sm transition-all ${selectedFaculty?.id === appraisal.id ? 'ring-2 ring-blue-500' : ''
                                 }`}
                             onClick={() => setSelectedFaculty(appraisal)}
                         >
@@ -132,7 +132,7 @@ const HODReviewForm: React.FC = () => {
                     )) : reviewedAppraisals.map((appraisal) => (
                         <Card
                             key={appraisal.id}
-                            className={`cursor-pointer border-slate-200 hover:shadow-md transition-all ${selectedFaculty?.id === appraisal.id ? 'ring-2 ring-blue-500' : ''
+                            className={`cursor-pointer border-slate-200 hover:shadow-sm transition-all ${selectedFaculty?.id === appraisal.id ? 'ring-2 ring-blue-500' : ''
                                 }`}
                             onClick={() => setSelectedFaculty(appraisal)}
                         >

@@ -146,11 +146,9 @@ const DEPT_HEATMAP_DATA = [
 ];
 
 const GOI_CAMPUS_DATA = [
-  { name: "St. Xavier's", type: 'K-12', staff: 187, present: 160, onLeave: 22, lop: 8, payroll: 'Ready', health: 92 },
-  { name: 'Holy Cross', type: 'Higher', staff: 234, present: 196, onLeave: 31, lop: 12, payroll: 'Blocked', health: 58 },
-  { name: 'Delhi Public', type: 'K-12', staff: 156, present: 140, onLeave: 14, lop: 4, payroll: 'Ready', health: 88 },
-  { name: 'Presidency', type: 'Higher', staff: 298, present: 244, onLeave: 42, lop: 14, payroll: 'In Progress', health: 74 },
-  { name: 'Bishop Cotton', type: 'K-12', staff: 142, present: 118, onLeave: 19, lop: 7, payroll: 'Ready', health: 81 },
+  { name: "Garden City University School", type: 'K-12', staff: 187, present: 160, onLeave: 22, lop: 8, payroll: 'Ready', health: 92 },
+  { name: 'Garden City University PU College', type: 'PU College', staff: 234, present: 196, onLeave: 31, lop: 12, payroll: 'Blocked', health: 58 },
+  { name: 'Garden City University BBA College', type: 'BBA College', staff: 298, present: 244, onLeave: 42, lop: 14, payroll: 'In Progress', health: 74 },
 ];
 
 const CAMPUS_DRILL_DATA: Record<string, {
@@ -172,7 +170,7 @@ const CAMPUS_DRILL_DATA: Record<string, {
   engagement: { score: number; trend: 'up' | 'down' | 'flat'; surveyResponse: number };
   goals: { set: number; onTrack: number; atRisk: number; completed: number };
 }> = {
-  "St. Xavier's": {
+  "Garden City University School": {
     attendance: { present: 160, onLeave: 22, ual: 3, lop: 8 },
     leaveBreakdown: [
       { type: 'Casual', count: 8, color: '#003f98' }, { type: 'Sick', count: 6, color: '#1a7f4b' },
@@ -201,7 +199,7 @@ const CAMPUS_DRILL_DATA: Record<string, {
     engagement: { score: 82, trend: 'up', surveyResponse: 88 },
     goals: { set: 310, onTrack: 278, atRisk: 22, completed: 10 },
   },
-  'Holy Cross': {
+  'Garden City University PU College': {
     attendance: { present: 196, onLeave: 31, ual: 7, lop: 12 },
     leaveBreakdown: [
       { type: 'Casual', count: 12, color: '#003f98' }, { type: 'Sick', count: 9, color: '#1a7f4b' },
@@ -230,7 +228,7 @@ const CAMPUS_DRILL_DATA: Record<string, {
     engagement: { score: 54, trend: 'down', surveyResponse: 62 },
     goals: { set: 390, onTrack: 240, atRisk: 98, completed: 52 },
   },
-  'Delhi Public': {
+  'Garden City University BBA College': {
     attendance: { present: 140, onLeave: 14, ual: 2, lop: 4 },
     leaveBreakdown: [
       { type: 'Casual', count: 5, color: '#003f98' }, { type: 'Sick', count: 4, color: '#1a7f4b' },
@@ -259,69 +257,11 @@ const CAMPUS_DRILL_DATA: Record<string, {
     engagement: { score: 79, trend: 'flat', surveyResponse: 84 },
     goals: { set: 260, onTrack: 238, atRisk: 14, completed: 8 },
   },
-  'Presidency': {
-    attendance: { present: 244, onLeave: 42, ual: 8, lop: 14 },
-    leaveBreakdown: [
-      { type: 'Casual', count: 16, color: '#003f98' }, { type: 'Sick', count: 12, color: '#1a7f4b' },
-      { type: 'LOP', count: 8, color: '#c62828' }, { type: 'Earned', count: 6, color: '#7c3aed' },
-    ],
-    payrollSteps: [
-      { label: 'Attendance locked', status: 'done' }, { label: 'Leave data synced', status: 'in_progress' },
-      { label: 'LOP validated', status: 'waiting' }, { label: 'Statutory computation', status: 'waiting' },
-      { label: 'Finance approval', status: 'waiting' },
-    ],
-    topAbsentees: [{ name: 'Mohan D', dept: 'Admin', days: 8 }, { name: 'Sunita R', dept: 'Science', days: 6 }, { name: 'Anil K', dept: 'Commerce', days: 5 }],
-    staffByDept: [
-      { dept: 'Science', count: 62, present: 54 }, { dept: 'Commerce', count: 55, present: 46 },
-      { dept: 'Maths', count: 48, present: 42 }, { dept: 'Admin', count: 38, present: 32 }, { dept: 'PE', count: 20, present: 18 },
-    ],
-    alerts: [{ msg: '8 UAL staff — 3 escalated', type: 'error' }, { msg: 'Leave data sync in progress', type: 'warning' }, { msg: 'Payroll blocked till sync completes', type: 'warning' }],
-    salary: { gross: 9420000, net: 8140000, lopDeduction: 248000, costPerEmp: 31611, budgetVariance: -6 },
-    statutory: { pf: 'filed', esi: 'pending', tds: 'pending', pt: 'filed' },
-    appraisal: { total: 298, submitted: 234, completed: 188, cycle: 'Q1 2026' },
-    talentAcq: { openPositions: 14, offersOut: 6, joinedMTD: 2, timeToHire: 38 },
-    onboarding: { active: 2, slaBreached: 2, completed: 10 },
-    exitData: { active: 7, ffSettled: 2, ffPending: 5, attritionYTD: 9.4 },
-    lnd: { enrolled: 220, completed: 148, completionPct: 67, certIssued: 22 },
-    lessonPlans: { submitted: 241, total: 298 },
-    research: { papers: 22, conferences: 14, patents: 3 },
-    engagement: { score: 62, trend: 'down', surveyResponse: 71 },
-    goals: { set: 490, onTrack: 320, atRisk: 124, completed: 46 },
-  },
-  'Bishop Cotton': {
-    attendance: { present: 118, onLeave: 19, ual: 4, lop: 7 },
-    leaveBreakdown: [
-      { type: 'Casual', count: 7, color: '#003f98' }, { type: 'Sick', count: 5, color: '#1a7f4b' },
-      { type: 'LOP', count: 4, color: '#c62828' }, { type: 'Earned', count: 3, color: '#7c3aed' },
-    ],
-    payrollSteps: [
-      { label: 'Attendance locked', status: 'done' }, { label: 'Leave data synced', status: 'done' },
-      { label: 'LOP validated', status: 'done' }, { label: 'Statutory computation', status: 'in_progress' },
-      { label: 'Finance approval', status: 'waiting' },
-    ],
-    topAbsentees: [{ name: 'Rajesh V', dept: 'Admin', days: 5 }, { name: 'Meena N', dept: 'Science', days: 3 }],
-    staffByDept: [
-      { dept: 'Science', count: 30, present: 26 }, { dept: 'Maths', count: 26, present: 23 },
-      { dept: 'English', count: 20, present: 18 }, { dept: 'Admin', count: 16, present: 14 },
-    ],
-    alerts: [{ msg: '4 UAL cases pending review', type: 'warning' }, { msg: 'Statutory computation in progress', type: 'info' }],
-    salary: { gross: 3920000, net: 3440000, lopDeduction: 72000, costPerEmp: 27606, budgetVariance: 0 },
-    statutory: { pf: 'filed', esi: 'filed', tds: 'filed', pt: 'pending' },
-    appraisal: { total: 142, submitted: 126, completed: 114, cycle: 'Q1 2026' },
-    talentAcq: { openPositions: 6, offersOut: 2, joinedMTD: 1, timeToHire: 24 },
-    onboarding: { active: 1, slaBreached: 1, completed: 7 },
-    exitData: { active: 3, ffSettled: 1, ffPending: 2, attritionYTD: 5.1 },
-    lnd: { enrolled: 110, completed: 86, completionPct: 78, certIssued: 16 },
-    lessonPlans: { submitted: 128, total: 142 },
-    research: { papers: 5, conferences: 3, patents: 0 },
-    engagement: { score: 71, trend: 'flat', surveyResponse: 76 },
-    goals: { set: 240, onTrack: 192, atRisk: 36, completed: 12 },
-  },
 };
 
 const ACTIVITY_FEED_DATA = [
   { id: 1, text: "Ravi Naik's leave approved by HOD", time: '2m ago', type: 'success' as const },
-  { id: 2, text: 'Holy Cross payroll blocked — finance pending', time: '18m ago', type: 'error' as const },
+  { id: 2, text: 'Garden City University PU College payroll blocked — finance pending', time: '18m ago', type: 'error' as const },
   { id: 3, text: 'Kavya Rao onboarding complete', time: '1h ago', type: 'teal' as const },
   { id: 4, text: '9 approvals auto-escalated to HR Admin', time: '2h ago', type: 'warning' as const },
   { id: 5, text: 'Sunita More LOP rejected by manager', time: '3h ago', type: 'error' as const },
@@ -418,11 +358,9 @@ const GROUP_KPI_DATA = [
 ];
 
 const PAYROLL_STATUS_MATRIX = [
-  { campus: "St. Xavier's", attendance: 'done', leave: 'done', lop: 'done', statutory: 'done', finance: 'ready' },
-  { campus: 'Holy Cross', attendance: 'done', leave: 'done', lop: 'pending', statutory: 'in_progress', finance: 'blocked' },
-  { campus: 'Delhi Public', attendance: 'done', leave: 'done', lop: 'done', statutory: 'done', finance: 'ready' },
-  { campus: 'Presidency', attendance: 'done', leave: 'pending', lop: 'pending', statutory: 'pending', finance: 'pending' },
-  { campus: 'Bishop Cotton', attendance: 'done', leave: 'done', lop: 'done', statutory: 'in_progress', finance: 'ready' },
+  { campus: "Garden City University School", attendance: 'done', leave: 'done', lop: 'done', statutory: 'done', finance: 'ready' },
+  { campus: 'Garden City University PU College', attendance: 'done', leave: 'done', lop: 'pending', statutory: 'in_progress', finance: 'blocked' },
+  { campus: 'Garden City University BBA College', attendance: 'done', leave: 'pending', lop: 'pending', statutory: 'pending', finance: 'pending' },
 ];
 
 const DEPT_COVERAGE_DATA = [
@@ -512,58 +450,48 @@ const APPRAISAL_PROGRESS_DATA = {
 };
 
 const PERFORMANCE_DIST_DATA = [
-  { campus: "St. Xavier's", outstanding: 18, good: 42, average: 30, belowAvg: 8, poor: 2 },
-  { campus: 'Holy Cross', outstanding: 12, good: 38, average: 35, belowAvg: 12, poor: 3 },
-  { campus: 'Delhi Public', outstanding: 22, good: 45, average: 25, belowAvg: 6, poor: 2 },
-  { campus: 'Presidency', outstanding: 15, good: 40, average: 33, belowAvg: 9, poor: 3 },
-  { campus: 'Bishop Cotton', outstanding: 20, good: 43, average: 28, belowAvg: 7, poor: 2 },
+  { campus: "Garden City University School", outstanding: 18, good: 42, average: 30, belowAvg: 8, poor: 2 },
+  { campus: 'Garden City University PU College', outstanding: 12, good: 38, average: 35, belowAvg: 12, poor: 3 },
+  { campus: 'Garden City University BBA College', outstanding: 22, good: 45, average: 25, belowAvg: 6, poor: 2 },
 ];
 
 const PAYROLL_COST_SUMMARY_DATA = [
-  { campus: "St. Xavier's", gross: 58.4, net: 51.2, lop: 1.8, budget: 60, costPerEmp: 31200 },
-  { campus: 'Holy Cross', gross: 74.6, net: 65.8, lop: 3.2, budget: 70, costPerEmp: 31880 },
-  { campus: 'Delhi Public', gross: 48.2, net: 42.4, lop: 1.2, budget: 50, costPerEmp: 30900 },
-  { campus: 'Presidency', gross: 92.1, net: 81.4, lop: 4.1, budget: 88, costPerEmp: 30900 },
-  { campus: 'Bishop Cotton', gross: 44.8, net: 39.6, lop: 1.6, budget: 46, costPerEmp: 31500 },
+  { campus: "Garden City University School", gross: 58.4, net: 51.2, lop: 1.8, budget: 60, costPerEmp: 31200 },
+  { campus: 'Garden City University PU College', gross: 74.6, net: 65.8, lop: 3.2, budget: 70, costPerEmp: 31880 },
+  { campus: 'Garden City University BBA College', gross: 92.1, net: 81.4, lop: 4.1, budget: 88, costPerEmp: 30900 },
 ];
 
 const STAFF_MOVEMENT_DATA = [
-  { campus: "St. Xavier's", joiners: 3, exits: 1, net: 2 },
-  { campus: 'Holy Cross', joiners: 2, exits: 4, net: -2 },
-  { campus: 'Delhi Public', joiners: 4, exits: 1, net: 3 },
-  { campus: 'Presidency', joiners: 1, exits: 3, net: -2 },
-  { campus: 'Bishop Cotton', joiners: 2, exits: 2, net: 0 },
+  { campus: "Garden City University School", joiners: 3, exits: 1, net: 2 },
+  { campus: 'Garden City University PU College', joiners: 2, exits: 4, net: -2 },
+  { campus: 'Garden City University BBA College', joiners: 1, exits: 3, net: -2 },
 ];
 
 const ATTRITION_LEAGUE_DATA = [
-  { campus: 'Holy Cross', rate: 8.4, voluntary: 6.2, involuntary: 2.2, rank: 1 },
-  { campus: 'Presidency', rate: 7.1, voluntary: 5.4, involuntary: 1.7, rank: 2 },
-  { campus: 'Bishop Cotton', rate: 6.8, voluntary: 5.0, involuntary: 1.8, rank: 3 },
-  { campus: "St. Xavier's", rate: 5.2, voluntary: 3.8, involuntary: 1.4, rank: 4 },
-  { campus: 'Delhi Public', rate: 4.6, voluntary: 3.4, involuntary: 1.2, rank: 5 },
+  { campus: 'Garden City University PU College', rate: 8.4, voluntary: 6.2, involuntary: 2.2, rank: 1 },
+  { campus: 'Garden City University BBA College', rate: 7.1, voluntary: 5.4, involuntary: 1.7, rank: 2 },
+  { campus: "Garden City University School", rate: 5.2, voluntary: 3.8, involuntary: 1.4, rank: 3 },
 ];
 
 const HEADCOUNT_BUDGET_DATA = [
-  { campus: "St. Xavier's", sanctioned: 200, actual: 187, gap: 13 },
-  { campus: 'Holy Cross', sanctioned: 250, actual: 234, gap: 16 },
-  { campus: 'Delhi Public', sanctioned: 165, actual: 156, gap: 9 },
-  { campus: 'Presidency', sanctioned: 310, actual: 298, gap: 12 },
-  { campus: 'Bishop Cotton', sanctioned: 155, actual: 142, gap: 13 },
+  { campus: "Garden City University School", sanctioned: 200, actual: 187, gap: 13 },
+  { campus: 'Garden City University PU College', sanctioned: 250, actual: 234, gap: 16 },
+  { campus: 'Garden City University BBA College', sanctioned: 310, actual: 298, gap: 12 },
 ];
 
 const PAYROLL_TREND_12M_DATA = [
-  { month: 'Apr', xavier: 56, holyCross: 71, delhi: 46, presidency: 88, bishop: 43 },
-  { month: 'May', xavier: 57, holyCross: 72, delhi: 46, presidency: 89, bishop: 43 },
-  { month: 'Jun', xavier: 57, holyCross: 72, delhi: 47, presidency: 89, bishop: 44 },
-  { month: 'Jul', xavier: 58, holyCross: 73, delhi: 47, presidency: 90, bishop: 44 },
-  { month: 'Aug', xavier: 58, holyCross: 73, delhi: 47, presidency: 91, bishop: 44 },
-  { month: 'Sep', xavier: 58, holyCross: 74, delhi: 48, presidency: 91, bishop: 44 },
-  { month: 'Oct', xavier: 59, holyCross: 74, delhi: 48, presidency: 91, bishop: 45 },
-  { month: 'Nov', xavier: 59, holyCross: 74, delhi: 48, presidency: 92, bishop: 45 },
-  { month: 'Dec', xavier: 60, holyCross: 75, delhi: 48, presidency: 92, bishop: 45 },
-  { month: 'Jan', xavier: 58, holyCross: 74, delhi: 47, presidency: 91, bishop: 44 },
-  { month: 'Feb', xavier: 58, holyCross: 73, delhi: 47, presidency: 91, bishop: 44 },
-  { month: 'Mar', xavier: 58, holyCross: 75, delhi: 48, presidency: 92, bishop: 45 },
+  { month: 'Apr', school: 56, puCollege: 71, bbaCollege: 88 },
+  { month: 'May', school: 57, puCollege: 72, bbaCollege: 89 },
+  { month: 'Jun', school: 57, puCollege: 72, bbaCollege: 89 },
+  { month: 'Jul', school: 58, puCollege: 73, bbaCollege: 90 },
+  { month: 'Aug', school: 58, puCollege: 73, bbaCollege: 91 },
+  { month: 'Sep', school: 58, puCollege: 74, bbaCollege: 91 },
+  { month: 'Oct', school: 59, puCollege: 74, bbaCollege: 91 },
+  { month: 'Nov', school: 59, puCollege: 74, bbaCollege: 92 },
+  { month: 'Dec', school: 60, puCollege: 75, bbaCollege: 92 },
+  { month: 'Jan', school: 58, puCollege: 74, bbaCollege: 91 },
+  { month: 'Feb', school: 58, puCollege: 73, bbaCollege: 91 },
+  { month: 'Mar', school: 58, puCollege: 75, bbaCollege: 92 },
 ];
 
 const HIGH_PERFORMER_RISK_DATA = [
@@ -797,7 +725,7 @@ function KPICard({ label, value, delta, deltaType = 'up', icon: Icon }: {
           <Icon className="w-4 h-4" style={{ color: DS.primary }} />
         </div>
       </div>
-      <div className="text-3xl font-black tracking-tight mb-2" style={{ color: DS.text, fontFamily: 'Manrope, sans-serif' }}>{value}</div>
+      <div className="text-xl font-black tracking-tight mb-2" style={{ color: DS.text, fontFamily: 'Manrope, sans-serif' }}>{value}</div>
       <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full w-fit" style={{ background: dBg, color: dColor }}>{delta}</span>
     </div>
   );
@@ -1132,7 +1060,7 @@ function renderWidget(id: string, chartType: ChartTypeOption, role?: DashboardRo
       return (
         <div className="h-full flex flex-col justify-end pt-3">
           <div className="flex items-start justify-between mb-4">
-            <span className="text-2xl font-black" style={{ color: DS.text, fontFamily: 'Manrope, sans-serif' }}>{kpi.value}</span>
+            <span className="text-xl font-black" style={{ color: DS.text, fontFamily: 'Manrope, sans-serif' }}>{kpi.value}</span>
             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: kpi.deltaType === 'down' ? DS.errorBg : DS.successBg, color: kpi.deltaType === 'down' ? DS.error : kpi.deltaType === 'up' ? DS.success : DS.warning }}>{kpi.delta}</span>
           </div>
           <ResponsiveContainer width="100%" height={45}>
@@ -1631,7 +1559,7 @@ function renderWidget(id: string, chartType: ChartTypeOption, role?: DashboardRo
   if (id === 'WGT_ALERTS') {
     const alerts = [
       { msg: '14 staff on UAL — awaiting HR review', type: 'error' },
-      { msg: 'Holy Cross payroll blocked since 22 Mar', type: 'error' },
+      { msg: 'Garden City University PU College payroll blocked since 22 Mar', type: 'error' },
       { msg: 'TDS filing due in 5 days', type: 'warning' },
       { msg: '9 leave approvals pending >3 days', type: 'warning' },
       { msg: 'Kavita Nair probation expires in 5 days', type: 'warning' },
@@ -2087,11 +2015,9 @@ function renderWidget(id: string, chartType: ChartTypeOption, role?: DashboardRo
             <YAxis tick={{ fontSize: 10, fill: DS.text3 }} unit="L" />
             <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
             <Legend wrapperStyle={{ fontSize: 10 }} />
-            <Bar dataKey="xavier" name="St. Xavier's" fill={DS.primary} stackId="a" />
-            <Bar dataKey="holyCross" name="Holy Cross" fill={DS.error} stackId="a" />
-            <Bar dataKey="delhi" name="Delhi Public" fill={DS.teal} stackId="a" />
-            <Bar dataKey="presidency" name="Presidency" fill={DS.amber} stackId="a" />
-            <Bar dataKey="bishop" name="Bishop Cotton" fill={DS.purple} stackId="a" radius={[3,3,0,0]} />
+            <Bar dataKey="school" name="Garden City University School" fill={DS.primary} stackId="a" />
+            <Bar dataKey="puCollege" name="Garden City University PU College" fill={DS.error} stackId="a" />
+            <Bar dataKey="bbaCollege" name="Garden City University BBA College" fill={DS.amber} stackId="a" radius={[3,3,0,0]} />
           </ReBarChart>
         </ResponsiveContainer>
       );
@@ -2104,11 +2030,9 @@ function renderWidget(id: string, chartType: ChartTypeOption, role?: DashboardRo
           <YAxis tick={{ fontSize: 10, fill: DS.text3 }} unit="L" />
           <Tooltip contentStyle={{ background: DS.bgCard, border: `1px solid ${DS.border}`, borderRadius: 12, fontSize: 11 }} />
           <Legend wrapperStyle={{ fontSize: 10 }} />
-          <Line type="monotone" dataKey="xavier" stroke={DS.primary} strokeWidth={2} dot={false} name="St. Xavier's" />
-          <Line type="monotone" dataKey="holyCross" stroke={DS.error} strokeWidth={2} dot={false} name="Holy Cross" />
-          <Line type="monotone" dataKey="delhi" stroke={DS.teal} strokeWidth={2} dot={false} name="Delhi Public" />
-          <Line type="monotone" dataKey="presidency" stroke={DS.amber} strokeWidth={2} dot={false} name="Presidency" />
-          <Line type="monotone" dataKey="bishop" stroke={DS.purple} strokeWidth={2} dot={false} name="Bishop Cotton" />
+          <Line type="monotone" dataKey="school" stroke={DS.primary} strokeWidth={2} dot={false} name="Garden City University School" />
+          <Line type="monotone" dataKey="puCollege" stroke={DS.error} strokeWidth={2} dot={false} name="Garden City University PU College" />
+          <Line type="monotone" dataKey="bbaCollege" stroke={DS.amber} strokeWidth={2} dot={false} name="Garden City University BBA College" />
         </ReLineChart>
       </ResponsiveContainer>
     );
@@ -2304,8 +2228,8 @@ function renderWidget(id: string, chartType: ChartTypeOption, role?: DashboardRo
   // ── GOI Attrition per Campus ─────────────────────────────────────────────────
   if (id === 'WGT_GOI_ATTRITION_CAMPUS') {
     const attrData = [
-      { name: "St. Xavier's", rate: 3.2 }, { name: 'Holy Cross', rate: 8.7 },
-      { name: 'Delhi Public', rate: 2.8 }, { name: 'Presidency', rate: 9.4 }, { name: 'Bishop Cotton', rate: 5.1 },
+      { name: "Garden City University School", rate: 3.2 }, { name: 'Garden City University PU College', rate: 8.7 },
+      { name: 'Garden City University BBA College', rate: 2.8 }, { name: 'Garden City University PU College', rate: 9.4 }, { name: 'Garden City University BBA College', rate: 5.1 },
     ];
     return (
       <ResponsiveContainer width="100%" height={160}>
@@ -2323,8 +2247,8 @@ function renderWidget(id: string, chartType: ChartTypeOption, role?: DashboardRo
   // ── GOI Engagement Scores per Campus ─────────────────────────────────────────
   if (id === 'WGT_GOI_ENGAGEMENT') {
     const engData = [
-      { name: "St. Xavier's", score: 82 }, { name: 'Holy Cross', score: 54 },
-      { name: 'Delhi Public', score: 79 }, { name: 'Presidency', score: 62 }, { name: 'Bishop Cotton', score: 71 },
+      { name: "Garden City University School", score: 82 }, { name: 'Garden City University PU College', score: 54 },
+      { name: 'Garden City University BBA College', score: 79 }, { name: 'Garden City University PU College', score: 62 }, { name: 'Garden City University BBA College', score: 71 },
     ];
     const max = 100;
     return (
@@ -2345,11 +2269,11 @@ function renderWidget(id: string, chartType: ChartTypeOption, role?: DashboardRo
   // ── GOI Talent Acquisition Summary ───────────────────────────────────────────
   if (id === 'WGT_GOI_TA_PIPELINE') {
     const taData = [
-      { campus: "St. Xavier's", open: 4, offers: 2, joined: 3, days: 18 },
-      { campus: 'Holy Cross', open: 11, offers: 4, joined: 1, days: 34 },
-      { campus: 'Delhi Public', open: 3, offers: 1, joined: 2, days: 16 },
-      { campus: 'Presidency', open: 14, offers: 6, joined: 2, days: 38 },
-      { campus: 'Bishop Cotton', open: 6, offers: 2, joined: 1, days: 24 },
+      { campus: "Garden City University School", open: 4, offers: 2, joined: 3, days: 18 },
+      { campus: 'Garden City University PU College', open: 11, offers: 4, joined: 1, days: 34 },
+      { campus: 'Garden City University BBA College', open: 3, offers: 1, joined: 2, days: 16 },
+      { campus: 'Garden City University PU College', open: 14, offers: 6, joined: 2, days: 38 },
+      { campus: 'Garden City University BBA College', open: 6, offers: 2, joined: 1, days: 24 },
     ];
     return (
       <div className="overflow-x-auto text-xs mt-1">
@@ -2382,11 +2306,11 @@ function renderWidget(id: string, chartType: ChartTypeOption, role?: DashboardRo
   // ── GOI L&D Completion per Campus ────────────────────────────────────────────
   if (id === 'WGT_GOI_TRAINING_COMPLETION') {
     const ldData = [
-      { name: "St. Xavier's", enrolled: 142, completed: 128 },
-      { name: 'Holy Cross', enrolled: 180, completed: 112 },
-      { name: 'Delhi Public', enrolled: 130, completed: 122 },
-      { name: 'Presidency', enrolled: 220, completed: 148 },
-      { name: 'Bishop Cotton', enrolled: 110, completed: 86 },
+      { name: "Garden City University School", enrolled: 142, completed: 128 },
+      { name: 'Garden City University PU College', enrolled: 180, completed: 112 },
+      { name: 'Garden City University BBA College', enrolled: 130, completed: 122 },
+      { name: 'Garden City University PU College', enrolled: 220, completed: 148 },
+      { name: 'Garden City University BBA College', enrolled: 110, completed: 86 },
     ];
     return (
       <div className="space-y-2">
@@ -2408,11 +2332,11 @@ function renderWidget(id: string, chartType: ChartTypeOption, role?: DashboardRo
   // ── GOI Statutory Compliance Matrix ──────────────────────────────────────────
   if (id === 'WGT_GOI_STATUTORY_MATRIX') {
     const statData = [
-      { campus: "St. Xavier's", pf: 'filed', esi: 'filed', tds: 'filed', pt: 'filed' },
-      { campus: 'Holy Cross', pf: 'filed', esi: 'filed', tds: 'pending', pt: 'filed' },
-      { campus: 'Delhi Public', pf: 'filed', esi: 'filed', tds: 'filed', pt: 'filed' },
-      { campus: 'Presidency', pf: 'filed', esi: 'pending', tds: 'pending', pt: 'filed' },
-      { campus: 'Bishop Cotton', pf: 'filed', esi: 'filed', tds: 'filed', pt: 'pending' },
+      { campus: "Garden City University School", pf: 'filed', esi: 'filed', tds: 'filed', pt: 'filed' },
+      { campus: 'Garden City University PU College', pf: 'filed', esi: 'filed', tds: 'pending', pt: 'filed' },
+      { campus: 'Garden City University BBA College', pf: 'filed', esi: 'filed', tds: 'filed', pt: 'filed' },
+      { campus: 'Garden City University PU College', pf: 'filed', esi: 'pending', tds: 'pending', pt: 'filed' },
+      { campus: 'Garden City University BBA College', pf: 'filed', esi: 'filed', tds: 'filed', pt: 'pending' },
     ] as const;
     const statColor = (s: string) => s === 'filed' ? { bg: DS.successBg, color: DS.success } : s === 'pending' ? { bg: DS.warningBg, color: DS.warning } : { bg: DS.errorBg, color: DS.error };
     return (
@@ -2443,11 +2367,11 @@ function renderWidget(id: string, chartType: ChartTypeOption, role?: DashboardRo
   // ── GOI Appraisal Status per Campus ──────────────────────────────────────────
   if (id === 'WGT_GOI_APPRAISAL_STATUS') {
     const apData = [
-      { name: "St. Xavier's", submitted: 172, completed: 165 },
-      { name: 'Holy Cross', submitted: 188, completed: 142 },
-      { name: 'Delhi Public', submitted: 148, completed: 144 },
-      { name: 'Presidency', submitted: 234, completed: 188 },
-      { name: 'Bishop Cotton', submitted: 126, completed: 114 },
+      { name: "Garden City University School", submitted: 172, completed: 165 },
+      { name: 'Garden City University PU College', submitted: 188, completed: 142 },
+      { name: 'Garden City University BBA College', submitted: 148, completed: 144 },
+      { name: 'Garden City University PU College', submitted: 234, completed: 188 },
+      { name: 'Garden City University BBA College', submitted: 126, completed: 114 },
     ];
     return (
       <ResponsiveContainer width="100%" height={160}>
@@ -2467,11 +2391,11 @@ function renderWidget(id: string, chartType: ChartTypeOption, role?: DashboardRo
   // ── GOI Research Output per Campus ───────────────────────────────────────────
   if (id === 'WGT_GOI_RESEARCH_OUTPUT') {
     const resData = [
-      { name: "St. Xavier's", papers: 12, conferences: 8, patents: 1 },
-      { name: 'Holy Cross', papers: 6, conferences: 4, patents: 0 },
-      { name: 'Delhi Public', papers: 8, conferences: 6, patents: 2 },
-      { name: 'Presidency', papers: 22, conferences: 14, patents: 3 },
-      { name: 'Bishop Cotton', papers: 5, conferences: 3, patents: 0 },
+      { name: "Garden City University School", papers: 12, conferences: 8, patents: 1 },
+      { name: 'Garden City University PU College', papers: 6, conferences: 4, patents: 0 },
+      { name: 'Garden City University BBA College', papers: 8, conferences: 6, patents: 2 },
+      { name: 'Garden City University PU College', papers: 22, conferences: 14, patents: 3 },
+      { name: 'Garden City University BBA College', papers: 5, conferences: 3, patents: 0 },
     ];
     return (
       <ResponsiveContainer width="100%" height={160}>
@@ -2513,11 +2437,11 @@ function renderWidget(id: string, chartType: ChartTypeOption, role?: DashboardRo
   // ── GOI Lesson Plans per Campus ───────────────────────────────────────────────
   if (id === 'WGT_GOI_LESSON_PLANS') {
     const lpData = [
-      { name: "St. Xavier's", submitted: 178, total: 187 },
-      { name: 'Holy Cross', submitted: 196, total: 234 },
-      { name: 'Delhi Public', submitted: 152, total: 156 },
-      { name: 'Presidency', submitted: 241, total: 298 },
-      { name: 'Bishop Cotton', submitted: 128, total: 142 },
+      { name: "Garden City University School", submitted: 178, total: 187 },
+      { name: 'Garden City University PU College', submitted: 196, total: 234 },
+      { name: 'Garden City University BBA College', submitted: 152, total: 156 },
+      { name: 'Garden City University PU College', submitted: 241, total: 298 },
+      { name: 'Garden City University BBA College', submitted: 128, total: 142 },
     ];
     return (
       <div className="space-y-2">
@@ -2987,7 +2911,7 @@ function renderWidget(id: string, chartType: ChartTypeOption, role?: DashboardRo
     return (
       <div className="space-y-3">
         <div className="flex items-center justify-between p-3 rounded-xl" style={{ background: DS.primaryGrad, color: 'white' }}>
-          <div><p className="text-[10px] font-bold opacity-80">Active Enrolments</p><p className="text-2xl font-black">{lmsData.active}</p></div>
+          <div><p className="text-[10px] font-bold opacity-80">Active Enrolments</p><p className="text-xl font-black">{lmsData.active}</p></div>
           <BookOpen className="w-8 h-8 opacity-20" />
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -3573,7 +3497,7 @@ function CampusDrillPanel({ campus, onClose }: { campus: string; onClose: () => 
           </div>
         </div>
 
-        <div className="flex-1 p-6 space-y-5">
+        <div className="flex-1 px-4 py-4 space-y-5">
           {/* ── Overview Tab ── */}
           {activeTab === 'overview' && (
             <>
@@ -3766,7 +3690,7 @@ function CampusDrillPanel({ campus, onClose }: { campus: string; onClose: () => 
                 ].map(tile => (
                   <div key={tile.label} className="rounded-2xl p-4" style={{ background: tile.bg }}>
                     <p className="text-[10px] font-semibold mb-1" style={{ color: DS.text3 }}>{tile.label}</p>
-                    <p className="text-2xl font-black" style={{ color: tile.color, fontFamily: 'Manrope, sans-serif' }}>{tile.value}</p>
+                    <p className="text-xl font-black" style={{ color: tile.color, fontFamily: 'Manrope, sans-serif' }}>{tile.value}</p>
                   </div>
                 ))}
               </div>
@@ -3910,7 +3834,7 @@ function CampusDrillPanel({ campus, onClose }: { campus: string; onClose: () => 
                 <h4 className="text-xs font-black uppercase tracking-wider mb-3" style={{ color: DS.text3 }}>Engagement & Goals</h4>
                 <div className="flex items-center gap-4 mb-4">
                   <div className="text-center">
-                    <div className="text-3xl font-black" style={{ color: data.engagement.score >= 75 ? DS.success : data.engagement.score >= 60 ? DS.amber : DS.error, fontFamily: 'Manrope, sans-serif' }}>
+                    <div className="text-xl font-black" style={{ color: data.engagement.score >= 75 ? DS.success : data.engagement.score >= 60 ? DS.amber : DS.error, fontFamily: 'Manrope, sans-serif' }}>
                       {data.engagement.score}
                     </div>
                     <div className="text-[9px] font-semibold" style={{ color: DS.text3 }}>Engagement Score</div>
@@ -4108,7 +4032,7 @@ function AddWidgetDrawer({ open, onClose, role, activeIds, onAdd }: {
             </div>
           ))}
           {available.length === 0 && (
-            <div className="text-center py-8">
+            <div className="text-center py-4">
               <p className="text-sm font-semibold" style={{ color: DS.text3 }}>No widgets found</p>
             </div>
           )}
@@ -4291,7 +4215,7 @@ const ManagementDashboard: React.FC = () => {
       {/* Body */}
       <div className="max-w-screen-2xl mx-auto px-6 py-6">
         {/* Role Banner */}
-        <div className="mb-6 rounded-2xl px-5 py-4 flex items-center justify-between" style={{ background: DS.primaryGrad, boxShadow: '0 8px 32px rgba(0,63,152,0.18)' }}>
+        <div className="mb-4 rounded-2xl px-5 py-4 flex items-center justify-between" style={{ background: DS.primaryGrad, boxShadow: '0 8px 32px rgba(0,63,152,0.18)' }}>
           <div>
             <h2 className="text-lg font-black text-white" style={{ fontFamily: 'Manrope, sans-serif' }}>
               {roleLabels[dashRole]} Dashboard
@@ -4305,12 +4229,12 @@ const ManagementDashboard: React.FC = () => {
           </div>
           <div className="flex items-center gap-3">
             <div className="text-right">
-              <p className="text-2xl font-black text-white" style={{ fontFamily: 'Manrope, sans-serif' }}>1,284</p>
+              <p className="text-xl font-black text-white" style={{ fontFamily: 'Manrope, sans-serif' }}>1,284</p>
               <p className="text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>Total Headcount</p>
             </div>
             <div className="w-px h-10" style={{ background: 'rgba(255,255,255,0.2)' }} />
             <div className="text-right">
-              <p className="text-2xl font-black text-white" style={{ fontFamily: 'Manrope, sans-serif' }}>84.7%</p>
+              <p className="text-xl font-black text-white" style={{ fontFamily: 'Manrope, sans-serif' }}>84.7%</p>
               <p className="text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>Today's Attendance</p>
             </div>
           </div>

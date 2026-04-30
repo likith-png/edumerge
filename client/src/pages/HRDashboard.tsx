@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
+import Layout from '../components/Layout';
 import {
-    Calendar, Clock, ChevronRight, FileText, AlertCircle, ArrowLeft,
+    Calendar, Clock, ChevronRight, FileText, AlertCircle,
     TrendingUp, UserMinus, Activity, Filter, CheckCircle, LogOut, ShieldAlert, FileWarning, Send, BrainCircuit, Zap, Users2
 } from 'lucide-react';
 import { getAllExits, getNOCRequests } from '../services/exitService';
 import { getAllEmployees } from '../services/employeeService';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '../components/ui/badge';
-
-// import { Progress } from '../components/ui/progress';
 
 const HRDashboard: React.FC = () => {
     const navigate = useNavigate();
@@ -23,7 +22,6 @@ const HRDashboard: React.FC = () => {
         attritionRate: 0,
         trends: [0, 0, 0, 0, 0, 0, 0] as number[]
     });
-
 
     useEffect(() => {
         fetchData();
@@ -46,7 +44,7 @@ const HRDashboard: React.FC = () => {
             const pending = allExits.filter((e: any) => e.status === 'Pending').length;
             const currentMonth = new Date().getMonth();
             const currentYear = new Date().getFullYear();
-            
+
             const totalMonth = allExits.filter((e: any) => {
                 const date = new Date(e.resignation_date);
                 return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
@@ -54,13 +52,11 @@ const HRDashboard: React.FC = () => {
 
             const overdueNOCs = allNOCs.filter((n: any) => n.status === 'Pending').length;
 
-            // Calculate Attrition Rate (Simplified: Last 12 months exits / headcount)
             const oneYearAgo = new Date();
             oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
             const exitsLastYear = allExits.filter((e: any) => new Date(e.resignation_date) > oneYearAgo).length;
             const attrition = allEmployees.length > 0 ? ((exitsLastYear / allEmployees.length) * 100).toFixed(1) : 0;
 
-            // Calculate Weekly Trends (Last 7 weeks)
             const trends = Array(7).fill(0);
             const now = new Date();
             allExits.forEach((e: any) => {
@@ -85,7 +81,6 @@ const HRDashboard: React.FC = () => {
         }
     };
 
-
     // Derived Data
     const upcomingExits = exits
         .filter((e: any) => {
@@ -101,7 +96,7 @@ const HRDashboard: React.FC = () => {
             dept: e.department || 'General',
             status: 'LWD',
             date: new Date(e.lwd_proposed).toLocaleDateString('en-US', { day: 'numeric', month: 'short' }),
-            avatarColor: 'bg-indigo-100 text-indigo-700'
+            avatarColor: 'bg-blue-100 text-blue-700'
         }));
 
     const recentResignations = [...exits]
@@ -126,367 +121,235 @@ const HRDashboard: React.FC = () => {
     };
 
     if (loading) return (
-        <div className="flex items-center justify-center min-h-screen bg-slate-50">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 flex items-center justify-center">
+            <div className="text-center">
+                <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                <p className="text-sm text-slate-600">Loading…</p>
+            </div>
         </div>
-    );
-
-    return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50/30 p-8 font-sans animate-in fade-in duration-500">
-            {/* Header */}
-            <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-full bg-white/50 hover:bg-white shadow-sm ring-1 ring-slate-200/50">
-                        <ArrowLeft className="w-5 h-5 text-slate-600" />
-                    </Button>
-                    <div>
-                        <h1 className="text-3xl font-black text-slate-900 tracking-tight">HR Dashboard</h1>
-                        <p className="text-slate-500 font-medium">Overview of Exit Management & Attrition Trends</p>
-                    </div>
-                </div>
-                <div className="flex gap-3">
-                    <Button variant="outline" className="bg-white/60 backdrop-blur-sm border-slate-200 text-slate-600 font-bold hover:bg-white">
-                        <Calendar className="w-4 h-4 mr-2" /> {new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                    </Button>
-                    <Button className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-200">
-                        <FileText className="w-4 h-4 mr-2" /> Export Report
-                    </Button>
-                </div>
-            </header>
-
+    );    return (
+        <Layout
+            title="HR Dashboard"
+            description="Overview of Exit Management & Attrition Trends"
+            icon={Activity}
+            showHome
+        >
             {/* Quick Stats Row */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <Card className="border-none shadow-sm bg-white/60 backdrop-blur-xl hover:bg-white hover:shadow-md transition-all duration-300 group">
-                    <CardContent className="p-6">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 bg-rose-50 rounded-2xl group-hover:bg-rose-100 transition-colors">
-                                <UserMinus className="w-6 h-6 text-rose-600" />
-                            </div>
-                            <Badge className="bg-rose-100 text-rose-700 border-none px-2 py-0.5">+2.4%</Badge>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <Card className="border-slate-200">
+                    <CardContent className="p-4 flex items-center gap-4">
+                        <div className="p-3 bg-red-50 text-red-600 rounded-lg">
+                            <UserMinus className="h-5 w-5" />
                         </div>
-                        <h3 className="text-3xl font-black text-slate-900 mb-1">{stats.totalExitsMonth}</h3>
-                        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Exits This Month</p>
+                        <div>
+                            <p className="text-sm font-medium text-slate-500">Exits This Month</p>
+                            <p className="text-2xl font-bold text-slate-900">{stats.totalExitsMonth}</p>
+                        </div>
                     </CardContent>
                 </Card>
 
-                <Card className="border-none shadow-sm bg-white/60 backdrop-blur-xl hover:bg-white hover:shadow-md transition-all duration-300 group">
-                    <CardContent className="p-6">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 bg-amber-50 rounded-2xl group-hover:bg-amber-100 transition-colors">
-                                <AlertCircle className="w-6 h-6 text-amber-600" />
-                            </div>
-                            <Badge className="bg-amber-100 text-amber-700 border-none px-2 py-0.5">Action Req</Badge>
+                <Card className="border-slate-200">
+                    <CardContent className="p-4 flex items-center gap-4">
+                        <div className="p-3 bg-amber-50 text-amber-600 rounded-lg">
+                            <AlertCircle className="h-5 w-5" />
                         </div>
-                        <h3 className="text-3xl font-black text-slate-900 mb-1">{stats.pendingApprovals}</h3>
-                        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Pending Approvals</p>
+                        <div>
+                            <p className="text-sm font-medium text-slate-500">Pending Approvals</p>
+                            <p className="text-2xl font-bold text-slate-900">{stats.pendingApprovals}</p>
+                        </div>
                     </CardContent>
                 </Card>
 
-                <Card className="border-none shadow-sm bg-white/60 backdrop-blur-xl hover:bg-white hover:shadow-md transition-all duration-300 group">
-                    <CardContent className="p-6">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 bg-indigo-50 rounded-2xl group-hover:bg-indigo-100 transition-colors">
-                                <Activity className="w-6 h-6 text-indigo-600" />
-                            </div>
-                            <Badge className="bg-emerald-100 text-emerald-700 border-none px-2 py-0.5">-0.5%</Badge>
+                <Card className="border-slate-200">
+                    <CardContent className="p-4 flex items-center gap-4">
+                        <div className="p-3 bg-emerald-50 text-emerald-600 rounded-lg">
+                            <CheckCircle className="h-5 w-5" />
                         </div>
-                        <h3 className="text-3xl font-black text-slate-900 mb-1">{stats.attritionRate}%</h3>
-                        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Annual Attrition</p>
+                        <div>
+                            <p className="text-sm font-medium text-slate-500">NOC Clearance Delays</p>
+                            <p className="text-2xl font-bold text-slate-900">{stats.nocDelays}</p>
+                        </div>
                     </CardContent>
                 </Card>
 
-                <Card className="border-none shadow-sm bg-slate-900 text-white hover:shadow-xl hover:shadow-indigo-500/20 transition-all duration-300">
-                    <CardContent className="p-6 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500 rounded-full blur-3xl -mr-16 -mt-16 opacity-20"></div>
-                        <div className="relative z-10">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-sm">
-                                    <Clock className="w-6 h-6 text-indigo-300" />
-                                </div>
-                            </div>
-                            <h3 className="text-3xl font-black mb-1">5</h3>
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Avg Settlement Days</p>
-                            <div className="mt-4 pt-4 border-t border-white/10 flex items-center gap-2 text-xs text-indigo-300">
-                                <span>Target: 7 Days</span> <CheckCircle className="w-3 h-3" />
-                            </div>
+                <Card className="border-slate-200">
+                    <CardContent className="p-4 flex items-center gap-4">
+                        <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
+                            <TrendingUp className="h-5 w-5" />
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-slate-500">Annual Attrition</p>
+                            <p className="text-2xl font-bold text-slate-900">{stats.attritionRate}%</p>
                         </div>
                     </CardContent>
                 </Card>
             </div>
 
-            {/* Masonry Grid Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Column 1: Lists & Tasks */}
-                <div className="space-y-6">
-                    {/* Upcoming Exits */}
-                    <Card className="border-none shadow-sm bg-white/80 backdrop-blur-xl hover:shadow-md transition-all duration-300">
-                        <CardHeader className="pb-2 border-b border-slate-100/50">
-                            <div className="flex justify-between items-center">
-                                <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
-                                    <LogOut className="w-4 h-4 text-indigo-500" /> Upcoming Exits
-                                </CardTitle>
-                                <Button variant="ghost" size="sm" className="h-8 text-xs font-bold text-indigo-600 hover:bg-indigo-50" onClick={() => navigate('/exit')}>
-                                    View All
-                                </Button>
-                            </div>
+                <div className="lg:col-span-4 space-y-6">
+                    <Card className="border-slate-200">
+                        <CardHeader className="py-4 border-b border-slate-100 flex flex-row items-center justify-between">
+                            <CardTitle className="text-sm font-bold flex items-center gap-2">
+                                <LogOut className="h-4 w-4 text-blue-500" /> Upcoming Exits
+                            </CardTitle>
+                            <Button variant="ghost" size="sm" className="h-7 text-xs text-blue-600" onClick={() => navigate('/exit')}>
+                                View All
+                            </Button>
                         </CardHeader>
                         <CardContent className="p-0">
-                            <div className="divide-y divide-slate-100/50">
+                            <div className="divide-y divide-slate-100">
                                 {upcomingExits.length > 0 ? upcomingExits.map((exit: any) => (
-                                    <div key={exit.id} className="flex items-center gap-4 p-4 hover:bg-slate-50/80 transition-colors cursor-pointer group" onClick={() => navigate('/exit')}>
-                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs ring-2 ring-white shadow-sm transition-transform group-hover:scale-105 ${exit.avatarColor}`}>
+                                    <div key={exit.id} className="flex items-center gap-3 p-4 hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => navigate('/exit')}>
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs ${exit.avatarColor}`}>
                                             {exit.name.charAt(0)}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <h4 className="text-sm font-bold text-slate-900 truncate group-hover:text-indigo-600 transition-colors">{exit.name}</h4>
-                                            <p className="text-xs text-slate-500 font-medium truncate">{exit.dept}</p>
+                                            <h4 className="text-sm font-semibold text-slate-900 truncate">{exit.name}</h4>
+                                            <p className="text-xs text-slate-500">{exit.dept}</p>
                                         </div>
-                                        <div className="text-right shrink-0">
-                                            <Badge variant="outline" className="bg-slate-100 border-none text-slate-600 font-bold mb-1 block">
+                                        <div className="text-right">
+                                            <Badge variant="outline" className="text-[10px] font-medium bg-slate-50">
                                                 {exit.date}
                                             </Badge>
-                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">LWD</span>
                                         </div>
                                     </div>
                                 )) : (
-                                    <p className="text-xs text-slate-400 text-center py-8 font-medium">No upcoming exits</p>
+                                    <div className="text-center py-10 opacity-60">
+                                        <LogOut className="h-8 w-8 mx-auto mb-2 text-slate-300" />
+                                        <p className="text-xs">No upcoming exits</p>
+                                    </div>
                                 )}
                             </div>
                         </CardContent>
                     </Card>
 
-                    {/* Pending Actions */}
-                    <Card className="border-none shadow-sm bg-white/80 backdrop-blur-xl overflow-hidden">
-                        <CardHeader className="bg-rose-50/50 pb-4 border-b border-rose-100/50">
-                            <CardTitle className="text-sm font-bold text-rose-900 flex items-center gap-2">
-                                <AlertCircle className="w-4 h-4 text-rose-500" /> Attention Required
+                    <Card className="border-slate-200">
+                        <CardHeader className="py-4 border-b border-slate-100">
+                            <CardTitle className="text-sm font-bold flex items-center gap-2">
+                                <Activity className="h-4 w-4 text-indigo-500" /> ICIS Usage Index
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="p-0">
-                            <div className="p-4 hover:bg-rose-50/30 cursor-pointer transition-colors border-b border-slate-50 flex items-center justify-between" onClick={() => navigate('/exit?tab=approvals')}>
-                                <div className="flex items-center gap-3">
-                                    <div className="w-2 h-2 rounded-full bg-rose-500"></div>
-                                    <span className="text-sm font-bold text-slate-700">Pending Resignation Approvals</span>
-                                </div>
-                                <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-200 border-none">{stats.pendingApprovals}</Badge>
-                            </div>
-                            <div className="p-4 hover:bg-rose-50/30 cursor-pointer transition-colors flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                                    <span className="text-sm font-bold text-slate-700">Overdue NOC Clearances</span>
-                                </div>
-                                <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-200 border-none">{stats.nocDelays}</Badge>
-                            </div>
-
-                        </CardContent>
-                    </Card>
-
-                    {/* Document Expiry Alerts Widget */}
-                    <Card className="border-none shadow-sm bg-white/80 backdrop-blur-xl hover:shadow-md transition-all duration-300">
-                        <CardHeader className="pb-3 border-b border-slate-100/50">
-                            <div className="flex justify-between items-center">
-                                <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                                    <ShieldAlert className="w-4 h-4 text-purple-600" /> Compliance Expirations
-                                </CardTitle>
-                                <Badge className="bg-purple-100 text-purple-700 border-none">{documentExpiries.length}</Badge>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="p-0">
-                            <div className="divide-y divide-slate-100/50">
-                                {documentExpiries.map((doc) => (
-                                    <div key={doc.id} className="p-4 hover:bg-slate-50/80 transition-colors group flex items-center gap-4">
-                                        <div className={`p-2 rounded-lg 
-                                            ${doc.severity === 'high' ? 'bg-rose-50 text-rose-600' :
-                                                doc.severity === 'medium' ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'}
-                                        `}>
-                                            <FileWarning className="w-5 h-5" />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <h4 className="text-sm font-bold text-slate-900 truncate">{doc.name}</h4>
-                                            <p className="text-xs font-semibold text-slate-500 truncate">{doc.type}</p>
-                                        </div>
-                                        <div className="flex flex-col items-end gap-2">
-                                            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full
-                                                ${doc.severity === 'high' ? 'bg-rose-100 text-rose-700' :
-                                                    doc.severity === 'medium' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}
-                                            `}>
-                                                in {doc.expires}
-                                            </span>
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="h-6 px-2 text-[10px] bg-slate-100 hover:bg-purple-50 hover:text-purple-700 text-slate-600 rounded transition-colors"
-                                                onClick={(e) => handleSendReminder(e, doc.id)}
-                                            >
-                                                <Send className="w-3 h-3 mr-1" /> Reminder
-                                            </Button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Capacity Intelligence (ICIS) - BETA */}
-                    <Card className="border-none shadow-lg bg-slate-900 overflow-hidden relative group">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500 rounded-full blur-3xl -mr-16 -mt-16 opacity-20 group-hover:opacity-40 transition-opacity"></div>
-                        <div className="absolute bottom-0 left-0 w-24 h-24 bg-purple-500 rounded-full blur-2xl -ml-12 -mb-12 opacity-10 group-hover:opacity-30 transition-opacity"></div>
-                        
-                        <CardHeader className="relative z-10 pb-0 flex flex-row items-center justify-between">
-                            <CardTitle className="text-sm font-black text-white flex items-center gap-2 tracking-wider">
-                                <BrainCircuit className="w-5 h-5 text-indigo-400" /> CAPACITY INTELLIGENCE
-                            </CardTitle>
-                            <Badge className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white border-none text-[9px] font-black uppercase tracking-tighter px-2">BETA</Badge>
-                        </CardHeader>
-                        <CardContent className="relative z-10 p-6">
-                            <div className="flex items-center gap-3 mb-6 bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-sm">
-                                <div className="p-2 bg-indigo-500/20 rounded-xl">
-                                    <Zap className="w-4 h-4 text-indigo-300" />
-                                </div>
-                                <div className="flex-1">
-                                    <p className="text-[10px] font-bold text-indigo-200 uppercase tracking-widest leading-none mb-1">Current Surplus</p>
-                                    <h4 className="text-xl font-black text-white">ICIS: 84.2%</h4>
-                                </div>
-                                <div className="text-right">
-                                    <span className="text-[10px] font-black text-emerald-400">+4.2%</span>
-                                </div>
-                            </div>
-                            
+                        <CardContent className="p-6">
                             <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <Users2 className="w-3.5 h-3.5 text-slate-400" />
-                                        <span className="text-xs font-bold text-slate-300">Workforce Utilization</span>
+                                <div className="flex items-baseline justify-between">
+                                    <span className="text-3xl font-bold text-slate-900">84.2%</span>
+                                    <span className="text-xs font-medium text-emerald-600">+4.2% week</span>
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="flex justify-between text-xs text-slate-500">
+                                        <span>System Adoption</span>
+                                        <span>76%</span>
                                     </div>
-                                    <span className="text-xs font-black text-indigo-300">76%</span>
+                                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                                        <div className="h-full bg-indigo-500 rounded-full" style={{ width: '76%' }}></div>
+                                    </div>
                                 </div>
-                                <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-                                    <div className="h-full bg-indigo-500 w-[76%] rounded-full shadow-[0_0_8px_rgba(99,102,241,0.5)]"></div>
-                                </div>
-                                
-                                <p className="text-[10px] text-slate-400 font-medium leading-relaxed italic">
-                                    AI-powered analysis of organizational bandwidth and productivity gaps.
-                                </p>
                             </div>
-
-                            <Button className="w-full mt-6 bg-white/10 hover:bg-white/20 border border-white/10 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all group-hover:bg-indigo-600 group-hover:border-indigo-500">
-                                ENTER ENGINE <ChevronRight className="w-3 h-3 ml-1 group-hover:translate-x-1 transition-transform" />
-                            </Button>
                         </CardContent>
                     </Card>
                 </div>
 
-
-                {/* Column 2: Visualizations */}
-                <div className="space-y-6">
-                    {/* Attrition Trends Graph */}
-                    <Card className="border-none shadow-sm bg-white/80 backdrop-blur-xl h-[420px] flex flex-col">
-                        <CardHeader className="pb-2">
-                            <div className="flex justify-between items-center mb-2">
-                                <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
-                                    <TrendingUp className="w-4 h-4 text-emerald-500" /> Attrition Trends
-                                </CardTitle>
-                                <Button variant="outline" size="sm" className="h-7 text-xs bg-white border-slate-200">
-                                    <Filter className="w-3 h-3 mr-1" /> Monthly
-                                </Button>
-                            </div>
+                {/* Column 2: Trends & Analytics */}
+                <div className="lg:col-span-5 space-y-6">
+                    <Card className="border-slate-200 h-[450px] flex flex-col">
+                        <CardHeader className="py-4 border-b border-slate-100 flex flex-row items-center justify-between">
+                            <CardTitle className="text-sm font-bold flex items-center gap-2">
+                                <TrendingUp className="h-4 w-4 text-emerald-500" /> Weekly Exit Trends
+                            </CardTitle>
                         </CardHeader>
-                        <CardContent className="flex-1 flex items-end justify-between gap-3 p-6 pt-0">
+                        <CardContent className="flex-1 flex items-end justify-between gap-4 p-8">
                             {stats.trends.map((h, i) => {
                                 const maxVal = Math.max(...stats.trends, 1);
-                                const heightPercentage = (h / maxVal) * 85; // Scale to max 85%
+                                const heightPercentage = (h / maxVal) * 100;
                                 return (
-                                    <div key={i} className="flex-1 flex flex-col justify-end group cursor-pointer h-full">
-                                        <div className="relative w-full rounded-2xl bg-slate-100 overflow-hidden h-[85%]">
+                                    <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                                        <div className="w-full bg-slate-50 rounded-md flex flex-col justify-end overflow-hidden h-[250px] border border-slate-100">
                                             <div
-                                                className="absolute bottom-0 w-full bg-gradient-to-t from-indigo-500 to-purple-500 transition-all duration-500 ease-out group-hover:from-indigo-600 group-hover:to-purple-600 group-hover:shadow-lg group-hover:shadow-indigo-500/20 rounded-t-lg"
+                                                className="bg-slate-900 transition-all duration-500"
                                                 style={{ height: `${heightPercentage}%` }}
-                                            >
-                                                <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded transition-opacity whitespace-nowrap z-10">
-                                                    {h} Exits
-                                                </div>
-                                            </div>
+                                            />
                                         </div>
-                                        <span className="text-[10px] font-bold text-center text-slate-400 mt-3 uppercase tracking-wider">W{i + 1}</span>
+                                        <span className="text-[10px] font-medium text-slate-400">W{i + 1}</span>
                                     </div>
                                 );
                             })}
                         </CardContent>
-
                     </Card>
-                </div>
 
-                {/* Column 3: Schedule & Recent List */}
-                <div className="space-y-6">
-                    {/* Today Schedule */}
-                    <Card className="border-none shadow-sm bg-white/80 backdrop-blur-xl">
-                        <CardHeader className="pb-4 border-b border-slate-100/50">
-                            <CardTitle className="text-base font-bold text-slate-900 flex justify-between items-center">
-                                <span>Today's Schedule</span>
-                                <span className="text-xs font-bold px-2 py-1 bg-indigo-50 text-indigo-600 rounded-md">{new Date().toLocaleDateString(undefined, { weekday: 'short' })}</span>
-                            </CardTitle>
+                    <Card className="border-slate-200">
+                        <CardHeader className="py-4 border-b border-slate-100">
+                            <CardTitle className="text-sm font-bold">Today's Schedule</CardTitle>
                         </CardHeader>
-                        <CardContent className="p-0">
-                            <div className="relative p-6">
-                                {/* Timeline Line */}
-                                <div className="absolute left-[4.5rem] top-6 bottom-6 w-px bg-slate-200 border-l border-dashed border-slate-300/50"></div>
-
-                                <div className="space-y-6">
-                                    {todaySchedule.map((task) => (
-                                        <div key={task.id} className="flex relative group">
-                                            <div className="w-14 pt-2.5 text-xs font-bold text-slate-400 text-right pr-4">{task.time}</div>
-                                            <div className="absolute left-[4.25rem] top-3 w-2.5 h-2.5 rounded-full bg-white border-2 border-indigo-500 shadow-sm z-10 group-hover:scale-125 transition-transform"></div>
-                                            <div className={`flex-1 p-3 rounded-xl border-l-[3px] shadow-sm transition-all hover:-translate-y-0.5 cursor-pointer bg-white/50 hover:bg-white hover:shadow-md ${task.color}`}>
-                                                <h4 className="font-bold text-sm text-slate-800">{task.title}</h4>
-                                                <div className="flex items-center gap-2 mt-1">
-                                                    <span className="text-[10px] font-bold opacity-70 uppercase tracking-widest">{task.type}</span>
-                                                </div>
-                                            </div>
+                        <CardContent className="p-6">
+                            <div className="space-y-6">
+                                {todaySchedule.map((task) => (
+                                    <div key={task.id} className="flex gap-4">
+                                        <div className="w-16 pt-0.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">{task.time}</div>
+                                        <div className="flex-1 pl-4 border-l-2 border-slate-200">
+                                            <h4 className="text-sm font-semibold text-slate-800">{task.title}</h4>
+                                            <span className={`inline-block px-2 py-0.5 mt-1 rounded text-[9px] font-bold uppercase tracking-wider ${task.color.split(' ').slice(0, 2).join(' ')}`}>
+                                                {task.type}
+                                            </span>
                                         </div>
-                                    ))}
-                                </div>
+                                    </div>
+                                ))}
                             </div>
                         </CardContent>
                     </Card>
+                </div>
 
-                    {/* Recent Resignations */}
-                    <Card className="border-none shadow-sm bg-white/80 backdrop-blur-xl">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-bold text-slate-900">Recent Resignations</CardTitle>
+                {/* Column 3: Maintenance & Archives */}
+                <div className="lg:col-span-3 space-y-6">
+                    <Card className="border-slate-200">
+                        <CardHeader className="py-4 border-b border-slate-100">
+                            <CardTitle className="text-sm font-bold flex items-center gap-2">
+                                <ShieldAlert className="h-4 w-4 text-amber-500" /> Compliance Alerts
+                            </CardTitle>
                         </CardHeader>
-                        <CardContent className="p-0">
-                            <div className="divide-y divide-slate-100/50">
-                                {recentResignations.map((res: any) => (
-                                    <div key={res.id} className="p-4 hover:bg-slate-50/50 transition-colors flex items-center justify-between group">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-500 group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-colors">
-                                                {res.employee_name?.charAt(0)}
-                                            </div>
-                                            <div>
-                                                <div className="text-sm font-bold text-slate-900">{res.employee_name}</div>
-                                                <div className="text-[10px] font-medium text-slate-500 uppercase">{res.department || 'Gen'}</div>
-                                            </div>
+                        <CardContent className="p-4 space-y-3">
+                            {documentExpiries.map((doc) => (
+                                <div key={doc.id} className="p-3 rounded-lg border border-slate-100 bg-slate-50/50 flex flex-col gap-2">
+                                    <div className="flex justify-between items-start">
+                                        <div className="min-w-0">
+                                            <p className="text-xs font-bold text-slate-900 truncate">{doc.name}</p>
+                                            <p className="text-[10px] text-slate-500">{doc.type}</p>
                                         </div>
-                                        <Badge variant="outline" className={`border-none font-bold ${res.status === 'Pending' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'
-                                            }`}>
-                                            {res.status}
+                                        <Badge variant={doc.severity === 'high' ? 'destructive' : 'secondary'} className="text-[9px]">
+                                            {doc.expires}
                                         </Badge>
                                     </div>
+                                    <Button size="sm" variant="outline" className="h-7 text-[10px] w-full" onClick={(e) => handleSendReminder(e, doc.id)}>
+                                        <Send className="h-3 w-3 mr-1" /> Send Reminder
+                                    </Button>
+                                </div>
+                            ))}
+                        </CardContent>
+                    </Card>
+
+                    <Card className="border-slate-200">
+                        <CardHeader className="py-4 border-b border-slate-100">
+                            <CardTitle className="text-sm font-bold">Recent Exits</CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-4">
+                            <div className="space-y-3">
+                                {recentResignations.map((res: any) => (
+                                    <div key={res.id} className="flex items-center justify-between text-xs py-1 border-b border-slate-50 last:border-0">
+                                        <span className="font-medium text-slate-700">{res.employee_name}</span>
+                                        <span className="text-slate-400">Processed</span>
+                                    </div>
                                 ))}
-                                {recentResignations.length === 0 && (
-                                    <div className="p-6 text-center text-xs text-slate-400 font-medium">No recent activity</div>
-                                )}
                             </div>
-                            <Button variant="ghost" className="w-full text-xs font-bold text-slate-500 hover:text-indigo-600 hover:bg-slate-50 h-10 border-t border-slate-100/50 rounded-t-none rounded-b-xl" onClick={() => navigate('/exit')}>
-                                View All Activity <ChevronRight className="w-3 h-3 ml-1" />
+                            <Button variant="ghost" className="w-full mt-4 h-8 text-xs text-slate-500" onClick={() => navigate('/exit')}>
+                                View Directory <ChevronRight className="h-3 w-3 ml-1" />
                             </Button>
                         </CardContent>
                     </Card>
                 </div>
             </div>
-        </div>
+        </Layout>
     );
+;
 };
 
 export default HRDashboard;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import Layout from '../components/Layout';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
@@ -10,14 +10,42 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Separator } from '../components/ui/separator';
 import { ArrowLeft, Save, Shield, Clock, AlertTriangle, Users, Settings, Target, Plus, CheckCircle, Trash2, ListOrdered, MessageSquare, GripVertical } from 'lucide-react';
 
+interface StageDefinition {
+    id: string;
+    label: string;
+    icon: string;
+    color: string;
+    description?: string;
+}
+
+interface Policy {
+    id: number;
+    name: string;
+    duration: number;
+    type?: string;
+    stages: string[];
+}
+
+interface StageConfig {
+    points?: Array<{ id: string; title: string; weight: string; type: string; sub?: string }>;
+    owner?: string;
+    checker?: string;
+    allowReopen?: boolean;
+    scheduleOffset?: string | number;
+    slaLimit?: string | number;
+    slaFrequency?: string;
+    notifications?: Record<string, boolean>;
+    selectedOutcome?: string;
+    approvalGates?: string[];
+}
+
 const ProbationConfig = () => {
-    const navigate = useNavigate();
     const [activeStage, setActiveStage] = useState('general');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedPolicyId, setSelectedPolicyId] = useState<number | null>(null);
     const [editingPolicyId, setEditingPolicyId] = useState<number | null>(null);
     const [newPolicy, setNewPolicy] = useState<{ name: string; duration: number; stages: string[] }>({ name: '', duration: 6, stages: ['kpi', '90_day', 'decision'] });
-    const [policies, setPolicies] = useState<any[]>(() => {
+    const [policies, setPolicies] = useState<Policy[]>(() => {
         const saved = localStorage.getItem('probation_policies');
         return saved ? JSON.parse(saved) : [
             { id: 1, name: 'Standard Academic Probation', duration: 12, type: 'Months', stages: ['kpi', '30_day', '60_day', '90_day', 'decision'] },
@@ -25,7 +53,7 @@ const ProbationConfig = () => {
         ];
     });
 
-    const [stageConfigs, setStageConfigs] = useState<Record<string, any>>(() => {
+    const [stageConfigs, setStageConfigs] = useState<Record<string, StageConfig>>(() => {
         const saved = localStorage.getItem('probation_stage_configs');
         return saved ? JSON.parse(saved) : {
             'kpi': {
@@ -44,13 +72,13 @@ const ProbationConfig = () => {
         };
     });
 
-    const updateStageConfig = (stageId: string, data: any) => {
+    const updateStageConfig = (stageId: string, data: StageConfig) => {
         const newConfigs = { ...stageConfigs, [stageId]: data };
         setStageConfigs(newConfigs);
         localStorage.setItem('probation_stage_configs', JSON.stringify(newConfigs));
     };
 
-    const [stageDefinitions, setStageDefinitions] = useState<any[]>(() => {
+    const [stageDefinitions, setStageDefinitions] = useState<StageDefinition[]>(() => {
         const saved = localStorage.getItem('probation_stage_definitions');
         return saved ? JSON.parse(saved) : [
             { id: 'kpi', label: 'KPI Setting', description: 'Initial goal setting stage', icon: 'Target', color: 'indigo' },
@@ -61,7 +89,7 @@ const ProbationConfig = () => {
         ];
     });
 
-    const updateStageDefinition = (id: string, updates: any) => {
+    const updateStageDefinition = (id: string, updates: Partial<StageDefinition>) => {
         const newStages = stageDefinitions.map(s => s.id === id ? { ...s, ...updates } : s);
         setStageDefinitions(newStages);
         localStorage.setItem('probation_stage_definitions', JSON.stringify(newStages));
@@ -90,54 +118,37 @@ const ProbationConfig = () => {
     };
 
     // Helper to get icon component
-    const getIcon = (iconName: string) => {
-        const icons: any = { Target, Clock, Users, Shield, AlertTriangle, CheckCircle, Plus, Settings };
+    const getIcon = (iconName: string): React.ElementType => {
+        const icons: Record<string, React.ElementType> = { Target, Clock, Users, Shield, AlertTriangle, CheckCircle, Plus, Settings };
         return icons[iconName] || Target;
     };
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] relative overflow-hidden">
-            {/* Background Blurs */}
-            <div className="absolute top-0 -left-1/4 w-[50%] h-[50%] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />
-            <div className="absolute bottom-0 -right-1/4 w-[50%] h-[50%] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
-
-            <div className="max-w-7xl mx-auto px-6 py-8 relative z-10 space-y-8">
-                {/* Premium Header */}
-                <div className="flex items-center justify-between bg-white/40 backdrop-blur-xl border border-white/50 p-6 rounded-[32px] shadow-sm">
-                    <div className="flex items-center space-x-6">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => navigate('/probation-dashboard')}
-                            className="rounded-2xl hover:bg-white/60 transition-all shadow-sm"
-                        >
-                            <ArrowLeft className="h-5 w-5" />
-                        </Button>
-                        <div>
-                            <h1 className="text-3xl font-black text-slate-900 tracking-tight">Probation Config</h1>
-                            <p className="text-sm font-medium text-slate-500">Orchestrate the journey of your new talent</p>
-                        </div>
-                    </div>
-                    <Button className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-xl shadow-indigo-200 rounded-2xl px-6 h-12 font-bold transition-all hover:scale-105 active:scale-95">
-                        <Save className="h-5 w-5 mr-2" />
-                        Save Configuration
-                    </Button>
-                </div>
-
-                <div className="grid grid-cols-12 gap-10">
+        <Layout 
+            title="Probation Config" 
+            description="Orchestrate the journey of your new talent" 
+            showBack={true}
+            headerActions={
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-md rounded-lg px-4 h-10 font-bold transition-all">
+                    <Save className="h-4 w-4 mr-2" />
+                    Save
+                </Button>
+            }
+        >
+                <div className="grid grid-cols-12 gap-10 mt-6">
                     {/* Sidebar Navigation - Floating Crystal Items */}
                     <div className="col-span-3 space-y-8">
                         <div>
-                            <h3 className="px-4 text-[10px] font-black text-slate-400 uppercase tracking-[2px] mb-4">Core Engine</h3>
+                            <h3 className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Core Engine</h3>
                             <button
                                 onClick={() => setActiveStage('general')}
-                                className={`group w-full relative p-4 rounded-[24px] transition-all duration-300 ${activeStage === 'general'
-                                    ? 'bg-white shadow-xl ring-1 ring-black/5 translate-x-2'
-                                    : 'hover:bg-white/50 hover:translate-x-1'
+                                className={`group w-full relative p-3 rounded-xl transition-all duration-300 ${activeStage === 'general'
+                                    ? 'bg-white shadow-md border border-slate-200'
+                                    : 'hover:bg-slate-50'
                                     }`}
                             >
                                 <div className="flex items-center gap-4 relative z-10">
-                                    <div className={`p-2.5 rounded-xl transition-all duration-300 ${activeStage === 'general' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'bg-white shadow-sm text-slate-400 group-hover:text-indigo-600'}`}>
+                                    <div className={`p-2.5 rounded-xl transition-all duration-300 ${activeStage === 'general' ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-200' : 'bg-white shadow-sm text-slate-400 group-hover:text-indigo-600'}`}>
                                         <Settings className="w-5 h-5" />
                                     </div>
                                     <div className="text-left">
@@ -150,21 +161,21 @@ const ProbationConfig = () => {
 
                         <div>
                             <div className="flex items-center justify-between px-4 mb-4">
-                                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[2px]">Stage Designer</h3>
+                                <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Stage Designer</h3>
                                 <Button onClick={handleAddStage} variant="ghost" size="icon" className="h-6 w-6 rounded-full hover:bg-indigo-50 text-indigo-600">
                                     <Plus className="w-3 h-3" />
                                 </Button>
                             </div>
 
-                            <div className="px-4 mb-6">
+                            <div className="px-4 mb-4">
                                 <Select
                                     value={selectedPolicyId?.toString() || 'all'}
                                     onValueChange={(v) => setSelectedPolicyId(v === 'all' ? null : parseInt(v))}
                                 >
-                                    <SelectTrigger className="h-10 rounded-xl bg-white/60 backdrop-blur-md border-white/50 shadow-sm focus:ring-indigo-500">
+                                    <SelectTrigger className="h-10 rounded-lg bg-white border-slate-200 shadow-sm">
                                         <SelectValue placeholder="All Templates" />
                                     </SelectTrigger>
-                                    <SelectContent className="rounded-2xl border-white/50 backdrop-blur-xl">
+                                    <SelectContent className="rounded-lg shadow-xl">
                                         <SelectItem value="all">Global (All Stages)</SelectItem>
                                         {policies.map(p => (
                                             <SelectItem key={p.id} value={p.id.toString()}>{p.name}</SelectItem>
@@ -178,13 +189,13 @@ const ProbationConfig = () => {
                                     <button
                                         key={stage.id}
                                         onClick={() => setActiveStage(stage.id)}
-                                        className={`group w-full relative p-4 rounded-[24px] transition-all duration-300 ${activeStage === stage.id
-                                            ? 'bg-white shadow-xl ring-1 ring-black/5 translate-x-3'
-                                            : 'hover:bg-white/50 hover:translate-x-1'
+                                        className={`group w-full relative p-3 rounded-xl transition-all duration-300 ${activeStage === stage.id
+                                            ? 'bg-white shadow-md border border-slate-200'
+                                            : 'hover:bg-slate-50'
                                             }`}
                                     >
                                         <div className="flex items-center gap-4 relative z-10">
-                                            <div className={`p-2.5 rounded-xl transition-all duration-300 ${activeStage === stage.id ? `bg-${stage.color}-600 text-white shadow-lg shadow-${stage.color}-200` : 'bg-white shadow-sm text-slate-400 group-hover:text-slate-600'}`}>
+                                            <div className={`p-2.5 rounded-xl transition-all duration-300 ${activeStage === stage.id ? `bg-${stage.color}-600 text-white shadow-sm shadow-${stage.color}-200` : 'bg-white shadow-sm text-slate-400 group-hover:text-slate-600'}`}>
                                                 {React.createElement(getIcon(stage.icon) as any, { className: "w-5 h-5" })}
                                             </div>
                                             <div className="text-left flex-1 min-w-0">
@@ -210,15 +221,15 @@ const ProbationConfig = () => {
                         {activeStage === 'general' && (
                             <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
                                 {isModalOpen && (
-                                    <Card className="border-none shadow-2xl rounded-[40px] bg-white/80 backdrop-blur-2xl overflow-hidden border border-white/50 relative z-20 ring-1 ring-black/5">
+                                    <Card className="border border-slate-200 shadow-xl rounded-2xl bg-white overflow-hidden relative z-20">
                                         <CardHeader className="pb-4">
                                             <div className="flex items-center gap-4 mb-2">
-                                                <div className="p-3 bg-indigo-600 rounded-2xl text-white shadow-lg shadow-indigo-100">
+                                                <div className="p-3 bg-indigo-600 rounded-2xl text-white shadow-sm shadow-indigo-100">
                                                     <Plus className="w-6 h-6" />
                                                 </div>
                                                 <div>
-                                                    <CardTitle className="text-2xl font-black text-slate-900 leading-none">
-                                                        {editingPolicyId ? 'Refine Policy' : 'New Policy Architect'}
+                                                    <CardTitle className="text-xl font-bold text-slate-900 leading-none">
+                                                        {editingPolicyId ? 'Edit Policy' : 'New Policy Architect'}
                                                     </CardTitle>
                                                     <CardDescription className="text-slate-500 font-medium">Define the timeline and milestone structure.</CardDescription>
                                                 </div>
@@ -227,7 +238,7 @@ const ProbationConfig = () => {
                                         <CardContent className="space-y-8">
                                             <div className="grid grid-cols-2 gap-8">
                                                 <div className="space-y-3">
-                                                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Policy Identity</Label>
+                                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Policy Identity</Label>
                                                     <Input
                                                         placeholder="e.g. Senior Academic Track"
                                                         className="h-14 rounded-2xl bg-white border-slate-200 focus:ring-2 focus:ring-indigo-500 font-bold text-lg"
@@ -236,7 +247,7 @@ const ProbationConfig = () => {
                                                     />
                                                 </div>
                                                 <div className="space-y-3">
-                                                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Duration (Months)</Label>
+                                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Duration (Months)</Label>
                                                     <Input
                                                         type="number"
                                                         className="h-14 rounded-2xl bg-white border-slate-200 focus:ring-2 focus:ring-indigo-500 font-bold text-lg"
@@ -247,10 +258,10 @@ const ProbationConfig = () => {
                                             </div>
 
                                             <div className="space-y-4">
-                                                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Journey Milestones</Label>
+                                                <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Journey Milestones</Label>
                                                 <div className="grid grid-cols-2 gap-4">
                                                     {stageDefinitions.map((s: any) => (
-                                                        <label key={s.id} className={`flex items-center gap-4 p-4 rounded-3xl cursor-pointer transition-all border-2 ${newPolicy.stages.includes(s.id) ? 'bg-indigo-50/50 border-indigo-600 shadow-sm' : 'bg-white border-slate-100 hover:border-slate-300'}`}>
+                                                        <label key={s.id} className={`flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all border-2 ${newPolicy.stages.includes(s.id) ? 'bg-blue-50 border-blue-500 shadow-sm' : 'bg-white border-slate-100 hover:border-slate-200'}`}>
                                                             <div className="relative flex items-center">
                                                                 <input
                                                                     type="checkbox"
@@ -268,7 +279,7 @@ const ProbationConfig = () => {
                                                                 </div>
                                                             </div>
                                                             <div className="flex-1 min-w-0">
-                                                                <div className={`text-sm font-black ${newPolicy.stages.includes(s.id) ? 'text-indigo-900' : 'text-slate-900'}`}>{s.label}</div>
+                                                                <div className={`text-sm font-bold ${newPolicy.stages.includes(s.id) ? 'text-blue-900' : 'text-slate-900'}`}>{s.label}</div>
                                                                 <p className="text-[10px] text-slate-500 font-medium truncate">{s.description}</p>
                                                             </div>
                                                         </label>
@@ -333,7 +344,7 @@ const ProbationConfig = () => {
                                                     Discard
                                                 </Button>
                                                 <Button
-                                                    className="h-12 px-10 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-100"
+                                                    className="h-12 px-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md"
                                                     disabled={!newPolicy.name}
                                                     onClick={() => {
                                                         let updated;
@@ -360,12 +371,12 @@ const ProbationConfig = () => {
                                 <div className="space-y-6">
                                     <div className="flex items-center justify-between px-2">
                                         <div>
-                                            <h2 className="text-xl font-black text-slate-900 tracking-tight">Active Policies</h2>
+                                            <h2 className="text-xl font-bold text-slate-900 tracking-tight">Active Policies</h2>
                                             <p className="text-xs font-medium text-slate-500">Manage institutional probation frameworks</p>
                                         </div>
                                         <Button
                                             size="sm"
-                                            className="bg-white border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 rounded-2xl px-6 h-10 font-black tracking-tight"
+                                            className="bg-white border border-slate-200 text-slate-900 hover:bg-slate-50 rounded-lg px-4 h-10 font-bold"
                                             onClick={() => setIsModalOpen(true)}
                                             disabled={isModalOpen}
                                         >
@@ -373,15 +384,15 @@ const ProbationConfig = () => {
                                         </Button>
                                     </div>
 
-                                    <div className="grid gap-6">
+                                    <div className="grid gapx-4 py-4">
                                         {policies.map(policy => (
-                                            <div key={policy.id} className="group relative overflow-hidden rounded-[32px] bg-white border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 p-8 hover:-translate-y-1">
+                                            <div key={policy.id} className="group relative overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 p-6 hover:-translate-y-1">
                                                 <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-600/5 rounded-full -mr-10 -mt-10 blur-2xl group-hover:bg-indigo-600/10 transition-colors" />
 
                                                 <div className="flex items-center justify-between relative z-10">
                                                     <div className="flex items-center gap-8">
-                                                        <div className="h-16 w-16 rounded-[24px] bg-indigo-600 text-white flex flex-col items-center justify-center shadow-lg shadow-indigo-200">
-                                                            <span className="text-2xl font-black leading-none">{policy.duration}</span>
+                                                        <div className="h-16 w-16 rounded-[24px] bg-indigo-600 text-white flex flex-col items-center justify-center shadow-sm shadow-indigo-200">
+                                                            <span className="text-xl font-black leading-none">{policy.duration}</span>
                                                             <span className="text-[10px] uppercase font-bold tracking-widest opacity-80">MOS</span>
                                                         </div>
                                                         <div>
@@ -429,7 +440,10 @@ const ProbationConfig = () => {
                                                         const stageInfo = stageDefinitions.find((s: any) => s.id === sid);
                                                         return (
                                                             <div key={sid} className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-100 rounded-xl transition-all hover:bg-white hover:shadow-sm">
-                                                                {stageInfo?.icon && <stageInfo.icon className={`w-3.5 h-3.5 text-${stageInfo?.color}-500`} />}
+                                                                {stageInfo?.icon && (() => {
+                                                                    const Icon = stageInfo.icon as any;
+                                                                    return <Icon className={`w-3.5 h-3.5 text-${stageInfo?.color}-500`} />;
+                                                                })()}
                                                                 <span className="text-[10px] font-black uppercase tracking-wider text-slate-600">
                                                                     {stageInfo?.label || sid}
                                                                 </span>
@@ -442,7 +456,7 @@ const ProbationConfig = () => {
 
                                         {policies.length === 0 && (
                                             <div className="flex flex-col items-center justify-center p-20 rounded-[40px] border-4 border-dashed border-slate-100 bg-slate-50/50">
-                                                <div className="p-6 bg-slate-100 rounded-full mb-6">
+                                                <div className="px-4 py-4 bg-slate-100 rounded-full mb-4">
                                                     <Settings className="w-10 h-10 text-slate-300" />
                                                 </div>
                                                 <h3 className="text-xl font-black text-slate-400 tracking-tight">No Policies Architected</h3>
@@ -458,11 +472,14 @@ const ProbationConfig = () => {
                         {activeStage !== 'general' && (
                             <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-700">
                                 <div className="flex items-center gap-4 mb-2">
-                                    <div className={`p-4 rounded-[28px] bg-${stageDefinitions.find((s: any) => s.id === activeStage)?.color}-600 text-white shadow-xl shadow-${stageDefinitions.find((s: any) => s.id === activeStage)?.color}-100`}>
-                                        {React.createElement(stageDefinitions.find((s: any) => s.id === activeStage)?.icon || Settings, { className: "w-8 h-8" } as any)}
+                                    <div className={`p-4 rounded-[28px] bg-${stageDefinitions.find((s) => s.id === activeStage)?.color || 'indigo'}-600 text-white shadow-xl shadow-${stageDefinitions.find((s) => s.id === activeStage)?.color || 'indigo'}-100`}>
+                                        {(() => {
+                                            const IconComp = getIcon(stageDefinitions.find((s) => s.id === activeStage)?.icon || 'Settings') as React.ComponentType<{ className?: string }>;
+                                            return <IconComp className="w-8 h-8" />;
+                                        })()}
                                     </div>
                                     <div>
-                                        <h2 className="text-3xl font-black text-slate-900 tracking-tight leading-none uppercase">
+                                        <h2 className="text-xl font-bold text-slate-900 tracking-tight leading-none uppercase">
                                             {stageDefinitions.find((s: any) => s.id === activeStage)?.label} Configuration
                                         </h2>
                                         <p className="text-sm font-medium text-slate-500 mt-2">Personalize the experience for this specific milestone.</p>
@@ -471,10 +488,10 @@ const ProbationConfig = () => {
 
                                 <div className="grid grid-cols-2 gap-8">
                                     {/* 1. Workflow Settings */}
-                                    <Card className="border-none shadow-xl rounded-[40px] bg-white/80 backdrop-blur-2xl overflow-hidden border border-white/50 relative group">
+                                    <Card className="border border-slate-200 shadow-lg rounded-2xl bg-white overflow-hidden relative group">
                                         <div className="absolute top-0 left-0 w-2 h-full bg-indigo-600/50 group-hover:w-4 transition-all" />
                                         <CardHeader>
-                                            <CardTitle className="flex items-center text-lg font-black text-slate-900 tracking-tight">
+                                            <CardTitle className="flex items-center text-lg font-bold text-slate-900 tracking-tight">
                                                 <Shield className="w-5 h-5 mr-3 text-indigo-500" />
                                                 Workflow Rules
                                             </CardTitle>
@@ -483,13 +500,13 @@ const ProbationConfig = () => {
                                         <CardContent className="space-y-8">
                                             <div className="space-y-4">
                                                 <div className="space-y-2">
-                                                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Stage Owner</Label>
+                                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Stage Owner</Label>
                                                     <Select
                                                         value={stageConfigs[activeStage]?.owner || 'manager'}
                                                         onValueChange={(v) => updateStageConfig(activeStage, { ...stageConfigs[activeStage], owner: v })}
                                                     >
-                                                        <SelectTrigger className="h-12 rounded-2xl bg-white/60 border-slate-100 shadow-sm"><SelectValue /></SelectTrigger>
-                                                        <SelectContent className="rounded-2xl border-white/50 backdrop-blur-xl">
+                                                        <SelectTrigger className="h-10 rounded-lg bg-slate-50 border-slate-200"><SelectValue /></SelectTrigger>
+                                                        <SelectContent className="rounded-lg shadow-xl">
                                                             <SelectItem value="manager">Reporting Manager</SelectItem>
                                                             <SelectItem value="hr">HR Manager</SelectItem>
                                                             <SelectItem value="skip_level">Skip Level Manager</SelectItem>
@@ -498,13 +515,13 @@ const ProbationConfig = () => {
                                                     </Select>
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Checker Role</Label>
+                                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Checker Role</Label>
                                                     <Select
                                                         value={stageConfigs[activeStage]?.checker || 'hr'}
                                                         onValueChange={(v) => updateStageConfig(activeStage, { ...stageConfigs[activeStage], checker: v })}
                                                     >
-                                                        <SelectTrigger className="h-12 rounded-2xl bg-white/60 border-slate-100 shadow-sm"><SelectValue /></SelectTrigger>
-                                                        <SelectContent className="rounded-2xl border-white/50 backdrop-blur-xl">
+                                                        <SelectTrigger className="h-10 rounded-lg bg-slate-50 border-slate-200"><SelectValue /></SelectTrigger>
+                                                        <SelectContent className="rounded-lg shadow-xl">
                                                             <SelectItem value="none">None (Self-Approval)</SelectItem>
                                                             <SelectItem value="manager">Reporting Manager</SelectItem>
                                                             <SelectItem value="hr">HR Manager</SelectItem>
@@ -518,7 +535,7 @@ const ProbationConfig = () => {
 
                                             <div className="flex items-center justify-between p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
                                                 <div className="space-y-0.5">
-                                                    <Label className="text-sm font-black text-slate-900">Allow "Reopen Stage"</Label>
+                                                    <Label className="text-sm font-bold text-slate-900">Allow "Reopen Stage"</Label>
                                                     <p className="text-[10px] font-medium text-slate-500">Enable retro-active edits by Admins</p>
                                                 </div>
                                                 <Switch
@@ -532,26 +549,26 @@ const ProbationConfig = () => {
 
                                     {/* 2. SLA & Escalation */}
                                     <div className="space-y-8">
-                                        <Card className="border-none shadow-xl rounded-[40px] bg-white/80 backdrop-blur-2xl overflow-hidden border border-white/50 relative group">
+                                        <Card className="border border-slate-200 shadow-lg rounded-2xl bg-white overflow-hidden relative group">
                                             <div className="absolute top-0 left-0 w-2 h-full bg-amber-500/50 group-hover:w-4 transition-all" />
                                             <CardHeader>
-                                                <CardTitle className="flex items-center text-lg font-black text-slate-900 tracking-tight">
+                                                <CardTitle className="flex items-center text-lg font-bold text-slate-900 tracking-tight">
                                                     <Clock className="w-5 h-5 mr-3 text-amber-500" />
                                                     SLA & Scheduling
                                                 </CardTitle>
                                                 <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Timelines & Reminders</CardDescription>
                                             </CardHeader>
                                             <CardContent className="space-y-8">
-                                                <div className="grid grid-cols-2 gap-6">
+                                                <div className="grid grid-cols-2 gapx-4 py-4">
                                                     <div className="col-span-2">
-                                                        <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Schedule Offset (Days after Joining)</Label>
+                                                        <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Schedule Offset (Days after Joining)</Label>
                                                         <div className="flex items-center gap-3 mt-2">
-                                                            <Input
-                                                                type="number"
-                                                                value={stageConfigs[activeStage]?.scheduleOffset || 30}
-                                                                onChange={(e) => updateStageConfig(activeStage, { ...stageConfigs[activeStage], scheduleOffset: e.target.value })}
-                                                                className="h-12 rounded-2xl bg-white border-slate-100 shadow-sm font-black text-lg w-full"
-                                                            />
+                                                                <Input
+                                                                    type="number"
+                                                                    value={stageConfigs[activeStage]?.scheduleOffset || 30}
+                                                                    onChange={(e) => updateStageConfig(activeStage, { ...stageConfigs[activeStage], scheduleOffset: e.target.value })}
+                                                                    className="h-10 rounded-lg bg-white border-slate-200 shadow-sm font-bold text-lg w-full"
+                                                                />
                                                             <div className="h-12 px-4 rounded-2xl bg-slate-100 flex items-center text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                                                 Days from Join
                                                             </div>
@@ -564,7 +581,7 @@ const ProbationConfig = () => {
                                                             type="number"
                                                             value={stageConfigs[activeStage]?.slaLimit || 7}
                                                             onChange={(e) => updateStageConfig(activeStage, { ...stageConfigs[activeStage], slaLimit: e.target.value })}
-                                                            className="h-12 rounded-2xl bg-white border-slate-100 shadow-sm font-black text-lg"
+                                                            className="h-10 rounded-lg bg-white border-slate-200 shadow-sm font-bold text-lg"
                                                         />
                                                     </div>
                                                     <div className="space-y-2">
@@ -587,10 +604,10 @@ const ProbationConfig = () => {
 
 
                                         {/* 3. Notifications */}
-                                        <Card className="border-none shadow-xl rounded-[40px] bg-white/80 backdrop-blur-2xl overflow-hidden border border-white/50 relative group">
+                                        <Card className="border border-slate-200 shadow-lg rounded-2xl bg-white overflow-hidden relative group">
                                             <div className="absolute top-0 left-0 w-2 h-full bg-blue-500/50 group-hover:w-4 transition-all" />
                                             <CardHeader>
-                                                <CardTitle className="flex items-center text-lg font-black text-slate-900 tracking-tight">
+                                                <CardTitle className="flex items-center text-lg font-bold text-slate-900 tracking-tight">
                                                     <Users className="w-5 h-5 mr-3 text-blue-500" />
                                                     Notifications
                                                 </CardTitle>
@@ -629,25 +646,25 @@ const ProbationConfig = () => {
                                 <div className="space-y-8 mt-10">
                                     <div className="flex items-center justify-between px-2">
                                         <div>
-                                            <h2 className="text-xl font-black text-slate-900 tracking-tight">Stage Designer</h2>
+                                            <h2 className="text-xl font-bold text-slate-900 tracking-tight">Stage Designer</h2>
                                             <p className="text-xs font-medium text-slate-500">Define the input fields and requirements for this specific milestone</p>
                                         </div>
                                     </div>
 
                                     {stageDefinitions.map((s: any) => s.id).includes(activeStage) && (
-                                        <Card className="border-none shadow-2xl rounded-[40px] bg-white/90 backdrop-blur-2xl overflow-hidden border border-white/50 relative group p-8">
+                                        <Card className="border border-slate-200 shadow-xl rounded-2xl bg-white overflow-hidden relative group p-6">
                                             <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/5 rounded-full -mr-32 -mt-32 blur-3xl transition-opacity group-hover:opacity-100 opacity-50" />
                                             <div className="relative z-10 space-y-8">
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-4">
-                                                        <div className="p-3 bg-indigo-600 rounded-2xl text-white shadow-lg shadow-indigo-100">
+                                                        <div className="p-3 bg-indigo-600 rounded-2xl text-white shadow-sm shadow-indigo-100">
                                                             <Target className="w-6 h-6" />
                                                         </div>
                                                         <div>
                                                             {activeStage !== 'general' ? (
                                                                 <div className="group/edit flex items-center gap-2">
                                                                     <Input
-                                                                        className="text-xl font-black text-slate-900 bg-transparent border-none outline-none focus:ring-0 p-0 w-full hover:bg-slate-50 transition-colors rounded-lg px-2 -ml-2 h-auto"
+                                                                        className="text-xl font-bold text-slate-900 bg-transparent border-none outline-none focus:ring-0 p-0 w-full hover:bg-slate-50 transition-colors rounded-lg px-2 -ml-2 h-auto"
                                                                         value={stageDefinitions.find((s: any) => s.id === activeStage)?.label || ''}
                                                                         onChange={(e) => updateStageDefinition(activeStage, { label: e.target.value })}
                                                                     />
@@ -703,7 +720,7 @@ const ProbationConfig = () => {
                                                                     </div>
                                                                 </div>
                                                             ) : (
-                                                                <h3 className="text-xl font-black text-slate-900">{stageDefinitions.find((s: any) => s.id === activeStage)?.label || 'Stage'} Designer</h3>
+                                                                <h3 className="text-xl font-bold text-slate-900">{stageDefinitions.find((s: any) => s.id === activeStage)?.label || 'Stage'} Designer</h3>
                                                             )}
                                                             {activeStage !== 'general' ? (
                                                                 <input
@@ -723,16 +740,16 @@ const ProbationConfig = () => {
                                                             updateStageConfig(activeStage, { ...current, points: [...(current.points || []), newPoint] });
                                                         }}
                                                         variant="outline"
-                                                        className="rounded-2xl border-slate-200 font-bold text-slate-600 hover:bg-slate-50 transition-all hover:scale-105 active:scale-95"
+                                                        className="rounded-lg border-slate-200 font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
                                                     >
                                                         <Plus className="w-4 h-4 mr-2" /> ADD PARAMETER
                                                     </Button>
                                                 </div>
 
                                                 <div className="grid gap-4">
-                                                    {(stageConfigs[activeStage]?.points || []).map((point: any, i: number) => (
-                                                        <div key={point.id} className="flex items-center justify-between p-6 bg-white border border-slate-100 rounded-[28px] shadow-sm hover:shadow-md transition-all group/item">
-                                                            <div className="flex items-center gap-6 flex-1">
+                                                    {(stageConfigs[activeStage]?.points || []).map((point, i) => (
+                                                        <div key={point.id} className="flex items-center justify-between px-4 py-3 bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-all group/item">
+                                                            <div className="flex items-center gapx-4 py-4 flex-1">
                                                                 <div className="cursor-grab active:cursor-grabbing text-slate-200 hover:text-slate-400 transition-colors">
                                                                     <GripVertical className="w-5 h-5" />
                                                                 </div>
@@ -756,7 +773,7 @@ const ProbationConfig = () => {
                                                                                 updateStageConfig(activeStage, { ...stageConfigs[activeStage], points: newPoints });
                                                                             }}
                                                                         >
-                                                                            <SelectTrigger className="h-6 w-24 rounded-lg bg-indigo-50 border-none text-indigo-600 text-[9px] font-black uppercase"><SelectValue /></SelectTrigger>
+                                                                            <SelectTrigger className="h-6 w-24 rounded-md bg-slate-100 border-none text-slate-600 text-[9px] font-bold uppercase"><SelectValue /></SelectTrigger>
                                                                             <SelectContent className="rounded-xl border-none shadow-xl">
                                                                                 <SelectItem value="rating">Rating (1-5)</SelectItem>
                                                                                 <SelectItem value="boolean">Yes/No</SelectItem>
@@ -787,8 +804,10 @@ const ProbationConfig = () => {
                                                                     size="icon"
                                                                     className="h-10 w-10 rounded-xl hover:bg-rose-50 text-rose-500"
                                                                     onClick={() => {
-                                                                        const newPoints = stageConfigs['kpi'].points.filter((_: any, idx: number) => idx !== i);
-                                                                        updateStageConfig('kpi', { ...stageConfigs['kpi'], points: newPoints });
+                                                                        const currentConfig = stageConfigs['kpi'] || { points: [] };
+                                                                        const currentPoints = currentConfig.points || [];
+                                                                        const newPoints = currentPoints.filter((_: any, idx: number) => idx !== i);
+                                                                        updateStageConfig('kpi', { ...currentConfig, points: newPoints });
                                                                     }}
                                                                 >
                                                                     <Trash2 className="w-4 h-4" />
@@ -802,36 +821,37 @@ const ProbationConfig = () => {
                                     )}
 
                                     {(activeStage === '30_day' || activeStage === '60_day' || activeStage === '90_day') && (
-                                        <Card className="border-none shadow-2xl rounded-[40px] bg-white/90 backdrop-blur-2xl overflow-hidden border border-white/50 relative group p-8">
+                                        <Card className="border border-slate-200 shadow-xl rounded-2xl bg-white overflow-hidden relative group p-6">
                                             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 rounded-full -mr-32 -mt-32 blur-3xl opacity-50 transition-opacity group-hover:opacity-100" />
                                             <div className="relative z-10 space-y-8">
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-4">
-                                                        <div className="p-3 bg-blue-600 rounded-2xl text-white shadow-lg shadow-blue-100">
+                                                        <div className="p-3 bg-blue-600 rounded-2xl text-white shadow-sm shadow-blue-100">
                                                             <MessageSquare className="w-6 h-6" />
                                                         </div>
                                                         <div>
-                                                            <h3 className="text-xl font-black text-slate-900">Feedback Designer</h3>
-                                                            <p className="text-xs font-medium text-slate-500">Build the questionnaire for this review milestone</p>
+                                            <h3 className="text-xl font-bold text-slate-900">{stageDefinitions.find((s) => s.id === activeStage)?.label || 'Stage'} Designer</h3>
+                                            <p className="text-xs font-medium text-slate-500">Define the questionnaire for this review milestone</p>
                                                         </div>
                                                     </div>
                                                     <Button
                                                         onClick={() => {
-                                                            const newPoint = { id: Date.now().toString(), title: "New Question?", sub: "Observation detail", type: "scale" };
+                                                            const newPoint = { id: Date.now().toString(), title: "New Question?", sub: "Observation detail", type: "scale", weight: "10" };
                                                             const current = stageConfigs['feedback'] || { points: [] };
-                                                            updateStageConfig('feedback', { ...current, points: [...current.points, newPoint] });
+                                                            const currentPoints = current.points || [];
+                                                            updateStageConfig('feedback', { ...current, points: [...currentPoints, newPoint] });
                                                         }}
                                                         variant="outline"
-                                                        className="rounded-2xl border-slate-200 font-bold text-slate-600 hover:bg-slate-50 transition-all hover:scale-105 active:scale-95"
+                                                        className="rounded-lg border-slate-200 font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
                                                     >
                                                         <Plus className="w-4 h-4 mr-2" /> ADD QUESTION
                                                     </Button>
                                                 </div>
 
                                                 <div className="grid gap-4">
-                                                    {(stageConfigs['feedback']?.points || []).map((q: any, i: number) => (
-                                                        <div key={q.id} className="flex items-center justify-between p-6 bg-white border border-slate-100 rounded-[28px] shadow-sm hover:shadow-md transition-all group/item">
-                                                            <div className="flex items-center gap-6 flex-1">
+                                                    {(stageConfigs[activeStage]?.points ?? []).map((q, i) => (
+                                                        <div key={q.id} className="flex items-center justify-between px-4 py-3 bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-all group/item">
+                                                            <div className="flex items-center gapx-4 py-4 flex-1">
                                                                 <div className="p-2.5 bg-slate-50 rounded-xl text-slate-300 group-hover/item:text-blue-600 group-hover/item:bg-blue-50 transition-all">
                                                                     <ListOrdered className="w-5 h-5" />
                                                                 </div>
@@ -840,30 +860,33 @@ const ProbationConfig = () => {
                                                                         className="text-sm font-black text-slate-900 bg-transparent border-none outline-none w-full focus:ring-0"
                                                                         value={q.title}
                                                                         onChange={(e) => {
-                                                                            const newPoints = [...stageConfigs['feedback'].points];
+                                                                            const currentConfig = stageConfigs['feedback'] || { points: [] };
+                                                                            const newPoints = [...(currentConfig.points || [])];
                                                                             newPoints[i].title = e.target.value;
-                                                                            updateStageConfig('feedback', { ...stageConfigs['feedback'], points: newPoints });
+                                                                            updateStageConfig('feedback', { ...currentConfig, points: newPoints });
                                                                         }}
                                                                     />
                                                                     <div className="flex items-center gap-3 mt-1">
                                                                         <Select
                                                                             value={q.type}
                                                                             onValueChange={(v) => {
-                                                                                const newPoints = [...stageConfigs['feedback'].points];
+                                                                                const currentConfig = stageConfigs['feedback'] || { points: [] };
+                                                                                const newPoints = [...(currentConfig.points || [])];
                                                                                 newPoints[i].type = v;
-                                                                                updateStageConfig('feedback', { ...stageConfigs['feedback'], points: newPoints });
+                                                                                updateStageConfig('feedback', { ...currentConfig, points: newPoints });
                                                                             }}
                                                                         >
-                                                                            <SelectTrigger className="h-6 w-24 rounded-lg bg-blue-50 border-none text-blue-600 text-[9px] font-black uppercase"><SelectValue /></SelectTrigger>
+                                                                            <SelectTrigger className="h-6 w-24 rounded-md bg-slate-100 border-none text-slate-600 text-[9px] font-bold uppercase"><SelectValue /></SelectTrigger>
                                                                             <SelectContent className="rounded-xl border-none shadow-xl"><SelectItem value="scale">Scale (1-5)</SelectItem><SelectItem value="text">Text Area</SelectItem></SelectContent>
                                                                         </Select>
                                                                         <input
                                                                             className="text-[10px] font-bold text-slate-400 bg-transparent border-none outline-none w-full focus:ring-0"
                                                                             value={q.sub}
                                                                             onChange={(e) => {
-                                                                                const newPoints = [...stageConfigs['feedback'].points];
+                                                                                const currentConfig = stageConfigs['feedback'] || { points: [] };
+                                                                                const newPoints = [...(currentConfig.points || [])];
                                                                                 newPoints[i].sub = e.target.value;
-                                                                                updateStageConfig('feedback', { ...stageConfigs['feedback'], points: newPoints });
+                                                                                updateStageConfig('feedback', { ...currentConfig, points: newPoints });
                                                                             }}
                                                                         />
                                                                     </div>
@@ -875,8 +898,10 @@ const ProbationConfig = () => {
                                                                     size="icon"
                                                                     className="h-10 w-10 rounded-xl hover:bg-rose-50 text-rose-500"
                                                                     onClick={() => {
-                                                                        const newPoints = stageConfigs['feedback'].points.filter((_: any, idx: number) => idx !== i);
-                                                                        updateStageConfig('feedback', { ...stageConfigs['feedback'], points: newPoints });
+                                                                        const currentConfig = stageConfigs['feedback'] || { points: [] };
+                                                                        const currentPoints = currentConfig.points || [];
+                                                                        const newPoints = currentPoints.filter((_: any, idx: number) => idx !== i);
+                                                                        updateStageConfig('feedback', { ...currentConfig, points: newPoints });
                                                                     }}
                                                                 >
                                                                     <Trash2 className="w-4 h-4" />
@@ -891,22 +916,22 @@ const ProbationConfig = () => {
 
                                     {/* Decision Matrix */}
                                     {activeStage === 'decision' && (
-                                        <Card className="border-none shadow-2xl rounded-[40px] bg-white/90 backdrop-blur-2xl overflow-hidden border border-white/50 relative group p-8">
+                                        <Card className="border border-slate-200 shadow-xl rounded-2xl bg-white overflow-hidden relative group p-6">
                                             <div className="absolute top-0 right-0 w-64 h-64 bg-rose-600/5 rounded-full -mr-32 -mt-32 blur-3xl opacity-50 transition-opacity group-hover:opacity-100" />
                                             <div className="relative z-10 space-y-8">
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-4">
-                                                        <div className="p-3 bg-rose-600 rounded-2xl text-white shadow-lg shadow-rose-100">
+                                                        <div className="p-3 bg-rose-600 rounded-2xl text-white shadow-sm shadow-rose-100">
                                                             <AlertTriangle className="w-6 h-6" />
                                                         </div>
                                                         <div>
-                                                            <h3 className="text-xl font-black text-slate-900">Decision Framework</h3>
+                                                            <h3 className="text-xl font-bold text-slate-900">Decision Framework</h3>
                                                             <p className="text-xs font-medium text-slate-500">Configure final outcomes and authorization gates</p>
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                <div className="grid grid-cols-3 gap-6">
+                                                <div className="grid grid-cols-3 gapx-4 py-4">
                                                     {[
                                                         { id: 'confirmed', label: 'Confirmed', sub: 'Permanent appointment', color: 'bg-emerald-500', ring: 'ring-emerald-100', border: 'border-emerald-500', bgSoft: 'bg-emerald-50', text: 'text-emerald-600', iconBg: 'bg-emerald-600' },
                                                         { id: 'extended', label: 'Extended', sub: 'Specify extra duration', color: 'bg-amber-500', ring: 'ring-amber-100', border: 'border-amber-500', bgSoft: 'bg-amber-50', text: 'text-amber-600', iconBg: 'bg-amber-600' },
@@ -915,23 +940,23 @@ const ProbationConfig = () => {
                                                         <div
                                                             key={opt.id}
                                                             onClick={() => updateStageConfig('decision', { ...stageConfigs['decision'], selectedOutcome: opt.id })}
-                                                            className={`p-8 bg-white border rounded-[32px] shadow-sm hover:shadow-xl transition-all group/item text-center relative overflow-hidden cursor-pointer
-                                                                ${stageConfigs['decision']?.selectedOutcome === opt.id ? `${opt.border} ring-2 ${opt.ring}` : 'border-slate-100 hover:border-slate-300'}`}
+                                                            className={`p-6 bg-white border rounded-2xl shadow-sm hover:shadow-md transition-all group/item text-center relative overflow-hidden cursor-pointer
+                                                                ${stageConfigs['decision']?.selectedOutcome === opt.id ? `${opt.border} ring-1 ${opt.ring}` : 'border-slate-200 hover:border-slate-300'}`}
                                                         >
                                                             <div className={`absolute top-0 left-0 w-full h-1 ${opt.color} opacity-50`} />
                                                             <div className={`w-14 h-14 rounded-2xl ${opt.bgSoft} ${opt.text} flex items-center justify-center mx-auto mb-4 group-hover/item:scale-110 transition-transform shadow-sm
                                                                 ${stageConfigs['decision']?.selectedOutcome === opt.id ? `${opt.iconBg} text-white` : ''}`}>
                                                                 <CheckCircle className="w-7 h-7" />
                                                             </div>
-                                                            <div className="text-base font-black text-slate-900 mb-1">{opt.label}</div>
+                                                            <div className="text-base font-bold text-slate-900 mb-1">{opt.label}</div>
                                                             <p className="text-[10px] font-medium text-slate-500 leading-tight uppercase tracking-widest">{opt.sub}</p>
                                                         </div>
                                                     ))}
                                                 </div>
 
-                                                <div className="p-8 bg-slate-50/50 rounded-[40px] border border-slate-100 space-y-8 relative overflow-hidden">
+                                                <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-8 relative overflow-hidden">
                                                     <div className="absolute top-1/2 left-0 w-full h-px bg-slate-200 -z-0" />
-                                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[3px] text-center relative z-10 bg-slate-50/50 w-fit mx-auto px-4">Approval Sequence</h4>
+                                                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center relative z-10 bg-slate-50 w-fit mx-auto px-4">Approval Sequence</h4>
                                                     <div className="flex items-center justify-between gap-4 relative z-10 px-10">
                                                         {[
                                                             { id: 'hod', label: 'HOD Gate', step: 1 },
@@ -941,7 +966,7 @@ const ProbationConfig = () => {
                                                             <div
                                                                 key={gate.id}
                                                                 onClick={() => {
-                                                                    const currentGates = stageConfigs['decision']?.approvalGates || ['hod', 'hr'];
+                                                                    const currentGates = (stageConfigs['decision']?.approvalGates || ['hod', 'hr']) as string[];
                                                                     const newGates = currentGates.includes(gate.id)
                                                                         ? currentGates.filter((g: string) => g !== gate.id)
                                                                         : [...currentGates, gate.id];
@@ -949,13 +974,13 @@ const ProbationConfig = () => {
                                                                 }}
                                                                 className="flex flex-col items-center gap-4 group/gate cursor-pointer"
                                                             >
-                                                                <div className={`w-16 h-16 rounded-full bg-white border-2 flex items-center justify-center font-black shadow-xl transition-all group-hover/gate:scale-110
+                                                                <div className={`w-14 h-14 rounded-full bg-white border-2 flex items-center justify-center font-bold shadow-md transition-all group-hover:scale-105
                                                                     ${(stageConfigs['decision']?.approvalGates || ['hod', 'hr']).includes(gate.id)
                                                                         ? 'border-indigo-600 text-indigo-600 shadow-indigo-100'
                                                                         : 'border-slate-200 text-slate-300 shadow-none'}`}>
                                                                     {gate.step}
                                                                 </div>
-                                                                <span className={`text-[10px] font-black uppercase tracking-widest
+                                                                <span className={`text-[10px] font-bold uppercase tracking-widest
                                                                     ${(stageConfigs['decision']?.approvalGates || ['hod', 'hr']).includes(gate.id)
                                                                         ? 'text-slate-600' : 'text-slate-300 italic'}`}>
                                                                     {gate.label}
@@ -970,25 +995,25 @@ const ProbationConfig = () => {
                                 </div>
 
                                 {/* Escalation Path - Bottom Banner */}
-                                <div className="p-8 rounded-[40px] bg-gradient-to-r from-rose-500 to-amber-500 text-white shadow-2xl shadow-rose-100 relative overflow-hidden group mt-10">
+                                <div className="p-8 rounded-2xl bg-slate-900 text-white shadow-xl relative overflow-hidden group mt-10">
                                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl group-hover:bg-white/20 transition-all duration-700" />
                                     <div className="relative z-10">
-                                        <h3 className="text-xl font-black tracking-tight mb-6 flex items-center">
+                                        <h3 className="text-xl font-bold tracking-tight mb-4 flex items-center">
                                             <AlertTriangle className="w-6 h-6 mr-3" />
                                             CRITICAL ESCALATION PATH
                                         </h3>
-                                        <div className="grid grid-cols-2 gap-10">
-                                            <div className="flex items-center justify-between p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
+                                        <div className="grid grid-cols-2 gap-8">
+                                            <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10">
                                                 <span className="font-bold text-sm tracking-tight">Escalate to L2 Manager after</span>
                                                 <div className="flex items-center gap-3">
-                                                    <Input type="number" className="w-16 h-10 bg-white/20 border-white/30 text-center font-black rounded-xl" defaultValue={3} />
+                                                    <Input type="number" className="w-16 h-10 bg-white/10 border-white/20 text-center font-bold rounded-lg" defaultValue={3} />
                                                     <span className="text-[10px] font-black uppercase tracking-widest opacity-80">Days</span>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center justify-between p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
+                                            <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10">
                                                 <span className="font-bold text-sm tracking-tight">Notify HR Head after</span>
                                                 <div className="flex items-center gap-3">
-                                                    <Input type="number" className="w-16 h-10 bg-white/20 border-white/30 text-center font-black rounded-xl" defaultValue={5} />
+                                                    <Input type="number" className="w-16 h-10 bg-white/10 border-white/20 text-center font-bold rounded-lg" defaultValue={5} />
                                                     <span className="text-[10px] font-black uppercase tracking-widest opacity-80">Days</span>
                                                 </div>
                                             </div>
@@ -999,8 +1024,7 @@ const ProbationConfig = () => {
                         )}
                     </div>
                 </div>
-            </div>
-        </div>
+        </Layout>
     );
 };
 

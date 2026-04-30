@@ -85,16 +85,16 @@ const KPIConfiguration: React.FC = () => {
     return (
         <Layout title="KPI Configuration Engine" description="Define and track Key Performance Indicators" icon={Activity} showBack>
             {/* Stats Summary */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                 <Card className="border-blue-200 bg-blue-50">
                     <CardContent className="pt-4">
-                        <div className="text-2xl font-bold text-blue-900">{kpis.length}</div>
+                        <div className="text-xl font-bold text-blue-900">{kpis.length}</div>
                         <div className="text-xs text-blue-700">Total KPIs</div>
                     </CardContent>
                 </Card>
                 <Card className="border-green-200 bg-green-50">
                     <CardContent className="pt-4">
-                        <div className="text-2xl font-bold text-green-900">
+                        <div className="text-xl font-bold text-green-900">
                             {kpis.filter(k => k.achieved && getAchievementPercentage(k) >= 100).length}
                         </div>
                         <div className="text-xs text-green-700">Targets Achieved</div>
@@ -102,7 +102,7 @@ const KPIConfiguration: React.FC = () => {
                 </Card>
                 <Card className="border-amber-200 bg-amber-50">
                     <CardContent className="pt-4">
-                        <div className="text-2xl font-bold text-amber-900">
+                        <div className="text-xl font-bold text-amber-900">
                             {kpis.filter(k => k.autoCalculated).length}
                         </div>
                         <div className="text-xs text-amber-700">Auto-Calculated</div>
@@ -136,7 +136,7 @@ const KPIConfiguration: React.FC = () => {
             </div>
 
             {/* Filters */}
-            <div className="flex flex-wrap gap-3 mb-6">
+            <div className="flex flex-wrap gap-3 mb-4">
                 <Select value={selectedKRA} onValueChange={setSelectedKRA}>
                     <SelectTrigger className="w-[220px]">
                         <SelectValue placeholder="Filter by KRA" />
@@ -169,7 +169,7 @@ const KPIConfiguration: React.FC = () => {
                     const achievementPercentage = getAchievementPercentage(kpi);
 
                     return (
-                        <Card key={kpi.id} className="border-slate-200 hover:shadow-md transition-shadow">
+                        <Card key={kpi.id} className="border-slate-200 hover:shadow-sm transition-shadow">
                             <CardHeader className="pb-3">
                                 <div className="flex items-start justify-between">
                                     <div className="flex-1">

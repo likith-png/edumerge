@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -7,16 +7,41 @@ import { Badge } from '../components/ui/badge';
 import {
     User, TrendingUp, GraduationCap, Calendar, FileText,
     CheckCircle, ArrowLeft, BookOpen, Trophy, Heart, Sparkles, Star, Lightbulb, Users, Award, Shield, Clock, AlertTriangle, Target,
-    ExternalLink, X, Edit, Plus, Upload, Menu, IndianRupee, Activity
+    ExternalLink, X, Edit, Plus, Upload, Menu, IndianRupee, Activity, Download, Send
 } from 'lucide-react';
-import { getStaffPortfolio, updateStaffMember, updateStaffExperience, updateStaffEducation, updateStaffPersonalDetails } from '../services/staffPortfolioService';
+import { getStaffPortfolio, updateStaffMember, updateStaffExperience, updateStaffEducation, updateStaffPersonalDetails, getPerformanceSummary } from '../services/staffPortfolioService';
 import { Dialog, DialogContent, DialogTitle } from '../components/ui/dialog';
 import { Input } from '../components/ui/input';
+import * as researchService from '../services/researchService';
+import type { Publication } from '../services/researchService';
 
 const StaffPortfolioDetail: React.FC = () => {
     const { staffId } = useParams<{ staffId: string }>();
     const navigate = useNavigate();
     const portfolio = getStaffPortfolio(staffId || '');
+    
+    const [researchRecords, setResearchRecords] = useState<Publication[]>([]);
+    const [isResearchLoading, setIsResearchLoading] = useState(false);
+
+    useEffect(() => {
+        const fetchResearch = async () => {
+            if (!staffId) return;
+            setIsResearchLoading(true);
+            try {
+                // Mapping Mock ID to DB ID: NH-0010 -> 1, NH-0015 -> 1 (HOD), etc.
+                // In a real system, this would be a single coherent ID.
+                const dbId = staffId === 'NH-0010' ? 1 : staffId === 'NH-0015' ? 2 : 1;
+                const res = await researchService.getMyPublications(dbId);
+                setResearchRecords(res.data);
+            } catch (err) {
+                console.error("Research sync failed:", err);
+            } finally {
+                setIsResearchLoading(false);
+            }
+        };
+        fetchResearch();
+    }, [staffId]);
+
     const [selectedHighlight, setSelectedHighlight] = useState<any>(null);
     const [isEditingBasic, setIsEditingBasic] = useState(false);
     const [editForm, setEditForm] = useState<any>(portfolio?.member || {});
@@ -52,6 +77,59 @@ const StaffPortfolioDetail: React.FC = () => {
     const { member, performanceHistory, trainingJourney, academicContributions,
         researchOutput, complianceRecords, careerTimeline, exitInfo,
         badges, kudos, highlights, probationData, salaryDetails, biometricData, monthlyLeave, yearlyLeave } = portfolio;
+
+    if (!member.isOnboardingComplete) {
+        return (
+            <Layout
+                title={member.name}
+                description="Profile Initiation in Progress"
+                icon={User}
+                showBack
+            >
+                <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-8 animate-in fade-in zoom-in duration-700">
+                    <div className="relative">
+                        <div className="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full scale-150" />
+                        <Card className="relative bg-white/40 backdrop-blur-xl border border-white/40 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] rounded-[2.5rem] p-12 text-center max-w-lg">
+                            <CardContent className="space-y-6">
+                                <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl flex items-center justify-center mx-auto shadow-xl transform hover:rotate-6 transition-transform">
+                                    <Sparkles className="w-12 h-12 text-white" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Badge className="bg-blue-100 text-blue-600 border-none uppercase tracking-widest text-[10px] font-black px-4 py-1">Phase: Initiation</Badge>
+                                    <h3 className="text-3xl font-black text-slate-900 tracking-tight">Complete Data to View Details</h3>
+                                    <p className="text-slate-500 font-medium leading-relaxed">
+                                        This staff member is newly onboarded. Please finalize the documentation process in Talent Acquisition to unlock the full professional portfolio.
+                                    </p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4 pt-4 text-left">
+                                    <div className="p-4 bg-white/50 rounded-2xl border border-white/60">
+                                        <p className="text-[9px] font-bold text-slate-400 uppercase mb-1">Status</p>
+                                        <div className="flex items-center gap-2">
+                                            <Clock className="w-3.5 h-3.5 text-amber-500" />
+                                            <span className="text-xs font-bold text-slate-700 uppercase">Waitlisting</span>
+                                        </div>
+                                    </div>
+                                    <div className="p-4 bg-white/50 rounded-2xl border border-white/60">
+                                        <p className="text-[9px] font-bold text-slate-400 uppercase mb-1">Dept</p>
+                                        <div className="flex items-center gap-2">
+                                            <Target className="w-3.5 h-3.5 text-blue-500" />
+                                            <span className="text-xs font-bold text-slate-700 uppercase">{member.department}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <Button 
+                                    onClick={() => navigate('/talent-acquisition')}
+                                    className="w-full h-14 bg-slate-900 hover:bg-black text-white rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-2xl transition-all hover:scale-[1.02]"
+                                >
+                                    Proceed to Talent Acquisition
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </div>
+            </Layout>
+        );
+    }
 
     const calculateTotalExperience = (from: string, to: string) => {
         if (!from || !to) return '';
@@ -178,22 +256,22 @@ const StaffPortfolioDetail: React.FC = () => {
             showBack
         >
             {/* Action Bar */}
-            <div className="flex justify-end mb-8 gap-3">
-                <div className="inline-flex items-center bg-white/40 backdrop-blur-md p-1.5 rounded-[16px] border border-white/60 shadow-sm">
+            <div className="flex justify-end items-center mb-6 gap-3">
+                <div className="inline-flex items-center bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
                     <button
                         onClick={() => setViewMode('monthly')}
-                        className={`px-5 py-2.5 rounded-[12px] text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'monthly'
-                            ? 'bg-white text-blue-800 shadow-sm border border-white'
-                            : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
+                        className={`px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${viewMode === 'monthly'
+                            ? 'bg-slate-900 text-white shadow-md'
+                            : 'text-slate-400 hover:text-slate-600'
                             }`}
                     >
                         Monthly
                     </button>
                     <button
                         onClick={() => setViewMode('yearly')}
-                        className={`px-5 py-2.5 rounded-[12px] text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'yearly'
-                            ? 'bg-white text-blue-800 shadow-sm border border-white'
-                            : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
+                        className={`px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${viewMode === 'yearly'
+                            ? 'bg-slate-900 text-white shadow-md'
+                            : 'text-slate-400 hover:text-slate-600'
                             }`}
                     >
                         Yearly
@@ -201,80 +279,75 @@ const StaffPortfolioDetail: React.FC = () => {
                 </div>
                 <Button
                     onClick={() => setIsPersonalOpen(true)}
-                    className="bg-white/80 backdrop-blur-md hover:bg-white text-blue-800 border border-white/60 shadow-sm rounded-2xl flex items-center gap-2 font-black uppercase tracking-widest text-[10px] px-6 h-[46px]"
+                    variant="outline"
+                    className="bg-white hover:bg-slate-50 text-slate-700 border-slate-200 shadow-sm rounded-xl flex items-center gap-2 font-bold uppercase tracking-wider text-xs px-6 h-11"
                 >
-                    <User className="w-4 h-4" /> Personal Details
+                    <User className="w-4 h-4 text-blue-600" /> Personal Identity
                 </Button>
                 <Button
                     onClick={() => setIsEditingBasic(true)} 
-                    className="bg-blue-800 hover:bg-blue-900 text-white shadow-md shadow-blue-900/20 rounded-2xl flex items-center gap-2 font-black uppercase tracking-widest text-[10px] border border-blue-700/50 px-6 h-[46px]"
+                    className="bg-blue-600 hover:bg-blue-700 text-white shadow-md rounded-xl flex items-center gap-2 font-bold uppercase tracking-wider text-xs px-6 h-11"
                 >
-                    <Edit className="w-4 h-4" /> Edit Profile
+                    <Edit className="w-4 h-4" /> Refine Profile
                 </Button>
             </div>
 
 
             {/* Header Profile Card */}
-            <Card className="mb-8 overflow-hidden relative bg-white/60 backdrop-blur-xl border-white/60 shadow-xl rounded-[40px]">
-                <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-800/10 rounded-full blur-[80px] -mr-64 -mt-64 opacity-60"></div>
-                <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-emerald-500/10 rounded-full blur-[60px] -ml-32 -mb-32 opacity-40"></div>
-                
-                <CardContent className="p-10 relative z-10">
-                    <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
-                        <div className={`w-32 h-32 ${['bg-blue-600', 'bg-indigo-600', 'bg-emerald-600', 'bg-rose-600', 'bg-amber-600', 'bg-violet-600', 'bg-teal-600', 'bg-sky-600'][member.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 8]} rounded-[2.5rem] flex items-center justify-center text-white text-5xl font-black shadow-xl border border-white/20 ring-4 ring-blue-50/10 overflow-hidden transition-transform hover:scale-105 duration-500`}>
+            <Card className="mb-8 overflow-hidden bg-white border border-slate-200 shadow-sm rounded-2xl">
+                <CardContent className="p-8 md:p-10">
+                    <div className="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12">
+                        <div className={`w-32 h-32 md:w-40 md:h-40 ${['bg-blue-600', 'bg-indigo-600', 'bg-emerald-600', 'bg-rose-600', 'bg-amber-600', 'bg-violet-600', 'bg-teal-600', 'bg-sky-600'][member.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 8]} rounded-2xl flex items-center justify-center text-white text-5xl md:text-6xl font-bold shadow-lg`}>
                             {member.name.charAt(0).toUpperCase()}
                         </div>
                         <div className="flex-1 text-center md:text-left">
-                            <h2 className="text-4xl font-black text-slate-800 tracking-tight">{member.name}</h2>
-                            <p className="text-slate-500 font-black uppercase tracking-widest text-[10px] mt-2 mb-6">{member.designation}</p>
+                            <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 border border-blue-100 px-3 py-1 rounded-full font-bold text-[10px] uppercase tracking-wider mb-4">
+                                Institutional Faculty Record
+                            </div>
+                            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-2 leading-tight">{member.name}</h2>
+                            <p className="text-slate-500 font-semibold uppercase tracking-wider text-xs mb-6 flex items-center justify-center md:justify-start gap-2">
+                                <Shield className="w-4 h-4 text-slate-400" /> {member.designation}
+                            </p>
                             
-                            <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-2">
-                                <Badge className="bg-white/80 text-slate-700 border-white shadow-sm px-4 py-1.5 font-bold uppercase tracking-widest text-[10px]">{member.department}</Badge>
-                                <Badge className="bg-white/80 text-slate-700 border-white shadow-sm px-4 py-1.5 font-bold uppercase tracking-widest text-[10px]">{member.id}</Badge>
-                                <Badge className={`shadow-sm border-white px-4 py-1.5 font-black uppercase tracking-widest text-[10px] ${member.status === 'Active' ? 'bg-emerald-50/80 text-emerald-700' :
-                                    'bg-amber-50/80 text-amber-700'
-                                    }`}>
+                            <div className="flex flex-wrap justify-center md:justify-start gap-3 mb-8">
+                                <Badge variant="secondary" className="bg-slate-100 text-slate-600 border-none px-4 py-1.5 font-bold uppercase tracking-wider text-[10px] rounded-lg">{member.department}</Badge>
+                                <Badge variant="secondary" className="bg-slate-100 text-slate-600 border-none px-4 py-1.5 font-bold uppercase tracking-wider text-[10px] rounded-lg">ID: {member.id}</Badge>
+                                <Badge className={`px-4 py-1.5 font-bold uppercase tracking-wider text-[10px] rounded-lg border-none ${member.status === 'Active' ? 'bg-emerald-500 text-white shadow-sm' : 'bg-amber-500 text-white shadow-sm'}`}>
                                     {member.status}
                                 </Badge>
                             </div>
 
-                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mt-8 p-6 bg-white/40 backdrop-blur-md rounded-3xl border border-white/60 shadow-sm">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-6 bg-slate-50 rounded-xl border border-slate-100">
                                 <div>
-                                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Joined</div>
-                                    <div className="font-bold text-slate-800 text-sm">{new Date(member.joiningDate).toLocaleDateString()}</div>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Joined</p>
+                                    <p className="font-bold text-slate-700 text-sm">{new Date(member.joiningDate).toLocaleDateString()}</p>
                                 </div>
                                 <div>
-                                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Email</div>
-                                    <div className="font-bold text-slate-800 text-sm">{member.email}</div>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Email</p>
+                                    <p className="font-bold text-slate-700 text-sm lowercase">{member.email}</p>
                                 </div>
                                 <div>
-                                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Reporting To</div>
-                                    <div className="font-bold text-slate-800 text-sm">{member.reportingManager}</div>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Reporting Manager</p>
+                                    <p className="font-bold text-slate-700 text-sm">{member.reportingManager}</p>
                                 </div>
                                 <div>
-                                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Qualification</div>
-                                    <div className="font-bold text-slate-800 text-sm">{member.qualification}</div>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Qualification</p>
+                                    <p className="font-bold text-slate-700 text-sm uppercase">{member.qualification}</p>
                                 </div>
                             </div>
                             
-                            <div className="flex justify-center md:justify-start gap-4 mt-8">
-                                <div className="flex items-center gap-3 bg-white/60 backdrop-blur-sm px-4 py-2 border border-white rounded-2xl shadow-sm">
-                                    <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600">
-                                        <Trophy className="w-4 h-4" />
-                                    </div>
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-700">{badges.length} Badges</span>
+                            <div className="flex flex-wrap justify-center md:justify-start gap-4 mt-8">
+                                <div className="flex items-center gap-3 bg-white px-4 py-2 border border-slate-200 rounded-xl shadow-sm">
+                                    <Trophy className="w-4 h-4 text-amber-500" />
+                                    <span className="text-xs font-bold text-slate-600">{badges.length} Badges</span>
                                 </div>
-                                <div className="flex items-center gap-3 bg-white/60 backdrop-blur-sm px-4 py-2 border border-white rounded-2xl shadow-sm">
-                                    <div className="w-8 h-8 rounded-xl bg-rose-100 flex items-center justify-center text-rose-600">
-                                        <Heart className="w-4 h-4" />
-                                    </div>
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-700">{kudos.length} Kudos</span>
+                                <div className="flex items-center gap-3 bg-white px-4 py-2 border border-slate-200 rounded-xl shadow-sm">
+                                    <Heart className="w-4 h-4 text-rose-500" />
+                                    <span className="text-xs font-bold text-slate-600">{kudos.length} Kudos</span>
                                 </div>
-                                <div className="flex items-center gap-3 bg-white/60 backdrop-blur-sm px-4 py-2 border border-white rounded-2xl shadow-sm">
-                                    <div className="w-8 h-8 rounded-xl bg-blue-100 flex items-center justify-center text-blue-800">
-                                        <Sparkles className="w-4 h-4" />
-                                    </div>
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-700">{highlights.length} Highlights</span>
+                                <div className="flex items-center gap-3 bg-white px-4 py-2 border border-slate-200 rounded-xl shadow-sm">
+                                    <Clock className="w-4 h-4 text-blue-500" />
+                                    <span className="text-xs font-bold text-slate-600">{getPerformanceSummary(member.id).yearsOfService}y Experience</span>
                                 </div>
                             </div>
                         </div>
@@ -283,16 +356,16 @@ const StaffPortfolioDetail: React.FC = () => {
             </Card>
 
             {/* Educational Qualification Details Table */}
-            <Card className="mb-8 overflow-hidden bg-white/60 backdrop-blur-md border border-white/60 shadow-sm rounded-3xl">
-                <CardHeader className="bg-white/40 border-b border-white/60 py-5 flex flex-row items-center justify-between">
-                    <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-slate-800 flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center shadow-sm text-blue-800"><Menu className="w-4 h-4" /></div> 
+            <Card className="mb-6 overflow-hidden bg-white border border-slate-200 shadow-sm rounded-xl">
+                <CardHeader className="bg-slate-50 border-b border-slate-200 py-4 flex flex-row items-center justify-between">
+                    <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+                        <Menu className="w-4 h-4 text-blue-600" />
                         Educational Qualification Details
                     </CardTitle>
                     <Button 
-                        variant="ghost" 
+                        variant="outline" 
                         size="sm" 
-                        className="bg-white hover:bg-white/80 text-blue-800 shadow-sm border border-white/60 font-black text-[10px] uppercase tracking-widest gap-2 rounded-xl h-10 px-4"
+                        className="bg-white hover:bg-slate-50 text-blue-600 border-slate-200 font-bold text-[10px] uppercase tracking-wider gap-2 rounded-lg h-9 px-4"
                         onClick={() => { setSelectedEdu(null); setEditEduForm({}); setIsEditingEducation(true); }}
                     >
                         <Plus className="w-4 h-4" /> Add Detail
@@ -302,23 +375,23 @@ const StaffPortfolioDetail: React.FC = () => {
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-white/40 border-b border-white/60">
-                                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Education</th>
-                                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Course</th>
-                                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Specialization</th>
-                                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Institute</th>
-                                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Board/ Univ</th>
-                                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Type</th>
-                                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Class</th>
-                                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">% / CGPA</th>
-                                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Year</th>
-                                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">File</th>
-                                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Actions</th>
+                                <tr className="bg-slate-50/50 border-b border-slate-200">
+                                    <th className="px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Education</th>
+                                    <th className="px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Course</th>
+                                    <th className="px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Specialization</th>
+                                    <th className="px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Institute</th>
+                                    <th className="px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Board/ Univ</th>
+                                    <th className="px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Type</th>
+                                    <th className="px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Class</th>
+                                    <th className="px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">% / CGPA</th>
+                                    <th className="px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Year</th>
+                                    <th className="px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">File</th>
+                                    <th className="px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {educationDetails.map((edu: any, i: number) => (
-                                    <tr key={i} className="border-b border-white/60 hover:bg-white/80 transition-colors">
+                                    <tr key={i} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
                                         <td className="px-6 py-4 text-xs font-bold text-slate-800">{edu.level}</td>
                                         <td className="px-6 py-4 text-xs font-semibold text-slate-600">{edu.course}</td>
                                         <td className="px-6 py-4 text-xs font-semibold text-slate-600">{edu.specialization}</td>
@@ -326,14 +399,14 @@ const StaffPortfolioDetail: React.FC = () => {
                                         <td className="px-6 py-4 text-xs font-medium text-slate-600 max-w-[120px] truncate">{edu.board}</td>
                                         <td className="px-6 py-4 text-xs font-medium text-slate-500">{edu.courseType}</td>
                                         <td className="px-6 py-4 text-xs font-medium text-slate-500">{edu.class}</td>
-                                        <td className="px-6 py-4 text-xs font-black text-slate-800 text-center">{edu.percentage}%</td>
-                                        <td className="px-6 py-4 text-xs font-black text-slate-800 text-center">{edu.passingYear}</td>
+                                        <td className="px-6 py-4 text-xs font-bold text-slate-800 text-center">{edu.percentage}%</td>
+                                        <td className="px-6 py-4 text-xs font-bold text-slate-800 text-center">{edu.passingYear}</td>
                                         <td className="px-6 py-4 text-center">
-                                            <Button variant="link" className="h-auto p-0 text-[10px] font-black text-blue-800 hover:text-blue-800 uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-md no-underline hover:no-underline">View</Button>
+                                            <Button variant="link" className="h-auto p-0 text-[10px] font-bold text-blue-600 uppercase tracking-wider bg-blue-50 px-3 py-1 rounded-md hover:no-underline">View</Button>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center justify-end gap-2">
-                                                <button onClick={() => { setSelectedEdu(edu); setEditEduForm(edu); setIsEditingEducation(true); }} className="w-8 h-8 rounded-lg bg-white border border-white/60 shadow-sm flex items-center justify-center text-slate-400 hover:text-blue-800 transition-colors">
+                                                <button onClick={() => { setSelectedEdu(edu); setEditEduForm(edu); setIsEditingEducation(true); }} className="w-8 h-8 rounded-lg bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-400 hover:text-blue-600 transition-colors">
                                                     <Edit className="w-3.5 h-3.5" />
                                                 </button>
                                                 <button onClick={() => {
@@ -354,16 +427,16 @@ const StaffPortfolioDetail: React.FC = () => {
             </Card>
 
             {/* Experience Details Table */}
-            <Card className="mb-8 overflow-hidden bg-white/60 backdrop-blur-md border border-white/60 shadow-sm rounded-3xl text-sm">
-                <CardHeader className="bg-white/40 border-b border-white/60 py-5 flex flex-row items-center justify-between">
-                    <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-slate-800 flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center shadow-sm text-blue-800"><Menu className="w-4 h-4" /></div> 
+            <Card className="mb-6 overflow-hidden bg-white border border-slate-200 shadow-sm rounded-xl text-sm">
+                <CardHeader className="bg-slate-50 border-b border-slate-200 py-4 flex flex-row items-center justify-between">
+                    <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+                        <Menu className="w-4 h-4 text-blue-600" />
                         Experience Details
                     </CardTitle>
                     <Button 
-                        variant="ghost" 
+                        variant="outline" 
                         size="sm" 
-                        className="bg-white hover:bg-white/80 text-blue-800 shadow-sm border border-white/60 font-black text-[10px] uppercase tracking-widest gap-2 rounded-xl h-10 px-4"
+                        className="bg-white hover:bg-slate-50 text-blue-600 border-slate-200 font-bold text-[10px] uppercase tracking-wider gap-2 rounded-lg h-9 px-4"
                         onClick={() => { 
                             setSelectedExp(null); 
                             setExpForm({});
@@ -372,44 +445,43 @@ const StaffPortfolioDetail: React.FC = () => {
                     >
                         <Plus className="w-4 h-4" /> Add Detail
                     </Button>
-
                 </CardHeader>
                 <CardContent className="p-0">
-                    <div className="p-4 bg-rose-50/50 border-b border-rose-100 flex items-center gap-3 px-6">
-                        <div className="w-6 h-6 rounded-full bg-rose-100 flex items-center justify-center text-rose-500 shrink-0"><AlertTriangle className="w-3 h-3" /></div>
-                        <p className="text-[10px] font-black text-rose-600 uppercase tracking-[0.1em]">
-                            NOTE: In Edit mode, Dates must be Entered manually in dd/mm/yyyy format
+                    <div className="p-3 bg-amber-50 border-b border-amber-100 flex items-center gap-2 px-6">
+                        <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                        <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wide">
+                            NOTE: Dates must be entered manually in dd/mm/yyyy format
                         </p>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-white/40 border-b border-white/60">
-                                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Org. Name</th>
-                                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Designation</th>
-                                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Nature of Job</th>
-                                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Job Type</th>
-                                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">From</th>
-                                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">To</th>
-                                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Exp.</th>
-                                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Last Drawn</th>
-                                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Doc.</th>
-                                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Actions</th>
+                                <tr className="bg-slate-50/50 border-b border-slate-200">
+                                    <th className="px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Org. Name</th>
+                                    <th className="px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Designation</th>
+                                    <th className="px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Nature of Job</th>
+                                    <th className="px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Job Type</th>
+                                    <th className="px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">From</th>
+                                    <th className="px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">To</th>
+                                    <th className="px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Exp.</th>
+                                    <th className="px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-right">Last Drawn</th>
+                                    <th className="px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">Doc.</th>
+                                    <th className="px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {experienceDetails.map((exp: any, i: number) => (
-                                    <tr key={i} className="border-b border-white/60 hover:bg-white/80 transition-colors">
+                                    <tr key={i} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
                                         <td className="px-6 py-4 text-xs font-bold text-slate-800">{exp.orgName}</td>
-                                        <td className="px-6 py-4 text-[10px] text-slate-600 uppercase font-black tracking-widest">{exp.designation}</td>
+                                        <td className="px-6 py-4 text-[10px] text-slate-600 uppercase font-bold tracking-wider">{exp.designation}</td>
                                         <td className="px-6 py-4 text-xs text-slate-500 font-medium">{exp.natureOfJob}</td>
                                         <td className="px-6 py-4 text-xs text-slate-500 font-semibold text-center">{exp.jobType}</td>
-                                        <td className="px-6 py-4 text-xs text-slate-600 font-black text-center">{exp.fromDate}</td>
-                                        <td className="px-6 py-4 text-xs text-slate-600 font-black text-center">{exp.toDate}</td>
-                                        <td className="px-6 py-4 text-xs text-blue-800 font-black text-center">{exp.totalExp}</td>
-                                        <td className="px-6 py-4 text-xs text-emerald-600 font-black text-right">{exp.lastDrawn}</td>
+                                        <td className="px-6 py-4 text-xs text-slate-600 font-bold text-center">{exp.fromDate}</td>
+                                        <td className="px-6 py-4 text-xs text-slate-600 font-bold text-center">{exp.toDate}</td>
+                                        <td className="px-6 py-4 text-xs text-blue-600 font-bold text-center">{exp.totalExp}</td>
+                                        <td className="px-6 py-4 text-xs text-emerald-600 font-bold text-right">{exp.lastDrawn}</td>
                                         <td className="px-6 py-4 text-center">
-                                            <Button variant="link" className="h-auto p-0 text-[10px] font-black text-blue-800 uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-md hover:no-underline">View</Button>
+                                            <Button variant="link" className="h-auto p-0 text-[10px] font-bold text-blue-600 uppercase tracking-wider bg-blue-50 px-3 py-1 rounded-md hover:no-underline">View</Button>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center justify-end gap-2">
@@ -419,7 +491,7 @@ const StaffPortfolioDetail: React.FC = () => {
                                                         setExpForm(exp);
                                                         setIsEditingExperience(true); 
                                                     }} 
-                                                    className="w-8 h-8 rounded-lg bg-white border border-white/60 shadow-sm flex items-center justify-center text-slate-400 hover:text-blue-800 transition-colors"
+                                                    className="w-8 h-8 rounded-lg bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-400 hover:text-blue-600 transition-colors"
                                                 >
                                                     <Edit className="w-3.5 h-3.5" />
                                                 </button>
@@ -443,102 +515,85 @@ const StaffPortfolioDetail: React.FC = () => {
                 </CardContent>
             </Card>
 
-            {/* Salary Details Card */}
+            {/* Salary & Benefits */}
             {salaryDetails && (
-                <Card className="mb-8 overflow-hidden bg-white/60 backdrop-blur-md border border-white/60 shadow-sm rounded-3xl text-sm">
-                    <CardHeader className="bg-white/40 border-b border-white/60 py-5">
-                        <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-slate-800 flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-xl bg-green-50 text-green-600 flex items-center justify-center shadow-sm"><IndianRupee className="w-4 h-4" /></div> 
-                            Compensation & Salary Details
+                <Card className="mb-8 overflow-hidden bg-white border border-slate-200 shadow-sm rounded-xl">
+                    <CardHeader className="p-8 border-b border-slate-100 bg-slate-50/50">
+                        <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-3">
+                            <IndianRupee className="w-5 h-5 text-emerald-600" /> 
+                            Compensation Blueprint
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-6 bg-gradient-to-br from-green-50/50 to-emerald-50/30">
-                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Basic Pay</p>
-                                <p className="text-xl font-bold text-slate-800">₹{salaryDetails.basic.toLocaleString('en-IN')}</p>
+                    <CardContent className="p-0">
+                        <div className="grid grid-cols-2 lg:grid-cols-6 border-b border-slate-100">
+                            {[
+                                { l: 'Basic Pay', v: salaryDetails.basic },
+                                { l: 'DA', v: salaryDetails.da },
+                                { l: 'HRA', v: salaryDetails.hra },
+                                { l: 'CCA', v: salaryDetails.cca },
+                                { l: 'AGP (Ind)', v: salaryDetails.agp },
+                                { l: 'Variable', v: salaryDetails.variablePay }
+                            ].map((s, i) => (
+                                <div key={i} className="p-8 border-r border-slate-100 last:border-r-0">
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">{s.l}</p>
+                                    <p className="text-xl font-bold text-slate-800">₹{s.v.toLocaleString('en-IN')}</p>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="p-8 bg-slate-900 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-emerald-500 rounded-lg text-slate-900 shadow-lg">
+                                    <TrendingUp className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Aggregate Monthly Gross</p>
+                                    <p className="text-3xl font-bold text-white tracking-tight">₹{salaryDetails.gross.toLocaleString('en-IN')}</p>
+                                </div>
                             </div>
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">DA</p>
-                                <p className="text-xl font-bold text-slate-800">₹{salaryDetails.da.toLocaleString('en-IN')}</p>
-                            </div>
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">HRA</p>
-                                <p className="text-xl font-bold text-slate-800">₹{salaryDetails.hra.toLocaleString('en-IN')}</p>
-                            </div>
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">CCA</p>
-                                <p className="text-xl font-bold text-slate-800">₹{salaryDetails.cca.toLocaleString('en-IN')}</p>
-                            </div>
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Others</p>
-                                <p className="text-xl font-bold text-slate-800">₹{salaryDetails.others.toLocaleString('en-IN')}</p>
-                            </div>
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Conv. All.</p>
-                                <p className="text-xl font-bold text-slate-800">₹{salaryDetails.convAll.toLocaleString('en-IN')}</p>
-                            </div>
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">AGP (Ind)</p>
-                                <p className="text-xl font-bold text-slate-800">₹{salaryDetails.agp.toLocaleString('en-IN')}</p>
-                            </div>
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">PF Amount</p>
-                                <p className="text-xl font-bold text-slate-800">₹{salaryDetails.pfAmnt.toLocaleString('en-IN')}</p>
-                            </div>
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Variable Pay</p>
-                                <p className="text-xl font-bold text-slate-800">₹{salaryDetails.variablePay.toLocaleString('en-IN')}</p>
-                            </div>
-                            <div className="p-3 bg-emerald-100 rounded-xl border border-emerald-200 col-span-2 md:col-span-1 lg:col-span-1 flex flex-col justify-center">
-                                <p className="text-[10px] font-black text-emerald-800 uppercase tracking-widest">Gross Salary</p>
-                                <p className="text-2xl font-black text-emerald-900">₹{salaryDetails.gross.toLocaleString('en-IN')}</p>
-                            </div>
+                            <Badge variant="secondary" className="bg-white/10 text-white border-white/20 px-4 py-1.5 font-bold uppercase tracking-wider text-[10px] rounded-lg">Verified Record</Badge>
                         </div>
                     </CardContent>
                 </Card>
             )}
 
-            {/* Attendance & Leave Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                {/* Biometric Attendance Card */}
-                <Card className="bg-white/60 backdrop-blur-md border border-white/60 shadow-sm rounded-3xl overflow-hidden">
-                    <CardHeader className="bg-white/40 border-b border-white/60 py-5">
-                        <CardTitle className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center shadow-sm">
-                                <Activity className="h-4 w-4" />
-                            </div>
-                            Biometric Attendance
+            {/* Attendance & Compliance Hub */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+                {/* 1. Biometric Authentication Sync */}
+                <Card className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
+                    <CardHeader className="p-8 border-b border-slate-100 bg-slate-50/50">
+                        <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-3">
+                            <Activity className="h-5 w-5 text-blue-600" />
+                            Biometric Precision Log
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-6">
+                    <CardContent className="p-8">
                         {biometricData ? (
-                            <div className="space-y-4">
+                            <div className="space-y-6">
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-100">
-                                        <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">Total Present</p>
-                                        <p className="text-2xl font-black text-blue-900">{biometricData.status.filter((s: string) => s === 'P').length} Days</p>
+                                    <div className="p-5 bg-slate-900 rounded-xl shadow-md">
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Institutional Presence</p>
+                                        <p className="text-2xl font-bold text-white tracking-tight">{biometricData.status.filter((s: string) => s === 'P').length} Verified Days</p>
                                     </div>
-                                    <div className="p-4 bg-rose-50/50 rounded-2xl border border-rose-100">
-                                        <p className="text-[10px] font-black text-rose-600 uppercase tracking-widest mb-1">Late Marks</p>
-                                        <p className="text-2xl font-black text-rose-900">{biometricData.in_times.filter((t: string) => t && t > '10:00').length}</p>
+                                    <div className="p-5 bg-rose-50 rounded-xl border border-rose-100">
+                                        <p className="text-[10px] font-bold text-rose-600 uppercase tracking-wider mb-2">Temporal Variance</p>
+                                        <p className="text-2xl font-bold text-slate-900 tracking-tight">{biometricData.in_times.filter((t: string) => t && t > '10:00').length} Cycles</p>
                                     </div>
                                 </div>
-                                <div className="mt-4">
-                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Daily Log (Snapshot)</p>
+                                <div>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                        <Menu className="w-3 h-3" /> Micro-Attendance Lattice (Monthly)
+                                    </p>
                                     <div className="grid grid-cols-7 gap-2">
                                         {Array.from({ length: 31 }, (_, i) => {
                                             const status = biometricData.status[i];
-                                            const inTime = biometricData.in_times[i];
                                             return (
-                                                <div key={i} className={`aspect-square flex flex-col items-center justify-center rounded-lg border text-[10px] font-bold ${
-                                                    status === 'P' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' :
-                                                    status === 'A' ? 'bg-rose-50 border-rose-100 text-rose-700' :
-                                                    status === 'H' || status === 'W' ? 'bg-slate-50 border-slate-100 text-slate-500' :
-                                                    'bg-white border-slate-100 text-slate-400'
-                                                }`} title={`Day ${i+1}: ${status} (${inTime || 'N/A'})`}>
-                                                    <span>{i + 1}</span>
-                                                    <span className="text-[8px] opacity-70 font-black">{status}</span>
+                                                <div key={i} className={`aspect-square flex flex-col items-center justify-center rounded-lg border transition-all ${
+                                                    status === 'P' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' :
+                                                    status === 'A' ? 'bg-rose-50 border-rose-200 text-rose-700' :
+                                                    'bg-slate-50 border-slate-200 text-slate-400'
+                                                }`}>
+                                                    <span className="text-[9px] font-bold">{i + 1}</span>
+                                                    <span className="text-[7px] font-bold uppercase">{status || '-'}</span>
                                                 </div>
                                             );
                                         })}
@@ -546,307 +601,342 @@ const StaffPortfolioDetail: React.FC = () => {
                                 </div>
                             </div>
                         ) : (
-                            <p className="text-slate-500 text-sm italic">No biometric data available for this member.</p>
+                            <div className="p-10 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200 text-slate-400 text-sm italic">
+                                Authentication matrices pending sync.
+                            </div>
                         )}
                     </CardContent>
                 </Card>
 
-                {/* Leave Book Card */}
-                <Card className="bg-white/60 backdrop-blur-md border border-white/60 shadow-sm rounded-3xl overflow-hidden">
-                    <CardHeader className="bg-white/40 border-b border-white/60 py-5">
-                        <CardTitle className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center shadow-sm">
-                                <Calendar className="h-4 w-4" />
-                            </div>
-                            Leave Book Summary - {new Date().getFullYear()}
+                {/* 2. Institutional Leave Matrix */}
+                <Card className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
+                    <CardHeader className="p-8 border-b border-slate-100 bg-slate-50/50">
+                        <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-3">
+                            <Calendar className="h-5 w-5 text-teal-600" />
+                            Leave Capital Reserve
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="p-6">
+                    <CardContent className="p-8">
                         {yearlyLeave ? (
                             <div className="space-y-6">
-                                <div className="grid grid-cols-3 gap-3">
-                                    <div className="p-3 bg-white/40 border border-white/60 rounded-2xl text-center">
-                                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Earned Leave</p>
-                                        <div className="text-lg font-black text-slate-800">{yearlyLeave.BalanceEL} <span className="text-[10px] text-slate-400">Bal</span></div>
-                                        <p className="text-[8px] text-slate-400 mt-1">{yearlyLeave.TakenEL} Taken of {yearlyLeave.TotalEL}</p>
-                                    </div>
-                                    <div className="p-3 bg-white/40 border border-white/60 rounded-2xl text-center">
-                                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Casual Leave</p>
-                                        <div className="text-lg font-black text-slate-800">{yearlyLeave.BalanceCL} <span className="text-[10px] text-slate-400">Bal</span></div>
-                                        <p className="text-[8px] text-slate-400 mt-1">{yearlyLeave.TakenCL} Taken of {yearlyLeave.TotalCL}</p>
-                                    </div>
-                                    <div className="p-3 bg-white/40 border border-white/60 rounded-2xl text-center">
-                                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Sick Leave</p>
-                                        <div className="text-lg font-black text-slate-800">{yearlyLeave.BalanceSL} <span className="text-[10px] text-slate-400">Bal</span></div>
-                                        <p className="text-[8px] text-slate-400 mt-1">{yearlyLeave.TakenSL} Taken of {yearlyLeave.TotalSL}</p>
-                                    </div>
+                                <div className="grid grid-cols-3 gap-4">
+                                    {[
+                                        { l: 'EL', b: yearlyLeave.BalanceEL, t: yearlyLeave.TakenEL, total: yearlyLeave.TotalEL, c: 'blue' },
+                                        { l: 'CL', b: yearlyLeave.BalanceCL, t: yearlyLeave.TakenCL, total: yearlyLeave.TotalCL, c: 'teal' },
+                                        { l: 'SL', b: yearlyLeave.BalanceSL, t: yearlyLeave.TakenSL, total: yearlyLeave.TotalSL, c: 'rose' }
+                                    ].map((lv, i) => (
+                                        <div key={i} className={`p-4 bg-slate-50 rounded-xl border border-slate-100`}>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">{lv.l}</p>
+                                            <div className="text-2xl font-bold text-slate-900 tracking-tight">{lv.b} <span className="text-[10px] text-slate-400 lowercase font-normal">rem</span></div>
+                                            <div className="w-full bg-slate-200 h-1.5 rounded-full mt-3 overflow-hidden">
+                                                <div className={`h-full bg-slate-900 rounded-full`} style={{ width: `${(Number(lv.t) / Number(lv.total)) * 100}%` }} />
+                                            </div>
+                                            <p className="text-[8px] font-bold text-slate-400 mt-2 uppercase tracking-tight">{lv.t}/{lv.total} Consumed</p>
+                                        </div>
+                                    ))}
                                 </div>
 
-                                <div className="bg-amber-50/50 border border-amber-100 rounded-2xl p-4">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <p className="text-[10px] font-black text-amber-700 uppercase tracking-widest">Recent Activity (May 2024)</p>
-                                        <Badge className="bg-amber-100 text-amber-700 text-[8px] border-none">MONTHLY LOG</Badge>
+                                <div className="bg-slate-900 rounded-xl p-6">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Temporal Audit (Current Month)</p>
+                                        <Badge className="bg-emerald-500 text-white text-[8px] border-none px-2 py-0.5 font-bold uppercase tracking-wider">Live</Badge>
                                     </div>
                                     {monthlyLeave ? (
-                                        <div className="flex flex-wrap gap-2">
-                                            {monthlyLeave.EL !== '-' && (
-                                                <Badge variant="outline" className="bg-white text-emerald-700 border-emerald-100 text-[10px] font-bold">EL: {monthlyLeave.EL} Days</Badge>
-                                            )}
-                                            {monthlyLeave.CL !== '-' && (
-                                                <Badge variant="outline" className="bg-white text-blue-700 border-blue-100 text-[10px] font-bold">CL: {monthlyLeave.CL} Days</Badge>
-                                            )}
-                                            {monthlyLeave.LOP !== '-' && (
-                                                <Badge variant="outline" className="bg-white text-rose-700 border-rose-100 text-[10px] font-bold">LOP: {monthlyLeave.LOP} Days</Badge>
-                                            )}
-                                            {monthlyLeave.CO !== '-' && (
-                                                <Badge variant="outline" className="bg-white text-purple-700 border-purple-100 text-[10px] font-bold">CO: {monthlyLeave.CODays}</Badge>
-                                            )}
+                                        <div className="flex flex-wrap gap-6">
+                                            {[
+                                                { k: 'EL', v: monthlyLeave.EL, c: 'white' },
+                                                { k: 'CL', v: monthlyLeave.CL, c: 'white' },
+                                                { k: 'LOP', v: monthlyLeave.LOP, c: 'rose-400' }
+                                            ].map((stat, i) => (
+                                                <div key={i} className="flex flex-col">
+                                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{stat.k}</span>
+                                                    <span className={`text-xl font-bold ${stat.c === 'white' ? 'text-white' : 'text-rose-400'}`}>{stat.v}</span>
+                                                </div>
+                                            ))}
                                             {monthlyLeave['HR Comments'] && (
-                                                <div className="w-full mt-2 pt-2 border-t border-amber-100 text-[9px] text-amber-800 italic">
+                                                <div className="w-full mt-4 pt-4 border-t border-white/10 text-[10px] text-slate-400 italic">
                                                     HR: {monthlyLeave['HR Comments']}
                                                 </div>
                                             )}
                                         </div>
                                     ) : (
-                                        <p className="text-[10px] text-slate-500 italic">No leave details recorded for May.</p>
+                                        <p className="text-xs text-slate-500 italic">Monthly audit pulse not detected.</p>
                                     )}
                                 </div>
                             </div>
                         ) : (
-                            <p className="text-slate-500 text-sm italic">No yearly leave record found.</p>
+                            <div className="p-10 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200 text-slate-400 text-sm italic">
+                                Institutional leave capital pending initialization.
+                            </div>
                         )}
                     </CardContent>
                 </Card>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Left Column - Performance & Timeline */}
-                <div className="lg:col-span-2 space-y-6">
-                    {/* Performance History */}
-                    <Card className="bg-white/60 backdrop-blur-md border border-white/60 shadow-sm rounded-3xl overflow-hidden">
-                        <CardHeader className="bg-white/40 border-b border-white/60 py-5">
-                            <CardTitle className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shadow-sm">
-                                    <TrendingUp className="h-4 w-4" />
-                                </div>
-                                Performance History
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="pt-6">
-                            <div className="space-y-3">
-                                {performanceHistory.map((perf, idx) => (
-                                    <div key={idx} className="flex items-center gap-4 p-3 border border-slate-200 rounded-lg">
-                                        <div className="text-center min-w-[60px]">
-                                            <div className="text-2xl font-bold text-purple-900">{perf.rating}</div>
-                                            <div className="text-[10px] text-slate-600">{perf.year}</div>
-                                        </div>
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <Badge className={`text-[10px] ${perf.performanceBand === 'Outstanding' ? 'bg-green-100 text-green-800' :
-                                                    perf.performanceBand === 'Excellent' ? 'bg-blue-100 text-blue-800' :
-                                                        'bg-amber-100 text-amber-800'
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 py-4">
+                {/* Left Column - Core Professional Metrics & History */}
+                <div className="lg:col-span-2 space-y-10">
+                    <div className="space-y-10">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                            {/* 1. Performance Evolution */}
+                            <Card className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
+                                <CardHeader className="p-8 border-b border-slate-100 bg-slate-50/50">
+                                    <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-3">
+                                        <TrendingUp className="h-5 w-5 text-purple-600" />
+                                        Performance History
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-8 space-y-4">
+                                    {performanceHistory.map((perf, idx) => (
+                                        <div key={idx} className="flex items-center gap-6 p-5 bg-slate-50 rounded-xl border border-slate-100 hover:border-slate-300 transition-all">
+                                            <div className="text-center min-w-[70px]">
+                                                <div className="text-2xl font-bold text-slate-900">{perf.rating}</div>
+                                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">{perf.year}</div>
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <Badge variant="secondary" className={`text-[10px] font-bold uppercase tracking-wider px-3 py-0.5 rounded-lg border-none ${
+                                                        perf.performanceBand === 'Outstanding' ? 'bg-emerald-100 text-emerald-700' :
+                                                        perf.performanceBand === 'Excellent' ? 'bg-blue-100 text-blue-700' :
+                                                        'bg-amber-100 text-amber-700'
                                                     }`}>
-                                                    {perf.performanceBand}
-                                                </Badge>
-                                                <Badge className="bg-green-600 text-white text-[10px]">
-                                                    +{perf.increment}% Increment
-                                                </Badge>
-                                            </div>
-                                            <p className="text-xs text-slate-600">{perf.remarks}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Career Timeline */}
-                    <Card className="bg-white/60 backdrop-blur-md border border-white/60 shadow-sm rounded-3xl overflow-hidden mt-6">
-                        <CardHeader className="bg-white/40 border-b border-white/60 py-5">
-                            <CardTitle className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-800 flex items-center justify-center shadow-sm">
-                                    <Calendar className="h-4 w-4" />
-                                </div>
-                                Career Timeline
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="pt-6">
-                            <div className="relative">
-                                {careerTimeline.map((milestone, idx) => (
-                                    <div key={idx} className="flex gap-4 pb-4">
-                                        <div className="relative">
-                                            <div className={`w-3 h-3 rounded-full ${milestone.type === 'Joining' ? 'bg-blue-600' :
-                                                milestone.type === 'Promotion' ? 'bg-purple-600' :
-                                                    milestone.type === 'Award' ? 'bg-yellow-500' :
-                                                        milestone.type === 'Publication' ? 'bg-green-600' :
-                                                            'bg-slate-400'
-                                                }`} />
-                                            {idx < careerTimeline.length - 1 && (
-                                                <div className="absolute top-3 left-1.5 w-0.5 h-full bg-slate-200" />
-                                            )}
-                                        </div>
-                                        <div className="flex-1 pb-4">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <div className="text-xs text-slate-500">{new Date(milestone.date).toLocaleDateString()}</div>
-                                                <Badge className="bg-slate-100 text-slate-600 text-[10px] border-none font-bold">
-                                                    {calculateServiceDuration(milestone.date)}
-                                                </Badge>
-                                            </div>
-                                            <h4 className="font-semibold text-sm text-slate-900 mt-1">{milestone.title}</h4>
-                                            <p className="text-xs text-slate-600 mt-1">{milestone.description}</p>
-
-                                            {/* Increment Salary Details */}
-                                            {milestone.type === 'Increment' && milestone.beforeIncrementSalary && milestone.afterIncrementSalary && (
-                                                <div className="mt-3 bg-emerald-50 border border-emerald-100 rounded-xl p-3 flex flex-col gap-2 shadow-sm">
-                                                    <div className="text-[10px] font-black uppercase tracking-widest text-emerald-600 flex items-center gap-1">
-                                                        <TrendingUp className="w-3 h-3" /> Salary Revision Details ({viewMode === 'monthly' ? 'Monthly' : 'Yearly'})
-                                                    </div>
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="flex-1 bg-white border border-slate-100 rounded-lg p-2 text-center">
-                                                            <div className="text-[10px] text-slate-400 font-bold uppercase mb-0.5">Before</div>
-                                                            <div className="font-bold text-slate-700 text-sm">{getDisplaySalary(milestone.beforeIncrementSalary)}</div>
-                                                        </div>
-                                                        <div className="flex items-center justify-center">
-                                                            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
-                                                                <TrendingUp className="w-4 h-4" />
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex-1 bg-white border border-emerald-200 rounded-lg p-2 text-center ring-1 ring-emerald-500/10 shadow-sm relative overflow-hidden">
-                                                            <div className="absolute top-0 right-0 w-8 h-8 bg-emerald-50 rounded-bl-full flex items-start justify-end p-1">
-                                                                <Star className="w-2.5 h-2.5 text-emerald-500" />
-                                                            </div>
-                                                            <div className="text-[10px] text-emerald-600 font-black uppercase mb-0.5">After</div>
-                                                            <div className="font-black text-emerald-700 text-sm">{getDisplaySalary(milestone.afterIncrementSalary)}</div>
-                                                        </div>
-                                                    </div>
+                                                        {perf.performanceBand}
+                                                    </Badge>
+                                                    <Badge variant="outline" className="text-slate-500 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-lg bg-white">
+                                                        +{perf.increment}% Revision
+                                                    </Badge>
                                                 </div>
-                                            )}
-                                        </div>
-
-                                    </div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Training Journey */}
-                    <Card className="bg-white/60 backdrop-blur-md border border-white/60 shadow-sm rounded-3xl overflow-hidden mt-6">
-                        <CardHeader className="bg-white/40 border-b border-white/60 py-5">
-                            <CardTitle className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-sm">
-                                        <GraduationCap className="h-4 w-4" />
-                                    </div>
-                                    Learning & Development
-                                </div>
-                                <div className="flex gap-2">
-                                    {trainingJourney.certifications?.map((cert, i) => (
-                                        <Badge key={i} className="bg-blue-50 text-blue-800 border border-blue-100 text-[9px] font-black uppercase tracking-widest px-3 py-1 shadow-sm">
-                                            {cert.issuer}
-                                        </Badge>
-                                    ))}
-                                </div>
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="pt-6">
-                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                                <div className="p-4 bg-green-50/50 rounded-[24px] border border-green-100 text-center">
-                                    <div className="text-3xl font-black text-green-900 leading-none">{trainingJourney.totalHours}</div>
-                                    <div className="text-[10px] font-black text-green-600 uppercase tracking-widest mt-1">Total Hours</div>
-                                </div>
-                                <div className="p-4 bg-blue-50/50 rounded-[24px] border border-blue-100 text-center">
-                                    <div className="text-3xl font-black text-blue-900 leading-none">{trainingJourney.coursesCompleted}</div>
-                                    <div className="text-[10px] font-black text-blue-600 uppercase tracking-widest mt-1">Courses</div>
-                                </div>
-                                <div className="p-4 bg-purple-50/50 rounded-[24px] border border-purple-100 text-center">
-                                    <div className="text-3xl font-black text-purple-900 leading-none">{trainingJourney.certifications?.length || 0}</div>
-                                    <div className="text-[10px] font-black text-purple-600 uppercase tracking-widest mt-1">Certs</div>
-                                </div>
-                                <div className="p-4 bg-amber-50/50 rounded-[24px] border border-amber-100 text-center">
-                                    <div className="text-3xl font-black text-amber-900 leading-none">84%</div>
-                                    <div className="text-[10px] font-black text-amber-600 uppercase tracking-widest mt-1">Compliance</div>
-                                </div>
-                            </div>
-                            <div className="space-y-3">
-                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Recent Activity</h4>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {trainingJourney.recentTrainings.map((training, idx) => (
-                                        <div key={idx} className="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
-                                                <BookOpen className="w-5 h-5" />
-                                            </div>
-                                            <div>
-                                                <div className="font-bold text-slate-900 text-sm">{training.title}</div>
-                                                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{training.date} • {training.duration}</div>
+                                                <p className="text-xs font-medium text-slate-500 italic">{perf.remarks}</p>
                                             </div>
                                         </div>
                                     ))}
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+                                </CardContent>
+                            </Card>
 
-                    {/* Recognition Wall */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                        <Card className="rounded-[32px] border border-slate-800 shadow-xl bg-slate-900/90 backdrop-blur-xl text-white overflow-hidden relative">
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-800/20 rounded-full blur-3xl"></div>
-                            <CardHeader className="p-8 pb-4 relative z-10">
-                                <CardTitle className="text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-3 text-slate-300">
-                                    <div className="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center border border-slate-700">
-                                        <Trophy className="w-4 h-4 text-amber-400" />
-                                    </div>
-                                    Badges Received
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-8 pt-4 relative z-10">
-                                <div className="flex flex-wrap gap-4">
-                                    {badges.map((badge) => (
-                                        <div key={badge.id} className="group relative">
-                                            <div className={`w-14 h-14 rounded-[1.25rem] flex items-center justify-center transition-all duration-500 group-hover:scale-110 shadow-lg border border-white/10 ${badge.level === 'Gold' ? 'bg-gradient-to-br from-amber-400 to-yellow-600 text-white' :
-                                                badge.level === 'Silver' ? 'bg-gradient-to-br from-slate-300 to-slate-500 text-white' :
-                                                    'bg-gradient-to-br from-amber-700 to-orange-900 text-white'
-                                                }`}>
-                                                {badge.icon === 'Lightbulb' ? <Lightbulb className="w-6 h-6" /> :
-                                                    badge.icon === 'Users' ? <Users className="w-6 h-6" /> :
-                                                        <Heart className="w-6 h-6" />}
+                            {/* 2. Institutional Career Timeline */}
+                            <Card className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
+                                <CardHeader className="p-8 border-b border-slate-100 bg-slate-50/50">
+                                    <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-3">
+                                        <Calendar className="h-5 w-5 text-blue-600" />
+                                        Career Milestones
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-10">
+                                    <div className="relative pl-8 border-l-2 border-slate-100 space-y-10">
+                                        {careerTimeline.map((milestone, idx) => (
+                                            <div key={idx} className="relative">
+                                                <div className={`absolute -left-[41px] top-1 w-4 h-4 rounded-full border-2 border-white shadow-md ${
+                                                    milestone.type === 'Joining' ? 'bg-blue-600' :
+                                                    milestone.type === 'Promotion' ? 'bg-purple-600' :
+                                                    milestone.type === 'Award' ? 'bg-amber-500' :
+                                                    milestone.type === 'Publication' ? 'bg-emerald-600' :
+                                                    'bg-slate-400'
+                                                }`} />
+                                                <div className="space-y-2">
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{new Date(milestone.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                                                        <Badge variant="secondary" className="bg-slate-100 text-slate-500 text-[8px] font-bold uppercase tracking-wider border-none px-2">{calculateServiceDuration(milestone.date)}</Badge>
+                                                    </div>
+                                                    <h4 className="text-lg font-bold text-slate-900 tracking-tight">{milestone.title}</h4>
+                                                    <p className="text-xs font-medium text-slate-500 leading-relaxed">{milestone.description}</p>
+                                                    
+                                                    {milestone.type === 'Increment' && milestone.beforeIncrementSalary && milestone.afterIncrementSalary && (
+                                                        <div className="mt-4 p-5 bg-slate-50 rounded-xl border border-slate-100 inline-flex flex-col gap-3">
+                                                            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Salary Revision</p>
+                                                            <div className="flex items-center gap-4">
+                                                                <div className="text-center">
+                                                                    <div className="text-[8px] font-bold text-slate-300 uppercase mb-0.5">Prior</div>
+                                                                    <div className="text-sm font-bold text-slate-400">{getDisplaySalary(milestone.beforeIncrementSalary)}</div>
+                                                                </div>
+                                                                <TrendingUp className="w-4 h-4 text-emerald-500" />
+                                                                <div className="text-center">
+                                                                    <div className="text-[8px] font-bold text-emerald-500 uppercase mb-0.5">Updated</div>
+                                                                    <div className="text-sm font-bold text-slate-900">{getDisplaySalary(milestone.afterIncrementSalary)}</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-slate-800 text-white border border-slate-600 flex items-center justify-center text-[8px] font-black shadow-sm">
-                                                {badge.level[0]}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="rounded-[32px] border border-white/60 shadow-sm bg-white/60 backdrop-blur-md overflow-hidden">
-                            <CardHeader className="p-8 pb-4 border-b border-white/60 bg-white/40">
-                                <CardTitle className="text-[11px] font-black text-slate-800 uppercase tracking-[0.2em] flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-xl bg-rose-50 flex items-center justify-center text-rose-500 shadow-sm">
-                                        <Heart className="w-4 h-4" />
+                                        ))}
                                     </div>
-                                    Wall of Kudos
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-8 pt-6 space-y-4">
-                                {kudos.map((k) => (
-                                    <div key={k.id} className="p-4 rounded-2xl bg-white/80 border border-white shadow-sm relative group hover:shadow-md transition-all">
-                                        <div className="absolute top-4 right-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">{k.date}</div>
-                                        <p className="text-sm font-bold text-slate-700 italic pr-12 pb-2">"{k.message}"</p>
-                                        <div className="mt-2 pt-3 border-t border-slate-100 flex items-center gap-2">
-                                            <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">From</div>
-                                            <div className="text-[10px] font-black text-slate-800 uppercase tracking-widest">{k.from}</div>
-                                            <Badge className="bg-rose-50 text-rose-600 border border-rose-100 text-[8px] h-5 px-2 uppercase font-black tracking-widest ml-auto shadow-sm">{k.type}</Badge>
-                                        </div>
-                                    </div>
-                                ))}
-                            </CardContent>
-                        </Card>
+                                </CardContent>
+                            </Card>
+                        </div>
                     </div>
                 </div>
 
-                {/* Right Column - Stats & Info */}
-                <div className="space-y-6">
+                {/* Learning & Scholarly Dominance Section (Inside Left Column) */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                {/* 1. Training & Certifications */}
+                <Card className="lg:col-span-1 bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
+                    <CardHeader className="p-8 border-b border-slate-100 bg-slate-50/50">
+                        <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-3">
+                            <GraduationCap className="h-5 w-5 text-emerald-600" />
+                            Competency Matrix
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-8 space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Skill Hours</p>
+                                <p className="text-2xl font-bold text-slate-900">{trainingJourney.totalHours}</p>
+                            </div>
+                            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Courses</p>
+                                <p className="text-2xl font-bold text-slate-900">{trainingJourney.coursesCompleted}</p>
+                            </div>
+                        </div>
+                        <div className="space-y-3">
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                                <Menu className="w-3 h-3 text-emerald-500" /> Recent Academic Drill
+                            </p>
+                            {trainingJourney.recentTrainings.map((training, idx) => (
+                                <div key={idx} className="p-4 bg-white rounded-lg border border-slate-100 flex items-center gap-4 hover:border-slate-300 transition-all">
+                                    <div className="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400">
+                                        <BookOpen className="w-5 h-5" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="font-bold text-[11px] text-slate-800 uppercase tracking-wide">{training.title}</div>
+                                        <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mt-1">{training.date} • {training.duration}</div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* 2. Research & Scholarly Output */}
+                <Card className="lg:col-span-2 bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
+                    <CardHeader className="p-8 border-b border-slate-100 bg-slate-50/50 flex flex-row items-center justify-between">
+                        <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-3">
+                            <BookOpen className="h-5 w-5 text-indigo-600" />
+                            Research Output
+                        </CardTitle>
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="bg-white hover:bg-slate-50 text-indigo-600 border-slate-200 font-bold text-[10px] uppercase tracking-wider gap-2 rounded-lg h-10 px-6 shadow-sm"
+                            onClick={() => navigate('/research-publication')}
+                        >
+                            <ExternalLink className="w-4 h-4" /> Global Repository
+                        </Button>
+                    </CardHeader>
+                    <CardContent className="p-8">
+                        {isResearchLoading ? (
+                            <div className="py-12 text-center">
+                                <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Syncing records...</p>
+                            </div>
+                        ) : researchRecords.length > 0 ? (
+                            <div className="space-y-8">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div className="p-6 bg-indigo-600 rounded-xl text-white shadow-md">
+                                        <p className="text-[10px] font-bold uppercase tracking-wider opacity-70 mb-2">Manuscripts</p>
+                                        <h4 className="text-3xl font-bold">{researchRecords.length}</h4>
+                                        <Badge className="bg-white/20 text-white border-none text-[8px] font-bold mt-3 uppercase tracking-wider">SCOPUS</Badge>
+                                    </div>
+                                    <div className="p-6 bg-slate-50 rounded-xl border border-slate-100">
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Citations</p>
+                                        <h4 className="text-3xl font-bold text-slate-900">{researchRecords.reduce((acc, r) => acc + (r.citations || 0), 0)}</h4>
+                                        <p className="text-[9px] font-bold text-emerald-600 uppercase mt-3">Impact: {researchRecords.reduce((acc, r) => acc + (r.impact_factor || 0), 0).toFixed(2)}</p>
+                                    </div>
+                                    <div className="p-6 bg-slate-900 rounded-xl text-white">
+                                        <p className="text-[10px] font-bold uppercase tracking-wider opacity-70 mb-2">Value</p>
+                                        <h4 className="text-3xl font-bold text-emerald-400">
+                                            {researchRecords.reduce((acc, r) => acc + (r.status === 'Approved' ? (r.type === 'Journal' ? 25 : r.type === 'Book' ? 50 : 15) : 0), 0)}
+                                        </h4>
+                                        <Badge className="bg-emerald-500/20 text-emerald-400 border-none text-[8px] font-bold mt-3 uppercase tracking-wider">Approved</Badge>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                                        <Menu className="w-3 h-3 text-indigo-500" /> Key Artefacts
+                                    </p>
+                                    {researchRecords.slice(0, 3).map((pub, idx) => (
+                                        <div key={idx} className="p-4 bg-slate-50 rounded-lg border border-slate-100 hover:border-slate-300 transition-all flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400">
+                                                <FileText className="w-6 h-6" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <span className="text-[9px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded uppercase">{pub.type}</span>
+                                                    <span className="text-[9px] font-bold text-slate-400 uppercase">{pub.date}</span>
+                                                </div>
+                                                <h6 className="font-bold text-slate-800 text-xs italic">{pub.title}</h6>
+                                            </div>
+                                            <Badge variant="outline" className={`text-[9px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border-none shadow-sm ${
+                                                pub.status === 'Approved' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'
+                                            }`}>
+                                                {pub.status}
+                                            </Badge>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="py-16 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                                <Sparkles className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Research synchronizing...</p>
+                                <Button variant="link" onClick={() => navigate('/research-publication')} className="text-indigo-600 font-bold text-[10px] uppercase mt-2 tracking-wider">Global Repository</Button>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* Recognition Wall */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
+                    <Card className="bg-slate-900 border-none shadow-lg rounded-xl overflow-hidden relative">
+                        <CardHeader className="p-8 border-b border-white/5">
+                            <CardTitle className="text-xs font-bold uppercase tracking-wider flex items-center gap-3 text-slate-300">
+                                <Trophy className="w-4 h-4 text-amber-400" />
+                                Badges Received
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-8">
+                            <div className="flex flex-wrap gap-4">
+                                {badges.map((badge) => (
+                                    <div key={badge.id} className="relative group">
+                                        <div className={`w-14 h-14 rounded-xl flex items-center justify-center border border-white/10 ${badge.level === 'Gold' ? 'bg-amber-500/20 text-amber-400' :
+                                            badge.level === 'Silver' ? 'bg-slate-400/20 text-slate-300' :
+                                                'bg-amber-800/20 text-amber-900'
+                                            }`}>
+                                            {badge.icon === 'Lightbulb' ? <Lightbulb className="w-6 h-6" /> :
+                                                badge.icon === 'Users' ? <Users className="w-6 h-6" /> :
+                                                    <Heart className="w-6 h-6" />}
+                                        </div>
+                                        <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-slate-800 text-white border border-slate-700 flex items-center justify-center text-[8px] font-bold">
+                                            {badge.level[0]}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
+                        <CardHeader className="p-8 border-b border-slate-100 bg-slate-50/50">
+                            <CardTitle className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-3">
+                                <Heart className="w-4 h-4 text-rose-500" />
+                                Wall of Kudos
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-8 space-y-4">
+                            {kudos.map((k) => (
+                                <div key={k.id} className="p-4 rounded-xl bg-slate-50 border border-slate-100 relative">
+                                    <div className="absolute top-4 right-4 text-[9px] font-bold text-slate-400 uppercase">{k.date}</div>
+                                    <p className="text-sm font-medium text-slate-700 italic pr-12 mb-2">"{k.message}"</p>
+                                    <Badge variant="secondary" className="bg-rose-50 text-rose-600 border-none text-[8px] h-4 px-2 uppercase font-bold tracking-wider">{k.type}</Badge>
+                                </div>
+                            ))}
+                        </CardContent>
+                    </Card>
+                </div>
+                </div>
+
+                {/* Right Column - Stats, Compliance & Special Context */}
+                <div className="space-y-10">
                     {/* Academic Contributions */}
                     <Card className="bg-white/60 backdrop-blur-md border border-white/60 shadow-sm rounded-[32px] overflow-hidden">
                         <CardHeader className="bg-white/40 border-b border-white/60 py-5">
@@ -859,15 +949,15 @@ const StaffPortfolioDetail: React.FC = () => {
                         </CardHeader>
                         <CardContent className="pt-6 space-y-5">
                             <div className="p-4 bg-white/80 border border-white rounded-2xl shadow-sm">
-                                <div className="text-3xl font-black text-blue-600 leading-none mb-1">{academicContributions.studentsImpacted}</div>
+                                <div className="text-xl font-black text-blue-600 leading-none mb-1">{academicContributions.studentsImpacted}</div>
                                 <div className="text-[10px] uppercase font-black tracking-widest text-slate-400">Students Taught</div>
                             </div>
                             <div className="p-4 bg-white/80 border border-white rounded-2xl shadow-sm">
-                                <div className="text-3xl font-black text-emerald-600 leading-none mb-1">{academicContributions.averagePassPercentage}%</div>
+                                <div className="text-xl font-black text-emerald-600 leading-none mb-1">{academicContributions.averagePassPercentage}%</div>
                                 <div className="text-[10px] uppercase font-black tracking-widest text-slate-400">Avg Pass Rate</div>
                             </div>
                             <div className="p-4 bg-white/80 border border-white rounded-2xl shadow-sm">
-                                <div className="text-3xl font-black text-purple-600 leading-none mb-1">{academicContributions.averageFeedbackRating}/5</div>
+                                <div className="text-xl font-black text-purple-600 leading-none mb-1">{academicContributions.averageFeedbackRating}/5</div>
                                 <div className="text-[10px] uppercase font-black tracking-widest text-slate-400">Student Feedback</div>
                             </div>
                             <div className="pt-4 border-t border-white/60">
@@ -883,43 +973,39 @@ const StaffPortfolioDetail: React.FC = () => {
                         </CardContent>
                     </Card>
 
-                    {/* Research Output */}
-                    <Card className="bg-white/60 backdrop-blur-md border border-white/60 shadow-sm rounded-[32px] overflow-hidden">
-                        <CardHeader className="bg-white/40 border-b border-white/60 py-5">
-                            <CardTitle className="text-[11px] font-black text-slate-800 uppercase tracking-[0.2em] flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shadow-sm">
-                                    <FileText className="h-4 w-4" />
-                                </div>
-                                Research Output
+                    {/* Research Output Summary */}
+                    <Card className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
+                        <CardHeader className="p-8 border-b border-slate-100 bg-slate-50/50">
+                            <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-700 flex items-center gap-3">
+                                <FileText className="w-4 h-4 text-amber-500" />
+                                Research Summary
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="pt-6 space-y-3">
-                            <div className="flex justify-between items-center p-3 bg-white/80 rounded-xl border border-white shadow-sm">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Publications</span>
-                                <span className="font-black text-lg text-slate-800">{researchOutput.publications}</span>
+                        <CardContent className="p-8 space-y-4">
+                            <div className="flex justify-between items-center p-4 bg-slate-50 rounded-xl border border-slate-100">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Publications</span>
+                                <span className="font-bold text-lg text-slate-900">{researchOutput.publications}</span>
                             </div>
-                            <div className="flex justify-between items-center p-3 bg-white/80 rounded-xl border border-white shadow-sm">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Conferences</span>
-                                <span className="font-black text-lg text-slate-800">{researchOutput.conferences}</span>
+                            <div className="flex justify-between items-center p-4 bg-slate-50 rounded-xl border border-slate-100">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Conferences</span>
+                                <span className="font-bold text-lg text-slate-900">{researchOutput.conferences}</span>
                             </div>
-                            <div className="flex justify-between items-center p-3 bg-white/80 rounded-xl border border-white shadow-sm">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Patents</span>
-                                <span className="font-black text-lg text-slate-800">{researchOutput.patents}</span>
+                            <div className="flex justify-between items-center p-4 bg-slate-50 rounded-xl border border-slate-100">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Patents</span>
+                                <span className="font-bold text-lg text-slate-900">{researchOutput.patents}</span>
                             </div>
-                            <div className="flex justify-between items-center p-3 bg-white/80 rounded-xl border border-white shadow-sm">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Citations</span>
-                                <span className="font-black text-lg text-slate-800">{researchOutput.citations}</span>
+                            <div className="flex justify-between items-center p-4 bg-slate-50 rounded-xl border border-slate-100">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Citations</span>
+                                <span className="font-bold text-lg text-slate-900">{researchOutput.citations}</span>
                             </div>
                         </CardContent>
                     </Card>
 
-                    {/* Highlights & Awards */}
-                    <Card className="bg-white/60 backdrop-blur-md border border-white/60 shadow-sm rounded-[32px] overflow-hidden">
-                        <CardHeader className="bg-white/40 border-b border-white/60 py-5">
-                            <CardTitle className="text-[11px] font-black text-slate-800 uppercase tracking-[0.2em] flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-800 flex items-center justify-center shadow-sm">
-                                    <Star className="h-4 w-4" />
-                                </div>
+                    {/* Career Highlights */}
+                    <Card className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
+                        <CardHeader className="p-8 border-b border-slate-100 bg-slate-50/50">
+                            <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-700 flex items-center gap-3">
+                                <Star className="w-4 h-4 text-blue-600" />
                                 Career Highlights
                             </CardTitle>
                         </CardHeader>
@@ -927,10 +1013,10 @@ const StaffPortfolioDetail: React.FC = () => {
                             {highlights.map((h) => (
                                 <div
                                     key={h.id}
-                                    className="flex gap-4 group cursor-pointer hover:bg-white/80 p-3 -m-3 rounded-2xl transition-all border border-transparent hover:border-white shadow-none hover:shadow-sm"
+                                    className="flex gap-4 p-4 rounded-xl border border-transparent hover:border-slate-200 hover:bg-slate-50 transition-all cursor-pointer group"
                                     onClick={() => setSelectedHighlight(h)}
                                 >
-                                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${h.category === 'Award' ? 'bg-amber-100 text-amber-600' :
+                                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${h.category === 'Award' ? 'bg-amber-100 text-amber-600' :
                                         h.category === 'Research' ? 'bg-blue-100 text-blue-600' :
                                             'bg-purple-100 text-purple-600'
                                         }`}>
@@ -939,11 +1025,11 @@ const StaffPortfolioDetail: React.FC = () => {
                                                 <BookOpen className="w-5 h-5" />}
                                     </div>
                                     <div className="space-y-1">
-                                        <div className="text-sm font-black text-slate-900 group-hover:text-blue-800 transition-colors flex items-center gap-2">
+                                        <div className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors flex items-center gap-2">
                                             {h.title}
                                             <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                                         </div>
-                                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{h.category} • {h.date}</div>
+                                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{h.category} • {h.date}</div>
                                     </div>
                                 </div>
                             ))}
@@ -952,47 +1038,44 @@ const StaffPortfolioDetail: React.FC = () => {
 
                     {/* Highlight Detail Modal */}
                     <Dialog open={!!selectedHighlight} onOpenChange={() => setSelectedHighlight(null)}>
-                        <DialogContent className="max-w-xl p-0 overflow-hidden border-none rounded-[32px] shadow-2xl">
-                            <div className={`h-32 w-full flex items-end p-8 relative ${selectedHighlight?.category === 'Award' ? 'bg-gradient-to-r from-amber-400 to-orange-500' :
-                                selectedHighlight?.category === 'Research' ? 'bg-gradient-to-r from-blue-500 to-blue-800' :
-                                    'bg-gradient-to-r from-purple-500 to-pink-600'
-                                }`}>
+                        <DialogContent className="max-w-xl p-0 overflow-hidden border border-slate-200 rounded-xl shadow-2xl">
+                            <div className="bg-slate-900 px-8 py-6 flex items-center justify-between border-b border-slate-800">
+                                <div className="space-y-1">
+                                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{selectedHighlight?.category} Recognition</div>
+                                    <DialogTitle className="text-lg font-bold text-white uppercase tracking-wider">{selectedHighlight?.title}</DialogTitle>
+                                </div>
                                 <button
                                     onClick={() => setSelectedHighlight(null)}
-                                    className="absolute top-6 right-6 w-10 h-10 rounded-full bg-black/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/20 transition-all"
+                                    className="text-slate-400 hover:text-white transition-colors"
                                 >
                                     <X className="w-5 h-5" />
                                 </button>
-                                <div className="space-y-1 text-white">
-                                    <div className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80">{selectedHighlight?.category} Recognition</div>
-                                    <DialogTitle className="text-2xl font-black text-white">{selectedHighlight?.title}</DialogTitle>
-                                </div>
                             </div>
 
                             <div className="p-8 space-y-8 bg-white">
-                                <div className="grid grid-cols-2 gap-6">
+                                <div className="grid grid-cols-2 gap-8">
                                     <div className="space-y-1">
-                                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Date Received</div>
+                                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Date Received</div>
                                         <div className="text-sm font-bold text-slate-900">{selectedHighlight?.date}</div>
                                     </div>
                                     <div className="space-y-1">
-                                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Impact Metric</div>
-                                        <div className="text-sm font-black text-blue-800">{selectedHighlight?.impact}</div>
+                                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Impact Metric</div>
+                                        <div className="text-sm font-bold text-blue-600">{selectedHighlight?.impact}</div>
                                     </div>
                                 </div>
 
                                 <div className="space-y-3">
-                                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Overview</div>
-                                    <p className="text-slate-600 leading-relaxed font-medium">
+                                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Overview</div>
+                                    <p className="text-sm text-slate-600 leading-relaxed font-semibold">
                                         {selectedHighlight?.description}
                                     </p>
                                 </div>
 
                                 <div className="space-y-3">
-                                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tags & Competencies</div>
+                                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tags & Competencies</div>
                                     <div className="flex flex-wrap gap-2">
                                         {selectedHighlight?.tags?.map((tag: string, i: number) => (
-                                            <Badge key={i} className="bg-slate-100 text-slate-600 border-none px-3 py-1 rounded-lg font-bold text-[10px] uppercase">
+                                            <Badge key={i} className="bg-slate-100 text-slate-600 border-none px-4 py-1.5 rounded-lg font-bold text-[9px] uppercase tracking-wider">
                                                 {tag}
                                             </Badge>
                                         ))}
@@ -1002,7 +1085,7 @@ const StaffPortfolioDetail: React.FC = () => {
                                 <div className="pt-6 border-t border-slate-100 flex justify-end">
                                     <Button
                                         onClick={() => setSelectedHighlight(null)}
-                                        className="bg-slate-900 text-white hover:bg-slate-800 rounded-2xl px-8 h-12 font-black uppercase tracking-widest text-[10px]"
+                                        className="bg-slate-900 text-white hover:bg-black rounded-lg px-8 h-11 font-bold uppercase tracking-wider text-[10px] transition-colors"
                                     >
                                         Close Details
                                     </Button>
@@ -1013,71 +1096,69 @@ const StaffPortfolioDetail: React.FC = () => {
 
                     {/* Probation Insights */}
                     {probationData && (
-                        <Card className="bg-white/60 backdrop-blur-md border border-white/60 shadow-sm rounded-[32px] overflow-hidden">
-                            <CardHeader className="bg-white/40 border-b border-white/60 py-5">
-                                <CardTitle className="text-[11px] font-black text-slate-800 uppercase tracking-[0.2em] flex items-center justify-between">
+                        <Card className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
+                            <CardHeader className="p-8 border-b border-slate-100 bg-slate-50/50">
+                                <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-700 flex items-center justify-between">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-800 flex items-center justify-center shadow-sm">
-                                            <Shield className="h-4 w-4" />
-                                        </div>
+                                        <Shield className="w-4 h-4 text-blue-600" />
                                         Probation Insights
                                     </div>
-                                    <Badge className="bg-blue-800 text-white border-none uppercase text-[9px] font-black tracking-widest shadow-sm">
+                                    <Badge className="bg-blue-600 text-white border-none uppercase text-[9px] font-bold tracking-wider rounded-lg px-3 py-1">
                                         {probationData.status}
                                     </Badge>
                                 </CardTitle>
                             </CardHeader>
-                            <CardContent className="p-6 space-y-6">
+                            <CardContent className="p-8 space-y-6">
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div className="p-4 rounded-3xl bg-white/80 border border-white shadow-sm flex items-center justify-between">
+                                    <div className="p-5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
                                         <div>
-                                            <div className="text-2xl font-black text-slate-900">{probationData.onTimeTasks}</div>
-                                            <div className="text-[10px] font-black text-blue-700 uppercase tracking-widest mt-1">On-Time Tasks</div>
+                                            <div className="text-2xl font-bold text-slate-900">{probationData.onTimeTasks}</div>
+                                            <div className="text-[10px] font-bold text-blue-600 uppercase tracking-wider mt-1">On-Time</div>
                                         </div>
                                         <Clock className="w-5 h-5 text-blue-200" />
                                     </div>
-                                    <div className="p-4 rounded-3xl bg-white/80 border border-white shadow-sm flex items-center justify-between">
+                                    <div className="p-5 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-between">
                                         <div>
-                                            <div className="text-2xl font-black text-rose-600">{probationData.delayedTasks}</div>
-                                            <div className="text-[10px] font-black text-rose-400 uppercase tracking-widest mt-1">Delayed</div>
+                                            <div className="text-2xl font-bold text-rose-600">{probationData.delayedTasks}</div>
+                                            <div className="text-[10px] font-bold text-rose-400 uppercase tracking-wider mt-1">Delayed</div>
                                         </div>
-                                        <AlertTriangle className="w-5 h-5 text-rose-300" />
+                                        <AlertTriangle className="w-5 h-5 text-rose-200" />
                                     </div>
                                 </div>
 
                                 <div className="space-y-3">
                                     <div className="flex justify-between items-end">
-                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Task Completion</h4>
-                                        <span className="text-sm font-black text-blue-800">{probationData.completionRate}%</span>
+                                        <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Completion Rate</h4>
+                                        <span className="text-sm font-bold text-blue-600">{probationData.completionRate}%</span>
                                     </div>
                                     <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                                        <div className="h-full bg-blue-800 rounded-full" style={{ width: `${probationData.completionRate}%` }} />
+                                        <div className="h-full bg-blue-600 rounded-full" style={{ width: `${probationData.completionRate}%` }} />
                                     </div>
                                 </div>
 
-                                <div className="space-y-4 pt-4 border-t border-slate-100">
-                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Review History</h4>
+                                <div className="space-y-4 pt-6 border-t border-slate-100">
+                                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Review History</h4>
                                     <div className="space-y-4">
-                                        {probationData.history.map((event, i) => (
+                                        {probationData.history.map((event: any, i: number) => (
                                             <div key={i} className="flex gap-4 relative">
                                                 {i < probationData.history.length - 1 && (
-                                                    <div className="absolute left-2.5 top-6 bottom-0 w-0.5 bg-slate-100" />
+                                                    <div className="absolute top-0 left-2 w-0.5 h-full bg-slate-100" />
                                                 )}
-                                                <div className={`w-5 h-5 rounded-full z-10 flex items-center justify-center border-2 border-white shadow-sm ${event.status.includes('On-time') ? 'bg-emerald-500' : 'bg-rose-500'
+                                                <div className={`w-4 h-4 rounded-full z-10 flex items-center justify-center border-2 border-white shadow-sm shrink-0 mt-0.5 ${event.status.includes('On-time') ? 'bg-emerald-500' : 'bg-rose-500'
                                                     }`} />
                                                 <div className="space-y-1 pb-4">
-                                                    <div className="text-xs font-black text-slate-900 uppercase leading-none">{event.event}</div>
-                                                    <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{event.date} • {event.status}</div>
+                                                    <div className="text-xs font-bold text-slate-900 uppercase">{event.event}</div>
+                                                    <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{event.date} • {event.status}</div>
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
-                                <div className="pt-4 border-t border-slate-100 grid grid-cols-1 gap-2">
-                                    {probationData.kpis.map((kpi, i) => (
-                                        <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                <div className="pt-6 border-t border-slate-100 grid grid-cols-1 gap-2">
+                                    {probationData.kpis.map((kpi: any, i: number) => (
+                                        <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-100">
                                             <span className="text-xs font-bold text-slate-700">{kpi.title}</span>
-                                            <Badge className="bg-emerald-100 text-emerald-700 text-[8px] h-4 border-none uppercase font-black">{kpi.status}</Badge>
+                                            <Badge className="bg-emerald-100 text-emerald-700 text-[8px] h-5 border-none uppercase font-bold rounded-lg px-3">{kpi.status}</Badge>
                                         </div>
                                     ))}
                                 </div>
@@ -1085,55 +1166,51 @@ const StaffPortfolioDetail: React.FC = () => {
                         </Card>
                     )}
                     {/* Compliance */}
-                    <Card className="bg-white/60 backdrop-blur-md border border-white/60 shadow-sm rounded-[32px] overflow-hidden">
-                        <CardHeader className="bg-white/40 border-b border-white/60 py-5">
-                            <CardTitle className="text-[11px] font-black text-slate-800 uppercase tracking-[0.2em] flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center shadow-sm">
-                                    <CheckCircle className="h-4 w-4" />
-                                </div>
+                    <Card className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
+                        <CardHeader className="p-8 border-b border-slate-100 bg-slate-50/50">
+                            <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-700 flex items-center gap-3">
+                                <CheckCircle className="w-4 h-4 text-emerald-600" />
                                 Compliance
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="pt-6 space-y-3">
-                            <div className="flex justify-between items-center p-3 bg-white/80 rounded-xl border border-white shadow-sm">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Attendance</span>
-                                <span className="font-black text-lg text-emerald-600">{complianceRecords.currentAttendance}%</span>
+                        <CardContent className="p-8 space-y-4">
+                            <div className="flex justify-between items-center p-4 bg-slate-50 rounded-xl border border-slate-100">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Attendance</span>
+                                <span className="font-bold text-lg text-emerald-600">{complianceRecords.currentAttendance}%</span>
                             </div>
-                            <div className="flex justify-between items-center p-3 bg-white/80 rounded-xl border border-white shadow-sm">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Leave Balance</span>
-                                <span className="font-black text-lg text-slate-800">{complianceRecords.leaveBalance} days</span>
+                            <div className="flex justify-between items-center p-4 bg-slate-50 rounded-xl border border-slate-100">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Leave Balance</span>
+                                <span className="font-bold text-lg text-slate-900">{complianceRecords.leaveBalance} days</span>
                             </div>
-                            <div className="flex justify-between items-center p-3 bg-white/80 rounded-xl border border-white shadow-sm">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Disciplinary</span>
-                                <span className="font-black text-lg text-emerald-600">{complianceRecords.disciplinaryRecords}</span>
+                            <div className="flex justify-between items-center p-4 bg-slate-50 rounded-xl border border-slate-100">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Disciplinary</span>
+                                <span className="font-bold text-lg text-emerald-600">{complianceRecords.disciplinaryRecords}</span>
                             </div>
                         </CardContent>
                     </Card>
-
+                    
                     {/* Exit Info (if applicable) */}
                     {exitInfo && (
-                        <Card className="bg-white/60 backdrop-blur-md border border-rose-100/50 shadow-sm rounded-[32px] overflow-hidden">
-                            <CardHeader className="bg-rose-50/50 border-b border-rose-100/50 py-5">
-                                <CardTitle className="text-[11px] font-black text-rose-800 uppercase tracking-[0.2em] flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shadow-sm">
-                                        <AlertTriangle className="h-4 w-4" />
-                                    </div>
+                        <Card className="bg-white border border-rose-100 shadow-sm rounded-xl overflow-hidden">
+                            <CardHeader className="p-8 border-b border-rose-100 bg-rose-50/50">
+                                <CardTitle className="text-sm font-bold uppercase tracking-wider text-rose-800 flex items-center gap-3">
+                                    <AlertTriangle className="w-4 h-4 text-rose-600" />
                                     Exit Information
                                 </CardTitle>
                             </CardHeader>
-                            <CardContent className="pt-6 space-y-3">
-                                <div className="p-3 bg-white/80 rounded-xl border border-white shadow-sm flex items-center justify-between">
-                                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-500">Resignation Date</div>
-                                    <div className="font-black text-sm text-slate-800">{exitInfo.resignationDate}</div>
+                            <CardContent className="p-8 space-y-4">
+                                <div className="p-4 bg-white rounded-xl border border-rose-100 flex items-center justify-between">
+                                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Resignation Date</div>
+                                    <div className="font-bold text-sm text-slate-800">{portfolio?.exitInfo?.resignationDate}</div>
                                 </div>
-                                <div className="p-3 bg-white/80 rounded-xl border border-white shadow-sm flex items-center justify-between">
-                                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-500">Reason</div>
-                                    <div className="font-black text-sm text-slate-800">{exitInfo.reason}</div>
+                                <div className="p-4 bg-white rounded-xl border border-rose-100 flex items-center justify-between">
+                                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Reason</div>
+                                    <div className="font-bold text-sm text-slate-800">{portfolio?.exitInfo?.reason}</div>
                                 </div>
-                                <div className="p-3 bg-white/80 rounded-xl border border-white shadow-sm flex items-center justify-between">
-                                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-500">NOC Status</div>
-                                    <Badge className="bg-amber-50 text-amber-600 border border-amber-100 text-[9px] uppercase font-black tracking-widest shadow-sm">
-                                        {exitInfo.nocStatus}
+                                <div className="p-4 bg-white rounded-xl border border-rose-100 flex items-center justify-between">
+                                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">NOC Status</div>
+                                    <Badge variant="secondary" className="bg-amber-50 text-amber-600 border border-amber-100 text-[9px] uppercase font-bold tracking-wider rounded-lg px-3 py-1">
+                                        {portfolio?.exitInfo?.nocStatus}
                                     </Badge>
                                 </div>
                             </CardContent>
@@ -1141,58 +1218,80 @@ const StaffPortfolioDetail: React.FC = () => {
                     )}
                 </div>
             </div>
-
-            {/* Back Button */}
-            <div className="mt-6">
-                <Button onClick={() => navigate('/staff-portfolio')} variant="outline" className="gap-2">
+            
+            {/* Action Buttons Group */}
+            <div className="mt-12 flex flex-col md:flex-row items-center justify-between gap-6 pt-8 border-t border-slate-200">
+                <Button 
+                    onClick={() => navigate('/staff-portfolio')} 
+                    variant="outline" 
+                    className="gap-3 h-12 px-8 rounded-xl border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-xs shadow-sm hover:bg-slate-50"
+                >
                     <ArrowLeft className="h-4 w-4" />
                     Back to Staff List
                 </Button>
+                
+                <div className="flex items-center gap-4">
+                    <Button 
+                        variant="outline"
+                        className="h-12 px-8 rounded-xl border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-xs shadow-sm"
+                    >
+                        <Download className="w-4 h-4 mr-2" /> Download Dossier
+                    </Button>
+                    <Button 
+                        className="h-12 px-8 rounded-xl bg-slate-900 hover:bg-black text-white font-bold uppercase tracking-wider text-xs shadow-md"
+                    >
+                        <Send className="w-4 h-4 mr-2" /> Share Profile
+                    </Button>
+                </div>
             </div>
 
             {/* Basic Info Edit Modal */}
             <Dialog open={isEditingBasic} onOpenChange={setIsEditingBasic}>
-                <DialogContent className="max-w-2xl p-0 overflow-hidden border-none rounded-[32px] shadow-2xl">
-                    <div className="bg-blue-800 h-24 w-full flex items-end p-8 relative">
-                        <button onClick={() => setIsEditingBasic(false)} className="absolute top-6 right-6 text-white/70 hover:text-white transition-all"><X className="w-5 h-5" /></button>
-                        <DialogTitle className="text-2xl font-black text-white">Edit Basic Information</DialogTitle>
+                <DialogContent className="max-w-2xl p-0 overflow-hidden border border-slate-200 rounded-xl shadow-2xl">
+                    <div className="bg-slate-900 px-8 py-6 flex items-center justify-between border-b border-slate-800">
+                        <DialogTitle className="text-lg font-bold text-white uppercase tracking-wider">Edit Basic Information</DialogTitle>
+                        <button onClick={() => setIsEditingBasic(false)} className="text-slate-400 hover:text-white transition-colors">
+                            <X className="w-5 h-5" />
+                        </button>
                     </div>
-                    <div className="p-8 bg-white grid grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Full Name</label>
-                            <input 
-                                type="text" value={editForm.name} 
-                                onChange={(e) => setEditForm({...editForm, name: e.target.value})}
-                                className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-700 text-sm font-bold"
-                            />
+                    <div className="p-8 bg-white space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Full Name</label>
+                                <input 
+                                    type="text" value={editForm.name} 
+                                    onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                                    className="w-full p-3 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 text-sm font-semibold"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Designation</label>
+                                <input 
+                                    type="text" value={editForm.designation} 
+                                    onChange={(e) => setEditForm({...editForm, designation: e.target.value})}
+                                    className="w-full p-3 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 text-sm font-semibold"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Department</label>
+                                <input 
+                                    type="text" value={editForm.department} 
+                                    onChange={(e) => setEditForm({...editForm, department: e.target.value})}
+                                    className="w-full p-3 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 text-sm font-semibold"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Email Address</label>
+                                <input 
+                                    type="email" value={editForm.email} 
+                                    onChange={(e) => setEditForm({...editForm, email: e.target.value})}
+                                    className="w-full p-3 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 text-sm font-semibold"
+                                />
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Designation</label>
-                            <input 
-                                type="text" value={editForm.designation} 
-                                onChange={(e) => setEditForm({...editForm, designation: e.target.value})}
-                                className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-700 text-sm font-bold"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Department</label>
-                            <input 
-                                type="text" value={editForm.department} 
-                                onChange={(e) => setEditForm({...editForm, department: e.target.value})}
-                                className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-700 text-sm font-bold"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Email Address</label>
-                            <input 
-                                type="email" value={editForm.email} 
-                                onChange={(e) => setEditForm({...editForm, email: e.target.value})}
-                                className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-700 text-sm font-bold"
-                            />
-                        </div>
-                        <div className="col-span-2 pt-6 border-t border-slate-100 flex justify-end gap-3">
-                            <Button variant="outline" onClick={() => setIsEditingBasic(false)} className="rounded-2xl px-6 h-12 font-black uppercase text-[10px]">Cancel</Button>
-                            <Button onClick={handleSaveBasicDetails} className="bg-blue-800 text-white rounded-2xl px-8 h-12 font-black uppercase text-[10px]">Save Changes</Button>
+                        <div className="pt-6 border-t border-slate-100 flex justify-end gap-3">
+                            <Button variant="outline" onClick={() => setIsEditingBasic(false)} className="rounded-lg px-6 h-11 font-bold uppercase text-[10px] border-slate-200 text-slate-600">Cancel</Button>
+                            <Button onClick={handleSaveBasicDetails} className="bg-slate-900 text-white rounded-lg px-8 h-11 font-bold uppercase text-[10px] hover:bg-black transition-colors">Save Changes</Button>
                         </div>
                     </div>
                 </DialogContent>
@@ -1200,30 +1299,34 @@ const StaffPortfolioDetail: React.FC = () => {
 
             {/* Education Edit Modal */}
             <Dialog open={isEditingEducation} onOpenChange={setIsEditingEducation}>
-                <DialogContent className="max-w-3xl p-0 overflow-hidden border-none rounded-[32px] shadow-2xl">
-                    <div className="bg-blue-700 h-24 w-full flex items-end p-8 relative">
-                        <button onClick={() => setIsEditingEducation(false)} className="absolute top-6 right-6 text-white/70 hover:text-white transition-all"><X className="w-5 h-5" /></button>
-                        <DialogTitle className="text-2xl font-black text-white">Update Education Detail</DialogTitle>
+                <DialogContent className="max-w-3xl p-0 overflow-hidden border border-slate-200 rounded-xl shadow-2xl">
+                    <div className="bg-slate-900 px-8 py-6 flex items-center justify-between border-b border-slate-800">
+                        <DialogTitle className="text-lg font-bold text-white uppercase tracking-wider">Update Education Detail</DialogTitle>
+                        <button onClick={() => setIsEditingEducation(false)} className="text-slate-400 hover:text-white transition-colors">
+                            <X className="w-5 h-5" />
+                        </button>
                     </div>
-                    <div className="p-8 bg-white grid grid-cols-3 gap-6">
-                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Education</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" value={editEduForm.level || ''} onChange={(e) => setEditEduForm({...editEduForm, level: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Course</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" value={editEduForm.course || ''} onChange={(e) => setEditEduForm({...editEduForm, course: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Specialization</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" value={editEduForm.specialization || ''} onChange={(e) => setEditEduForm({...editEduForm, specialization: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">School / Institute</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" value={editEduForm.institute || ''} onChange={(e) => setEditEduForm({...editEduForm, institute: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Board / University</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" value={editEduForm.board || ''} onChange={(e) => setEditEduForm({...editEduForm, board: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Course Type</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" value={editEduForm.courseType || ''} onChange={(e) => setEditEduForm({...editEduForm, courseType: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Class</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" value={editEduForm.class || ''} onChange={(e) => setEditEduForm({...editEduForm, class: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Percentage</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" value={editEduForm.percentage || ''} onChange={(e) => setEditEduForm({...editEduForm, percentage: e.target.value})} /></div>
-                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Passing Year</label><input type="text" className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" value={editEduForm.passingYear || ''} onChange={(e) => setEditEduForm({...editEduForm, passingYear: e.target.value})} /></div>
+                    <div className="p-8 bg-white space-y-6 overflow-y-auto max-h-[80vh]">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                            <div className="space-y-2"><label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Education</label><input type="text" className="w-full p-3 rounded-lg border border-slate-200 text-sm font-semibold" value={editEduForm.level || ''} onChange={(e) => setEditEduForm({...editEduForm, level: e.target.value})} /></div>
+                            <div className="space-y-2"><label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Course</label><input type="text" className="w-full p-3 rounded-lg border border-slate-200 text-sm font-semibold" value={editEduForm.course || ''} onChange={(e) => setEditEduForm({...editEduForm, course: e.target.value})} /></div>
+                            <div className="space-y-2"><label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Specialization</label><input type="text" className="w-full p-3 rounded-lg border border-slate-200 text-sm font-semibold" value={editEduForm.specialization || ''} onChange={(e) => setEditEduForm({...editEduForm, specialization: e.target.value})} /></div>
+                            <div className="space-y-2"><label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Institute</label><input type="text" className="w-full p-3 rounded-lg border border-slate-200 text-sm font-semibold" value={editEduForm.institute || ''} onChange={(e) => setEditEduForm({...editEduForm, institute: e.target.value})} /></div>
+                            <div className="space-y-2"><label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Board/University</label><input type="text" className="w-full p-3 rounded-lg border border-slate-200 text-sm font-semibold" value={editEduForm.board || ''} onChange={(e) => setEditEduForm({...editEduForm, board: e.target.value})} /></div>
+                            <div className="space-y-2"><label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Course Type</label><input type="text" className="w-full p-3 rounded-lg border border-slate-200 text-sm font-semibold" value={editEduForm.courseType || ''} onChange={(e) => setEditEduForm({...editEduForm, courseType: e.target.value})} /></div>
+                            <div className="space-y-2"><label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Class</label><input type="text" className="w-full p-3 rounded-lg border border-slate-200 text-sm font-semibold" value={editEduForm.class || ''} onChange={(e) => setEditEduForm({...editEduForm, class: e.target.value})} /></div>
+                            <div className="space-y-2"><label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Percentage</label><input type="text" className="w-full p-3 rounded-lg border border-slate-200 text-sm font-semibold" value={editEduForm.percentage || ''} onChange={(e) => setEditEduForm({...editEduForm, percentage: e.target.value})} /></div>
+                            <div className="space-y-2"><label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Passing Year</label><input type="text" className="w-full p-3 rounded-lg border border-slate-200 text-sm font-semibold" value={editEduForm.passingYear || ''} onChange={(e) => setEditEduForm({...editEduForm, passingYear: e.target.value})} /></div>
+                        </div>
                         
-                        <div className="col-span-3 pt-6 border-t border-slate-100 flex items-center justify-between">
-                            <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border border-dashed border-slate-300">
-                                <Upload className="w-4 h-4 text-slate-400" />
-                                <span className="text-[10px] font-black text-slate-400 uppercase">Update Document</span>
+                        <div className="pt-6 border-t border-slate-100 flex items-center justify-between gap-6">
+                            <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl border border-dashed border-slate-200 cursor-pointer hover:bg-slate-100 transition-colors flex-1">
+                                <Upload className="w-5 h-5 text-slate-400" />
+                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Update Educational Proof</span>
                             </div>
                             <div className="flex gap-3">
-                                <Button variant="outline" onClick={() => setIsEditingEducation(false)} className="rounded-2xl px-6 h-12 font-black uppercase text-[10px]">Cancel</Button>
-                                <Button onClick={handleSaveEducation} className="bg-blue-600 text-white rounded-2xl px-8 h-12 font-black uppercase text-[10px]">Update Detail</Button>
+                                <Button variant="outline" onClick={() => setIsEditingEducation(false)} className="rounded-lg px-6 h-11 font-bold uppercase text-[10px] border-slate-200 text-slate-600">Cancel</Button>
+                                <Button onClick={handleSaveEducation} className="bg-blue-600 text-white rounded-lg px-8 h-11 font-bold uppercase text-[10px] hover:bg-blue-700 transition-colors shadow-sm">Update Records</Button>
                             </div>
                         </div>
                     </div>
@@ -1232,137 +1335,120 @@ const StaffPortfolioDetail: React.FC = () => {
 
             {/* Experience Edit Modal */}
             <Dialog open={isEditingExperience} onOpenChange={setIsEditingExperience}>
-                <DialogContent className="max-w-4xl p-0 overflow-hidden border-none rounded-[32px] shadow-2xl">
-                    <div className="bg-slate-800 h-24 w-full flex items-end p-8 relative">
-                        <button onClick={() => setIsEditingExperience(false)} className="absolute top-6 right-6 text-white/70 hover:text-white transition-all"><X className="w-5 h-5" /></button>
-                        <DialogTitle className="text-2xl font-black text-white">Update Experience Detail</DialogTitle>
+                <DialogContent className="max-w-4xl p-0 overflow-hidden border border-slate-200 rounded-xl shadow-2xl">
+                    <div className="bg-slate-900 px-8 py-6 flex items-center justify-between border-b border-slate-800">
+                        <DialogTitle className="text-lg font-bold text-white uppercase tracking-wider">Update Experience Detail</DialogTitle>
+                        <button onClick={() => setIsEditingExperience(false)} className="text-slate-400 hover:text-white transition-colors">
+                            <X className="w-5 h-5" />
+                        </button>
                     </div>
-                    <div className="p-8 bg-white grid grid-cols-4 gap-6">
-                        <div className="space-y-2 col-span-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Organization Name</label>
-                            <input 
-                                type="text" 
-                                className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" 
-                                value={expForm.orgName || ''} 
-                                onChange={(e) => handleExperienceChange('orgName', e.target.value)}
-                            />
-                        </div>
-                        <div className="space-y-2 col-span-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Designation</label>
-                            <input 
-                                type="text" 
-                                className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" 
-                                value={expForm.designation || ''} 
-                                onChange={(e) => handleExperienceChange('designation', e.target.value)}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nature of Job</label>
-                            <input 
-                                type="text" 
-                                className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" 
-                                value={expForm.natureOfJob || ''} 
-                                onChange={(e) => handleExperienceChange('natureOfJob', e.target.value)}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Job Type</label>
-                            <input 
-                                type="text" 
-                                className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" 
-                                value={expForm.jobType || ''} 
-                                onChange={(e) => handleExperienceChange('jobType', e.target.value)}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">From Date (dd/mm/yyyy)</label>
-                            <input 
-                                type="text" 
-                                className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" 
-                                value={expForm.fromDate || ''} 
-                                onChange={(e) => handleExperienceChange('fromDate', e.target.value)}
-                                placeholder="dd/mm/yyyy"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">To Date (dd/mm/yyyy)</label>
-                            <input 
-                                type="text" 
-                                className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" 
-                                value={expForm.toDate || ''} 
-                                onChange={(e) => handleExperienceChange('toDate', e.target.value)}
-                                placeholder="dd/mm/yyyy"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Experience (Years)</label>
-                            <input 
-                                type="text" 
-                                className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold bg-slate-50 cursor-not-allowed" 
-                                value={expForm.totalExp || ''} 
-                                readOnly
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Last Drawn Salary</label>
-                            <input 
-                                type="text" 
-                                className="w-full p-3 rounded-xl border border-slate-200 text-sm font-bold" 
-                                value={expForm.lastDrawn || ''} 
-                                onChange={(e) => handleExperienceChange('lastDrawn', e.target.value)}
-                            />
+                    <div className="p-8 bg-white space-y-6 overflow-y-auto max-h-[80vh]">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                            <div className="space-y-2 col-span-2">
+                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Organization Name</label>
+                                <input 
+                                    type="text" 
+                                    className="w-full p-3 rounded-lg border border-slate-200 text-sm font-semibold focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600" 
+                                    value={expForm.orgName || ''} 
+                                    onChange={(e) => handleExperienceChange('orgName', e.target.value)}
+                                />
+                            </div>
+                            <div className="space-y-2 col-span-2">
+                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Designation</label>
+                                <input 
+                                    type="text" 
+                                    className="w-full p-3 rounded-lg border border-slate-200 text-sm font-semibold focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600" 
+                                    value={expForm.designation || ''} 
+                                    onChange={(e) => handleExperienceChange('designation', e.target.value)}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nature of Job</label>
+                                <input 
+                                    type="text" 
+                                    className="w-full p-3 rounded-lg border border-slate-200 text-sm font-semibold focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600" 
+                                    value={expForm.natureOfJob || ''} 
+                                    onChange={(e) => handleExperienceChange('natureOfJob', e.target.value)}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Job Type</label>
+                                <input 
+                                    type="text" 
+                                    className="w-full p-3 rounded-lg border border-slate-200 text-sm font-semibold focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600" 
+                                    value={expForm.jobType || ''} 
+                                    onChange={(e) => handleExperienceChange('jobType', e.target.value)}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">From Date</label>
+                                <input 
+                                    type="text" 
+                                    className="w-full p-3 rounded-lg border border-slate-200 text-sm font-semibold focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600" 
+                                    value={expForm.fromDate || ''} 
+                                    onChange={(e) => handleExperienceChange('fromDate', e.target.value)}
+                                    placeholder="dd/mm/yyyy"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">To Date</label>
+                                <input 
+                                    type="text" 
+                                    className="w-full p-3 rounded-lg border border-slate-200 text-sm font-semibold focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600" 
+                                    value={expForm.toDate || ''} 
+                                    onChange={(e) => handleExperienceChange('toDate', e.target.value)}
+                                    placeholder="dd/mm/yyyy"
+                                />
+                            </div>
                         </div>
                         
-                        <div className="col-span-4 pt-6 border-t border-slate-100 flex items-center justify-between">
-                            <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border border-dashed border-slate-300">
-                                <Upload className="w-4 h-4 text-slate-400" />
-                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Upload Experience Document</span>
+                        <div className="pt-6 border-t border-slate-100 flex items-center justify-between gap-6">
+                            <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl border border-dashed border-slate-200 cursor-pointer hover:bg-slate-100 transition-colors flex-1">
+                                <Upload className="w-5 h-5 text-slate-400" />
+                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Upload Service Certificate</span>
                             </div>
                             <div className="flex gap-3">
-                                <Button variant="outline" onClick={() => setIsEditingExperience(false)} className="rounded-2xl px-6 h-12 font-black uppercase text-[10px]">Cancel</Button>
-                                <Button onClick={handleSaveExperience} className="bg-slate-800 text-white hover:bg-slate-900 rounded-2xl px-8 h-12 font-black uppercase text-[10px]">Update Experience</Button>
+                                <Button variant="outline" onClick={() => setIsEditingExperience(false)} className="rounded-lg px-6 h-11 font-bold uppercase text-[10px] border-slate-200 text-slate-600">Cancel</Button>
+                                <Button onClick={handleSaveExperience} className="bg-slate-900 text-white rounded-lg px-8 h-11 font-bold uppercase text-[10px] hover:bg-black transition-colors shadow-sm">Update Experience</Button>
                             </div>
                         </div>
                     </div>
-
                 </DialogContent>
             </Dialog>
 
             {/* Personal Details Modal */}
             <Dialog open={isPersonalOpen} onOpenChange={setIsPersonalOpen}>
-                <DialogContent className="max-w-3xl p-0 overflow-hidden border-none rounded-[40px] shadow-2xl">
-                    <div className="bg-gradient-to-r from-blue-900 to-blue-900 h-32 w-full flex items-end p-10 relative">
-                        <button
-                            onClick={() => setIsPersonalOpen(false)}
-                            className="absolute top-8 right-8 w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/20 transition-all border border-white/20"
-                        >
-                            <X className="w-6 h-6" />
-                        </button>
-                        <div className="flex items-center gap-4 text-white w-full">
-                            <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-md border border-white/20">
-                                <User className="w-8 h-8" />
+                <DialogContent className="max-w-3xl p-0 overflow-hidden border border-slate-200 rounded-xl shadow-2xl">
+                    <div className="bg-slate-900 px-10 py-8 flex items-center justify-between border-b border-slate-800">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center text-blue-400 border border-slate-700">
+                                <User className="w-6 h-6" />
                             </div>
-                            <div className="flex-1 flex items-center justify-between">
-                                <div>
-                                    <h3 className="text-3xl font-black tracking-tight leading-none uppercase">Personal Information</h3>
-                                    <p className="text-blue-100 text-[10px] font-black uppercase tracking-[0.2em] mt-2 opacity-80">Confidential & Verified Records</p>
-                                </div>
-                                {!isEditingPersonal && (
-                                    <button 
-                                        onClick={() => {
-                                            setPersonalForm(portfolio.personalDetails);
-                                            setIsEditingPersonal(true);
-                                        }}
-                                        className="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-xl border border-white/30 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all"
-                                    >
-                                        <Edit className="w-3.5 h-3.5" /> Edit Info
-                                    </button>
-                                )}
+                            <div>
+                                <DialogTitle className="text-xl font-bold text-white uppercase tracking-wider">Personal Portfolio</DialogTitle>
+                                <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">Verified Identity Records</p>
                             </div>
                         </div>
+                        <button onClick={() => setIsPersonalOpen(false)} className="text-slate-400 hover:text-white transition-colors">
+                            <X className="w-6 h-6" />
+                        </button>
                     </div>
 
-                    <div className="p-10 space-y-10 bg-white max-h-[70vh] overflow-y-auto">
+                    <div className="p-10 bg-white space-y-10 max-h-[70vh] overflow-y-auto">
+                        {!isEditingPersonal && (
+                            <div className="flex justify-end">
+                                <Button 
+                                    onClick={() => {
+                                        setPersonalForm(portfolio?.personalDetails);
+                                        setIsEditingPersonal(true);
+                                    }}
+                                    variant="outline"
+                                    className="rounded-lg border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[10px] h-9 px-4 flex items-center gap-2"
+                                >
+                                    <Edit className="w-3.5 h-3.5" /> Edit Record
+                                </Button>
+                            </div>
+                        )}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {[
                                 { label: 'Date of Birth', key: 'dob', type: 'date' },
@@ -1375,11 +1461,11 @@ const StaffPortfolioDetail: React.FC = () => {
                                 { label: "Mother's Name", key: 'motherName', type: 'text' },
                             ].map((field) => (
                                 <div key={field.key} className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{field.label}</label>
+                                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{field.label}</label>
                                     {isEditingPersonal ? (
                                         field.type === 'select' ? (
                                             <select 
-                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold focus:ring-2 focus:ring-blue-100 outline-none"
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm font-semibold focus:ring-2 focus:ring-blue-600/20 outline-none"
                                                 value={personalForm[field.key]}
                                                 onChange={(e) => setPersonalForm({ ...personalForm, [field.key]: e.target.value })}
                                             >
@@ -1388,13 +1474,13 @@ const StaffPortfolioDetail: React.FC = () => {
                                         ) : (
                                             <Input 
                                                 type={field.type}
-                                                className="bg-slate-50 border-slate-200 rounded-xl h-12 font-bold"
+                                                className="bg-slate-50 border-slate-200 rounded-lg h-11 font-semibold"
                                                 value={personalForm[field.key]}
                                                 onChange={(e) => setPersonalForm({ ...personalForm, [field.key]: e.target.value })}
                                             />
                                         )
                                     ) : (
-                                        <div className="text-sm font-bold text-slate-900 bg-slate-50 p-4 rounded-2xl border border-slate-100">{(portfolio.personalDetails as any)[field.key]}</div>
+                                        <div className="text-sm font-semibold text-slate-900 bg-slate-50 p-4 rounded-xl border border-slate-100">{(portfolio?.personalDetails as any)[field.key]}</div>
                                     )}
                                 </div>
                             ))}
@@ -1408,119 +1494,118 @@ const StaffPortfolioDetail: React.FC = () => {
                                 { label: 'ESI Number', key: 'esiNumber', icon: Shield },
                             ].map((field) => (
                                 <div key={field.key} className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
                                         <field.icon className="w-3 h-3" /> {field.label}
                                     </label>
                                     {isEditingPersonal ? (
                                         <Input 
-                                            className="bg-blue-50/50 border-blue-100/50 rounded-xl h-12 font-bold text-blue-800"
+                                            className="bg-blue-50/30 border-blue-100/50 rounded-lg h-11 font-semibold text-blue-800"
                                             value={personalForm[field.key]}
                                             onChange={(e) => setPersonalForm({ ...personalForm, [field.key]: e.target.value })}
                                         />
                                     ) : (
-                                        <div className="text-sm font-black text-blue-800 bg-blue-50/50 p-4 rounded-2xl border border-blue-100/50">{(portfolio.personalDetails as any)[field.key]}</div>
+                                        <div className="text-sm font-bold text-blue-800 bg-blue-50/30 p-4 rounded-xl border border-blue-100/50">{(portfolio?.personalDetails as any)[field.key]}</div>
                                     )}
                                 </div>
                             ))}
                         </div>
 
-                        <div className="bg-slate-50 rounded-[32px] p-8 border border-slate-100">
-                            <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
+                        <div className="bg-slate-50 rounded-2xl p-8 border border-slate-100">
+                            <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-6 flex items-center gap-3">
                                 <Menu className="w-4 h-4 text-slate-400" /> Bank & Financial Details
                             </h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                                 {[
                                     { label: 'Bank Name', key: 'bankName' },
                                     { label: 'Branch', key: 'branchName' },
-                                    { label: 'Account Number', key: 'accountNumber', color: 'text-blue-800' },
+                                    { label: 'Account No', key: 'accountNumber', color: 'text-blue-700' },
                                     { label: 'IFSC Code', key: 'ifscCode' },
                                 ].map((field) => (
                                     <div key={field.key} className="space-y-1">
-                                        <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{field.label}</div>
+                                        <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{field.label}</div>
                                         {isEditingPersonal ? (
                                             <Input 
-                                                className={`bg-white border-slate-200 rounded-lg h-9 text-xs font-bold ${field.color || 'text-slate-900'}`}
+                                                className={`bg-white border-slate-200 rounded-lg h-9 text-xs font-semibold ${field.color || 'text-slate-900'}`}
                                                 value={personalForm.bankDetails[field.key]}
                                                 onChange={(e) => setPersonalForm({ ...personalForm, bankDetails: { ...personalForm.bankDetails, [field.key]: e.target.value } })}
                                             />
                                         ) : (
-                                            <div className={`text-sm font-black ${field.color || 'text-slate-900'}`}>{(portfolio.personalDetails.bankDetails as any)[field.key]}</div>
+                                            <div className={`text-sm font-bold ${field.color || 'text-slate-900'}`}>{(portfolio?.personalDetails?.bankDetails as any)[field.key]}</div>
                                         )}
                                     </div>
                                 ))}
                             </div>
                         </div>
 
-                        {portfolio.personalDetails.passportDetails && (
-                            <div className="bg-blue-50/30 rounded-[32px] p-8 border border-blue-100/50">
-                                <h4 className="text-[10px] font-black text-blue-700 uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
-                                    <FileText className="w-4 h-4 text-blue-600" /> Passport Details
+                        {portfolio?.personalDetails.passportDetails && (
+                            <div className="bg-slate-900 rounded-2xl p-8 border border-slate-800">
+                                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-6 flex items-center gap-3">
+                                    <FileText className="w-4 h-4 text-blue-400" /> Passport Information
                                 </h4>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <div className="space-y-1">
-                                        <div className="text-[9px] font-black text-blue-200 uppercase tracking-widest">Passport Number</div>
+                                        <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Passport Number</div>
                                         {isEditingPersonal ? (
                                             <Input 
-                                                className="bg-white border-blue-100 rounded-lg h-9 text-xs font-bold"
+                                                className="bg-slate-800 border-slate-700 text-white rounded-lg h-9 text-xs font-semibold"
                                                 value={personalForm.passportDetails?.number}
                                                 onChange={(e) => setPersonalForm({ ...personalForm, passportDetails: { ...personalForm.passportDetails, number: e.target.value } })}
                                             />
                                         ) : (
-                                            <div className="text-sm font-black text-slate-900">{portfolio.personalDetails.passportDetails.number}</div>
+                                            <div className="text-sm font-bold text-white tracking-widest">{portfolio?.personalDetails?.passportDetails?.number}</div>
                                         )}
                                     </div>
                                     <div className="space-y-1">
-                                        <div className="text-[9px] font-black text-blue-200 uppercase tracking-widest">Expiry Date</div>
+                                        <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Expiry Date</div>
                                         {isEditingPersonal ? (
                                             <Input 
                                                 type="date"
-                                                className="bg-white border-blue-100 rounded-lg h-9 text-xs font-bold"
+                                                className="bg-slate-800 border-slate-700 text-white rounded-lg h-9 text-xs font-semibold"
                                                 value={personalForm.passportDetails?.expiryDate}
                                                 onChange={(e) => setPersonalForm({ ...personalForm, passportDetails: { ...personalForm.passportDetails, expiryDate: e.target.value } })}
                                             />
                                         ) : (
-                                            <div className="text-sm font-black text-slate-900">{portfolio.personalDetails.passportDetails.expiryDate}</div>
+                                            <div className="text-sm font-bold text-white">{portfolio?.personalDetails?.passportDetails?.expiryDate}</div>
                                         )}
                                     </div>
                                 </div>
                             </div>
                         )}
 
-
                         <div className="space-y-8 pt-8 border-t border-slate-100">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Current Address</label>
+                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Current Address</label>
                                 {isEditingPersonal ? (
                                     <textarea 
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-5 text-sm font-medium italic min-h-[100px] outline-none focus:ring-2 focus:ring-blue-100"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl p-5 text-sm font-medium italic min-h-[100px] outline-none focus:ring-2 focus:ring-blue-600/10"
                                         value={personalForm.currentAddress}
                                         onChange={(e) => setPersonalForm({ ...personalForm, currentAddress: e.target.value })}
                                     />
                                 ) : (
-                                    <div className="text-sm font-medium text-slate-700 bg-slate-50 p-5 rounded-2xl border border-slate-100 leading-relaxed italic">
-                                        {portfolio.personalDetails.currentAddress}
+                                    <div className="text-sm font-medium text-slate-700 bg-slate-50 p-6 rounded-xl border border-slate-100 leading-relaxed italic">
+                                        {portfolio?.personalDetails.currentAddress}
                                     </div>
                                 )}
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Permanent Address</label>
+                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Permanent Address</label>
                                 {isEditingPersonal ? (
                                     <textarea 
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-5 text-sm font-medium italic min-h-[100px] outline-none focus:ring-2 focus:ring-blue-100"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl p-5 text-sm font-medium italic min-h-[100px] outline-none focus:ring-2 focus:ring-blue-600/10"
                                         value={personalForm.permanentAddress}
                                         onChange={(e) => setPersonalForm({ ...personalForm, permanentAddress: e.target.value })}
                                     />
                                 ) : (
-                                    <div className="text-sm font-medium text-slate-700 bg-slate-50 p-5 rounded-2xl border border-slate-100 leading-relaxed italic">
-                                        {portfolio.personalDetails.permanentAddress}
+                                    <div className="text-sm font-medium text-slate-700 bg-slate-50 p-6 rounded-xl border border-slate-100 leading-relaxed italic">
+                                        {portfolio?.personalDetails.permanentAddress}
                                     </div>
                                 )}
                             </div>
                         </div>
 
-                        <div className="bg-rose-50 rounded-[32px] p-8 border border-rose-100">
-                            <h4 className="text-[10px] font-black text-rose-500 uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
-                                <Heart className="w-4 h-4" /> Emergency Contact Details
+                        <div className="bg-rose-50 rounded-2xl p-8 border border-rose-100">
+                            <h4 className="text-[10px] font-bold text-rose-500 uppercase tracking-wider mb-6 flex items-center gap-3">
+                                <Heart className="w-4 h-4" /> Emergency Contact
                             </h4>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 {[
@@ -1529,34 +1614,34 @@ const StaffPortfolioDetail: React.FC = () => {
                                     { label: 'Phone Number', key: 'phone', color: 'text-rose-600' },
                                 ].map((field) => (
                                     <div key={field.key} className="space-y-1">
-                                        <div className="text-[9px] font-black text-rose-300 uppercase tracking-widest">{field.label}</div>
+                                        <div className="text-[9px] font-bold text-rose-300 uppercase tracking-wider">{field.label}</div>
                                         {isEditingPersonal ? (
                                             <Input 
-                                                className={`bg-white border-rose-100 rounded-lg h-9 text-xs font-bold ${field.color || 'text-slate-900'}`}
+                                                className={`bg-white border-rose-100 rounded-lg h-9 text-xs font-semibold ${field.color || 'text-slate-900'}`}
                                                 value={personalForm.emergencyContact[field.key]}
                                                 onChange={(e) => setPersonalForm({ ...personalForm, emergencyContact: { ...personalForm.emergencyContact, [field.key]: e.target.value } })}
                                             />
                                         ) : (
-                                            <div className={`text-sm font-black ${field.color || 'text-slate-900'} ${field.isItalic ? 'italic' : ''}`}>{(portfolio.personalDetails.emergencyContact as any)[field.key]}</div>
+                                            <div className={`text-sm font-bold ${field.color || 'text-slate-900'} ${field.isItalic ? 'italic' : ''}`}>{(portfolio?.personalDetails?.emergencyContact as any)[field.key]}</div>
                                         )}
                                     </div>
                                 ))}
                             </div>
                         </div>
 
-                        <div className="pt-6 flex justify-end gap-3">
+                        <div className="pt-6 border-t border-slate-100 flex justify-end gap-3">
                             {isEditingPersonal ? (
                                 <>
                                     <Button
                                         onClick={() => setIsEditingPersonal(false)}
                                         variant="ghost"
-                                        className="rounded-2xl px-8 h-14 font-black uppercase tracking-widest text-[10px] text-slate-500 hover:bg-slate-100"
+                                        className="rounded-lg px-8 h-12 font-bold uppercase tracking-wider text-[10px] text-slate-500 hover:bg-slate-100"
                                     >
                                         Discard
                                     </Button>
                                     <Button
                                         onClick={handleSavePersonal}
-                                        className="bg-blue-800 text-white hover:bg-blue-900 rounded-2xl px-10 h-14 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-blue-800/20"
+                                        className="bg-slate-900 text-white rounded-lg px-10 h-12 font-bold uppercase tracking-wider text-[10px] hover:bg-black transition-colors"
                                     >
                                         Save Changes
                                     </Button>
@@ -1564,9 +1649,9 @@ const StaffPortfolioDetail: React.FC = () => {
                             ) : (
                                 <Button
                                     onClick={() => setIsPersonalOpen(false)}
-                                    className="bg-slate-900 text-white hover:bg-slate-800 rounded-2xl px-10 h-14 font-black uppercase tracking-widest text-xs"
+                                    className="bg-slate-900 text-white rounded-lg px-10 h-12 font-bold uppercase tracking-wider text-xs hover:bg-black transition-colors"
                                 >
-                                    Close Records
+                                    Close Portfolio
                                 </Button>
                             )}
                         </div>

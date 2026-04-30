@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import Layout from '../components/Layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import {
-    AlertTriangle, Settings, Clock, Home, Shield, CheckCircle,
+    AlertTriangle, Settings, Clock, Shield, CheckCircle,
     Search, Plus, Calendar, TrendingUp, Monitor, Info, Users, FileText,
     Target, Trash2
 } from 'lucide-react';
@@ -11,7 +12,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Switch } from '../components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { usePersona } from '../contexts/PersonaContext';
 
@@ -48,14 +48,40 @@ interface Employee {
     timeline?: TimelineEvent[];
     policyId?: number;
     currentStageId?: string;
+    isOnboardingComplete?: boolean;
+}
+
+interface StageDefinition {
+    id: string;
+    label: string;
+    icon: string;
+    color: string;
+    description?: string;
+}
+
+interface Policy {
+    id: number;
+    name: string;
+    duration: number;
+    type?: string;
+    stages: string[];
+}
+
+interface StageConfig {
+    points?: Array<{ id: string; title: string; weight: string; type: string; sub?: string }>;
+    owner?: string;
+    checker?: string;
+    allowReopen?: boolean;
+    scheduleOffset?: string | number;
+    slaLimit?: string | number;
+    slaFrequency?: string;
+    notifications?: Record<string, boolean>;
 }
 
 // Helper to determine stages dynamically
-const getIcon = (iconName: string | any) => {
-    // If it's already a component (legacy), return it
+const getIcon = (iconName: string | React.ElementType) => {
     if (typeof iconName !== 'string') return iconName;
-
-    const icons: any = { Target, Clock, Users, Shield, AlertTriangle, CheckCircle, Plus, Settings };
+    const icons: Record<string, React.ElementType> = { Target, Clock, Users, Shield, AlertTriangle, CheckCircle, Plus, Settings };
     return icons[iconName] || Target;
 };
 
@@ -69,14 +95,14 @@ const ProbationDashboard: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
     const [actionType, setActionType] = useState<'Review' | 'Decision' | 'KPI' | 'History' | 'Hire' | null>(null);
-    const [stageConfigs, setStageConfigs] = useState<Record<string, any>>(() => {
+    const [stageConfigs, setStageConfigs] = useState<Record<string, StageConfig>>(() => {
         const saved = localStorage.getItem('probation_stage_configs');
         return saved ? JSON.parse(saved) : null;
     });
 
     // Dynamic Configuration State
-    const [stageDefinitions, setStageDefinitions] = useState<any[]>([]);
-    const [policies, setPolicies] = useState<any[]>([]);
+    const [stageDefinitions, setStageDefinitions] = useState<StageDefinition[]>([]);
+    const [policies, setPolicies] = useState<Policy[]>([]);
 
     useEffect(() => {
         const loadConfig = () => {
@@ -107,12 +133,12 @@ const ProbationDashboard: React.FC = () => {
 
     const getEmployeeStages = (emp: Employee | null) => {
         // Default stages if no policy or definitions
-        const defaults = [
-            { id: 'kpi', label: 'KPI Setting', icon: Target, color: 'indigo' },
-            { id: '30_day', label: '30-Day Check', icon: Clock, color: 'blue' },
-            { id: '60_day', label: '60-Day Review', icon: Users, color: 'emerald' },
-            { id: '90_day', label: 'Final Assessment', icon: Shield, color: 'amber' },
-            { id: 'decision', label: 'Confirmation', icon: AlertTriangle, color: 'rose' }
+        const defaults: StageDefinition[] = [
+            { id: 'kpi', label: 'KPI Setting', icon: 'Target', color: 'indigo' },
+            { id: '30_day', label: '30-Day Check', icon: 'Clock', color: 'blue' },
+            { id: '60_day', label: '60-Day Review', icon: 'Users', color: 'emerald' },
+            { id: '90_day', label: 'Final Assessment', icon: 'Shield', color: 'amber' },
+            { id: 'decision', label: 'Confirmation', icon: 'AlertTriangle', color: 'rose' }
         ];
 
         if (!emp) return defaults;
@@ -126,8 +152,8 @@ const ProbationDashboard: React.FC = () => {
 
         return policy.stages.map((stageId: string) => {
             const def = stageDefinitions.find(d => d.id === stageId);
-            return def ? { ...def, icon: getIcon(def.icon) } : null;
-        }).filter(Boolean);
+            return def ? { ...def } : null;
+        }).filter((s): s is StageDefinition => s !== null);
     };
 
     // Filtered data for view
@@ -208,6 +234,7 @@ const ProbationDashboard: React.FC = () => {
                         joining_date: "2024-01-10", status: "Probation", review_status: "Pending",
                         probation_end_date: "2024-07-10", next_review_date: "2024-04-10",
                         risk_level: "Low", performance_score: 4.5, currentStageId: "kpi", policyId: 1,
+                        isOnboardingComplete: false,
                         timeline: [{ id: 1, date: "2024-01-10", event: "Hired", details: "Joined as Asst. Professor" }]
                     },
                     {
@@ -384,100 +411,68 @@ const ProbationDashboard: React.FC = () => {
         setSelectedEmployee(null);
     };
 
-    if (loading) return <div className="p-6 text-center">Loading...</div>;
-    if (error) return <div className="p-6 text-center text-red-500">Error: {error}</div>;
+    if (loading) return <div className="px-4 py-4 text-center">Loading...</div>;
+    if (error) return <div className="px-4 py-4 text-center text-red-500">Error: {error}</div>;
 
     return (
-        <div className="flex flex-col h-screen bg-slate-50">
-            {/* Top Navigation Bar - Premium Glassmorphism */}
-            <div className="bg-white/70 backdrop-blur-xl border-b border-white/40 sticky top-0 z-50 shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-20">
-                        <div className="flex items-center gap-6">
-                            <button
-                                onClick={() => window.location.href = '/'}
-                                className="w-10 h-10 rounded-xl bg-white shadow-xl shadow-slate-200/50 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:scale-110 transition-all border border-slate-50"
-                            >
-                                <Home className="w-4 h-4" />
-                            </button>
-                            <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-200">
-                                    <Shield className="w-5 h-5" />
-                                </div>
-                                <div className="hidden sm:block">
-                                    <h1 className="text-lg font-black text-slate-900 tracking-tight leading-none uppercase">
-                                        {isHR ? 'Probation Hub' : isManager ? 'Team Probation' : 'Probation Status'}
-                                    </h1>
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Institutional Oversight</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-4">
-                            <div className="relative hidden md:block">
-                                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                                <input
-                                    className="h-10 w-64 pl-10 pr-4 bg-slate-100 border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 transition-all"
-                                    placeholder="Search staff..."
-                                />
-                            </div>
-                            {(role === 'HR_ADMIN' || role === 'ADMIN') && (
-                                <Button
-                                    onClick={() => window.location.href = '/probation/config'}
-                                    variant="ghost"
-                                    className="h-10 px-4 rounded-xl gap-2 font-bold text-slate-600 hover:bg-slate-100"
-                                >
-                                    <Settings className="w-4 h-4" />
-                                    <span className="text-xs uppercase tracking-wider">Configure</span>
-                                </Button>
-                            )}
-                        </div>
+        <Layout 
+            title={isHR ? 'Probation Hub' : isManager ? 'Team Probation' : 'Probation Status'} 
+            description="Institutional Oversight & Performance Review" 
+            showHome={true} 
+            icon={Shield}
+            headerActions={
+                <div className="flex items-center gap-4">
+                    <div className="relative hidden md:block">
+                        <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                            className="h-10 w-72 pl-12 pr-4 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium focus:ring-2 focus:ring-slate-900 transition-all placeholder:text-slate-400"
+                            placeholder="Search staff members..."
+                        />
                     </div>
+                    {isHR && (
+                            <Button
+                                onClick={() => window.location.href = '/probation/config'}
+                                className="h-10 bg-white border border-slate-200 text-slate-900 rounded-lg hover:bg-slate-50 transition-all shadow-sm font-bold text-xs uppercase tracking-widest px-4"
+                            >
+                                <Settings className="w-4 h-4 mr-2" />
+                                Config
+                            </Button>
+                    )}
                 </div>
-            </div>
-
-            {/* Main Content Area */}
-            <main className="flex-1 overflow-y-auto p-8">
-                <div className="max-w-7xl mx-auto space-y-12">
+            }
+        >
+            <div className="space-y-12">
                     {role !== 'EMPLOYEE' ? (
                         <>
-                            {/* Premium Stats Overview - Floating Crystal Cards */}
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            {/* Professional Stats Overview */}
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 py-4">
                                 {[
-                                    { label: 'Active staff', value: visibleEmployees.length, icon: Users, color: 'blue' },
-                                    { label: 'Reviews Pending', value: visibleEmployees.filter(e => !e.review_status || e.review_status === 'Pending').length, icon: Clock, color: 'amber' },
-                                    { label: 'Confirmation ready', value: visibleEmployees.filter(e => e.review_status === 'Submitted').length, icon: CheckCircle, color: 'emerald' },
-                                    { label: 'High Risk cases', value: visibleEmployees.filter(e => e.risk_level === 'High').length, icon: AlertTriangle, color: 'rose' }
+                                    { label: 'Total In Probation', value: visibleEmployees.length, icon: Users, color: 'slate' },
+                                    { label: 'Review Pending', value: visibleEmployees.filter(e => !e.review_status || e.review_status === 'Pending').length, icon: Clock, color: 'slate' },
+                                    { label: 'Reviews Submitted', value: visibleEmployees.filter(e => e.review_status === 'Submitted').length, icon: CheckCircle, color: 'slate' },
+                                    { label: 'High Risk Assets', value: visibleEmployees.filter(e => e.risk_level === 'High').length, icon: AlertTriangle, color: 'slate' }
                                 ].map((stat, i) => (
-                                    <div key={i} className="group relative">
-                                        <div className={`absolute inset-0 bg-${stat.color}-500 blur-2xl opacity-10 group-hover:opacity-20 transition-opacity rounded-[32px]`} />
-                                        <Card className="border-none shadow-xl bg-white/80 backdrop-blur-md rounded-[32px] overflow-hidden relative border border-white/50">
-                                            <CardContent className="p-6">
-                                                <div className="flex items-center gap-4">
-                                                    <div className={`h-12 w-12 rounded-2xl bg-${stat.color}-50 flex items-center justify-center text-${stat.color}-600`}>
-                                                        <stat.icon className="w-6 h-6" />
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
-                                                        <h3 className="text-2xl font-black text-slate-900 mt-1">{stat.value}</h3>
-                                                    </div>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
+                                    <div key={i} className="bg-white p-6 border border-slate-200 rounded-xl shadow-sm flex items-center gap-5">
+                                        <div className="h-12 w-12 rounded-lg bg-slate-900 flex items-center justify-center text-white shadow-sm">
+                                            {React.createElement(stat.icon, { className: "w-5 h-5" })}
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{stat.label}</p>
+                                            <h3 className="text-2xl font-bold text-slate-900 mt-0.5 tracking-tight">{stat.value}</h3>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
 
-                            {/* Filters & Actions */}
-                            <div className="flex flex-col sm:flex-row justify-between items-end gap-4 mb-6">
+                            <div className="flex flex-col sm:flex-row justify-between items-center gap-6 mb-8 mt-4">
                                 <div>
-                                    <h2 className="text-3xl font-black text-slate-900 tracking-tight italic">Probation Pool</h2>
-                                    <p className="text-slate-500 font-medium mt-1">Managing {visibleEmployees.length} staff members in induction.</p>
+                                    <h2 className="text-xl font-bold text-slate-900 tracking-tight">Probation Pool</h2>
+                                    <p className="text-xs font-medium text-slate-500 mt-1">Managing {visibleEmployees.length} personnel in probation period.</p>
                                 </div>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-3">
                                     <Button
                                         onClick={() => setActionType('Hire')}
-                                        className="rounded-full bg-slate-900 hover:bg-slate-800 text-white font-black text-xs uppercase tracking-widest px-8 h-11 shadow-lg"
+                                        className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-widest px-8 h-11 rounded-lg transition-all"
                                     >
                                         <Plus className="w-4 h-4 mr-2" /> New Hire
                                     </Button>
@@ -485,88 +480,90 @@ const ProbationDashboard: React.FC = () => {
                             </div>
 
                             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                                <TabsList className="bg-slate-100/50 p-1 rounded-2xl mb-8 w-full justify-start overflow-x-auto h-auto">
-                                    <TabsTrigger value="probation" className="rounded-xl px-6 py-3 font-bold data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm">
-                                        In Probation
-                                        <Badge className="ml-2 bg-indigo-100 text-indigo-600 hover:bg-indigo-100 border-none h-5 px-1.5 min-w-[20px] justify-center">
+                                <TabsList className="bg-slate-100 p-1 rounded-lg mb-8 w-fit border border-slate-200 gap-1 h-auto">
+                                    <TabsTrigger value="probation" className="rounded-md px-6 py-2 text-xs font-bold uppercase tracking-wider transition-all data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm">
+                                        In Progress
+                                        <Badge className="ml-2 bg-slate-200 text-slate-600 border-none h-4 px-1.5 font-bold text-[9px]">
                                             {employees.filter(e => {
                                                 const s = e.review_status || 'Pending';
                                                 return ['Pending', 'Submitted', 'Reviewed', 'In Progress'].includes(s) || s.startsWith('Extended') || s.includes('PIP');
                                             }).length}
                                         </Badge>
                                     </TabsTrigger>
-                                    <TabsTrigger value="completed" className="rounded-xl px-6 py-3 font-bold data-[state=active]:bg-white data-[state=active]:text-emerald-600 data-[state=active]:shadow-sm">
-                                        Completed
-                                        <Badge className="ml-2 bg-emerald-100 text-emerald-600 hover:bg-emerald-100 border-none h-5 px-1.5 min-w-[20px] justify-center">
+                                    <TabsTrigger value="completed" className="rounded-md px-6 py-2 text-xs font-bold uppercase tracking-wider transition-all data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm">
+                                        Confirmed
+                                        <Badge className="ml-2 bg-slate-200 text-slate-600 border-none h-4 px-1.5 font-bold text-[9px]">
                                             {employees.filter(e => e.review_status === 'Confirmed').length}
                                         </Badge>
                                     </TabsTrigger>
-                                    <TabsTrigger value="rejected" className="rounded-xl px-6 py-3 font-bold data-[state=active]:bg-white data-[state=active]:text-rose-600 data-[state=active]:shadow-sm">
-                                        Released
-                                        <Badge className="ml-2 bg-rose-100 text-rose-600 hover:bg-rose-100 border-none h-5 px-1.5 min-w-[20px] justify-center">
+                                    <TabsTrigger value="rejected" className="rounded-md px-6 py-2 text-xs font-bold uppercase tracking-wider transition-all data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm">
+                                        Terminated
+                                        <Badge className="ml-2 bg-slate-200 text-slate-600 border-none h-4 px-1.5 font-bold text-[9px]">
                                             {employees.filter(e => ['Terminated', 'Separated', 'Rejected'].includes(e.review_status || '')).length}
                                         </Badge>
                                     </TabsTrigger>
                                 </TabsList>
 
-                                {/* Masonry-style Grid for Employees */}
+                                {/* Masonry Grid for Candidates */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-12">
                                     {visibleEmployees.map((emp) => {
                                         const empStages = getEmployeeStages(emp);
+                                        const isHighRisk = emp.risk_level === 'High' || (emp.performance_score !== undefined && emp.performance_score > 0 && emp.performance_score < 3) || emp.kpis?.some(k => k.status === 'Not Met');
+                                        
                                         return (
-                                            <div key={emp.id} className="group relative">
-                                                {/* Dynamic Risk Background Blur */}
-                                                <div className={`absolute inset-0 blur-3xl opacity-5 transition-opacity duration-700
-                                                ${emp.risk_level === 'High' ? 'bg-rose-500' : emp.risk_level === 'Medium' ? 'bg-amber-500' : 'bg-indigo-500'}`}
-                                                />
-
-                                                <Card className="border-none shadow-sm hover:shadow-2xl bg-white rounded-[40px] overflow-hidden transition-all duration-500 border border-white/40 relative z-10 hover:-translate-y-2">
-                                                    <CardHeader className="p-8 pb-0">
+                                                 <Card className="border border-slate-200 shadow-sm bg-white rounded-2xl overflow-hidden hover:shadow-md transition-all relative z-10">
+                                                    <CardHeader className="p-6 pb-0">
                                                         <div className="flex justify-between items-start">
                                                             <div className="flex items-center gap-4">
-                                                                <div className="h-14 w-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-indigo-600 text-xl font-black shadow-inner">
+                                                                <div className="h-12 w-12 rounded-lg bg-slate-900 flex items-center justify-center text-white text-xl font-bold">
                                                                     {emp.name.charAt(0)}
                                                                 </div>
                                                                 <div>
-                                                                    <CardTitle className="text-lg font-black text-slate-900 tracking-tight leading-none">{emp.name}</CardTitle>
-                                                                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-2">{emp.designation}</p>
+                                                                    <CardTitle className="text-lg font-bold text-slate-900 tracking-tight">{emp.name}</CardTitle>
+                                                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-1">{emp.designation}</p>
                                                                 </div>
                                                             </div>
-                                                            <Badge className={`rounded-xl border-none font-black text-[9px] uppercase tracking-[0.15em] px-3 py-1 shadow-sm
-                                                            ${(emp.review_status === 'Terminated' || emp.status === 'Separated') ? 'bg-rose-600 text-white' : 
-                                                              emp.risk_level === 'High' || (emp.performance_score !== undefined && emp.performance_score > 0 && emp.performance_score < 3) || emp.kpis?.some(k => k.status === 'Not Met') ? 'bg-rose-50 text-rose-500' : 
-                                                              emp.risk_level === 'Medium' ? 'bg-amber-50 text-amber-500' : 'bg-slate-50 text-slate-400'}`}>
-                                                                {emp.review_status === 'Terminated' || emp.status === 'Separated' ? 'Terminated' : 
-                                                                 (emp.performance_score !== undefined && emp.performance_score > 0 && emp.performance_score < 3) || emp.kpis?.some(k => k.status === 'Not Met') ? 'Risk' :
-                                                                 emp.risk_level || 'Safe'}
-                                                            </Badge>
+                                                            <div className="flex flex-col items-end gap-1">
+                                                                <Badge className={`rounded-md border-none font-bold text-[9px] uppercase tracking-wider px-2 py-1
+                                                                ${(emp.review_status === 'Terminated' || emp.status === 'Separated') ? 'bg-rose-600 text-white' : 
+                                                                  isHighRisk ? 'bg-rose-500 text-white' : 
+                                                                  emp.risk_level === 'Medium' ? 'bg-amber-500 text-white' : 'bg-slate-900 text-white'}`}>
+                                                                    {emp.review_status === 'Terminated' || emp.status === 'Separated' ? 'Separated' : 
+                                                                     isHighRisk ? 'Critical' :
+                                                                     emp.risk_level || 'Normal'}
+                                                                </Badge>
+                                                                {emp.isOnboardingComplete === false && (
+                                                                    <Badge className="bg-rose-50 text-rose-600 border border-rose-100 text-[8px] font-black uppercase tracking-widest px-2 py-0.5">
+                                                                        Complete Data
+                                                                    </Badge>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     </CardHeader>
 
-                                                    <CardContent className="p-8">
-                                                        {/* Milestone Stats */}
-                                                        <div className="grid grid-cols-2 gap-4 mb-8">
-                                                            <div className="p-4 bg-slate-50 rounded-3xl border border-slate-100">
-                                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Confirmation Due</p>
+                                                    <CardContent className="p-6">
+                                                        <div className="grid grid-cols-2 gap-4 mb-6">
+                                                            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 shadow-sm">
+                                                                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-2">Milestone Due</p>
                                                                 <div className="flex items-center gap-2">
-                                                                    <Calendar className="w-3.5 h-3.5 text-indigo-600" />
-                                                                    <span className="text-sm font-black text-slate-800 tracking-tight">{emp.probation_end_date}</span>
+                                                                    <Calendar className="w-4 h-4 text-slate-600" />
+                                                                    <span className="text-sm font-bold text-slate-900 tracking-tight">{emp.probation_end_date}</span>
                                                                 </div>
                                                             </div>
-                                                            <div className="p-4 bg-slate-50 rounded-3xl border border-slate-100">
-                                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                                                            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 shadow-sm">
+                                                                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-2">Cycle Phase</p>
                                                                 <div className="flex items-center gap-2">
                                                                     <div className={`h-2 w-2 rounded-full ${emp.review_status === 'Submitted' ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}`} />
-                                                                    <span className="text-xs font-bold text-slate-600 uppercase tracking-tighter">{emp.review_status || 'Pending'}</span>
+                                                                    <span className="text-xs font-bold text-slate-700 uppercase">{emp.review_status || 'Active'}</span>
                                                                 </div>
                                                             </div>
                                                         </div>
 
-                                                        {/* Mini Progress Bar */}
-                                                <div className="space-y-3 mb-8">
+                                                        {/* Progress Architecture */}
+                                                        <div className="space-y-3 mb-6">
                                                             <div className="flex justify-between items-end">
-                                                                <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] italic">Journey Progress</span>
-                                                                <span className="text-xs font-black text-slate-900">
+                                                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Journey Progress</span>
+                                                                <span className="text-xs font-bold text-slate-900">
                                                                     {(() => {
                                                                         if (emp.review_status === 'Confirmed' || emp.review_status === 'Terminated' || emp.status === 'Separated' || emp.status === 'Confirmed') return '100%';
                                                                         const idx = empStages.findIndex((s: any) => s.id === emp.currentStageId);
@@ -575,11 +572,11 @@ const ProbationDashboard: React.FC = () => {
                                                                     })()}
                                                                 </span>
                                                             </div>
-                                                            <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-100">
+                                                            <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200">
                                                                 <div
-                                                                    className={`h-full rounded-full shadow-[0_0_10px_rgba(79,70,229,0.3)] transition-all duration-1000 
+                                                                    className={`h-full rounded-full transition-all duration-1000
                                                                     ${emp.review_status === 'Confirmed' || emp.status === 'Confirmed' ? 'bg-emerald-500' : 
-                                                                      emp.review_status === 'Terminated' || emp.status === 'Separated' ? 'bg-rose-500' : 'bg-indigo-600'}`}
+                                                                      emp.review_status === 'Terminated' || emp.status === 'Separated' ? 'bg-rose-500' : 'bg-blue-600'}`}
                                                                     style={{ 
                                                                         width: (() => {
                                                                             if (emp.review_status === 'Confirmed' || emp.review_status === 'Terminated' || emp.status === 'Separated' || emp.status === 'Confirmed') return '100%';
@@ -590,30 +587,28 @@ const ProbationDashboard: React.FC = () => {
                                                                     }}
                                                                 />
                                                             </div>
-                                                            <p className={`text-[10px] font-bold text-right uppercase tracking-widest ${emp.review_status === 'Terminated' || emp.status === 'Separated' ? 'text-rose-500' : 'text-slate-400'}`}>
-                                                                {emp.review_status === 'Confirmed' || emp.status === 'Confirmed' ? 'Converted' : emp.review_status === 'Terminated' || emp.status === 'Separated' ? 'Terminated' : 'In Probation'}
-                                                            </p>
                                                         </div>
 
-                                                        {/* Actions Crystal Buttons */}
-                                                        <div className="grid grid-cols-2 gap-3">
+                                                        {/* Strategic Actions */}
+                                                        <div className="grid grid-cols-2 gap-4">
                                                             <Button
                                                                 variant="ghost"
-                                                                className="rounded-2xl bg-indigo-50/50 hover:bg-indigo-600 hover:text-white font-black text-[10px] uppercase tracking-widest h-12 transition-all border border-indigo-100/50"
+                                                                className="rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-900 font-bold text-[10px] uppercase tracking-widest h-12 transition-all border border-slate-200"
                                                                 onClick={() => { setSelectedEmployee(emp); setActionType('History'); }}
                                                             >
-                                                                Full Profiler
+                                                                Insights
                                                             </Button>
                                                             {emp.review_status === 'Terminated' || emp.status === 'Separated' ? (
                                                                 <Button
-                                                                    className="rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-[10px] uppercase tracking-widest h-12 shadow-xl shadow-rose-100"
+                                                                    className="rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-[10px] uppercase tracking-widest h-12 shadow-sm transition-all active:scale-95"
                                                                     onClick={() => alert('Redirecting to Exit Management Module...')}
                                                                 >
-                                                                    Exit Management
+                                                                    Exit Protocol
                                                                 </Button>
                                                             ) : (
                                                                 <Button
-                                                                    className="rounded-2xl bg-slate-900 hover:bg-black text-white font-black text-[10px] uppercase tracking-widest h-12 shadow-xl shadow-slate-100"
+                                                                    className={`rounded-lg font-bold text-[10px] uppercase tracking-widest h-12 shadow-sm transition-all active:scale-95 flex-1 ${emp.isOnboardingComplete === false ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                                                                    disabled={emp.isOnboardingComplete === false}
                                                                     onClick={() => {
                                                                         setSelectedEmployee(emp);
                                                                         const currentConfigs = stageConfigs || {};
@@ -627,13 +622,12 @@ const ProbationDashboard: React.FC = () => {
                                                                         setActionType('Review');
                                                                     }}
                                                                 >
-                                                                    Record Review
+                                                                    {emp.isOnboardingComplete === false ? 'Awaiting Sync' : 'Review'}
                                                                 </Button>
                                                             )}
                                                         </div>
                                                     </CardContent>
                                                 </Card>
-                                            </div>
                                         );
                                     })}
                                 </div>
@@ -644,28 +638,23 @@ const ProbationDashboard: React.FC = () => {
                         <div className="max-w-4xl mx-auto pb-20">
                             <div className="relative">
                                 {/* Blurred background shapes */}
-                                <div className="absolute top-0 -left-20 w-72 h-72 bg-indigo-600/10 rounded-full blur-3xl animate-pulse" />
-                                <div className="absolute bottom-0 -right-20 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl" />
-
-                                <Card className="border-none shadow-2xl rounded-[60px] bg-white/80 backdrop-blur-2xl overflow-hidden border border-white/50 relative z-10">
-                                    <div className="h-48 bg-slate-900 relative p-12 overflow-hidden">
-                                        <div className="absolute top-0 right-0 p-8">
-                                            <Badge className="bg-white/10 backdrop-blur-md text-white border-white/10 px-6 py-2 rounded-full text-xs font-black uppercase tracking-[0.2em]">
-                                                Hiring ID: EMP-2024-88
+                                <Card className="border border-slate-200 shadow-xl rounded-3xl bg-white overflow-hidden relative z-10">
+                                    <div className="h-40 bg-slate-900 relative p-10 overflow-hidden">
+                                        <div className="absolute top-0 right-0 p-6">
+                                            <Badge className="bg-white/10 text-white border-white/10 px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider">
+                                                ID: EMP-2024-88
                                             </Badge>
                                         </div>
                                         <div className="relative z-10">
-                                            <h2 className="text-4xl font-black text-white tracking-tighter leading-none italic">Welcome to the Team</h2>
-                                            <p className="text-indigo-200 font-bold mt-4 flex items-center gap-3">
-                                                <Monitor className="w-5 h-5" />
+                                            <h2 className="text-2xl font-bold text-white tracking-tight">Welcome to the Team</h2>
+                                            <p className="text-slate-300 font-medium mt-1 flex items-center gap-2">
+                                                <Monitor className="w-4 h-4" />
                                                 <span>{user?.department || 'Academic Affairs'} • Senior Faculty</span>
                                             </p>
                                         </div>
-                                        {/* Abstract background elements */}
-                                        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-indigo-500 rounded-full opacity-20 blur-3xl" />
                                     </div>
 
-                                    <CardContent className="p-12">
+                                    <CardContent className="p-10">
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                                             {/* Summary Stats */}
                                             <div className="md:col-span-1 space-y-4">
@@ -674,31 +663,30 @@ const ProbationDashboard: React.FC = () => {
                                                         label: 'Next Review', value: (() => {
                                                             const offset = stageConfigs?.[(user as any)?.currentStageId || '']?.scheduleOffset || 30;
                                                             const joinDate = new Date((user as any)?.joining_date || Date.now());
-                                                            joinDate.setDate(joinDate.getDate() + parseInt(offset));
+                                                            joinDate.setDate(joinDate.getDate() + Number(offset));
                                                             return joinDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                                                        })(), icon: Calendar, color: 'indigo'
+                                                        })(), icon: Calendar, color: 'slate'
                                                     },
-                                                    { label: 'Confirmation', value: '45 Days to go', icon: Clock, color: 'emerald' },
-                                                    { label: 'Scorecard', value: '4.8 / 5.0', icon: TrendingUp, color: 'amber' }
+                                                    { label: 'Confirmation', value: '45 Days to go', icon: Clock, color: 'slate' },
+                                                    { label: 'Scorecard', value: '4.8 / 5.0', icon: TrendingUp, color: 'slate' }
                                                 ].map((stat, i) => (
-                                                    <div key={i} className={`p-6 rounded-[32px] bg-${stat.color}-50 border border-${stat.color}-100/50 flex flex-col items-center text-center group hover:scale-105 transition-transform duration-500`}>
-                                                        <div className={`h-12 w-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-${stat.color}-600 mb-4`}>
-                                                            <stat.icon className="w-6 h-6" />
+                                                    <div key={i} className={`p-5 rounded-xl bg-slate-50 border border-slate-100 flex flex-col items-center text-center`}>
+                                                        <div className={`h-10 w-10 rounded-lg bg-white shadow-sm flex items-center justify-center text-slate-600 mb-3`}>
+                                                            {React.createElement(stat.icon, { className: "w-5 h-5" })}
                                                         </div>
-                                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>
-                                                        <p className={`text-xl font-black text-${stat.color}-950 tracking-tight`}>{stat.value}</p>
+                                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">{stat.label}</p>
+                                                        <p className={`text-lg font-bold text-slate-900 tracking-tight`}>{stat.value}</p>
                                                     </div>
                                                 ))}
                                             </div>
 
                                             {/* Vertical Journey Timeline */}
-                                            <div className="md:col-span-2 space-y-8">
+                                            <div className="md:col-span-2 space-y-6">
                                                 <div className="flex items-center justify-between mb-2">
-                                                    <h3 className="text-xl font-black text-slate-900 tracking-tight italic">Your Journey Roadmap</h3>
-                                                    <Info className="w-5 h-5 text-slate-300 cursor-help" />
+                                                    <h3 className="text-xl font-bold text-slate-900 tracking-tight">Journey Roadmap</h3>
                                                 </div>
 
-                                                <div className="space-y-12 relative before:absolute before:inset-0 before:left-6 before:w-0.5 before:bg-slate-100 before:z-0">
+                                                <div className="space-y-10 relative before:absolute before:inset-0 before:left-6 before:w-0.5 before:bg-slate-100 before:z-0">
                                                     {getEmployeeStages(user as any).map((step: any, i: number, arr: any[]) => {
                                                         const currentIdx = arr.findIndex((s: any) => s.id === ((user as any)?.currentStageId || '90_day'));
                                                         const isCompleted = i < currentIdx;
@@ -707,25 +695,25 @@ const ProbationDashboard: React.FC = () => {
 
                                                         return (
                                                             <div key={i} className={`relative z-10 pl-16 group`}>
-                                                                <div className={`absolute left-4 top-1 h-4 w-4 rounded-full ring-4 transition-all duration-500
+                                                                <div className={`absolute left-4 top-1 h-4 w-4 rounded-full ring-4 transition-all duration-300
                                                                     ${isCompleted ? 'bg-emerald-500 ring-emerald-50' :
-                                                                        isCurrent ? 'bg-indigo-600 ring-indigo-100 animate-bounce' :
+                                                                        isCurrent ? 'bg-slate-900 ring-slate-100' :
                                                                             'bg-white ring-slate-100'}`}
                                                                 />
                                                                 <div>
                                                                     <div className="flex items-center gap-3">
-                                                                        <span className={`text-xs font-black uppercase tracking-widest transition-colors
-                                                                            ${isCurrent ? 'text-indigo-600' : isCompleted ? 'text-emerald-600' : 'text-slate-400'}`}>
+                                                                        <span className={`text-xs font-bold uppercase tracking-wider transition-colors
+                                                                            ${isCurrent ? 'text-slate-900' : isCompleted ? 'text-emerald-600' : 'text-slate-400'}`}>
                                                                             {step.label}
                                                                         </span>
-                                                                        <span className="h-px w-8 bg-slate-100" />
-                                                                        <span className="text-[10px] font-black text-slate-300">
+                                                                        <span className="h-px w-6 bg-slate-100" />
+                                                                        <span className="text-[10px] font-bold text-slate-300">
                                                                             {isCompleted ? 'Verified' : isCurrent ? 'Active Milestone' : 'Upcoming'}
                                                                         </span>
                                                                     </div>
-                                                                    <p className={`text-sm font-bold mt-2 leading-relaxed transition-colors
-                                                                        ${isPending ? 'text-slate-400' : 'text-slate-700'}`}>
-                                                                        {isCompleted ? 'Requirements met and validated.' : isCurrent ? 'Finalizing current assessments and peer reviews.' : 'Phase opens upon milestone clearance.'}
+                                                                    <p className={`text-sm font-medium mt-1 transition-colors
+                                                                        ${isPending ? 'text-slate-400' : 'text-slate-600'}`}>
+                                                                        {isCompleted ? 'Requirements met and validated.' : isCurrent ? 'Finalizing current assessments.' : 'Phase opens after milestone clearance.'}
                                                                     </p>
                                                                 </div>
                                                             </div>
@@ -733,8 +721,8 @@ const ProbationDashboard: React.FC = () => {
                                                     })}
                                                 </div>
 
-                                                <div className="pt-8 border-t border-slate-50 flex justify-end">
-                                                    <Button className="rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-widest px-10 h-14 shadow-2xl shadow-indigo-100">
+                                                <div className="pt-8 border-t border-slate-100 flex justify-end">
+                                                    <Button className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-widest px-8 h-12 shadow-lg">
                                                         Access Resources
                                                     </Button>
                                                 </div>
@@ -749,228 +737,85 @@ const ProbationDashboard: React.FC = () => {
                     {/* Dynamic Stage-Wise Review Modal */}
                     {/* Dynamic Stage-Wise Review Modal */}
                     <Dialog open={actionType === 'Review' || getEmployeeStages(selectedEmployee).map((s: any) => s.id).includes(actionType as string)} onOpenChange={() => setActionType(null)}>
-                        <DialogContent className="max-w-4xl p-0 overflow-hidden rounded-[40px] border-none shadow-2xl">
-                            <div className="flex h-[600px]">
+                        <DialogContent className="max-w-4xl p-0 overflow-hidden rounded-2xl border border-slate-200 shadow-2xl bg-white">
+                            <div className="flex h-[700px]">
                                 {/* Left Side: Journey Roadmap */}
-                                <div className="w-1/3 bg-slate-900 p-8 text-white relative overflow-hidden">
+                                <div className="w-1/3 bg-slate-50 p-8 border-r border-slate-200 relative overflow-hidden">
                                     <div className="relative z-10 h-full flex flex-col">
-                                        <div className="mb-8">
-                                            <Badge className="bg-white/10 text-indigo-300 border-none mb-4">Milestone Tracker</Badge>
-                                            <h2 className="text-2xl font-black tracking-tight italic">The Journey</h2>
+                                        <div className="mb-6">
+                                            <h2 className="text-xl font-bold text-slate-900 tracking-tight">Timeline</h2>
                                         </div>
 
-                                        <div className="flex-1 space-y-8 relative before:absolute before:inset-0 before:left-3 before:w-px before:bg-white/10 before:z-0">
+                                        <div className="flex-1 space-y-8 relative before:absolute before:inset-0 before:left-4 before:w-px before:bg-slate-200 before:z-0">
                                             {getEmployeeStages(selectedEmployee).map((s: any, i: number, arr: any[]) => {
                                                 const currentIdx = arr.findIndex((st: any) => st.id === selectedEmployee?.currentStageId);
                                                 const isCompleted = i < currentIdx;
                                                 const isActive = i === currentIdx;
 
                                                 return (
-                                                    <div key={s.id} className="relative z-10 pl-10 group">
-                                                        <div className={`absolute left-0 top-1 h-6 w-6 rounded-full flex items-center justify-center transition-all duration-500 shadow-lg
-                                                            ${isCompleted ? 'bg-emerald-500 scale-110 cursor-pointer hover:ring-4 hover:ring-emerald-200' : isActive ? 'bg-indigo-600 ring-4 ring-indigo-500/30' : 'bg-slate-800'}`}
+                                                    <div key={s.id} className="relative z-10 pl-12 group">
+                                                        <div className={`absolute left-0 top-1 h-8 w-8 rounded-lg flex items-center justify-center transition-all duration-300 shadow-sm
+                                                            ${isCompleted ? 'bg-emerald-500 scale-100 cursor-pointer' : isActive ? 'bg-slate-900 ring-4 ring-slate-100' : 'bg-white border border-slate-200'}`}
                                                             onClick={() => isCompleted && setActionType(s.id as any)}
                                                         >
-                                                            {isCompleted ? <CheckCircle className="w-4 h-4 text-white" /> : <span className="text-[10px] font-black">{i + 1}</span>}
+                                                            {(() => {
+                                                                const IconComp = getIcon(s.icon);
+                                                                return isCompleted ? <CheckCircle className="w-4 h-4 text-white" /> : <IconComp className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />;
+                                                            })()}
                                                         </div>
                                                         <div>
                                                             <div className="flex items-center gap-2">
-                                                                <p className={`text-[10px] font-black uppercase tracking-widest ${isActive ? 'text-indigo-400' : 'text-slate-500'}`}>{s.label}</p>
-                                                                {isCompleted && (
-                                                                    <Badge
-                                                                        onClick={() => setActionType(s.id as any)}
-                                                                        className="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 cursor-pointer text-[8px] px-1.5 py-0 border-none"
-                                                                    >
-                                                                        VIEW
-                                                                    </Badge>
-                                                                )}
+                                                                <p className={`text-[10px] font-bold uppercase tracking-wider ${isActive ? 'text-slate-900' : 'text-slate-500'}`}>{s.label}</p>
                                                             </div>
-                                                            {/* Scheduled Date Display */}
-                                                            <div className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">
-                                                                Scheduled: {(() => {
-                                                                    const offset = stageConfigs?.[s.id]?.scheduleOffset || 30;
-                                                                    const joinDate = new Date(selectedEmployee?.joining_date || Date.now());
-                                                                    joinDate.setDate(joinDate.getDate() + parseInt(offset));
-                                                                    return joinDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                                                                })()}
+                                                            <div className="text-[10px] font-medium text-slate-400 uppercase tracking-tight mt-0.5">
+                                                                {isCompleted ? 'Completed' : isActive ? 'Active Phase' : 'Next'}
                                                             </div>
-                                                            {/* Scheduled Date Display */}
-                                                            <div className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">
-                                                                Scheduled: {(() => {
-                                                                    const offset = stageConfigs?.[s.id]?.scheduleOffset || 30;
-                                                                    const joinDate = new Date(selectedEmployee?.joining_date || Date.now());
-                                                                    joinDate.setDate(joinDate.getDate() + parseInt(offset));
-                                                                    return joinDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                                                                })()}
-                                                            </div>
-                                                            {isActive && <div className="h-1 w-4 bg-indigo-500 rounded-full mt-1" />}
                                                         </div>
                                                     </div>
                                                 );
                                             })}
                                         </div>
 
-                                        <div className="pt-6 border-t border-white/10">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
-                                                    <Users className="w-5 h-5 text-indigo-400" />
+                                        <div className="pt-6 border-t border-slate-200">
+                                            <div className="flex items-center gap-4">
+                                                <div className="h-10 w-10 rounded-lg bg-slate-200 flex items-center justify-center">
+                                                    <Users className="w-5 h-5 text-slate-600" />
                                                 </div>
                                                 <div>
-                                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Candidate</p>
-                                                    <p className="text-sm font-bold">{selectedEmployee?.name}</p>
+                                                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">CANDIDATE</p>
+                                                    <p className="text-sm font-bold text-slate-900 tracking-tight">{selectedEmployee?.name}</p>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    {/* Abstract decor */}
-                                    <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-indigo-600/20 rounded-full blur-3xl" />
                                 </div>
 
                                 {/* Right Side: Dynamic Content */}
-                                <div className="flex-1 bg-white p-10 flex flex-col">
-                                    <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                                <div className="flex-1 bg-white p-10 flex flex-col overflow-hidden">
+                                    <div className="flex-1 overflow-y-auto pr-4 custom-scrollbar">
                                         <div className="mb-8">
-                                            <h3 className="text-2xl font-black text-slate-900 tracking-tight italic mb-2">
+                                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Assessment Module</p>
+                                            <h3 className="text-4xl font-black text-slate-900 tracking-tighter leading-tight italic mt-2">
                                                 {getEmployeeStages(selectedEmployee).find((s: any) => s.id === selectedEmployee?.currentStageId)?.label}
                                             </h3>
-                                            <p className="text-slate-500 font-medium">Please complete the required assessment for this milestone.</p>
                                         </div>
-
-                                        {/* Historical Feedback View */}
-                                        {(['kpi', '30_day', '60_day', '90_day'].includes(actionType as string) && actionType !== selectedEmployee?.currentStageId) && (
-                                            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
-                                                <div className="p-6 rounded-3xl bg-emerald-50 border border-emerald-100/50">
-                                                    <div className="flex items-center gap-4 mb-4">
-                                                        <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center text-emerald-600 shadow-sm border border-emerald-100">
-                                                            <CheckCircle className="w-5 h-5" />
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-900/50 italic leading-none">Completed Milestone</p>
-                                                            <h4 className="text-lg font-black text-emerald-900 mt-1">Feedback Archive</h4>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="space-y-4">
-                                                        {(selectedEmployee?.timeline?.filter(t => t.event.includes('Feedback') || t.event.includes('Review')) || []).map((t, i) => (
-                                                            <div key={i} className="p-5 rounded-2xl bg-white border border-emerald-100 shadow-sm">
-                                                                <div className="flex justify-between items-start mb-2">
-                                                                    <p className="text-xs font-black text-slate-900">{t.event}</p>
-                                                                    <span className="text-[10px] font-bold text-slate-400">{t.date}</span>
-                                                                </div>
-                                                                <p className="text-xs font-medium text-slate-600 leading-relaxed">{t.details}</p>
-                                                            </div>
-                                                        ))}
-                                                        {(!selectedEmployee?.timeline?.some(t => t.event.includes('Feedback'))) && (
-                                                            <div className="text-center py-8">
-                                                                <p className="text-xs font-bold text-slate-400 italic">No detailed feedback records found for this stage.</p>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                <Button
-                                                    onClick={() => setActionType('Review')}
-                                                    className="w-full h-12 rounded-2xl bg-slate-100 text-slate-600 font-black uppercase text-xs tracking-widest hover:bg-slate-200"
-                                                >
-                                                    Back to Current Review
-                                                </Button>
-                                            </div>
-                                        )}
-
-                                        {/* KPI Mode */}
-                                        {selectedEmployee?.currentStageId === 'kpi' && (
-                                            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
-                                                <div className="p-6 rounded-3xl bg-indigo-50 border border-indigo-100/50">
-                                                    <div className="flex items-center gap-4 mb-4">
-                                                        <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center text-indigo-600 shadow-sm border border-indigo-100">
-                                                            <Target className="w-5 h-5" />
-                                                        </div>
-                                                        <p className="text-xs font-black uppercase tracking-[0.2em] text-indigo-900/50 italic leading-none">Goal Alignment Phase</p>
-                                                    </div>
-                                                    <div className="space-y-4">
-                                                        {(stageConfigs?.['kpi']?.points || []).map((p: any) => (
-                                                            <div key={p.id} className="p-4 rounded-2xl bg-white border border-indigo-100 shadow-sm flex items-center justify-between">
-                                                                <div>
-                                                                    <p className="text-xs font-black text-slate-900">{p.title}</p>
-                                                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Weight: {p.weight}% • {p.type}</p>
-                                                                </div>
-                                                                {p.type === 'rating' ? (
-                                                                    <div className="flex gap-1">
-                                                                        {[1, 2, 3, 4, 5].map(v => (
-                                                                            <button key={v} className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-[10px] font-black">{v}</button>
-                                                                        ))}
-                                                                    </div>
-                                                                ) : (
-                                                                    <Switch className="data-[state=checked]:bg-indigo-600" />
-                                                                )}
-                                                            </div>
-                                                        ))}
-                                                        {(!stageConfigs?.['kpi']?.points || stageConfigs['kpi'].points.length === 0) && (
-                                                            <div className="space-y-4">
-                                                                <div className="space-y-2">
-                                                                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Primary Performance Goal</Label>
-                                                                    <input
-                                                                        className="w-full h-12 bg-white border-slate-200 rounded-2xl px-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
-                                                                        placeholder="e.g. Master technical stack..."
-                                                                        value={kpiForm.title}
-                                                                        onChange={(e) => setKpiForm({ ...kpiForm, title: e.target.value })}
-                                                                    />
-                                                                </div>
-                                                                <div className="grid grid-cols-2 gap-4">
-                                                                    <div className="space-y-2">
-                                                                        <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Metric Type</Label>
-                                                                        <Select
-                                                                            value={kpiForm.metricType}
-                                                                            onValueChange={(v) => setKpiForm({ ...kpiForm, metricType: v })}
-                                                                        >
-                                                                            <SelectTrigger className="rounded-2xl h-12 border-slate-200">
-                                                                                <SelectValue />
-                                                                            </SelectTrigger>
-                                                                            <SelectContent className="rounded-2xl border-none shadow-xl">
-                                                                                <SelectItem value="rating">Rating (1-5)</SelectItem>
-                                                                                <SelectItem value="boolean">Success/Fail</SelectItem>
-                                                                            </SelectContent>
-                                                                        </Select>
-                                                                    </div>
-                                                                    <div className="space-y-2">
-                                                                        <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Weightage</Label>
-                                                                        <Select
-                                                                            value={kpiForm.weightage}
-                                                                            onValueChange={(v) => setKpiForm({ ...kpiForm, weightage: v })}
-                                                                        >
-                                                                            <SelectTrigger className="rounded-2xl h-12 border-slate-200">
-                                                                                <SelectValue />
-                                                                            </SelectTrigger>
-                                                                            <SelectContent className="rounded-2xl border-none shadow-xl">
-                                                                                <SelectItem value="30">30%</SelectItem>
-                                                                                <SelectItem value="50">50%</SelectItem>
-                                                                                <SelectItem value="100">100%</SelectItem>
-                                                                            </SelectContent>
-                                                                        </Select>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
 
                                         {/* Feedback Mode (30/60/90 Day) */}
                                         {(selectedEmployee?.currentStageId?.includes('day')) && (
-                                            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
-                                                <div className="space-y-8">
+                                            <div className="space-y-10 animate-in fade-in slide-in-from-right-4 duration-700">
+                                                <div className="space-y-10">
                                                     {[
-                                                        { id: 'q1', label: 'Quality of Engagement', sub: 'Team interaction and collaboration' },
-                                                        { id: 'q2', label: 'Technical Proficiency', sub: 'Ability to handle assigned tasks independently' }
+                                                        { id: 'q1', label: 'Strategic Alignment', sub: 'Depth of team integration & cultural fit' },
+                                                        { id: 'q2', label: 'Operational Velocity', sub: 'Task ownership and independent execution' }
                                                     ].map((q) => (
-                                                        <div key={q.id} className="p-6 rounded-3xl bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-xl transition-all duration-500">
+                                                        <div key={q.id} className="px-8 py-8 rounded-[32px] bg-slate-50/50 border border-slate-100 hover:bg-white hover:shadow-2xl transition-all duration-700 group">
                                                             <div className="flex justify-between items-start mb-6">
                                                                 <div className="space-y-1">
-                                                                    <p className="text-xs font-black text-slate-900 italic tracking-tight">{q.label}</p>
+                                                                    <p className="text-lg font-black text-slate-900 italic tracking-tight group-hover:text-indigo-600 transition-colors">{q.label}</p>
                                                                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{q.sub}</p>
                                                                 </div>
                                                             </div>
-                                                            <div className="flex justify-between items-center gap-2">
+                                                            <div className="flex justify-between items-center gap-3">
                                                                 {[1, 2, 3, 4, 5].map(v => (
                                                                     <button
                                                                         key={v}
@@ -978,10 +823,10 @@ const ProbationDashboard: React.FC = () => {
                                                                             ...reviewForm,
                                                                             ratings: { ...reviewForm.ratings, [q.id]: v.toString() }
                                                                         })}
-                                                                        className={`flex-1 h-12 rounded-xl border transition-all shadow-sm font-black text-xs
+                                                                        className={`flex-1 h-14 rounded-2xl transition-all shadow-sm font-black text-sm
                                                                             ${reviewForm.ratings[q.id] === v.toString()
-                                                                                ? 'bg-slate-900 border-slate-900 text-white shadow-lg'
-                                                                                : 'border-slate-100 bg-white text-slate-400 hover:bg-slate-50'}`}
+                                                                                ? 'bg-slate-900 text-white shadow-2xl shadow-slate-900/20 ring-4 ring-slate-900/10'
+                                                                                : 'bg-white border border-slate-100 text-slate-400 hover:bg-slate-50 hover:border-slate-200'}`}
                                                                     >
                                                                         {v}
                                                                     </button>
@@ -990,11 +835,11 @@ const ProbationDashboard: React.FC = () => {
                                                         </div>
                                                     ))}
 
-                                                    <div className="space-y-2">
-                                                        <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Reviewer Remarks</Label>
+                                                    <div className="space-y-4">
+                                                        <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Reviewer Thesis & Observations</Label>
                                                         <Textarea
-                                                            placeholder="Add specific observations..."
-                                                            className="rounded-[24px] border-slate-200 min-h-[120px] p-6 text-sm font-medium focus:ring-indigo-500 transition-all"
+                                                            placeholder="Synthesize the candidate's performance during this cycle..."
+                                                            className="rounded-[32px] border-slate-200 min-h-[160px] px-8 py-8 text-sm font-medium focus:ring-4 focus:ring-indigo-500/10 transition-all bg-white/50"
                                                             value={reviewForm.feedback}
                                                             onChange={(e) => setReviewForm({ ...reviewForm, feedback: e.target.value })}
                                                         />
@@ -1005,33 +850,33 @@ const ProbationDashboard: React.FC = () => {
 
                                         {/* Decision Mode */}
                                         {selectedEmployee?.currentStageId === 'decision' && (
-                                            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
-                                                <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-10 animate-in fade-in slide-in-from-right-4 duration-700">
+                                                <div className="grid grid-cols-2 gap-6">
                                                     {[
-                                                        { id: 'Confirmed', label: 'Confirm', icon: CheckCircle, color: 'emerald' },
-                                                        { id: 'Terminated', label: 'Terminate', icon: Trash2, color: 'rose' }
+                                                        { id: 'Confirmed', label: 'Authorize Confirmation', icon: CheckCircle, color: 'emerald' },
+                                                        { id: 'Terminated', label: 'Initiate Separation', icon: Trash2, color: 'rose' }
                                                     ].map(opt => (
                                                         <button
                                                             key={opt.id}
                                                             onClick={() => setDecisionForm({ ...decisionForm, decision: opt.id })}
-                                                            className={`p-6 rounded-[32px] border-2 transition-all duration-500 flex flex-col items-center gap-3 group
-                                                                ${decisionForm.decision === opt.id ? `bg-${opt.color}-50 border-${opt.color}-500 shadow-lg shadow-${opt.color}-100` : 'bg-white border-slate-100 hover:border-slate-300'}`}
+                                                            className={`p-10 rounded-[48px] border-2 transition-all duration-700 flex flex-col items-center gap-6 group
+                                                                ${decisionForm.decision === opt.id ? `bg-${opt.color}-50 border-${opt.color}-500 shadow-2xl shadow-${opt.color}-100` : 'bg-white border-slate-100 hover:border-slate-200'}`}
                                                         >
-                                                            <div className={`h-12 w-12 rounded-2xl flex items-center justify-center transition-all duration-500
-                                                                ${decisionForm.decision === opt.id ? `bg-${opt.color}-600 text-white` : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'}`}>
-                                                                <opt.icon className="w-6 h-6" />
+                                                            <div className={`h-16 w-16 rounded-[24px] flex items-center justify-center transition-all duration-700
+                                                                ${decisionForm.decision === opt.id ? `bg-${opt.color}-600 text-white shadow-xl shadow-${opt.color}-100` : 'bg-slate-100 text-slate-400 group-hover:scale-110'}`}>
+                                                                <opt.icon className="w-8 h-8" />
                                                             </div>
-                                                            <span className={`text-xs font-black uppercase tracking-widest ${decisionForm.decision === opt.id ? `text-${opt.color}-900` : 'text-slate-400'}`}>
+                                                            <span className={`text-xs font-black uppercase tracking-widest ${decisionForm.decision === opt.id ? `text-${opt.color}-900` : 'text-slate-400 hover:text-slate-600'}`}>
                                                                 {opt.label}
                                                             </span>
                                                         </button>
                                                     ))}
                                                 </div>
-                                                <div className="space-y-2 mt-4">
-                                                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Final Rationale</Label>
+                                                <div className="space-y-4">
+                                                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Executive Summary & Rationale</Label>
                                                     <Textarea
-                                                        placeholder="Provide the core reason for the final decision..."
-                                                        className="rounded-[24px] border-slate-200 min-h-[100px] p-6 text-sm font-medium"
+                                                        placeholder="Provide the institutional grounds for this final decision..."
+                                                        className="rounded-[40px] border-slate-200 min-h-[160px] px-8 py-8 text-sm font-medium bg-white/50"
                                                         value={decisionForm.pipReason}
                                                         onChange={(e) => setDecisionForm({ ...decisionForm, pipReason: e.target.value })}
                                                     />
@@ -1040,12 +885,15 @@ const ProbationDashboard: React.FC = () => {
                                         )}
                                     </div>
 
-                                    <div className="pt-8 border-t border-slate-100 flex gap-4">
-                                        <Button variant="ghost" onClick={() => setActionType(null)} className="rounded-2xl px-10 h-14 font-black text-xs uppercase tracking-widest text-slate-400">
-                                            Discard
+                                    <div className="pt-10 border-t border-slate-100 mt-auto flex gap-6">
+                                        <Button variant="ghost" onClick={() => setActionType(null)} className="rounded-2xl px-12 h-16 font-black text-xs uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-colors">
+                                            Abort
                                         </Button>
-                                        <Button onClick={handleReviewSubmit} className="flex-1 rounded-2xl bg-slate-900 hover:bg-black text-white font-black text-xs uppercase tracking-widest h-14 shadow-2xl transition-all active:scale-95">
-                                            {selectedEmployee?.currentStageId === 'decision' ? 'Finalize Journey' : 'Submit & Advance'}
+                                        <Button onClick={handleReviewSubmit} className="flex-1 rounded-3xl bg-slate-900 hover:bg-black text-white font-black text-xs uppercase tracking-widest h-16 shadow-2xl transition-all transform active:scale-95 group">
+                                            <span className="flex items-center gap-3">
+                                                {selectedEmployee?.currentStageId === 'decision' ? 'Seal Deployment' : 'Validate & Progress'}
+                                                <Shield className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-1" />
+                                            </span>
                                         </Button>
                                     </div>
                                 </div>
@@ -1104,36 +952,36 @@ const ProbationDashboard: React.FC = () => {
 
                     {/* New Hire Modal */}
                     <Dialog open={actionType === 'Hire'} onOpenChange={() => setActionType(null)}>
-                        <DialogContent className="max-w-xl rounded-[32px] border-none shadow-2xl p-0 overflow-hidden">
-                            <div className="bg-slate-900 p-8 text-white relative overflow-hidden">
+                        <DialogContent className="max-w-2xl rounded-[40px] border-none shadow-2xl p-0 overflow-hidden bg-white/90 backdrop-blur-3xl">
+                            <div className="bg-slate-900 p-12 text-white relative overflow-hidden">
                                 <div className="relative z-10">
-                                    <Badge className="bg-indigo-500/20 text-indigo-300 border-none mb-4">Talent Acquisition</Badge>
-                                    <h2 className="text-3xl font-black italic tracking-tight">Onboard New Talent</h2>
-                                    <p className="text-slate-400 text-sm mt-2">Add a staff member directly to the central probation pool.</p>
+                                    <Badge className="bg-indigo-500/20 text-indigo-300 border-none mb-6 font-black uppercase tracking-widest text-[10px] px-4 py-1">Hiring Engine</Badge>
+                                    <h2 className="text-4xl font-black italic tracking-tighter leading-none">Onboard<br />New Talent</h2>
+                                    <p className="text-slate-400 font-bold mt-4 max-w-sm">Initialize a new staff member into the institutional probation pipeline.</p>
                                 </div>
-                                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/20 rounded-full blur-3xl -mr-32 -mt-32" />
+                                <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-600/20 rounded-full blur-3xl -mr-40 -mt-40" />
                             </div>
-                            <div className="p-8 space-y-6">
-                                <div className="grid grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">FullName</Label>
+                            <div className="p-12 space-y-10">
+                                <div className="grid grid-cols-2 gap-8">
+                                    <div className="space-y-3">
+                                        <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-2">Full Identity</Label>
                                         <input
-                                            className="w-full h-12 bg-slate-50 border border-slate-100 rounded-2xl px-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
-                                            placeholder="DR. Jane Smith"
+                                            className="w-full h-14 bg-white border border-slate-200 rounded-2xl px-6 text-base font-black italic focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none"
+                                            placeholder="DR. JANE SMITH"
                                             value={hireForm.name}
                                             onChange={(e) => setHireForm({ ...hireForm, name: e.target.value })}
                                         />
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Department</Label>
+                                    <div className="space-y-3">
+                                        <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-2">Faculty / Dept</Label>
                                         <Select
                                             value={hireForm.department}
                                             onValueChange={(v) => setHireForm({ ...hireForm, department: v })}
                                         >
-                                            <SelectTrigger className="h-12 rounded-2xl border-slate-100 bg-slate-50">
+                                            <SelectTrigger className="h-14 rounded-2xl border-slate-200 bg-white px-6 font-bold">
                                                 <SelectValue />
                                             </SelectTrigger>
-                                            <SelectContent className="rounded-2xl border-none shadow-2xl">
+                                            <SelectContent className="rounded-2xl border-none shadow-2xl backdrop-blur-xl">
                                                 <SelectItem value="Computer Science">Computer Science</SelectItem>
                                                 <SelectItem value="Mechanical Eng">Mechanical Eng</SelectItem>
                                                 <SelectItem value="Administration">Administration</SelectItem>
@@ -1142,32 +990,32 @@ const ProbationDashboard: React.FC = () => {
                                         </Select>
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Designation</Label>
+                                <div className="grid grid-cols-2 gap-8">
+                                    <div className="space-y-3">
+                                        <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-2">Designation</Label>
                                         <input
-                                            className="w-full h-12 bg-slate-50 border border-slate-100 rounded-2xl px-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
+                                            className="w-full h-14 bg-white border border-slate-200 rounded-2xl px-6 text-sm font-bold uppercase focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none"
                                             placeholder="Asst. Professor"
                                             value={hireForm.designation}
                                             onChange={(e) => setHireForm({ ...hireForm, designation: e.target.value })}
                                         />
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Joining Date</Label>
+                                    <div className="space-y-3">
+                                        <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-2">Joining Date</Label>
                                         <input
                                             type="date"
-                                            className="w-full h-12 bg-slate-50 border border-slate-100 rounded-2xl px-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
+                                            className="w-full h-14 bg-white border border-slate-200 rounded-2xl px-6 text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none"
                                             value={hireForm.joiningDate}
                                             onChange={(e) => setHireForm({ ...hireForm, joiningDate: e.target.value })}
                                         />
                                     </div>
                                 </div>
-                                <div className="pt-4 flex gap-4">
-                                    <Button variant="ghost" onClick={() => setActionType(null)} className="flex-1 rounded-2xl h-14 font-black text-xs uppercase tracking-widest text-slate-400">
-                                        Cancel
+                                <div className="pt-8 flex gap-6">
+                                    <Button variant="ghost" onClick={() => setActionType(null)} className="flex-1 rounded-2xl h-16 font-black text-xs uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-colors">
+                                        Discard
                                     </Button>
-                                    <Button onClick={handleHireSubmit} className="flex-1 rounded-2xl bg-slate-900 hover:bg-black text-white font-black text-xs uppercase tracking-widest h-14 shadow-2xl transition-all">
-                                        Add to Pool
+                                    <Button onClick={handleHireSubmit} className="flex-1 rounded-3xl bg-slate-900 hover:bg-black text-white font-black text-xs uppercase tracking-widest h-16 shadow-2xl transition-all active:scale-95">
+                                        Initialize Onboarding
                                     </Button>
                                 </div>
                             </div>
@@ -1250,9 +1098,9 @@ const ProbationDashboard: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
-                            <DialogFooter className="bg-slate-50 -mx-6 -mb-6 p-6 rounded-b-[30px] border-t border-slate-100">
+                            <DialogFooter className="bg-slate-50 -mx-6 -mb-4 px-4 py-4 rounded-b-[30px] border-t border-slate-100">
                                 <Button variant="outline" className="rounded-xl" onClick={() => setActionType(null)}>Close Profile</Button>
-                                <Button className="rounded-xl bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100" onClick={() => { setActionType(null); setShowFeedbackModal(true); }}>
+                                <Button className="rounded-xl bg-indigo-600 hover:bg-indigo-700 shadow-sm shadow-indigo-100" onClick={() => { setActionType(null); setShowFeedbackModal(true); }}>
                                     Assess Feedback
                                 </Button>
                             </DialogFooter>
@@ -1290,7 +1138,7 @@ const ProbationDashboard: React.FC = () => {
                                                 <button
                                                     key={num}
                                                     onClick={() => setFeedbackData({ ...feedbackData, rating: num.toString() })}
-                                                    className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${feedbackData.rating === num.toString() ? 'bg-amber-500 text-white shadow-lg' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}
+                                                    className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${feedbackData.rating === num.toString() ? 'bg-amber-500 text-white shadow-sm' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}
                                                 >
                                                     {num}
                                                 </button>
@@ -1469,8 +1317,7 @@ const ProbationDashboard: React.FC = () => {
                     </Dialog>
 
                 </div>
-            </main>
-        </div>
+        </Layout>
     );
 };
 

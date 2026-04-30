@@ -74,7 +74,7 @@ const MidYearReview: React.FC = () => {
             showBack
         >
             {/* Header Info */}
-            <Card className="mb-6 border-purple-200 bg-purple-50">
+            <Card className="mb-4 border-purple-200 bg-purple-50">
                 <CardContent className="pt-4">
                     <div className="flex items-center justify-between">
                         <div>
@@ -84,7 +84,7 @@ const MidYearReview: React.FC = () => {
                             </p>
                         </div>
                         <div className="text-right">
-                            <div className="text-3xl font-bold text-purple-900">
+                            <div className="text-xl font-bold text-purple-900">
                                 {overallProgress.toFixed(0)}%
                             </div>
                             <div className="text-xs text-purple-700">Overall Progress</div>
@@ -94,7 +94,7 @@ const MidYearReview: React.FC = () => {
             </Card>
 
             {/* Goals Progress */}
-            <Card className="mb-6">
+            <Card className="mb-4">
                 <CardHeader>
                     <CardTitle className="text-base flex items-center gap-2">
                         <Target className="h-5 w-5" />
@@ -121,7 +121,7 @@ const MidYearReview: React.FC = () => {
                                         <Badge className={`${colors.bg} ${colors.text}`}>
                                             {goal.status}
                                         </Badge>
-                                        <div className="text-2xl font-bold text-slate-900">
+                                        <div className="text-xl font-bold text-slate-900">
                                             {goal.progressPercentage}%
                                         </div>
                                     </div>

@@ -28,7 +28,7 @@ const LeaveApprovals = () => {
                         <CardContent className="p-5 flex items-center justify-between">
                             <div>
                                 <div className="text-sm font-bold text-slate-500 uppercase">Pending Actions</div>
-                                <div className="text-3xl font-black text-slate-800 tracking-tight">3</div>
+                                <div className="text-xl font-black text-slate-800 tracking-tight">3</div>
                             </div>
                             <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center">
                                 <Clock className="w-6 h-6" />
@@ -39,7 +39,7 @@ const LeaveApprovals = () => {
                         <CardContent className="p-5 flex items-center justify-between">
                             <div>
                                 <div className="text-sm font-bold text-slate-500 uppercase">Approved This Month</div>
-                                <div className="text-3xl font-black text-emerald-600 tracking-tight">14</div>
+                                <div className="text-xl font-black text-emerald-600 tracking-tight">14</div>
                             </div>
                             <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center">
                                 <Check className="w-6 h-6" />
@@ -50,7 +50,7 @@ const LeaveApprovals = () => {
                         <CardContent className="p-5 flex items-center justify-between">
                             <div>
                                 <div className="text-sm font-bold text-slate-500 uppercase">Team on Leave Today</div>
-                                <div className="text-3xl font-black text-blue-600 tracking-tight">2</div>
+                                <div className="text-xl font-black text-blue-600 tracking-tight">2</div>
                             </div>
                             <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
                                 <CalendarCheck className="w-6 h-6" />
@@ -128,7 +128,7 @@ const LeaveApprovals = () => {
                             <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                                 <div>
                                     <div className="flex items-center gap-3 mb-1">
-                                        <h3 className="font-black text-2xl text-slate-800 tracking-tight">{selectedRequest.employee}</h3>
+                                        <h3 className="font-black text-xl text-slate-800 tracking-tight">{selectedRequest.employee}</h3>
                                         <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full">{selectedRequest.id}</span>
                                     </div>
                                     <p className="text-sm font-semibold text-slate-500">{selectedRequest.role} • Request submitted on {selectedRequest.appliedOn}</p>
@@ -145,7 +145,7 @@ const LeaveApprovals = () => {
                                         <h4 className="text-xs font-bold uppercase text-slate-400 tracking-wider mb-2">Leave Request Details</h4>
                                         <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-5 mb-4">
                                             <div className="text-xl font-black text-blue-700 mb-2">{selectedRequest.type}</div>
-                                            <div className="flex items-center gap-6">
+                                            <div className="flex items-center gapx-4 py-4">
                                                 <div>
                                                     <div className="text-xs text-slate-500 font-semibold mb-0.5">Duration</div>
                                                     <div className="font-bold text-slate-800">{selectedRequest.days} Days</div>
@@ -242,7 +242,7 @@ const LeaveApprovals = () => {
                                         <div className="flex justify-end gap-2">
                                             <Button variant="outline" onClick={() => setRejectMode(false)} disabled={actionState === 'processing'}>Cancel Rejection</Button>
                                             <Button
-                                                className="bg-rose-600 hover:bg-rose-700 text-white shadow-lg shadow-rose-500/20 disabled:opacity-50"
+                                                className="bg-rose-600 hover:bg-rose-700 text-white shadow-sm shadow-rose-500/20 disabled:opacity-50"
                                                 disabled={actionState === 'processing'}
                                                 onClick={() => {
                                                     setActionState('processing');
@@ -259,7 +259,7 @@ const LeaveApprovals = () => {
                                             <X className="w-4 h-4 mr-2" /> Reject Request
                                         </Button>
                                         <Button
-                                            className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20 flex-1 md:flex-none md:w-48 disabled:opacity-50"
+                                            className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-500/20 flex-1 md:flex-none md:w-48 disabled:opacity-50"
                                             disabled={actionState === 'processing'}
                                             onClick={() => {
                                                 setActionState('processing');

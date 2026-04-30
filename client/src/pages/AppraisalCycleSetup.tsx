@@ -73,7 +73,7 @@ const AppraisalCycleSetup: React.FC = () => {
             showBack
         >
             {/* Progress Stepper */}
-            <div className="mb-6 bg-white rounded-lg border border-slate-200 p-4">
+            <div className="mb-4 bg-white rounded-lg border border-slate-200 p-4">
                 <div className="flex items-center justify-between">
                     {steps.map((s, index) => (
                         <React.Fragment key={s.id}>
@@ -172,7 +172,7 @@ const AppraisalCycleSetup: React.FC = () => {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className={`p-4 rounded-lg ${totalWeightage === 100 ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
-                            <div className="text-3xl font-bold">{totalWeightage}%</div>
+                            <div className="text-xl font-bold">{totalWeightage}%</div>
                             <div className="text-sm">{totalWeightage === 100 ? '✓ Total is correct' : `⚠ Total must be 100% (currently ${totalWeightage}%)`}</div>
                         </div>
 

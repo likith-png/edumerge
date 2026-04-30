@@ -5,10 +5,21 @@ const router = Router();
 
 // Submit a new paper (Faculty)
 router.post('/submit', (req, res) => {
-    const { employee_id, title, type, journal_name, impact_factor, authorship, date, submission_mode, attachment_path } = req.body;
-    const sql = `INSERT INTO research_publications (employee_id, title, type, journal_name, impact_factor, authorship, date, status, submission_mode, attachment_path) 
-                  VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending Approval', ?, ?)`;
-    const params = [employee_id || 1, title, type, journal_name, impact_factor, authorship, date, submission_mode || 'Online', attachment_path];
+    const { 
+        employee_id, title, type, journal_name, impact_factor, authorship, 
+        date, submission_mode, attachment_path, 
+        issn_isbn, indexing, is_peer_reviewed, ugc_care_listed 
+    } = req.body;
+    
+    const sql = `INSERT INTO research_publications 
+                 (employee_id, title, type, journal_name, impact_factor, authorship, date, status, submission_mode, attachment_path, issn_isbn, indexing, is_peer_reviewed, ugc_care_listed) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending Approval', ?, ?, ?, ?, ?, ?)`;
+    
+    const params = [
+        employee_id || 1, title, type, journal_name, impact_factor, authorship, 
+        date, submission_mode || 'Online', attachment_path,
+        issn_isbn, indexing, is_peer_reviewed ? 1 : 0, ugc_care_listed ? 1 : 0
+    ];
     
     db.run(sql, params, function(err) {
         if (err) return res.status(500).json({ error: err.message });
@@ -41,16 +52,45 @@ router.get('/all', (req, res) => {
 
 // Get analytics (HR)
 router.get('/analytics', (req, res) => {
-    const sql = `
+    const kpiSql = `
         SELECT 
             COUNT(*) as total,
             SUM(CASE WHEN status = 'Approved' THEN 1 ELSE 0 END) as approved,
-            SUM(CASE WHEN status = 'Pending Approval' THEN 1 ELSE 0 END) as pending
+            SUM(CASE WHEN IFNULL(citations, 0) > 0 THEN citations ELSE 0 END) as totalCitations,
+            AVG(CASE WHEN impact_factor > 0 THEN impact_factor ELSE NULL END) as avgImpact
         FROM research_publications
     `;
-    db.get(sql, [], (err, row) => {
+
+    const rankingSql = `
+        SELECT 
+            e.id as employee_id,
+            e.name as employee_name,
+            e.department,
+            e.designation,
+            COUNT(rp.id) as pubCount,
+            SUM(IFNULL(rp.citations, 0)) as totalCitations,
+            AVG(IFNULL(rp.impact_factor, 0)) as avgImpact
+        FROM employees e
+        JOIN research_publications rp ON e.id = rp.employee_id
+        WHERE rp.status = 'Approved'
+        GROUP BY e.id
+        ORDER BY pubCount DESC, totalCitations DESC
+        LIMIT 10
+    `;
+
+    db.get(kpiSql, [], (err, kpis) => {
         if (err) return res.status(500).json({ error: err.message });
-        res.json({ data: row });
+        
+        db.all(rankingSql, [], (err, rankings) => {
+            if (err) return res.status(500).json({ error: err.message });
+            const analyticsData: any = kpis || { total: 0, approved: 0, totalCitations: 0, avgImpact: 0 };
+            res.json({ 
+                data: {
+                    ...analyticsData,
+                    rankings
+                }
+            });
+        });
     });
 });
 

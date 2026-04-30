@@ -54,7 +54,7 @@ const AppraisalAnalytics: React.FC = () => {
     return (
         <Layout title="Analytics & Governance Dashboard" description="Performance insights and institutional analytics" icon={PieChart} showBack>
             {/* Filters */}
-            <div className="flex flex-wrap gap-3 mb-6">
+            <div className="flex flex-wrap gap-3 mb-4">
                 <Select value={selectedYear} onValueChange={setSelectedYear}>
                     <SelectTrigger className="w-[180px]">
                         <SelectValue />
@@ -82,12 +82,12 @@ const AppraisalAnalytics: React.FC = () => {
             </div>
 
             {/* Overall Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
                 <Card className="border-slate-200">
                     <CardContent className="pt-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <div className="text-2xl font-bold text-slate-900">{overallStats.totalFaculty}</div>
+                                <div className="text-xl font-bold text-slate-900">{overallStats.totalFaculty}</div>
                                 <div className="text-xs text-slate-600">Total Faculty</div>
                             </div>
                             <Users className="h-8 w-8 text-slate-400" />
@@ -99,7 +99,7 @@ const AppraisalAnalytics: React.FC = () => {
                     <CardContent className="pt-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <div className="text-2xl font-bold text-blue-900">{overallStats.completionRate}%</div>
+                                <div className="text-xl font-bold text-blue-900">{overallStats.completionRate}%</div>
                                 <div className="text-xs text-blue-700">Completion Rate</div>
                             </div>
                             <Calendar className="h-8 w-8 text-blue-400" />
@@ -111,7 +111,7 @@ const AppraisalAnalytics: React.FC = () => {
                     <CardContent className="pt-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <div className="text-2xl font-bold text-green-900">{overallStats.averageScore.toFixed(1)}/5.0</div>
+                                <div className="text-xl font-bold text-green-900">{overallStats.averageScore.toFixed(1)}/5.0</div>
                                 <div className="text-xs text-green-700">Average Score</div>
                             </div>
                             <TrendingUp className="h-8 w-8 text-green-400" />
@@ -123,7 +123,7 @@ const AppraisalAnalytics: React.FC = () => {
                     <CardContent className="pt-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <div className="text-2xl font-bold text-amber-900">{overallStats.highPerformers}</div>
+                                <div className="text-xl font-bold text-amber-900">{overallStats.highPerformers}</div>
                                 <div className="text-xs text-amber-700">High Performers</div>
                             </div>
                             <Award className="h-8 w-8 text-amber-400" />
@@ -135,7 +135,7 @@ const AppraisalAnalytics: React.FC = () => {
                     <CardContent className="pt-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <div className="text-2xl font-bold text-red-900">{overallStats.needsImprovement}</div>
+                                <div className="text-xl font-bold text-red-900">{overallStats.needsImprovement}</div>
                                 <div className="text-xs text-red-700">Needs Improvement</div>
                             </div>
                             <AlertTriangle className="h-8 w-8 text-red-400" />
@@ -144,7 +144,7 @@ const AppraisalAnalytics: React.FC = () => {
                 </Card>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gapx-4 py-4">
                 {/* Department Performance Heatmap */}
                 <Card className="border-slate-200">
                     <CardHeader>

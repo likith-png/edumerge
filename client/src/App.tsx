@@ -5,8 +5,6 @@ import HRDashboard from './pages/HRDashboard';
 import LearningDevelopment from './pages/LearningDevelopment';
 import TalentDashboard from './pages/TalentDashboard';
 import ProbationDashboard from './pages/ProbationDashboard';
-import OnboardingProDashboard from './pages/OnboardingProDashboard';
-import OnboardingProPortal from './pages/OnboardingProPortal';
 import ProbationConfig from './pages/ProbationConfig';
 import ExitConfig from './pages/ExitConfig';
 import PolicyGuides from './pages/PolicyGuides';
@@ -46,17 +44,19 @@ import LeaveConfiguration from './pages/LeaveConfiguration';
 import YearlyLeaveBook from './pages/YearlyLeaveBook';
 import ResearchPublication from './pages/ResearchPublication';
 import ControlTower from './pages/ControlTower';
+import GOIControlTower from './pages/GOIControlTower';
+import VehicleManagement from './pages/VehicleManagement';
 
 import { PersonaProvider } from './contexts/PersonaContext';
+import { StaffProvider } from './contexts/StaffContext';
 
 function App() {
   return (
     <PersonaProvider>
+      <StaffProvider>
       <Router basename="/V2/HRMS_Demo">
         <Routes>
           <Route path="/" element={<Dashboard />} />
-          <Route path="/onboarding-pro" element={<OnboardingProDashboard />} />
-          <Route path="/onboarding-pro/portal" element={<OnboardingProPortal />} />
           <Route path="/feedback" element={<Feedback />} />
 
           <Route path="/exit" element={<ExitManagement />} />
@@ -111,10 +111,17 @@ function App() {
           {/* HRMS Control Tower */}
           <Route path="/control-tower" element={<ControlTower />} />
 
+          {/* GOI Control Tower */}
+          <Route path="/goi-control-tower" element={<GOIControlTower />} />
+
+          {/* Vehicle Management */}
+          <Route path="/vehicle-management" element={<VehicleManagement />} />
+
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
+      </StaffProvider>
     </PersonaProvider>
   );
 }

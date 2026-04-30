@@ -1,13 +1,43 @@
 import { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { defaultLeaveTypes, type LeaveType } from './LeaveConfiguration';
-import { Calendar, Plus, Clock, CheckCircle2, History, AlertCircle, Upload, X, Settings, ChevronRight, FileText, Check } from 'lucide-react';
+import {
+    Calendar, Plus, Clock, CheckCircle2, History, AlertCircle,
+    Upload, X, Settings, ChevronRight, FileText, Check, Info
+} from 'lucide-react';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../components/ui/dialog';
+import { Badge } from '../components/ui/badge';
+import { Label } from '../components/ui/label';
 import { usePersona } from '../contexts/PersonaContext';
 import { useNavigate } from 'react-router-dom';
 
-const mockHistory = [
+interface HistoryRecord {
+    id: string;
+    type: string;
+    from: string;
+    to: string;
+    days: number;
+    status: 'Approved' | 'Rejected' | 'Pending';
+    approver: string;
+    appliedOn: string;
+    reason: string;
+    hasProof: boolean;
+    rejectReason?: string;
+}
+
+interface Balance {
+    type: string;
+    total: number;
+    taken: number;
+    balance: number;
+    color: string;
+    bg: string;
+    accent: string;
+}
+
+const mockHistory: HistoryRecord[] = [
     { id: 'LR-1044', type: 'Casual Leave (CL)', from: '2024-05-10', to: '2024-05-11', days: 2, status: 'Approved', approver: 'HOD - Dr. Sharma', appliedOn: '2024-05-01', reason: 'Attending a family function out of station.', hasProof: false },
     { id: 'LR-0921', type: 'Vacation (VL)', from: '2023-12-20', to: '2024-01-02', days: 14, status: 'Approved', approver: 'HOD - Dr. Sharma', appliedOn: '2023-11-15', reason: 'Annual winter vacation.', hasProof: false },
     { id: 'LR-0855', type: 'Casual Leave (CL)', from: '2023-10-15', to: '2023-10-15', days: 1, status: 'Approved', approver: 'HOD - Dr. Sharma', appliedOn: '2023-10-10', reason: 'Medical appointment.', hasProof: false },
@@ -15,21 +45,21 @@ const mockHistory = [
 ];
 
 const LeaveDashboard = () => {
-    const { user, role } = usePersona();
+    const { role } = usePersona();
     const [showApplyModal, setShowApplyModal] = useState(false);
-    const [selectedHistory, setSelectedHistory] = useState<any | null>(null);
+    const [selectedHistory, setSelectedHistory] = useState<HistoryRecord | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitSuccess, setSubmitSuccess] = useState(false);
     const navigate = useNavigate();
 
     // Leave Types & Balances State
     const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
-    const [balances, setBalances] = useState<any[]>([]);
+    const [balances, setBalances] = useState<Balance[]>([]);
 
     useEffect(() => {
         const stored = localStorage.getItem('edumerge_leave_types');
         const types: LeaveType[] = stored ? JSON.parse(stored) : defaultLeaveTypes;
-        
+
         // Mock User Joining Date (e.g., joined on 6th of current month to test rule)
         const joiningDate = new Date();
         joiningDate.setDate(6); // Joined on 6th -> No CL for first month
@@ -47,18 +77,15 @@ const LeaveDashboard = () => {
             const numMatch = t.teachingPerm.match(/\d+/);
             const total = numMatch ? parseInt(numMatch[0]) : 0;
             const taken = total > 0 ? Math.floor(total * 0.3) : 0; // Mock taken
-            const colors = [
-                { color: 'text-blue-600', bg: 'bg-blue-50' },
-                { color: 'text-emerald-600', bg: 'bg-emerald-50' },
-                { color: 'text-purple-600', bg: 'bg-purple-50' },
-                { color: 'text-amber-600', bg: 'bg-amber-50' },
-                { color: 'text-rose-600', bg: 'bg-rose-50' },
-                { color: 'text-indigo-600', bg: 'bg-indigo-50' },
-                { color: 'text-slate-600', bg: 'bg-slate-50' },
-                { color: 'text-orange-600', bg: 'bg-orange-50' },
-                { color: 'text-cyan-600', bg: 'bg-cyan-50' }
+            const themes = [
+                { color: 'text-indigo-600', bg: 'bg-indigo-50/50', accent: 'bg-indigo-600' },
+                { color: 'text-emerald-600', bg: 'bg-emerald-50/50', accent: 'bg-emerald-600' },
+                { color: 'text-rose-600', bg: 'bg-rose-50/50', accent: 'bg-rose-600' },
+                { color: 'text-amber-600', bg: 'bg-amber-50/50', accent: 'bg-amber-600' },
+                { color: 'text-sky-600', bg: 'bg-sky-50/50', accent: 'bg-sky-600' },
+                { color: 'text-violet-600', bg: 'bg-violet-50/50', accent: 'bg-violet-600' },
             ];
-            const theme = colors[idx % colors.length];
+            const theme = themes[idx % themes.length];
 
             return {
                 type: t.name,
@@ -66,7 +93,8 @@ const LeaveDashboard = () => {
                 taken: taken,
                 balance: total > 0 ? total - taken : 0,
                 color: theme.color,
-                bg: theme.bg
+                bg: theme.bg,
+                accent: theme.accent
             };
         });
         setBalances(generatedBalances);
@@ -83,14 +111,14 @@ const LeaveDashboard = () => {
         const d = date.getDate();
         const weekNum = Math.ceil(d / 7);
         const dateString = date.toISOString().split('T')[0];
-        
+
         const publicHolidays = ['2024-05-01', '2024-08-15', '2024-10-02', '2024-12-25'];
-        
+
         // Weekly off: Sundays and 1st/3rd Saturdays
         if (day === 0) return true;
         if (day === 6 && [1, 3].includes(weekNum)) return true;
         if (publicHolidays.includes(dateString)) return true;
-        
+
         return false;
     };
 
@@ -98,7 +126,7 @@ const LeaveDashboard = () => {
         if (!startDate || !endDate) return 0;
         const start = new Date(startDate);
         const end = new Date(endDate);
-        
+
         // Basic count
         const diffTime = Math.abs(end.getTime() - start.getTime());
         let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
@@ -113,7 +141,6 @@ const LeaveDashboard = () => {
             const isAfterHoliday = isHoliday(afterEnd);
 
             // 1. Sandwich Rule: If CL appears both before and after a holiday
-            // (In this context, if the leave spans across a holiday, or starts and ends around one)
             let holidaysInBetween = 0;
             let current = new Date(start);
             while (current <= end) {
@@ -129,12 +156,6 @@ const LeaveDashboard = () => {
             }
         }
 
-        // Special rule: 5th Saturday is a full day
-        if (end.getDay() === 6 && Math.ceil(end.getDate() / 7) === 5) {
-            // Note: This rule is informative for payroll typically, 
-            // but we ensure it's not accidentally counted as a holiday/half-day if those were options.
-        }
-
         return diffDays;
     };
 
@@ -142,118 +163,151 @@ const LeaveDashboard = () => {
     const requiresProof = requestedDays > 3 || leaveType === 'On Exam Duty (OED)';
 
     return (
-        <Layout title="My Leave Dashboard" description={`Manage your time off, ${user.name}`} icon={Calendar} showHome>
-            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
+        <Layout title="Leave Management" description="Institutional absence management and policy compliance." icon={Calendar} showHome>
+            <div className="space-y-6 pb-16">
 
-                {/* Header Action */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                    <div>
-                        <h2 className="text-xl font-black text-slate-800 tracking-tight mb-1">Leave Balances for 2024</h2>
-                        <p className="text-sm text-slate-500 font-medium italic">Accrual Logic: Casual Leave split Jan/July; Vacation Leave per Semester.</p>
-                    </div>
-                    <div className="flex gap-3">
-                        {role === 'HR_ADMIN' && (
-                            <Button variant="outline" onClick={() => navigate('/leave/config')} className="bg-white">
-                                <Settings className="w-4 h-4 mr-2" />
-                                Configure Policy
+
+                    {/* Performance Header (Glass) */}
+                    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 p-6 border border-slate-200 bg-white rounded-xl shadow-sm">
+                        <div className="space-y-1">
+                            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Leave Overview</h2>
+                            <div className="flex items-center gap-3">
+                                <Badge variant="secondary" className="bg-slate-100 text-slate-700 hover:bg-slate-100 border-none">Rule Engine v4.0</Badge>
+                                <div className="h-1 w-1 rounded-full bg-slate-300" />
+                                <p className="text-xs text-slate-500 font-medium tracking-wide">Institutional Leave Repository</p>
+                            </div>
+                        </div>
+                        <div className="flex gap-3 w-full lg:w-auto">
+                            {role === 'HR_ADMIN' && (
+                                <Button variant="outline" onClick={() => navigate('/leave/config')} className="h-10 bg-white border border-slate-200 text-slate-700 rounded-lg px-4 hover:bg-slate-50 transition-all font-semibold text-xs uppercase tracking-widest">
+                                    <Settings className="w-4 h-4 mr-2" />
+                                    Configure
+                                </Button>
+                            )}
+                            <Button onClick={() => setShowApplyModal(true)} className="flex-1 lg:flex-none h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-lg px-6 font-semibold text-xs uppercase tracking-widest transition-all">
+                                <Plus className="w-4 h-4 mr-2" />
+                                Apply Leave
                             </Button>
-                        )}
-                        <Button onClick={() => setShowApplyModal(true)} className="bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 whitespace-nowrap">
-                            <Plus className="w-4 h-4 mr-2" />
-                            Apply for Leave
-                        </Button>
-                    </div>
-                </div>
-
-                {/* Balances Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                    {balances.map((bal, idx) => (
-                        <Card key={idx} className="border-none shadow-sm ring-1 ring-slate-100 bg-white hover:-translate-y-1 transition-transform duration-300">
-                            <CardContent className="p-5 flex flex-col h-full justify-between">
-                                <div className="flex justify-between items-start mb-4">
-                                    <div className={`p-2.5 rounded-xl ${bal.bg} ${bal.color}`}>
-                                        <Calendar className="w-5 h-5" />
-                                    </div>
-                                    <span className="text-xs font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-lg">Total: {bal.total}</span>
-                                </div>
-                                <div>
-                                    <div className="text-3xl font-black text-slate-800 mb-1">{bal.balance}</div>
-                                    <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">{bal.type}</div>
-                                </div>
-                                <div className="mt-4 pt-4 border-t border-slate-100 flex justify-between text-xs">
-                                    <span className="font-semibold text-slate-500">Taken: <span className="text-slate-700">{bal.taken}</span></span>
-                                    <span className="font-semibold text-emerald-600">Avail: {bal.balance}</span>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-
-                {/* History Table */}
-                <Card className="border-none shadow-sm ring-1 ring-slate-100 bg-white">
-                    <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center">
-                        <div className="flex items-center gap-2">
-                            <History className="w-5 h-5 text-slate-400" />
-                            <h3 className="font-bold text-slate-800">Leave Application History</h3>
                         </div>
                     </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-left">
-                            <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-100 text-xs uppercase tracking-wider">
-                                <tr>
-                                    <th className="px-6 py-4">Request ID</th>
-                                    <th className="px-6 py-4">Leave Type</th>
-                                    <th className="px-6 py-4">Duration</th>
-                                    <th className="px-6 py-4">Applied On</th>
-                                    <th className="px-6 py-4">Status & Approver</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-50">
-                                {mockHistory.map((hist, idx) => (
-                                    <tr key={idx} onClick={() => setSelectedHistory(hist)} className="hover:bg-slate-50/50 transition-colors cursor-pointer group">
-                                        <td className="px-6 py-4 font-bold text-blue-600 group-hover:text-blue-700">{hist.id}</td>
-                                        <td className="px-6 py-4 font-semibold text-slate-700">{hist.type}</td>
-                                        <td className="px-6 py-4">
-                                            <div className="text-slate-800 font-semibold">{hist.days} Days</div>
-                                            <div className="text-xs text-slate-500">{hist.from} to {hist.to}</div>
-                                        </td>
-                                        <td className="px-6 py-4 text-slate-500 font-medium">{hist.appliedOn}</td>
-                                        <td className="px-6 py-4 flex items-center justify-between">
-                                            <div>
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    {hist.status === 'Approved' ? (
-                                                        <span className="px-2.5 py-1 bg-emerald-100 text-emerald-700 font-bold text-xs rounded-full flex items-center gap-1">
-                                                            <CheckCircle2 className="w-3 h-3" /> Approved
-                                                        </span>
-                                                    ) : (
-                                                        <span className="px-2.5 py-1 bg-rose-100 text-rose-700 font-bold text-xs rounded-full flex items-center gap-1">
-                                                            <X className="w-3 h-3" /> Rejected
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <div className="text-xs text-slate-400 font-medium">{hist.approver}</div>
-                                            </div>
-                                            <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-blue-500 transition-colors" />
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </Card>
 
-                {/* Apply Leave Modal */}
-                {showApplyModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in">
-                        <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-8">
-
-                            {submitSuccess ? (
-                                <div className="p-12 text-center flex flex-col items-center justify-center animate-in zoom-in-95">
-                                    <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-6">
-                                        <CheckCircle2 className="w-10 h-10" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                        {balances.map((bal, idx) => (
+                            <div key={idx} className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between space-y-8">
+                                <div className="flex justify-between items-start">
+                                    <div className={`p-3 rounded-lg ${bal.bg} ${bal.color} border border-slate-100 shadow-sm`}>
+                                        <Calendar className="w-5 h-5" />
                                     </div>
-                                    <h3 className="text-2xl font-black text-slate-800 mb-2">Request Submitted!</h3>
-                                    <p className="text-slate-500 mb-8 max-w-sm">Your leave application has been routed to your approvers as per the policy workflow.</p>
+                                    <div className="text-right">
+                                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Limit</div>
+                                        <div className="text-xl font-bold text-slate-900 tracking-tight">{bal.total}</div>
+                                    </div>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="text-4xl font-bold text-slate-900 tracking-tight leading-none">{bal.balance}</div>
+                                    <div className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">{bal.type}</div>
+                                </div>
+                                <div className="space-y-3">
+                                    <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-50">
+                                        <div
+                                            className={`h-full ${bal.accent} rounded-full transition-all duration-1000`}
+                                            style={{ width: `${(bal.balance / bal.total) * 100}%` }}
+                                        />
+                                    </div>
+                                    <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest leading-none">
+                                        <span className="text-slate-400">Consumed: <span className="text-slate-900">{bal.taken}</span></span>
+                                        <span className="text-indigo-600">Available</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                        <div className="px-6 py-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-slate-900 rounded-xl shadow-md text-white">
+                                    <History className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-slate-900 tracking-tight">Leave History</h3>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Record of all past and pending requests</p>
+                                </div>
+                            </div>
+                            <div className="hidden md:block px-4 py-1.5 bg-blue-50 border border-blue-100 rounded-full text-[10px] font-bold text-blue-600 uppercase tracking-widest shadow-none">
+                                Unified Ledger
+                            </div>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm text-left">
+                                <thead className="bg-slate-50/80 text-slate-500 font-bold text-[10px] uppercase tracking-widest border-b border-slate-100">
+                                    <tr>
+                                        <th className="px-6 py-4">Request ID</th>
+                                        <th className="px-6 py-4">Leave Type</th>
+                                        <th className="px-6 py-4">Duration</th>
+                                        <th className="px-6 py-4">Applied On</th>
+                                        <th className="px-6 py-4">Status & Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                    {mockHistory.map((hist, idx) => (
+                                        <tr key={idx} onClick={() => setSelectedHistory(hist)} className="hover:bg-slate-50 transition-all cursor-pointer group">
+                                            <td className="px-6 py-5">
+                                                <span className="text-[11px] font-bold text-slate-900 uppercase tracking-widest bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 group-hover:bg-slate-900 group-hover:text-white transition-all">{hist.id}</span>
+                                            </td>
+                                            <td className="px-6 py-5">
+                                                <div className="font-bold text-slate-900 tracking-tight text-sm">{hist.type}</div>
+                                                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-1 flex items-center gap-1.5">
+                                                    <div className="w-1 h-1 rounded-full bg-slate-300" />
+                                                    Personal Request
+                                                </p>
+                                            </td>
+                                            <td className="px-6 py-5">
+                                                <div className="text-slate-900 font-bold tracking-tight text-lg leading-none flex items-baseline gap-1">
+                                                    {hist.days} <span className="text-[10px] uppercase font-bold opacity-30 tracking-widest">Days</span>
+                                                </div>
+                                                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1.5 bg-slate-100/50 px-2 py-0.5 rounded-md w-fit border border-slate-200/50">
+                                                    {hist.from} - {hist.to}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-5">
+                                                <div className="text-[11px] text-slate-700 font-bold uppercase tracking-wider">{hist.appliedOn}</div>
+                                                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1">Application Date</p>
+                                            </td>
+                                            <td className="px-6 py-5">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="space-y-2">
+                                                        <Badge variant="outline" className={`font-bold text-[9px] uppercase tracking-widest px-3 py-1 rounded-full
+                                                            ${hist.status === 'Approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                                                              hist.status === 'Rejected' ? 'bg-rose-50 text-rose-700 border-rose-100' :
+                                                              'bg-amber-50 text-amber-700 border-amber-100'}`}>
+                                                            {hist.status}
+                                                        </Badge>
+                                                        <p className="text-[10px] text-slate-400 font-medium tracking-wide leading-none px-1">By: {hist.approver.split(' - ')[1] || hist.approver}</p>
+                                                    </div>
+                                                    <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-600 transition-all" />
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                    {/* Submit Application Modal */}
+                    <Dialog open={showApplyModal} onOpenChange={setShowApplyModal}>
+                        <DialogContent className="max-w-3xl bg-white rounded-2xl p-0 overflow-hidden border border-slate-200 shadow-2xl">
+                            {submitSuccess ? (
+                                <div className="p-20 text-center flex flex-col items-center justify-center space-y-8">
+                                    <div className="w-32 h-32 bg-emerald-500 rounded-full flex items-center justify-center shadow-2xl shadow-emerald-200 animate-bounce">
+                                        <CheckCircle2 className="w-16 h-16 text-white" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h3 className="text-2xl font-bold text-slate-900 tracking-tight">Application Submitted</h3>
+                                        <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest max-w-sm">Your leave request has been successfully submitted and is awaiting approval.</p>
+                                    </div>
                                     <Button
                                         onClick={() => {
                                             setSubmitSuccess(false);
@@ -261,113 +315,125 @@ const LeaveDashboard = () => {
                                             setStartDate('');
                                             setEndDate('');
                                         }}
-                                        className="bg-emerald-600 hover:bg-emerald-700"
+                                        className="h-12 bg-slate-900 hover:bg-slate-800 text-white px-12 rounded-lg font-bold text-[10px] uppercase tracking-wider"
                                     >
-                                        Done
+                                        Dismiss
                                     </Button>
                                 </div>
                             ) : (
                                 <>
-                                    <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                                        <div>
-                                            <h3 className="font-black text-xl text-slate-800 tracking-tight">Apply for Leave</h3>
-                                            <p className="text-sm text-slate-500 mt-1">Submit your request for necessary approvals.</p>
+                                    <DialogHeader className="bg-slate-900 p-8 text-white relative">
+                                        <div className="relative z-10 space-y-1">
+                                            <DialogTitle className="text-2xl font-bold tracking-tight">Apply for Leave</DialogTitle>
+                                            <DialogDescription className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Submit a new leave request for approval.</DialogDescription>
                                         </div>
-                                        <button onClick={() => setShowApplyModal(false)} className="p-2 text-slate-400 hover:bg-slate-200 hover:text-slate-600 rounded-full transition-colors">
-                                            <X className="w-5 h-5" />
-                                        </button>
-                                    </div>
+                                    </DialogHeader>
 
-                                    <div className="p-8 overflow-y-auto space-y-6">
-                                        <div className="space-y-1.5">
-                                            <label className="text-sm font-bold text-slate-700">Leave Type</label>
-                                            <select
-                                                value={leaveType}
-                                                onChange={(e) => setLeaveType(e.target.value)}
-                                                className="w-full bg-white border border-slate-300 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow text-sm"
-                                            >
-                                                {leaveTypes.map((t) => (
-                                                    <option key={t.id} value={t.name}>{t.name}</option>
-                                                ))}
-                                            </select>
-                                            <div className="flex justify-between mt-1">
-                                                <p className="text-xs text-slate-500">Available balance: <span className="font-bold text-slate-700">{balances.find(b => b.type === leaveType)?.balance || 0} days</span></p>
-                                                {leaveType === 'Loss of Pay (LOP)' && (balances.find(b => b.type === 'Loss of Pay (LOP)')?.taken || 0) >= 5 && (
-                                                    <p className="text-xs text-rose-600 font-bold flex items-center gap-1 animate-pulse">
-                                                        <AlertCircle className="w-3 h-3" /> Max LOP (5 days) reached!
-                                                    </p>
-                                                )}
+                                    <div className="p-10 space-y-8 overflow-y-auto max-h-[60vh]">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                            <div className="space-y-4">
+                                                <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-1">Leave Classification</Label>
+                                                <div className="relative">
+                                                    <select
+                                                        value={leaveType}
+                                                        onChange={(e) => setLeaveType(e.target.value)}
+                                                        className="w-full h-12 appearance-none bg-slate-50 border border-slate-200 rounded-lg px-6 font-bold text-slate-900 text-sm focus:ring-2 focus:ring-slate-900 transition-all cursor-pointer"
+                                                    >
+                                                        {leaveTypes.map((t) => (
+                                                            <option key={t.id} value={t.name}>{t.name}</option>
+                                                        ))}
+                                                    </select>
+                                                    <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                                        <ChevronRight className="w-4 h-4 rotate-90" />
+                                                    </div>
+                                                </div>
+                                                <div className="flex justify-between items-center px-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="h-1.5 w-1.5 rounded-full bg-slate-400 mr-1" />
+                                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-none">Net Balance: <span className="text-slate-900">{balances.find(b => b.type === leaveType)?.balance || 0} Unit(s)</span></p>
+                                                    </div>
+                                                    {leaveType === 'Loss of Pay (LOP)' && (balances.find(b => b.type === 'Loss of Pay (LOP)')?.taken || 0) >= 5 && (
+                                                        <Badge className="bg-rose-100 text-rose-600 border-none font-bold text-[8px] uppercase tracking-widest">Threshold Exceeded</Badge>
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-1.5">
-                                                <label className="text-sm font-bold text-slate-700">Start Date</label>
-                                                <input
-                                                    type="date"
-                                                    value={startDate}
-                                                    onChange={(e) => setStartDate(e.target.value)}
-                                                    className="w-full bg-white border border-slate-300 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-                                                />
-                                            </div>
-                                            <div className="space-y-1.5">
-                                                <label className="text-sm font-bold text-slate-700">End Date</label>
-                                                <input
-                                                    type="date"
-                                                    value={endDate}
-                                                    onChange={(e) => setEndDate(e.target.value)}
-                                                    className="w-full bg-white border border-slate-300 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-                                                />
+                                            <div className="grid grid-cols-2 gap-6">
+                                                <div className="space-y-4">
+                                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-1">Deployment Date</Label>
+                                                    <input
+                                                        type="date"
+                                                        value={startDate}
+                                                        onChange={(e) => setStartDate(e.target.value)}
+                                                        className="w-full h-12 bg-slate-50 border border-slate-200 rounded-lg px-6 font-bold text-slate-900 text-sm focus:ring-2 focus:ring-slate-950 transition-all"
+                                                    />
+                                                </div>
+                                                <div className="space-y-4">
+                                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-1">Termination Date</Label>
+                                                    <input
+                                                        type="date"
+                                                        value={endDate}
+                                                        onChange={(e) => setEndDate(e.target.value)}
+                                                        className="w-full h-12 bg-slate-50 border border-slate-200 rounded-lg px-6 font-bold text-slate-900 text-sm focus:ring-2 focus:ring-slate-950 transition-all"
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
 
                                         {requestedDays > 0 && (
-                                            <div className="space-y-3">
-                                                <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-center justify-between">
-                                                    <div className="flex items-center gap-3">
-                                                        <Clock className="w-5 h-5 text-blue-600" />
-                                                        <span className="text-sm font-bold text-blue-900">Total Duration Calculated</span>
-                                                    </div>
-                                                    <span className="text-lg font-black text-blue-700">{requestedDays} Days</span>
+                                            <div className="space-y-6">
+                                        <div className="bg-slate-900 rounded-xl p-6 flex items-center justify-between shadow-sm">
+                                            <div className="flex items-center gap-4">
+                                                <div className="p-3 bg-white/10 rounded-lg">
+                                                    <Clock className="w-6 h-6 text-white" />
                                                 </div>
+                                                <div>
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Estimated Duration</span>
+                                                    <h4 className="text-lg font-bold text-white tracking-tight mt-0.5">Total Days Requested</h4>
+                                                </div>
+                                            </div>
+                                            <div className="text-4xl font-bold text-white tracking-tighter">{requestedDays} <span className="text-xs uppercase font-bold text-slate-400">Days</span></div>
+                                        </div>
+
                                                 {endDate && new Date(endDate).getDay() === 6 && Math.ceil(new Date(endDate).getDate() / 7) === 5 && (
-                                                    <div className="text-[10px] font-bold text-blue-600 uppercase tracking-widest bg-blue-50/50 px-3 py-1.5 rounded-lg border border-blue-100/50 flex items-center gap-2">
-                                                        <Check className="w-3 h-3" /> 5th Saturday Rule: Applied as Full Working Day
+                                                    <div className="flex items-center gap-4 bg-slate-50 p-5 rounded-xl border border-slate-100">
+                                                        <Info className="w-5 h-5 text-slate-500 shrink-0" />
+                                                        <span className="text-[10px] font-bold text-slate-700 uppercase tracking-widest">Protocol Override: 5th Saturday applied as full institutional deployment.</span>
                                                     </div>
                                                 )}
                                             </div>
                                         )}
 
-                                        <div className="space-y-1.5">
-                                            <label className="text-sm font-bold text-slate-700">Reason / Notes</label>
+                                        <div className="space-y-4">
+                                            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-1">Institutional Context / Rationale</Label>
                                             <textarea
                                                 rows={3}
-                                                placeholder="Please provide additional context for your approvers..."
-                                                className="w-full bg-white border border-slate-300 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none resize-none text-sm"
+                                                placeholder="Provide context for this leave request..."
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-6 font-bold text-slate-900 text-sm focus:ring-2 focus:ring-slate-950 transition-all resize-none shadow-sm"
                                             ></textarea>
                                         </div>
 
                                         {requiresProof && (
-                                            <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
-                                                <div className="flex items-center gap-2 text-amber-600 bg-amber-50 p-3 rounded-lg border border-amber-200">
-                                                    <AlertCircle className="w-5 h-5 shrink-0" />
-                                                    <span className="text-xs font-bold">Policy rules require supporting documentation for this request (e.g. OED proof, or CL &gt; 3 days).</span>
+                                            <div className="space-y-6 animate-in slide-in-from-bottom-8">
+                                                <div className="flex items-center gap-4 text-rose-600 bg-rose-50 p-5 rounded-xl border border-rose-100 shadow-sm">
+                                                    <AlertCircle className="w-6 h-6 shrink-0" />
+                                                    <span className="text-[10px] font-bold uppercase tracking-widest leading-relaxed">Verification protocol required for requests exceeding 3 units or OED.</span>
                                                 </div>
-                                                <div className="border-2 border-dashed border-slate-300 rounded-2xl p-8 flex flex-col items-center justify-center hover:bg-slate-50 transition-colors cursor-pointer group">
-                                                    <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                                                        <Upload className="w-6 h-6" />
+                                                <div className="border-2 border-dashed border-slate-200 rounded-2xl p-12 flex flex-col items-center justify-center hover:bg-slate-50 transition-all cursor-pointer group bg-white shadow-sm">
+                                                    <div className="w-16 h-16 bg-slate-50 text-slate-400 rounded-xl flex items-center justify-center mb-6 group-hover:bg-slate-900 group-hover:text-white transition-all duration-300 border border-slate-100">
+                                                        <Upload className="w-7 h-7" />
                                                     </div>
-                                                    <span className="text-sm font-bold text-slate-700">Click to upload document</span>
-                                                    <span className="text-xs text-slate-400 mt-1">PDF, JPG, PNG up to 5MB</span>
+                                                    <span className="text-[10px] font-bold text-slate-900 uppercase tracking-widest">Initialize Document Upload</span>
+                                                    <span className="text-[9px] text-slate-400 font-bold uppercase mt-2 tracking-widest opacity-60">PDF, JPEG, PNG [Limit 5MiB]</span>
                                                 </div>
                                             </div>
                                         )}
                                     </div>
 
-                                    <div className="px-8 py-5 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
-                                        <Button variant="outline" onClick={() => setShowApplyModal(false)} disabled={isSubmitting}>Cancel</Button>
+                                    <div className="p-10 border-t border-slate-100 bg-slate-50 flex justify-end gap-6">
+                                        <Button variant="ghost" className="h-12 px-10 rounded-lg font-bold text-[10px] uppercase tracking-widest text-slate-400 hover:bg-white hover:text-slate-900 transition-all" onClick={() => setShowApplyModal(false)} disabled={isSubmitting}>Abort Request</Button>
                                         <Button
-                                            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+                                            className="h-12 px-12 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-bold text-[10px] uppercase tracking-wider shadow-sm transition-all disabled:opacity-50"
                                             disabled={isSubmitting || !startDate || !endDate}
                                             onClick={() => {
                                                 setIsSubmitting(true);
@@ -382,88 +448,97 @@ const LeaveDashboard = () => {
                                     </div>
                                 </>
                             )}
-                        </div>
-                    </div>
-                )}
+                        </DialogContent>
+                    </Dialog>
 
-                {/* History Details Slide-over / Modal */}
-                {selectedHistory && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in">
-                        <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col animate-in zoom-in-95">
-                            <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                                <div>
-                                    <div className="flex items-center gap-3 mb-1">
-                                        <h3 className="font-black text-xl text-slate-800 tracking-tight">Request Details</h3>
-                                        <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full">{selectedHistory.id}</span>
-                                    </div>
-                                    <p className="text-sm font-semibold text-slate-500">Submitted on {selectedHistory.appliedOn}</p>
-                                </div>
-                                <button onClick={() => setSelectedHistory(null)} className="p-2 text-slate-400 hover:bg-slate-200 hover:text-slate-600 rounded-full transition-colors bg-white shadow-sm border border-slate-200">
-                                    <X className="w-5 h-5" />
-                                </button>
-                            </div>
-
-                            <div className="p-8 space-y-6 bg-white overflow-y-auto max-h-[70vh]">
-                                <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-5">
-                                    <div className="text-xl font-black text-blue-700 mb-2">{selectedHistory.type}</div>
-                                    <div className="flex items-center gap-6">
-                                        <div>
-                                            <div className="text-xs text-slate-500 font-semibold mb-0.5">Duration</div>
-                                            <div className="font-bold text-slate-800">{selectedHistory.days} Days</div>
+                    {/* Instance Detail Trace */}
+                    <Dialog open={!!selectedHistory} onOpenChange={(open) => !open && setSelectedHistory(null)}>
+                        <DialogContent className="max-w-2xl bg-white rounded-2xl p-0 overflow-hidden border border-slate-200 shadow-2xl">
+                            {selectedHistory && (
+                                <>
+                                    <DialogHeader className="bg-slate-900 p-8 text-white relative">
+                                        <div className="relative z-10 space-y-1">
+                                            <div className="flex items-center gap-4">
+                                                <DialogTitle className="text-xl font-bold tracking-tight">Request Details</DialogTitle>
+                                                <Badge variant="secondary" className="bg-white/10 text-white border-none font-bold text-[10px] tracking-widest px-3 py-0.5 rounded-full">{selectedHistory.id}</Badge>
+                                            </div>
+                                            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Submitted On: {selectedHistory.appliedOn}</p>
                                         </div>
-                                        <div className="w-px h-8 bg-blue-200"></div>
-                                        <div>
-                                            <div className="text-xs text-slate-500 font-semibold mb-0.5">Timeline</div>
-                                            <div className="font-bold text-slate-800">{selectedHistory.from} to {selectedHistory.to}</div>
-                                        </div>
-                                    </div>
-                                </div>
+                                    </DialogHeader>
 
-                                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                    <div className="text-xs font-bold text-slate-500 mb-1">Your Reason / Notes</div>
-                                    <p className="text-sm text-slate-700">{selectedHistory.reason}</p>
-                                </div>
-
-                                {selectedHistory.hasProof && (
-                                    <div>
-                                        <h4 className="text-xs font-bold uppercase text-emerald-600 tracking-wider mb-2 flex items-center gap-1"><Check className="w-3 h-3" /> Supporting Evidence attached</h4>
-                                        <div className="border border-slate-200 rounded-xl p-3 flex items-center justify-between bg-white hover:border-emerald-300 transition-colors cursor-pointer group">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 bg-emerald-50 text-emerald-600 flex items-center justify-center rounded-lg group-hover:bg-emerald-100"><FileText className="w-5 h-5" /></div>
-                                                <div>
-                                                    <div className="font-bold text-sm text-slate-800 group-hover:text-emerald-700">Exam_Duty_Proof.pdf</div>
-                                                    <div className="text-xs text-slate-500">1.2 MB PDF Document</div>
+                                    <div className="p-10 space-y-8">
+                                        <div className="bg-slate-50 rounded-xl p-6 border border-slate-100 shadow-sm space-y-6">
+                                            <div className="space-y-0.5">
+                                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Leave Type</span>
+                                                <div className="text-xl font-bold text-slate-900 tracking-tight">{selectedHistory.type}</div>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-8">
+                                                <div className="space-y-0.5">
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Duration</span>
+                                                    <div className="font-bold text-slate-900 text-base">{selectedHistory.days} <span className="text-xs uppercase opacity-40 ml-1">Days</span></div>
+                                                </div>
+                                                <div className="space-y-0.5">
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Date Range</span>
+                                                    <div className="font-bold text-slate-900 text-base">{selectedHistory.from} - {selectedHistory.to}</div>
                                                 </div>
                                             </div>
-                                            <Button variant="ghost" size="sm" className="text-emerald-600">Download</Button>
                                         </div>
-                                    </div>
-                                )}
 
-                                <div>
-                                    <h4 className="text-xs font-bold uppercase text-slate-400 tracking-wider mb-2">Routing & Verification</h4>
-                                    <div className={`p-4 rounded-xl border ${selectedHistory.status === 'Approved' ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'}`}>
-                                        <div className="flex items-center gap-3 mb-2">
-                                            {selectedHistory.status === 'Approved' ? <CheckCircle2 className="w-5 h-5 text-emerald-600" /> : <X className="w-5 h-5 text-rose-600" />}
-                                            <span className={`font-bold ${selectedHistory.status === 'Approved' ? 'text-emerald-800' : 'text-rose-800'}`}>
-                                                Status: {selectedHistory.status}
-                                            </span>
+                                        <div className="space-y-2">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Reason for Leave</span>
+                                            <div className="bg-white p-4 rounded-xl border border-slate-100 text-sm font-medium text-slate-600 leading-relaxed shadow-sm italic">
+                                                "{selectedHistory.reason}"
+                                            </div>
                                         </div>
-                                        <div className={`text-sm ${selectedHistory.status === 'Approved' ? 'text-emerald-700' : 'text-rose-700'}`}>
-                                            Processed by <span className="font-bold">{selectedHistory.approver}</span>
-                                        </div>
-                                        {selectedHistory.rejectReason && (
-                                            <div className="mt-3 p-3 bg-white/60 rounded-lg text-sm font-medium text-rose-800 border border-rose-100">
-                                                <strong>Notes:</strong> {selectedHistory.rejectReason}
+
+                                        {selectedHistory.hasProof && (
+                                            <div className="space-y-4">
+                                                <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest px-1 flex items-center gap-2">
+                                                    <Check className="w-3 h-3" /> Evidence Verified
+                                                </span>
+                                                <div className="bg-white border border-slate-200 rounded-xl p-6 flex items-center justify-between group hover:shadow-md transition-all cursor-pointer">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-12 h-12 bg-slate-50 text-slate-400 flex items-center justify-center rounded-lg group-hover:bg-slate-900 group-hover:text-white transition-all duration-300 border border-slate-100"><FileText className="w-6 h-6" /></div>
+                                                        <div>
+                                                            <div className="font-bold text-slate-900 text-sm tracking-tight uppercase">Verification_Archive.pdf</div>
+                                                            <div className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1">1.2 MiB • Binary Object</div>
+                                                        </div>
+                                                    </div>
+                                                    <Button variant="ghost" className="h-9 px-6 rounded-md font-bold text-[10px] uppercase tracking-widest text-slate-600 hover:bg-slate-100 border border-slate-200">Download</Button>
+                                                </div>
                                             </div>
                                         )}
+
+                                        <div className={`p-6 rounded-xl border shadow-sm ${selectedHistory.status === 'Approved' ? 'bg-emerald-50 border-emerald-100' : 'bg-rose-50 border-rose-100'}`}>
+                                            <div className="flex items-center justify-between mb-4">
+                                                <div className="flex items-center gap-4">
+                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-sm ${selectedHistory.status === 'Approved' ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`}>
+                                                        {selectedHistory.status === 'Approved' ? <CheckCircle2 className="w-5 h-5" /> : <X className="w-5 h-5" />}
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Current Status</span>
+                                                        <div className={`text-xl font-bold tracking-tight uppercase leading-none ${selectedHistory.status === 'Approved' ? 'text-emerald-700' : 'text-rose-700'}`}>
+                                                            {selectedHistory.status}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Approver</span>
+                                                    <div className="font-bold text-slate-900 tracking-tight mt-0.5">{selectedHistory.approver}</div>
+                                                </div>
+                                            </div>
+                                            {selectedHistory.rejectReason && (
+                                                <div className="mt-6 p-6 bg-white rounded-xl border border-rose-100">
+                                                    <div className="text-[10px] font-bold text-rose-400 uppercase tracking-widest mb-2">Rejection Context</div>
+                                                    <p className="text-sm font-bold text-rose-900 italic leading-relaxed">"{selectedHistory.rejectReason}"</p>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </div>
+                                </>
+                            )}
+                        </DialogContent>
+                    </Dialog>
         </Layout>
     );
 };

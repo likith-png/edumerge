@@ -16,13 +16,13 @@ const Stage4Training = ({ onComplete }: any) => {
     const allCompleted = modules.every(m => m.status === 'Completed');
 
     return (
-        <div className="p-6">
+        <div className="px-4 py-4">
             <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-orange-600" /> Training & Induction
             </h2>
-            <p className="text-slate-500 mb-6 text-sm">Review employee's progress on mandatory induction modules.</p>
+            <p className="text-slate-500 mb-4 text-sm">Review employee's progress on mandatory induction modules.</p>
 
-            <div className="space-y-4 mb-8">
+            <div className="space-y-4 mb-4">
                 {modules.map((module) => (
                     <div key={module.id} className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-lg shadow-sm">
                         <div className="flex items-center gap-4">

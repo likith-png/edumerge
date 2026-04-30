@@ -3,8 +3,11 @@ import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card'
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
+import Layout from '../components/Layout';
 import {
-    FileText, UserMinus, CheckSquare, ShieldAlert, AlertCircle, Briefcase, MessageSquare, CreditCard, BarChart, Settings, Home
+    FileText, UserMinus, CheckSquare, ShieldAlert, AlertCircle, Briefcase, 
+    MessageSquare, CreditCard, BarChart, Settings, UserX, Trash2, 
+    ArrowRight, Clock, ShieldCheck, ChevronRight
 } from 'lucide-react';
 import ExitConfiguration from '../components/exit/ExitConfiguration';
 import { submitResignation, getAllExits, updateExitStatus, terminateEmployee } from '../services/exitService';
@@ -19,6 +22,7 @@ import SettlementDashboard from '../components/exit/SettlementDashboard';
 import ExitAnalytics from '../components/exit/ExitAnalytics';
 import ExitDashboard from '../components/exit/ExitDashboard';
 import { usePersona } from '../contexts/PersonaContext';
+import { Badge } from '../components/ui/badge';
 
 const ExitManagement: React.FC = () => {
     const { role, user } = usePersona();
@@ -37,45 +41,48 @@ const ExitManagement: React.FC = () => {
         comments: ''
     });
 
-    // Sync viewMode if role changes
     useEffect(() => {
         if (role === 'HR_ADMIN' || role === 'ADMIN') setViewMode('Admin');
         else if (role === 'MANAGER') setViewMode('Manager');
         else setViewMode('Faculty');
-
         setActiveTab('dashboard');
     }, [role]);
 
-    // Helper to filter relevant exits for Admin dropdown
     const adminSelectableExits = exits.filter(e => {
         if (viewMode === 'Admin') return ['Approved', 'Manager_Approved', 'HR_Approved'].includes(e.status);
-        if (viewMode === 'Manager') {
-            // Filter by manager's team - in mock we'll use department
-            return e.department === user.department;
-        }
+        if (viewMode === 'Manager') return e.department === user.department;
         return false;
     });
 
     const AdminExitSelector = () => (
-        <div className="mb-6 p-4 bg-white rounded-lg border border-slate-200 shadow-sm">
-            <Label className="mb-2 block text-sm font-medium text-slate-700">
-                {viewMode === 'Manager' ? 'Select Team Member' : 'Select Employee to Manage'}
-            </Label>
-            <select
-                className="w-full md:w-1/3 h-10 rounded-md border border-slate-200 px-3 py-2 text-sm"
-                value={selectedExitId || ''}
-                onChange={(e) => setSelectedExitId(Number(e.target.value))}
-            >
-                <option value="">-- Select Employee --</option>
-                {adminSelectableExits.map(e => (
-                    <option key={e.id} value={e.id}>{e.employee_name} ({e.status})</option>
-                ))}
-            </select>
+        <div className="mb-10 p-8 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden relative">
+            <div className="relative z-10 flex items-center gap-4">
+                <div className="p-3 bg-slate-900 rounded-lg shadow-sm">
+                    <UserX className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                    <h3 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Employee Search</h3>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">Select personnel record for review</p>
+                </div>
+            </div>
+            <div className="relative z-10 w-full md:w-1/2">
+                <select
+                    className="w-full h-12 bg-slate-50 border border-slate-200 rounded-lg px-6 font-bold text-slate-900 text-sm focus:ring-2 focus:ring-blue-600/20 outline-none transition-all appearance-none cursor-pointer"
+                    value={selectedExitId || ''}
+                    onChange={(e) => setSelectedExitId(Number(e.target.value))}
+                >
+                    <option value="">-- Active Departure List --</option>
+                    {adminSelectableExits.map(e => (
+                        <option key={e.id} value={e.id}>{e.employee_name} ({e.status})</option>
+                    ))}
+                </select>
+                <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                    <ChevronRight className="w-4 h-4 rotate-90" />
+                </div>
+            </div>
         </div>
     );
 
-    // Get current user's active exit (Mock logic: assumes 1st active exit found linked to user)
-    // In real app, this would filter by logged-in user ID
     const myActiveExit = exits.find(e => ['Pending', 'Approved', 'Manager_Approved', 'HR_Approved'].includes(e.status));
 
     const [formData, setFormData] = useState({
@@ -103,7 +110,7 @@ const ExitManagement: React.FC = () => {
     const fetchEmployees = async () => {
         try {
             const data = await getAllEmployees();
-            setEmployees(data.data || data); // Handle both {data: []} and [] formats
+            setEmployees(data.data || data);
         } catch (error) {
             console.error(error);
         }
@@ -128,11 +135,8 @@ const ExitManagement: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        // Find current user's numeric ID from employees list
         const currentUser = employees.find(emp => emp.name === user.name || emp.email.includes(user.name.toLowerCase().split(' ')[0]));
-        const empId = currentUser?.id || 1; // Fallback to 1 if not found
-
+        const empId = currentUser?.id || 1;
         try {
             await submitResignation({ ...formData, employee_id: empId });
             alert("Resignation Submitted Successfully");
@@ -158,396 +162,459 @@ const ExitManagement: React.FC = () => {
     ];
 
     const currentTabs = allTabs.filter(tab => tab.roles.includes(viewMode));
+
     return (
-        <div className="flex flex-col h-screen relative overflow-hidden">
-            <div className="background-gradient"></div>
+        <Layout title="Exit Management" description="Streamlined employee separation and clearance workflows." icon={UserX} showHome>
             
-            {/* Top Navigation Bar */}
-            <div className="glass-panel mx-4 mt-4 mb-2 sticky top-4 z-20 px-2 py-2">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex flex-col md:flex-row items-center justify-between py-2 space-y-4 md:space-y-0">
-                        <div className="flex items-center gap-6">
+            {/* Standard Tab Navigation */}
+            <div className="mb-8 border-b border-slate-200">
+                <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
+                    <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-2">
+                        {currentTabs.map((tab) => (
                             <button
-                                onClick={() => window.location.href = '/'}
-                                className="w-12 h-12 rounded-2xl glass-card flex items-center justify-center text-slate-600 hover:text-indigo-600 transition-all"
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap
+                                    ${activeTab === tab.id
+                                        ? 'bg-slate-900 text-white shadow-sm'
+                                        : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+                                    }`}
                             >
-                                <Home className="w-5 h-5" />
+                                <tab.icon className={`h-4 w-4 ${activeTab === tab.id ? 'text-white' : 'text-slate-400'}`} />
+                                {tab.label}
                             </button>
-                            <div className="flex items-center space-x-4">
-                                <div className="p-3 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl shadow-lg shadow-indigo-500/20">
-                                    <UserMinus className="w-6 h-6 text-white" />
-                                </div>
-                                <div>
-                                    <h1 className="text-xl font-bold text-slate-900 drop-shadow-sm">
-                                        Exit Management
-                                    </h1>
-                                    <p className="text-sm font-medium text-slate-600">
-                                        {viewMode === 'Manager' ? 'Team Separation Hub' : 'Full-cycle separation portal'}
-                                    </p>
-                                </div>
+                        ))}
+                    </div>
+
+                    {(role === 'HR_ADMIN' || role === 'ADMIN' || role === 'MANAGER') && (
+                        <div className="relative min-w-[180px] pb-2">
+                            <select
+                                value={viewMode}
+                                onChange={(e) => {
+                                    const newMode = e.target.value as 'Faculty' | 'Admin' | 'Manager';
+                                    setViewMode(newMode);
+                                    setActiveTab(newMode === 'Admin' ? 'analytics' : newMode === 'Manager' ? 'approvals' : 'dashboard');
+                                    setSelectedExitId(undefined);
+                                }}
+                                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-[10px] font-bold text-slate-700 uppercase tracking-widest focus:ring-2 focus:ring-slate-900 transition-all appearance-none cursor-pointer"
+                            >
+                                <option value="Faculty">Personal View</option>
+                                {role === 'MANAGER' && <option value="Manager">Manager View</option>}
+                                {(role === 'HR_ADMIN' || role === 'ADMIN') && <option value="Admin">Admin Console</option>}
+                            </select>
+                            <div className="absolute right-4 top-1/2 -translate-y-[calc(50%+4px)] pointer-events-none text-slate-400">
+                                <ChevronRight className="w-3 h-3 rotate-90" />
                             </div>
                         </div>
-
-                        {/* View Switcher & Navigation */}
-                        <div className="flex items-center gap-4 overflow-x-auto no-scrollbar max-w-full pb-1 md:pb-0">
-
-
-                            {/* Role Switcher - Visible for Admin and Managers to toggle personal vs team view */}
-                            {(role === 'HR_ADMIN' || role === 'ADMIN' || role === 'MANAGER') && (
-                                <select
-                                    value={viewMode}
-                                    onChange={(e) => {
-                                        const newMode = e.target.value as 'Faculty' | 'Admin' | 'Manager';
-                                        setViewMode(newMode);
-                                        setActiveTab(newMode === 'Admin' ? 'analytics' : newMode === 'Manager' ? 'approvals' : 'dashboard');
-                                        setSelectedExitId(undefined); // Reset selection
-                                    }}
-                                    className="bg-slate-100 border-none text-sm font-semibold text-slate-700 rounded-md px-3 py-1.5 focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer"
-                                >
-                                    <option value="Faculty">Personal View</option>
-                                    {role === 'MANAGER' && <option value="Manager">Manager View</option>}
-                                    {(role === 'HR_ADMIN' || role === 'ADMIN') && <option value="Admin">Admin View</option>}
-                                </select>
-                            )}
-
-                            <div className="h-6 w-px bg-slate-200 mx-2 hidden md:block"></div>
-
-                            {/* Tabs */}
-                            <nav className="flex items-center p-1 bg-white/40 backdrop-blur-md rounded-full shadow-inner border border-white/60">
-                                {currentTabs.map((tab) => (
-                                    <button
-                                        key={tab.id}
-                                        onClick={() => setActiveTab(tab.id)}
-                                        className={`flex items-center space-x-2 px-5 py-2 rounded-full text-sm font-bold transition-all duration-300 whitespace-nowrap
-                                            ${activeTab === tab.id
-                                                ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-md shadow-indigo-500/20 translate-y-[-1px]'
-                                                : 'text-slate-600 hover:bg-white/60 hover:text-indigo-900'
-                                            }`}
-                                    >
-                                        <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-indigo-50' : 'text-slate-500'}`} />
-                                        <span>{tab.label}</span>
-                                    </button>
-                                ))}
-                            </nav>
-                        </div>
-                    </div>
+                    )}
                 </div>
             </div>
 
-            {/* Main Content Area */}
-            <main className="flex-1 overflow-y-auto relative z-10 p-6">
-                <div className="max-w-7xl mx-auto space-y-6">
+            <div className="space-y-8 pb-16">
+                {viewMode === 'Admin' && ['handover', 'settlement'].includes(activeTab) && (
+                    <div className="mb-8 p-6 bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-slate-900 rounded-lg text-white shadow-md">
+                                <UserX className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-slate-900 tracking-tight">Personnel Search</h3>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Select employee for terminal review</p>
+                            </div>
+                        </div>
+                        <div className="relative w-full md:w-1/2">
+                            <select
+                                className="w-full h-11 bg-slate-50 border border-slate-200 rounded-lg px-6 font-bold text-slate-900 text-sm focus:ring-2 focus:ring-slate-900 outline-none transition-all appearance-none cursor-pointer"
+                                value={selectedExitId || ''}
+                                onChange={(e) => setSelectedExitId(Number(e.target.value))}
+                            >
+                                <option value="">-- Active Departure List --</option>
+                                {adminSelectableExits.map(e => (
+                                    <option key={e.id} value={e.id}>{e.employee_name} ({e.status})</option>
+                                ))}
+                            </select>
+                            <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                <ChevronRight className="w-4 h-4 rotate-90" />
+                            </div>
+                        </div>
+                    </div>
+                )}
 
-                    <div className="p-4 md:p-8 max-w-7xl mx-auto">
-                        {/* Admin View: Show Select Employee Dropdown for specific tabs */}
-                        {viewMode === 'Admin' && ['handover', 'settlement'].includes(activeTab) && (
-                            <AdminExitSelector />
-                        )}
+                {activeTab === 'dashboard' && (
+                    <ExitDashboard
+                        setActiveTab={setActiveTab}
+                        activeExit={viewMode === 'Faculty' ? myActiveExit : exits.find(e => e.id === selectedExitId)}
+                        viewMode={viewMode}
+                        allExits={exits}
+                    />
+                )}
+                {activeTab === 'configuration' && <ExitConfiguration />}
 
-                        {activeTab === 'dashboard' && (
-                            <ExitDashboard
-                                setActiveTab={setActiveTab}
-                                activeExit={viewMode === 'Faculty' ? myActiveExit : exits.find(e => e.id === selectedExitId)}
-                                viewMode={viewMode}
-                                allExits={exits}
-                            />
-                        )}
-                        {activeTab === 'configuration' && <ExitConfiguration />}
-                        {activeTab === 'submit' && (
-                            <div className="max-w-2xl mx-auto glass-card border-[rgba(255,255,255,0.8)] shadow-xl relative z-10">
-                                <div className="px-8 py-6 border-b border-white/40 bg-white/20">
-                                    <h3 className="text-2xl font-bold bg-gradient-to-r from-indigo-900 to-slate-800 bg-clip-text text-transparent">Formal Resignation</h3>
-                                    <p className="text-sm font-medium text-slate-600 mt-1">Initiate your separation journey smoothly and securely.</p>
+                {activeTab === 'submit' && (
+                    <div className="max-w-4xl mx-auto space-y-8">
+                        <div className="text-center space-y-2 mb-12">
+                            <h2 className="text-3xl font-bold text-slate-900 uppercase tracking-tight">Resignation Request</h2>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Initiate formal separation protocols.</p>
+                        </div>
+
+                        <Card className="border border-slate-200 shadow-sm bg-white rounded-xl overflow-hidden">
+                            <div className="px-10 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-2.5 bg-slate-900 rounded-lg shadow-sm">
+                                        <FileText className="w-5 h-5 text-white" />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Initiate Resignation</h3>
                                 </div>
-                                <div className="p-8">
-                                    {exits.some(e => ['Pending', 'Approved'].includes(e.status)) ? (
-                                        <div className="text-center py-8">
-                                            <AlertCircle className="h-12 w-12 mx-auto text-yellow-500 mb-3" />
-                                            <h3 className="text-lg font-medium text-slate-900">Active Request Found</h3>
-                                            <p className="text-slate-500 max-w-sm mx-auto mt-2">
-                                                You already have an active resignation request. Please check the "My Requests" tab for updates.
-                                            </p>
-                                            <Button
-                                                variant="outline"
-                                                className="mt-6"
-                                                onClick={() => setActiveTab('status')}
-                                            >
-                                                View My Request
-                                            </Button>
+                                <ShieldCheck className="w-5 h-5 text-emerald-500 opacity-40" />
+                            </div>
+                            <CardContent className="px-10 py-10">
+                                {exits.some(e => ['Pending', 'Approved'].includes(e.status)) ? (
+                                    <div className="text-center py-20 space-y-6 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                                        <div className="w-16 h-16 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto border border-amber-100">
+                                            <AlertCircle className="h-8 w-8" />
                                         </div>
-                                    ) : (
-                                        <form onSubmit={handleSubmit} className="space-y-4">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div className="space-y-2">
-                                                    <Label htmlFor="type">Resignation Type</Label>
+                                        <div className="space-y-1">
+                                            <p className="text-lg font-bold text-slate-900 uppercase">Active Request Found</p>
+                                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider max-w-xs mx-auto">You already have an active separation request in the pipeline.</p>
+                                        </div>
+                                        <Button
+                                            onClick={() => setActiveTab('status')}
+                                            className="h-12 bg-slate-900 hover:bg-black text-white px-10 rounded-lg font-bold text-[10px] uppercase tracking-wider shadow-sm"
+                                        >
+                                            View Status
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <form onSubmit={handleSubmit} className="space-y-10">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                            <div className="space-y-2.5">
+                                                <Label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">Separation Type</Label>
+                                                <div className="relative">
                                                     <select
-                                                        id="type"
-                                                        className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                                        className="w-full h-12 bg-slate-50 border border-slate-200 rounded-lg px-6 font-bold text-slate-900 text-sm focus:ring-2 focus:ring-blue-600/20 outline-none transition-all appearance-none cursor-pointer"
                                                         value={formData.resignation_type || 'Voluntary'}
                                                         onChange={(e) => setFormData({ ...formData, resignation_type: e.target.value })}
                                                         required
                                                     >
                                                         <option value="Voluntary">Voluntary Resignation</option>
-                                                        <option value="Forced Resignation">Forced Resignation</option>
-                                                        <option value="Contract End">End of Contract</option>
+                                                        <option value="Forced Resignation">Directive Resignation</option>
+                                                        <option value="Contract End">Contract End</option>
                                                         <option value="Retirement">Retirement</option>
-                                                        <option value="Termination">Involuntary Termination</option>
+                                                        <option value="Termination">Termination</option>
                                                     </select>
+                                                    <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                                        <ChevronRight className="w-4 h-4 rotate-90" />
+                                                    </div>
                                                 </div>
-                                                <div className="space-y-2">
-                                                    <Label htmlFor="reason">Reason Category</Label>
+                                            </div>
+                                            <div className="space-y-2.5">
+                                                <Label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">Reason for Leaving</Label>
+                                                <div className="relative">
                                                     <select
-                                                        id="reason"
-                                                        className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                                        className="w-full h-12 bg-slate-50 border border-slate-200 rounded-lg px-6 font-bold text-slate-900 text-sm focus:ring-2 focus:ring-blue-600/20 outline-none transition-all appearance-none cursor-pointer"
                                                         value={formData.reason}
                                                         onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
                                                         required
                                                     >
-                                                        <option value="">Select a reason</option>
+                                                        <option value="">-- Select Reason --</option>
                                                         <option value="Better Opportunity">Better Opportunity</option>
                                                         <option value="Higher Studies">Higher Studies</option>
                                                         <option value="Personal Reasons">Personal Reasons</option>
                                                         <option value="Relocation">Relocation</option>
-                                                        <option value="Health">Health</option>
+                                                        <option value="Health">Health Reasons</option>
                                                         <option value="Other">Other</option>
                                                     </select>
+                                                    <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                                        <ChevronRight className="w-4 h-4 rotate-90" />
+                                                    </div>
                                                 </div>
                                             </div>
+                                        </div>
 
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div className="space-y-2">
-                                                    <Label htmlFor="lwd">Proposed Last Working Day</Label>
-                                                    <Input
-                                                        id="lwd"
-                                                        type="date"
-                                                        value={formData.lwd_proposed}
-                                                        onChange={(e) => setFormData({ ...formData, lwd_proposed: e.target.value })}
-                                                        required
-                                                    />
-                                                    <p className="text-xs text-slate-500">
-                                                        Policy Notice: {formData.resignation_type === 'Retirement' ? '90 Days' : formData.resignation_type === 'Contract End' ? '30 Days' : ['Termination', 'Forced Resignation'].includes(formData.resignation_type) ? 'Immediate' : '60 Days'}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                            <div className="space-y-2.5">
+                                                <Label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">Proposed last working day</Label>
+                                                <Input
+                                                    type="date"
+                                                    value={formData.lwd_proposed}
+                                                    onChange={(e) => setFormData({ ...formData, lwd_proposed: e.target.value })}
+                                                    className="h-12 bg-slate-50 border-slate-200 rounded-lg px-6 font-bold text-slate-900 text-sm focus:ring-2 focus:ring-blue-600/20 outline-none"
+                                                    required
+                                                />
+                                                <div className="flex items-center gap-2 px-1 mt-1">
+                                                    <Clock className="w-3.5 h-3.5 text-blue-500" />
+                                                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+                                                        Standard Notice: <span className="text-slate-900 font-bold">{formData.resignation_type === 'Retirement' ? '90 Days' : formData.resignation_type === 'Contract End' ? '30 Days' : ['Termination', 'Forced Resignation'].includes(formData.resignation_type) ? 'Immediate' : '60 Days'}</span>
                                                     </p>
                                                 </div>
-                                                <div className="space-y-2">
-                                                    <Label htmlFor="attachment">Supporting Document (Optional)</Label>
+                                            </div>
+                                            <div className="space-y-2.5 relative">
+                                                <Label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">Attachment (Optional)</Label>
+                                                <div className="relative">
                                                     <Input
-                                                        id="attachment"
                                                         type="file"
-                                                        className="cursor-pointer"
+                                                        className="h-12 bg-slate-50 border-slate-200 rounded-lg px-6 font-bold text-slate-900 text-sm focus:ring-2 focus:ring-blue-600/20 outline-none pt-3.5 cursor-pointer file:hidden"
                                                         onChange={(e) => {
-                                                            // Mock upload
                                                             if (e.target.files?.[0]) {
                                                                 setFormData({ ...formData, attachment_url: URL.createObjectURL(e.target.files[0]) });
                                                             }
                                                         }}
                                                     />
-                                                </div>
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <Label htmlFor="comments">Additional Comments / Remarks</Label>
-                                                <textarea
-                                                    id="comments"
-                                                    className="flex min-h-[80px] w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                                                    value={formData.comments}
-                                                    onChange={(e) => setFormData({ ...formData, comments: e.target.value })}
-                                                />
-                                            </div>
-
-                                            <div className="pt-4">
-                                                <Button type="submit" className="w-full">Submit Resignation</Button>
-                                            </div>
-                                        </form>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-
-                        {activeTab === 'status' && (
-                            <div className="space-y-4">
-                                {exits.length === 0 ? (
-                                    <div className="text-center py-12 text-slate-500">
-                                        <p>No exit requests found.</p>
-                                        <Button variant="link" onClick={() => setActiveTab('submit')}>
-                                            Submit a resignation
-                                        </Button>
-                                    </div>
-                                ) : (
-                                    exits.map((exit) => (
-                                        <Card key={exit.id} className="shadow-sm border-slate-200 relative">
-                                            <CardHeader className="py-3 px-4 flex flex-row items-center justify-between space-y-0 pb-2">
-                                                <CardTitle className="text-base font-medium">
-                                                    Exit Request #{exit.id} - {exit.employee_name}
-                                                </CardTitle>
-                                                <span className={`px-2 py-1 rounded-full text-xs font-semibold 
-                    ${exit.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                        exit.status === 'Approved' ? 'bg-green-100 text-green-800' :
-                                                            exit.status === 'Withdrawn' ? 'bg-slate-100 text-slate-500' : 'bg-slate-100 text-slate-800'}`}>
-                                                    {exit.status}
-                                                </span>
-                                            </CardHeader>
-                                            <CardContent className="px-4 pb-4 pt-2">
-                                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                                                    <div>
-                                                        <span className="text-slate-500 text-xs block">Resignation Date</span>
-                                                        <span className="font-medium text-slate-700">{exit.resignation_date}</span>
-                                                    </div>
-                                                    <div>
-                                                        <span className="text-slate-500 text-xs block">Type</span>
-                                                        <span className="font-medium text-slate-700">{exit.resignation_type || 'Voluntary'}</span>
-                                                    </div>
-                                                    <div>
-                                                        <span className="text-slate-500 text-xs block">Proposed LWD</span>
-                                                        <span className="font-medium text-slate-700">{exit.lwd_proposed}</span>
-                                                    </div>
-                                                    <div>
-                                                        <span className="text-slate-500 text-xs block">Notice Ends</span>
-                                                        <span className="font-medium text-slate-700">{exit.notice_period_end || '-'}</span>
+                                                    <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 flex items-center gap-2">
+                                                        <span className="text-[10px] font-bold uppercase tracking-wider opacity-60">Upload proof</span>
+                                                        <FileText className="w-4 h-4" />
                                                     </div>
                                                 </div>
-                                                {exit.status === 'Pending' && (
-                                                    <div className="mt-4 flex justify-end">
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
-                                                            onClick={async () => {
-                                                                if (!confirm("Are you sure you want to withdraw your resignation?")) return;
-                                                                try {
-                                                                    await updateExitStatus(exit.id, { status: 'Withdrawn', comments: 'Withdrawn by user' });
-                                                                    fetchExits();
-                                                                } catch (e) {
-                                                                    console.error(e);
-                                                                    alert("Failed to withdraw");
-                                                                }
-                                                            }}
-                                                        >
-                                                            Withdraw Resignation
-                                                        </Button>
-                                                    </div>
-                                                )}
-                                            </CardContent>
-                                        </Card>
-                                    ))
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2.5">
+                                            <Label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">Detailed comments</Label>
+                                            <textarea
+                                                className="w-full min-h-[120px] bg-slate-50 border border-slate-200 rounded-xl p-6 font-semibold text-slate-900 text-sm focus:ring-2 focus:ring-blue-600/20 outline-none resize-none transition-all"
+                                                placeholder="Provide relevant details for your resignation..."
+                                                value={formData.comments}
+                                                onChange={(e) => setFormData({ ...formData, comments: e.target.value })}
+                                            />
+                                        </div>
+
+                                        <div className="pt-4">
+                                            <Button type="submit" className="w-full h-14 bg-slate-900 hover:bg-black text-white rounded-lg font-bold text-[11px] uppercase tracking-wider shadow-lg transition-all active:scale-[0.98] group">
+                                                Submit Resignation Request
+                                                <ArrowRight className="w-4 h-4 ml-3 group-hover:translate-x-1 transition-transform" />
+                                            </Button>
+                                        </div>
+                                    </form>
                                 )}
+                            </CardContent>
+                        </Card>
+                    </div>
+                )}
+
+                {activeTab === 'status' && (
+                    <div className="space-y-8">
+                        <div className="flex items-center justify-between mb-8 px-4">
+                            <h3 className="text-2xl font-bold text-slate-900 uppercase tracking-tight">Resignation Status</h3>
+                            <Badge className="bg-slate-900 text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider">{exits.length} Records</Badge>
+                        </div>
+                        
+                        {exits.length === 0 ? (
+                            <div className="text-center py-24 space-y-6 bg-white rounded-xl border border-slate-200 shadow-sm">
+                                <div className="w-20 h-20 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mx-auto border border-slate-100">
+                                    <UserMinus className="h-10 w-10" />
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-lg font-bold text-slate-900 uppercase">No active requests</p>
+                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">No active separation requests identified.</p>
+                                </div>
+                                <Button onClick={() => setActiveTab('submit')} className="h-12 bg-blue-600 hover:bg-blue-700 text-white px-10 rounded-lg font-bold text-[10px] uppercase tracking-wider shadow-sm">
+                                    Initiate Request
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="grid gap-6">
+                                {exits.map((exit) => (
+                                    <Card key={exit.id} className="border border-slate-200 shadow-sm bg-white rounded-xl overflow-hidden group hover:border-slate-300 transition-all duration-300">
+                                        <CardHeader className="px-10 py-6 border-b border-slate-100 flex flex-row items-center justify-between space-y-0 bg-slate-50/50">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-11 h-11 bg-slate-900 rounded-lg shadow-sm flex items-center justify-center">
+                                                    <span className="text-white font-bold text-xs">#{exit.id}</span>
+                                                </div>
+                                                <div>
+                                                    <CardTitle className="text-lg font-bold text-slate-900 uppercase tracking-tight">{exit.employee_name}</CardTitle>
+                                                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-1">Verification Status: Confirmed</p>
+                                                </div>
+                                            </div>
+                                            <Badge className={`px-5 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider border-none shadow-sm
+                                                ${exit.status === 'Pending' ? 'bg-amber-100 text-amber-700' :
+                                                  exit.status === 'Approved' ? 'bg-emerald-100 text-emerald-700' :
+                                                  exit.status === 'Withdrawn' ? 'bg-slate-100 text-slate-600' : 'bg-slate-900 text-white'}`}>
+                                                {exit.status}
+                                            </Badge>
+                                        </CardHeader>
+                                        <CardContent className="px-10 py-8">
+                                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+                                                <div className="space-y-1">
+                                                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Applied on</span>
+                                                    <div className="text-sm font-bold text-slate-900 uppercase">{exit.resignation_date}</div>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Category</span>
+                                                    <div className="text-sm font-bold text-slate-900 uppercase">{exit.resignation_type || 'Voluntary'}</div>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Last Working Day</span>
+                                                    <div className="text-sm font-bold text-blue-600 uppercase">{exit.lwd_proposed}</div>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Notice Period End</span>
+                                                    <div className="text-sm font-bold text-slate-900 uppercase">{exit.notice_period_end || '-'}</div>
+                                                </div>
+                                            </div>
+                                            {exit.status === 'Pending' && (
+                                                <div className="mt-8 flex justify-end">
+                                                    <Button
+                                                        variant="ghost"
+                                                        className="h-11 px-8 rounded-lg font-bold text-[10px] uppercase tracking-wider text-rose-500 hover:bg-rose-50 hover:text-rose-600 transition-all border border-rose-100 border-dashed"
+                                                        onClick={async () => {
+                                                            if (!confirm("Confirm withdrawal of resignation request?")) return;
+                                                            try {
+                                                                await updateExitStatus(exit.id, { status: 'Withdrawn', comments: 'Withdrawn by employee' });
+                                                                fetchExits();
+                                                            } catch (e) {
+                                                                console.error(e);
+                                                                alert("Withdrawal protocol failed");
+                                                            }
+                                                        }}
+                                                    >
+                                                        <Trash2 className="w-4 h-4 mr-2" />
+                                                        Withdraw Request
+                                                    </Button>
+                                                </div>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                ))}
                             </div>
                         )}
+                    </div>
+                )}
 
-                        {activeTab === 'approvals' && <ApprovalList />}
-                        {activeTab === 'noc' && <NOCDashboard />}
+                {activeTab === 'approvals' && <ApprovalList />}
+                {activeTab === 'noc' && <NOCDashboard />}
 
-                        {activeTab === 'handover' && (
-                            <>
-                                {viewMode === 'Admin' && <AdminExitSelector />}
-                                <HandoverList
-                                    exitId={viewMode === 'Admin' ? selectedExitId : myActiveExit?.id}
-                                    viewMode={viewMode}
-                                />
-                            </>
-                        )}
+                {activeTab === 'handover' && (
+                    <div className="animate-in fade-in duration-500">
+                        {viewMode === 'Admin' && <AdminExitSelector />}
+                        <HandoverList
+                            exitId={viewMode === 'Admin' ? selectedExitId : myActiveExit?.id}
+                            viewMode={viewMode}
+                        />
+                    </div>
+                )}
 
-                        {activeTab === 'interview' && (
-                            <ExitInterview
-                                exitId={viewMode === 'Admin' ? selectedExitId : myActiveExit?.id}
-                                onSuccess={() => setActiveTab('status')}
-                            />
-                        )}
+                {activeTab === 'interview' && (
+                    <ExitInterview
+                        exitId={viewMode === 'Admin' ? selectedExitId : myActiveExit?.id}
+                        onSuccess={() => setActiveTab('status')}
+                    />
+                )}
 
-                        {activeTab === 'settlement' && (
-                            <>
-                                {viewMode === 'Admin' && <AdminExitSelector />}
-                                <SettlementDashboard
-                                    exitId={viewMode === 'Admin' ? selectedExitId : myActiveExit?.id}
-                                    viewMode={viewMode}
-                                />
-                            </>
-                        )}
-                        {activeTab === 'terminate' && viewMode === 'Admin' && (
-                            <div className="max-w-2xl mx-auto glass-card border-[rgba(255,255,255,0.8)] shadow-xl relative z-10">
-                                <div className="bg-gradient-to-r from-red-500/10 to-red-400/5 px-8 py-6 border-b border-red-500/20">
-                                    <h3 className="text-2xl font-bold text-red-700">Involuntary Termination</h3>
-                                    <p className="text-sm font-medium text-slate-600 mt-1">Initiate immediate termination for a staff member.</p>
+                {activeTab === 'settlement' && (
+                    <div className="animate-in fade-in duration-500">
+                        {viewMode === 'Admin' && <AdminExitSelector />}
+                        <SettlementDashboard
+                            exitId={viewMode === 'Admin' ? selectedExitId : myActiveExit?.id}
+                            viewMode={viewMode}
+                        />
+                    </div>
+                )}
+
+                {activeTab === 'terminate' && viewMode === 'Admin' && (
+                    <div className="max-w-4xl mx-auto space-y-8">
+                        <div className="text-center space-y-2 mb-12">
+                            <h2 className="text-3xl font-bold text-rose-600 uppercase tracking-tight">Administrative Termination</h2>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Initiate mandatory separation protocols.</p>
+                        </div>
+
+                        <Card className="border border-rose-100 shadow-xl shadow-rose-900/5 bg-white rounded-xl overflow-hidden">
+                            <CardHeader className="px-10 py-6 border-b border-rose-50 bg-rose-50/50 flex flex-row items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-2.5 bg-rose-600 rounded-lg shadow-sm">
+                                        <ShieldAlert className="w-5 h-5 text-white" />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-rose-900 uppercase tracking-tight">Termination Directive</h3>
                                 </div>
-                                <div className="p-8">
-                                    <form onSubmit={handleTerminate} className="space-y-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="employee">Select Staff Member</Label>
+                            </CardHeader>
+                            <CardContent className="px-10 py-10">
+                                <form onSubmit={handleTerminate} className="space-y-10">
+                                    <div className="space-y-2.5">
+                                        <Label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">Select Employee Persona</Label>
+                                        <div className="relative">
                                             <select
-                                                id="employee"
-                                                className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                                className="w-full h-12 bg-slate-50 border border-rose-100 rounded-lg px-6 font-bold text-slate-900 text-sm focus:ring-2 focus:ring-rose-500/20 outline-none transition-all appearance-none cursor-pointer"
                                                 value={terminationFormData.employee_id}
                                                 onChange={(e) => setTerminationFormData({ ...terminationFormData, employee_id: Number(e.target.value) })}
                                                 required
                                             >
-                                                <option value="0">-- Select Staff --</option>
+                                                <option value="0">-- Active Personnel Directory --</option>
                                                 {employees.map(emp => (
                                                     <option key={emp.id} value={emp.id}>{emp.name} ({emp.department})</option>
                                                 ))}
                                             </select>
+                                            <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                                <ChevronRight className="w-4 h-4 rotate-90" />
+                                            </div>
                                         </div>
+                                    </div>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <Label htmlFor="term_reason">Termination Reason</Label>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="space-y-2.5">
+                                            <Label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">Primary Violation</Label>
+                                            <div className="relative">
                                                 <select
-                                                    id="term_reason"
-                                                    className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                                    className="w-full h-12 bg-slate-50 border border-rose-100 rounded-lg px-6 font-bold text-slate-900 text-sm focus:ring-2 focus:ring-rose-500/20 outline-none transition-all appearance-none cursor-pointer"
                                                     value={terminationFormData.reason}
                                                     onChange={(e) => setTerminationFormData({ ...terminationFormData, reason: e.target.value })}
                                                     required
                                                 >
-                                                    <option value="">Select a reason</option>
-                                                    <option value="Performance Issues">Performance Issues</option>
-                                                    <option value="Conduct Violation">Conduct Violation</option>
-                                                    <option value="Policy Non-compliance">Policy Non-compliance</option>
-                                                    <option value="Attendance Issues">Attendance Issues</option>
-                                                    <option value="Other">Other Administrative Reason</option>
+                                                    <option value="">-- Violation Category --</option>
+                                                    <option value="Performance Issues">Performance Deficit</option>
+                                                    <option value="Conduct Violation">Ethical Conduct Violation</option>
+                                                    <option value="Policy Non-compliance">Protocol Non-Compliance</option>
+                                                    <option value="Attendance Issues">Deployment Failure</option>
+                                                    <option value="Other">Administrative Other</option>
                                                 </select>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="term_lwd">Effective Termination Date</Label>
-                                                <Input
-                                                    id="term_lwd"
-                                                    type="date"
-                                                    value={terminationFormData.lwd_proposed}
-                                                    onChange={(e) => setTerminationFormData({ ...terminationFormData, lwd_proposed: e.target.value })}
-                                                    required
-                                                />
+                                                <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                                    <ChevronRight className="w-4 h-4 rotate-90" />
+                                                </div>
                                             </div>
                                         </div>
-
-                                        <div className="space-y-2">
-                                            <Label htmlFor="term_comments">Administrative Remarks / Evidence</Label>
-                                            <textarea
-                                                id="term_comments"
-                                                className="flex min-h-[100px] w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                                                placeholder="Enter details regarding the termination..."
-                                                value={terminationFormData.comments}
-                                                onChange={(e) => setTerminationFormData({ ...terminationFormData, comments: e.target.value })}
+                                        <div className="space-y-2.5">
+                                            <Label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">Expulsion Effective Date</Label>
+                                            <Input
+                                                type="date"
+                                                value={terminationFormData.lwd_proposed}
+                                                onChange={(e) => setTerminationFormData({ ...terminationFormData, lwd_proposed: e.target.value })}
+                                                className="h-12 bg-slate-50 border border-rose-100 rounded-lg px-6 font-bold text-slate-900 text-sm focus:ring-2 focus:ring-rose-500/20 outline-none"
+                                                required
                                             />
                                         </div>
+                                    </div>
 
-                                        <div className="pt-4 p-4 bg-red-50 rounded-lg border border-red-100 mb-4">
-                                            <div className="flex gap-3">
-                                                <ShieldAlert className="w-5 h-5 text-red-600 shrink-0" />
-                                                <p className="text-xs text-red-700">
-                                                    <strong>Warning:</strong> This action is permanent and will immediately trigger the exit workflow, including NOC clearances and settlement for the selected employee.
-                                                </p>
-                                            </div>
+                                    <div className="space-y-2.5">
+                                        <Label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">Rationale & Archive Evidence</Label>
+                                        <textarea
+                                            className="w-full min-h-[120px] bg-slate-50 border border-rose-100 rounded-xl p-6 font-semibold text-slate-900 text-sm focus:ring-2 focus:ring-rose-500/20 outline-none resize-none transition-all"
+                                            placeholder="Document institutional violations for archive..."
+                                            value={terminationFormData.comments}
+                                            onChange={(e) => setTerminationFormData({ ...terminationFormData, comments: e.target.value })}
+                                        />
+                                    </div>
+
+                                    <div className="p-6 bg-rose-50 rounded-xl border border-rose-100 flex items-start gap-5">
+                                        <div className="p-2.5 bg-rose-500 text-white rounded-lg shadow-sm">
+                                            <ShieldAlert className="w-5 h-5" />
                                         </div>
+                                        <div className="space-y-1">
+                                            <p className="text-xs font-bold text-rose-900 uppercase tracking-wider">Permanent Action Directive</p>
+                                            <p className="text-[10px] text-rose-600 font-medium leading-relaxed opacity-90">Warning: Proceeding with this directive will permanently modify the personnel persona. All access, clearance trails, and fiscal settlements will be initialized immediately.</p>
+                                        </div>
+                                    </div>
 
-                                        <Button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-500/30">
-                                            Confirm Termination
-                                        </Button>
-                                    </form>
-                                </div>
-                            </div>
-                        )}
-                        {activeTab === 'analytics' && <ExitAnalytics />}
+                                    <Button type="submit" className="w-full h-16 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold text-[11px] uppercase tracking-wider shadow-lg transition-all active:scale-[0.98] group">
+                                        Execute Termination Directive
+                                        <ArrowRight className="w-4 h-4 ml-3 group-hover:translate-x-1 transition-transform" />
+                                    </Button>
+                                </form>
+                            </CardContent>
+                        </Card>
                     </div>
-                </div>
-            </main>
-        </div >
+                )}
+
+                {activeTab === 'analytics' && <ExitAnalytics />}
+            </div>
+        </Layout>
     );
 };
 
