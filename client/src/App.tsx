@@ -42,6 +42,8 @@ import LeaveDashboard from './pages/LeaveDashboard';
 import LeaveApprovals from './pages/LeaveApprovals';
 import LeaveConfiguration from './pages/LeaveConfiguration';
 import YearlyLeaveBook from './pages/YearlyLeaveBook';
+import AdvancedLeaveManagement from './pages/AdvancedLeaveManagement';
+import PrincipalDashboard from './pages/PrincipalDashboard';
 import ResearchPublication from './pages/ResearchPublication';
 import ControlTower from './pages/ControlTower';
 import GOIControlTower from './pages/GOIControlTower';
@@ -101,6 +103,10 @@ function App() {
           <Route path="/leave/approvals" element={<LeaveApprovals />} />
           <Route path="/leave/config" element={<LeaveConfiguration />} />
           <Route path="/leave/reports/yearly-book" element={<YearlyLeaveBook />} />
+          <Route path="/leave/advanced" element={<AdvancedLeaveManagement />} />
+
+          {/* Principal Dashboard */}
+          <Route path="/principal-dashboard" element={<PrincipalDashboard />} />
 
           {/* Alumni Portal */}
           <Route path="/alumni-portal" element={<AlumniPortal />} />

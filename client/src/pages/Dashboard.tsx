@@ -90,7 +90,7 @@ const categories = [
                 title: "Leave Management",
                 description: "Apply for leaves, track balances, and manage team approvals.",
                 icon: Calendar,
-                path: "/leave/dashboard"
+                path: "/leave/advanced"
             },
             {
                 title: "Organisation Structure",
@@ -141,6 +141,12 @@ const categories = [
         icon: Network,
         color: "slate",
         modules: [
+            {
+                title: "Principal Dashboard",
+                description: "Smart KPIs, student analytics, staff performance, finance health, and action centre for institution leadership.",
+                icon: GraduationCap,
+                path: "/principal-dashboard"
+            },
             {
                 title: "HRMS Control Tower",
                 description: "Real-time HRMS command centre — plug-and-play widgets, GOI view, payroll readiness, approvals and more.",
