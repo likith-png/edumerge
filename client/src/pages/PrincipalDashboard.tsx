@@ -211,7 +211,7 @@ const COLLECTION_MODE_PIE = [
 
 const fmt = (n: number) => n >= 1000000 ? `₹${(n / 100000).toFixed(1)}L` : n >= 1000 ? `₹${(n / 1000).toFixed(0)}K` : `₹${n}`;
 
-const KPICard = ({ kpi, key: _ }: { kpi: { value: number; target: number; prev: number; label: string; unit: string } }) => {
+const KPICard = ({ kpi }: { kpi: { value: number; target: number; prev: number; label: string; unit: string } }) => {
   const trend = kpi.value >= kpi.prev;
   const atTarget = kpi.value >= kpi.target;
   const pct = Math.min((kpi.value / kpi.target) * 100, 100);
@@ -384,7 +384,7 @@ const OverviewSection = () => (
           <p className="text-xs text-slate-400 mb-2">{fmt(FINANCE.todayCollection.total)} total</p>
           <ResponsiveContainer width="100%" height={150}>
             <PieChart>
-              <Pie data={COLLECTION_MODE_PIE} cx="50%" cy="50%" outerRadius={58} paddingAngle={2} dataKey="value" label={({ percent }) => `${(percent * 100).toFixed(0)}%`} labelLine={false}>
+              <Pie data={COLLECTION_MODE_PIE} cx="50%" cy="50%" outerRadius={58} paddingAngle={2} dataKey="value" label={({ percent }) => `${((percent || 0) * 100).toFixed(0)}%`} labelLine={false}>
                 {COLLECTION_MODE_PIE.map((_, idx) => <Cell key={idx} fill={['#3b82f6', '#10b981', '#f59e0b'][idx]} />)}
               </Pie>
               <Tooltip formatter={(v) => [fmt(Number(v))]} contentStyle={{ fontSize: 11 }} />
@@ -497,7 +497,7 @@ const StudentAnalyticsSection = () => {
                     <Pie
                       data={ADMISSIONS_DATA.bySource.map(s => ({ name: s.source, value: s.converted }))}
                       cx="50%" cy="50%" outerRadius={65} paddingAngle={3} dataKey="value"
-                      label={({ percent }) => `${(percent * 100).toFixed(0)}%`} labelLine={false}
+                      label={({ percent }) => `${((percent || 0) * 100).toFixed(0)}%`} labelLine={false}
                     >
                       {ADMISSIONS_DATA.bySource.map((_, idx) => <Cell key={idx} fill={COLORS[idx]} />)}
                     </Pie>
@@ -932,7 +932,7 @@ const FinanceSection = () => (
           <ResponsiveContainer width="100%" height={185}>
             <PieChart>
               <Pie data={COLLECTION_MODE_PIE} cx="50%" cy="50%" outerRadius={68} paddingAngle={3} dataKey="value"
-                label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`} labelLine={false}>
+                label={({ name, percent }) => `${((percent || 0) * 100).toFixed(0)}%`} labelLine={false}>
                 {COLLECTION_MODE_PIE.map((_, idx) => <Cell key={idx} fill={['#3b82f6', '#10b981', '#f59e0b'][idx]} />)}
               </Pie>
               <Tooltip formatter={(v) => [fmt(Number(v))]} contentStyle={{ fontSize: 11 }} />
