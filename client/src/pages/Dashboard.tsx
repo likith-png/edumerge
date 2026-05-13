@@ -26,7 +26,8 @@ import {
     ShieldCheck,
     Truck,
     Search,
-    Building2
+    Building2,
+    Activity
 } from 'lucide-react';
 import { usePersona } from '../contexts/PersonaContext';
 import EmployeeDashboard from './EmployeeDashboard';
@@ -190,6 +191,12 @@ const categories = [
                 description: "Comprehensive analytical reports, custom report builder, and PDF/Excel exports.",
                 icon: PieChart,
                 path: "/reports"
+            },
+            {
+                title: "Workforce Intelligence",
+                description: "Institution health across continuity, control, reputation and scale.",
+                icon: Activity,
+                path: "/workforce-intelligence"
             }
         ]
     }

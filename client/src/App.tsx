@@ -48,6 +48,7 @@ import ResearchPublication from './pages/ResearchPublication';
 import ControlTower from './pages/ControlTower';
 import GOIControlTower from './pages/GOIControlTower';
 import VehicleManagement from './pages/VehicleManagement';
+import WorkforceIntelligence from './pages/WorkforceIntelligence';
 
 import { PersonaProvider } from './contexts/PersonaContext';
 import { StaffProvider } from './contexts/StaffContext';
@@ -122,6 +123,9 @@ function App() {
 
           {/* Vehicle Management */}
           <Route path="/vehicle-management" element={<VehicleManagement />} />
+
+          {/* Workforce Intelligence */}
+          <Route path="/workforce-intelligence" element={<WorkforceIntelligence />} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
