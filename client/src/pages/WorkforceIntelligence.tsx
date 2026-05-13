@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import {
     LayoutDashboard, Activity, ShieldCheck, ShieldAlert,
-    TrendingUp, ChevronRight, X, Info, LayoutGrid, AlertCircle, CheckCircle2, Database, Search, History, Clock, AlertTriangle, Check
+    TrendingUp, ChevronRight, X, Info, LayoutGrid, AlertCircle, CheckCircle2, Database, Search, History, Clock, AlertTriangle, Check, Download
 } from 'lucide-react';
 import { usePersona } from '../contexts/PersonaContext';
 
 // Shared Status Badge tailored to the design specs
-const StatusBadge = ({ type, text, tooltip }: { type: 'stable' | 'watch' | 'fragile' | 'matched' | 'mismatch' | 'strong' | 'developing' | 'weak' | 'structural' | 'isolated' | 'default' | 'documented' | 'good' | 'bad', text: string, tooltip?: string }) => {
+const StatusBadge = ({ type, text, tooltip }: { type: 'stable' | 'watch' | 'fragile' | 'matched' | 'mismatch' | 'strong' | 'developing' | 'weak' | 'structural' | 'isolated' | 'default' | 'documented' | 'good' | 'bad' | 'warning', text: string, tooltip?: string }) => {
     const styles = {
         stable: 'bg-teal-50 text-teal-700 border-teal-200',
         watch: 'bg-amber-50 text-amber-700 border-amber-200',
@@ -22,6 +22,7 @@ const StatusBadge = ({ type, text, tooltip }: { type: 'stable' | 'watch' | 'frag
         documented: 'bg-teal-50 text-teal-700 border-teal-200',
         good: 'bg-teal-50 text-teal-700 border-teal-200',
         bad: 'bg-rose-50 text-rose-700 border-rose-200',
+        warning: 'bg-amber-50 text-amber-700 border-amber-200',
     };
     return (
         <span className={`group relative px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wide border cursor-help inline-flex items-center gap-1 ${styles[type]}`}>
@@ -195,7 +196,7 @@ const WorkforceIntelligence: React.FC = () => {
     // Access Control Mapping based on persona role
     // Assuming HR Head, Principal -> all; HOD -> continuity; Trustee/Chairman -> scale; Payroll -> reputation
     const isFullAccess = ['ADMIN', 'HR_ADMIN', 'PRINCIPAL'].includes(role || 'HR_ADMIN');
-    const isHOD = role === 'HOD';
+    const isHOD = role === 'HOD' || role === 'MANAGER';
     const isTrustee = role === 'TRUSTEE' || role === 'CHAIRMAN';
     const isPayroll = role === 'PAYROLL';
 

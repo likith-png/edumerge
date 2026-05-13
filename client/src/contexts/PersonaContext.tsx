@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import { User, Briefcase, UserCog, GraduationCap, Users, X, Truck } from 'lucide-react';
 
-export type UserRole = 'HR_ADMIN' | 'MANAGER' | 'EMPLOYEE' | 'ADMIN' | 'ALUMNI' | 'DRIVER';
+export type UserRole = 'HR_ADMIN' | 'MANAGER' | 'EMPLOYEE' | 'ADMIN' | 'ALUMNI' | 'DRIVER' | 'HOD' | 'TRUSTEE' | 'CHAIRMAN' | 'PAYROLL';
 
 interface PersonaContextType {
     role: UserRole;
