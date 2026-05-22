@@ -1,0 +1,3682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="edumerge Institution Intelligence Platform Prototype v1.0. A unified command center for university management, academic compliance, workforce analytics, and financial foresight.">
+  <title>edumerge — Institution Intelligence Platform</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* CSS Variables & Theme */
+    :root {
+      --navy: #000099;        /* "edu" brand color — primary */
+      --orange: #FF9A01;      /* "merge" brand color — accent */
+      --navy-dark: #000077;
+      --navy-light: #E6E6FF;
+      --orange-light: #FFF4E0;
+      --orange-dark: #CC7A00;
+
+      /* Status colors */
+      --green: #0F6E56;
+      --green-light: #E1F5EE;
+      --amber: #854F0B;
+      --amber-light: #FAEEDA;
+      --red: #993C1D;
+      --red-light: #FAECE7;
+
+      /* Neutrals */
+      --gray-50: #F8F8F8;
+      --gray-100: #F0F0F0;
+      --gray-200: #E0E0E0;
+      --gray-400: #9E9E9E;
+      --gray-600: #5F5F5F;
+      --gray-900: #1A1A1A;
+      --white: #FFFFFF;
+
+      /* Shadows */
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Reset & Base Styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Sora', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--gray-900);
+      background-color: var(--gray-50);
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Typography Utilities */
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+    
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Layout Structure */
+    .app-container {
+      display: flex;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      width: 220px;
+      background-color: var(--white);
+      border-right: 1px solid var(--gray-200);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .sidebar-brand {
+      padding: 16px;
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: baseline;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .brand-edu {
+      color: var(--navy);
+    }
+
+    .brand-merge {
+      color: var(--orange);
+    }
+
+    .brand-sub {
+      font-size: 10px;
+      color: var(--gray-600);
+      margin-top: 2px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    /* Campus Selector */
+    .inst-selector-container {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--gray-100);
+      position: relative;
+    }
+
+    .inst-selector {
+      width: 100%;
+      padding: 8px 12px;
+      background-color: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-900);
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.2s;
+    }
+
+    .inst-selector:hover {
+      background-color: var(--gray-100);
+    }
+
+    .inst-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 16px;
+      right: 16px;
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 6px;
+      box-shadow: var(--shadow-lg);
+      z-index: 20;
+      display: none;
+      margin-top: 4px;
+      overflow: hidden;
+    }
+
+    .inst-dropdown.active {
+      display: block;
+    }
+
+    .inst-option {
+      padding: 8px 12px;
+      font-size: 13px;
+      color: var(--gray-900);
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    .inst-option:hover {
+      background-color: var(--navy-light);
+      color: var(--navy);
+    }
+
+    /* Sidebar Navigation */
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 0;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 10px 16px;
+      color: var(--gray-600);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 13.5px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+      gap: 10px;
+    }
+
+    .nav-item svg {
+      width: 16px;
+      height: 16px;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+      flex-shrink: 0;
+    }
+
+    .nav-item:hover {
+      background-color: var(--gray-50);
+      color: var(--gray-900);
+    }
+
+    .nav-item:hover svg {
+      opacity: 0.9;
+    }
+
+    .nav-item.active {
+      background-color: var(--navy-light);
+      color: var(--navy);
+      font-weight: 600;
+      border-left-color: var(--navy);
+    }
+
+    .nav-item.active svg {
+      opacity: 1;
+      color: var(--navy);
+    }
+
+    /* Notification Dot */
+    .nav-dot {
+      width: 6px;
+      height: 6px;
+      background-color: var(--red);
+      border-radius: 50%;
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .nav-badge {
+      background-color: var(--orange);
+      color: var(--white);
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 10px;
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    /* Sidebar Footer */
+    .sidebar-footer {
+      padding: 16px;
+      border-top: 1px solid var(--gray-100);
+      font-size: 11px;
+      color: var(--gray-600);
+      line-height: 1.4;
+      background-color: var(--gray-50);
+    }
+
+    .sidebar-footer-title {
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+
+    /* Main Container & Topbar */
+    .main-container {
+      display: flex;
+      flex-direction: column;
+      flex-1: 1;
+      flex-grow: 1;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* Topbar Styles */
+    .topbar {
+      height: 52px;
+      background-color: var(--white);
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 9;
+      flex-shrink: 0;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .page-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .notification-bell {
+      position: relative;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      transition: background-color 0.2s;
+    }
+
+    .notification-bell:hover {
+      background-color: var(--gray-50);
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      background-color: var(--orange);
+      color: var(--white);
+      font-size: 9px;
+      font-weight: 700;
+      min-width: 16px;
+      height: 16px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--white);
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      background-color: var(--navy);
+      color: var(--white);
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Screen Area */
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      position: relative;
+    }
+
+    .screen-content {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      width: 100%;
+    }
+
+    .screen-content.active {
+      display: block;
+      opacity: 1;
+    }
+
+    /* Card styling */
+    .card {
+      background-color: var(--white);
+      border-radius: 8px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-200);
+      padding: 20px;
+      margin-bottom: 24px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--gray-900);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background-color: var(--orange);
+      color: var(--white);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--orange-dark);
+    }
+
+    .btn-secondary {
+      background-color: var(--white);
+      border-color: var(--gray-200);
+      color: var(--gray-900);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--gray-50);
+      border-color: var(--gray-400);
+    }
+
+    .btn-navy {
+      background-color: var(--navy-light);
+      color: var(--navy);
+    }
+
+    .btn-navy:hover {
+      background-color: var(--navy);
+      color: var(--white);
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-green {
+      background-color: var(--green-light);
+      color: var(--green);
+    }
+
+    .badge-amber {
+      background-color: var(--amber-light);
+      color: var(--amber);
+    }
+
+    .badge-red {
+      background-color: var(--red-light);
+      color: var(--red);
+    }
+
+    /* Table Styles */
+    .table-container {
+      overflow-x: auto;
+      width: 100%;
+      margin-bottom: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    th {
+      font-weight: 600;
+      color: var(--gray-600);
+      border-bottom: 1px solid var(--gray-200);
+      padding: 10px 12px;
+      background-color: var(--gray-50);
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid var(--gray-100);
+      color: var(--gray-900);
+      vertical-align: middle;
+    }
+
+    tr:hover td {
+      background-color: var(--gray-50);
+    }
+
+    /* Grid systems */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .grid-5 {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    /* SCREEN 1 — OVERVIEW SPECIFICS */
+    .campus-card {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .campus-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+
+    .campus-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+
+    .campus-score-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .campus-score {
+      font-size: 32px;
+      font-weight: 700;
+      width: 64px;
+      height: 64px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--white);
+    }
+
+    .campus-score.green { background-color: var(--green); }
+    .campus-score.amber { background-color: var(--amber); }
+    .campus-score.red { background-color: var(--red); }
+
+    .campus-alerts-info {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--gray-600);
+    }
+
+    /* Domain mini-bars */
+    .domain-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-grow: 1;
+    }
+
+    .domain-bar-row {
+      display: flex;
+      align-items: center;
+      font-size: 11px;
+    }
+
+    .domain-label {
+      width: 95px;
+      font-weight: 500;
+      color: var(--gray-600);
+    }
+
+    .domain-bar-bg {
+      flex-grow: 1;
+      height: 8px;
+      background-color: var(--gray-200);
+      border-radius: 4px;
+      margin: 0 10px;
+      overflow: hidden;
+    }
+
+    .domain-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+    }
+
+    .domain-bar-fill.green { background-color: var(--green); }
+    .domain-bar-fill.amber { background-color: var(--amber); }
+    .domain-bar-fill.red { background-color: var(--red); }
+
+    .domain-value {
+      width: 20px;
+      text-align: right;
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+
+    /* Signals feed */
+    .signals-feed-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 32px 0 16px 0;
+      color: var(--gray-900);
+      border-left: 4px solid var(--orange);
+      padding-left: 10px;
+    }
+
+    .alert-card {
+      background-color: var(--white);
+      border-radius: 8px;
+      border: 1px solid var(--gray-200);
+      border-left-width: 6px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .alert-card.red-border { border-left-color: var(--red); }
+    .alert-card.amber-border { border-left-color: var(--amber); }
+
+    .alert-main {
+      flex-grow: 1;
+      padding-right: 24px;
+    }
+
+    .alert-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+
+    .alert-campus-tag {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gray-600);
+      background-color: var(--gray-100);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .alert-domain-tag {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--navy);
+      background-color: var(--navy-light);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .alert-description {
+      font-size: 13.5px;
+      color: var(--gray-900);
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .alert-footer {
+      font-size: 11px;
+      color: var(--gray-600);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .alert-assignment {
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+
+    /* SCREEN 2 — ACADEMIC CO-PILOT SPECIFICS */
+    .split-panel {
+      display: flex;
+      height: calc(100vh - 120px);
+      gap: 24px;
+      overflow: hidden;
+    }
+
+    .left-panel {
+      width: 38%;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      overflow: hidden;
+      height: 100%;
+    }
+
+    .right-panel {
+      width: 62%;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      overflow: hidden;
+      height: 100%;
+    }
+
+    /* Chat Elements */
+    .chat-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--gray-200);
+      background-color: var(--gray-50);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .chat-avatar {
+      width: 32px;
+      height: 32px;
+      background-color: var(--navy);
+      color: var(--white);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .chat-header-text h3 {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .chat-header-text p {
+      font-size: 11px;
+      color: var(--gray-600);
+    }
+
+    .chat-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background-color: var(--white);
+    }
+
+    .chat-welcome {
+      background-color: var(--gray-50);
+      border-radius: 8px;
+      padding: 16px;
+      border: 1px solid var(--gray-200);
+      margin-bottom: 12px;
+    }
+
+    .chat-welcome-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .chat-welcome-desc {
+      font-size: 12.5px;
+      color: var(--gray-600);
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    .chat-chips-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .chat-chip {
+      padding: 8px 12px;
+      background-color: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--gray-900);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+
+    .chat-chip:hover {
+      border-color: var(--navy);
+      background-color: var(--navy-light);
+      color: var(--navy);
+    }
+
+    .message-bubble {
+      max-width: 85%;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.4;
+      white-space: pre-line;
+    }
+
+    .message-user {
+      align-self: flex-end;
+      background-color: var(--navy-light);
+      color: var(--navy-dark);
+      border-bottom-right-radius: 2px;
+      font-weight: 500;
+    }
+
+    .message-system {
+      align-self: flex-start;
+      background-color: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      color: var(--gray-900);
+      border-bottom-left-radius: 2px;
+    }
+
+    .message-system strong {
+      color: var(--navy);
+    }
+
+    .typing-indicator {
+      display: flex;
+      gap: 4px;
+      padding: 12px 16px;
+      background-color: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      align-self: flex-start;
+      border-bottom-left-radius: 2px;
+    }
+
+    .typing-dot {
+      width: 6px;
+      height: 6px;
+      background-color: var(--gray-400);
+      border-radius: 50%;
+      animation: bounce 1.4s infinite ease-in-out both;
+    }
+
+    .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1.0); }
+    }
+
+    /* Process checklist in chat */
+    .chat-process-checklist {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      border-left: 2px solid var(--gray-200);
+      padding-left: 12px;
+    }
+
+    .process-step {
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--gray-600);
+    }
+
+    .process-step.complete {
+      color: var(--green);
+      font-weight: 500;
+    }
+
+    .process-step.warning {
+      color: var(--amber);
+      font-weight: 500;
+    }
+
+    .chat-input-container {
+      padding: 12px;
+      border-top: 1px solid var(--gray-200);
+      display: flex;
+      gap: 8px;
+      background-color: var(--gray-50);
+    }
+
+    .chat-input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid var(--gray-200);
+      border-radius: 6px;
+      outline: none;
+      font-family: inherit;
+      font-size: 13px;
+      background-color: var(--white);
+    }
+
+    .chat-input:focus {
+      border-color: var(--navy);
+    }
+
+    /* Reset & Attachment Buttons styling */
+    .chat-reset-btn {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: 1px solid var(--gray-300);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--gray-700);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .chat-reset-btn:hover {
+      background-color: var(--gray-100);
+      color: var(--navy);
+      border-color: var(--navy);
+    }
+    .chat-attach-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      background-color: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 6px;
+      color: var(--gray-600);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .chat-attach-btn:hover {
+      background-color: var(--gray-100);
+      color: var(--navy);
+      border-color: var(--navy);
+    }
+    .chat-attach-btn.attached {
+      background-color: var(--orange-light);
+      color: var(--orange);
+      border-color: var(--orange);
+    }
+
+    /* Output Tabs (Right Panel) */
+    .tabs-header {
+      display: flex;
+      background-color: var(--gray-50);
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .tab-btn {
+      padding: 14px 20px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--gray-600);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      color: var(--gray-900);
+      background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    .tab-btn.active {
+      color: var(--navy);
+      border-bottom-color: var(--navy);
+    }
+
+    .tabs-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      position: relative;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .output-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
+      color: var(--gray-400);
+      padding: 40px;
+    }
+
+    .output-placeholder svg {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 16px;
+      opacity: 0.4;
+    }
+
+    .output-placeholder h3 {
+      font-size: 16px;
+      color: var(--gray-600);
+      margin-bottom: 8px;
+    }
+
+    /* Timetable layout */
+    .timetable-grid {
+      display: grid;
+      grid-template-columns: 80px repeat(6, 1fr);
+      gap: 1px;
+      background-color: var(--gray-200);
+      border: 1px solid var(--gray-200);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .timetable-header {
+      background-color: var(--gray-50);
+      padding: 10px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 11px;
+      color: var(--gray-600);
+    }
+
+    .timetable-time {
+      background-color: var(--gray-50);
+      padding: 12px 6px;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--gray-600);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .timetable-cell {
+      background-color: var(--white);
+      padding: 10px 6px;
+      text-align: center;
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 52px;
+    }
+
+    .timetable-cell.subject-cs301 { background-color: #EBF5FF; color: #004085; }
+    .timetable-cell.subject-cs401 { background-color: #FEF3C7; color: #92400E; }
+    .timetable-cell.subject-cs501 { background-color: #ECFDF5; color: #065F46; }
+    .timetable-cell.subject-cs201 { background-color: #F3E8FF; color: #5B21B6; }
+    .timetable-cell.subject-lab { background-color: #F1F5F9; color: #334155; }
+    
+    .timetable-subj {
+      font-weight: 700;
+    }
+    
+    .timetable-fac {
+      font-size: 9px;
+      margin-top: 2px;
+      opacity: 0.8;
+    }
+
+    /* Callout styling */
+    .callout {
+      padding: 14px 16px;
+      border-radius: 6px;
+      font-size: 12.5px;
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+
+    .callout-amber {
+      background-color: var(--amber-light);
+      border: 1px solid #F59E0B20;
+      color: var(--amber);
+    }
+
+    .callout-red {
+      background-color: var(--red-light);
+      border: 1px solid #EF444420;
+      color: var(--red);
+    }
+
+    .callout-green {
+      background-color: var(--green-light);
+      border: 1px solid #10B98120;
+      color: var(--green);
+    }
+
+    /* SCREEN 3 — WORKFORCE INTELLIGENCE */
+    .stats-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100px;
+    }
+    
+    .stats-val {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .staff-card {
+      background-color: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .staff-card-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .staff-title {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .staff-signals {
+      font-size: 12.5px;
+      color: var(--gray-600);
+      margin-bottom: 12px;
+      background-color: var(--gray-50);
+      padding: 8px 12px;
+      border-radius: 4px;
+      border-left: 3px solid var(--amber);
+    }
+
+    .staff-signals.high-risk {
+      border-left-color: var(--red);
+    }
+
+    /* SCREEN 5 — COMPLIANCE */
+    .naac-display {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .naac-gauge {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      border: 12px solid var(--gray-200);
+      border-top-color: var(--navy);
+      border-right-color: var(--navy);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .naac-gauge::before {
+      content: '';
+      position: absolute;
+      width: 140px;
+      height: 140px;
+      background: var(--white);
+      border-radius: 50%;
+      z-index: 1;
+    }
+
+    .naac-gauge-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+    }
+
+    .naac-score-val {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1;
+    }
+
+    .naac-score-max {
+      font-size: 14px;
+      color: var(--gray-600);
+    }
+
+    .naac-criteria-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .naac-criterion-row {
+      display: flex;
+      align-items: center;
+      font-size: 12.5px;
+    }
+
+    .naac-crit-label {
+      width: 220px;
+      font-weight: 500;
+    }
+
+    .naac-crit-bar-bg {
+      flex-grow: 1;
+      height: 10px;
+      background-color: var(--gray-200);
+      border-radius: 5px;
+      margin: 0 16px;
+      overflow: hidden;
+    }
+
+    .naac-crit-bar-fill {
+      height: 100%;
+      border-radius: 5px;
+    }
+
+    .naac-crit-bar-fill.green { background-color: var(--green); }
+    .naac-crit-bar-fill.amber { background-color: var(--amber); }
+    .naac-crit-bar-fill.red { background-color: var(--red); }
+
+    .naac-crit-val {
+      width: 40px;
+      text-align: right;
+      font-weight: 600;
+    }
+
+    /* SCREEN 6 — FINANCE */
+    .chart-container {
+      position: relative;
+      height: 250px;
+      width: 100%;
+      margin-bottom: 24px;
+    }
+
+    /* Modal dialog */
+    dialog {
+      border: none;
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      padding: 0;
+      width: 700px;
+      max-width: 90%;
+      margin: auto;
+      background-color: var(--white);
+      z-index: 100;
+    }
+
+    dialog::backdrop {
+      background-color: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(2px);
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: var(--gray-50);
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--gray-600);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close:hover {
+      color: var(--gray-900);
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    /* Toast Notification */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast {
+      background-color: var(--navy-dark);
+      color: var(--white);
+      padding: 12px 20px;
+      border-radius: 6px;
+      box-shadow: var(--shadow-lg);
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast-icon {
+      color: var(--orange);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-logo">
+          <span class="brand-edu">edu</span><span class="brand-merge">merge</span>
+        </div>
+        <div class="brand-sub">Institution Intelligence</div>
+      </div>
+      
+      <div class="inst-selector-container">
+        <button class="inst-selector" id="instSelectorBtn">
+          <span>All Campuses</span>
+          <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+            <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="inst-dropdown" id="instDropdown">
+          <div class="inst-option" data-value="all">All Campuses</div>
+          <div class="inst-option" data-value="main">Main Campus</div>
+          <div class="inst-option" data-value="north">North Campus</div>
+          <div class="inst-option" data-value="east">East Campus</div>
+        </div>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <div class="nav-item active" data-screen="overview" id="nav-overview">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+          Institution Overview
+        </div>
+        <div class="nav-item" data-screen="academic" id="nav-academic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+          Academic co-pilot
+          <span class="nav-badge">NEW</span>
+        </div>
+        <div class="nav-item" data-screen="workforce" id="nav-workforce">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          Workforce Intelligence
+        </div>
+        <div class="nav-item" data-screen="grievance" id="nav-grievance">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          Grievance Intelligence
+          <span class="nav-dot" title="3 critical items"></span>
+        </div>
+        <div class="nav-item" data-screen="compliance" id="nav-compliance">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          Compliance & NAAC
+          <span class="nav-dot" title="2 critical items"></span>
+        </div>
+        <div class="nav-item" data-screen="finance" id="nav-finance">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          Finance Intelligence
+        </div>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="sidebar-footer-title">R. Subramaniam</div>
+        <div>Chairman · Trustee</div>
+        <div>Garden City University</div>
+        <div class="mono" style="font-weight: 500; font-size: 10px; margin-top: 4px;">FY 2026-27</div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTAINER -->
+    <div class="main-container">
+      
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <h2 class="page-title" id="pageTitle">Institution Overview</h2>
+        </div>
+        <div class="topbar-right">
+          <div class="notification-bell" id="bellIcon" title="Notifications">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <span class="notification-badge">5</span>
+          </div>
+          <div class="user-profile">
+            <div class="user-avatar" title="Chairman R. Subramaniam">RS</div>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENT AREA -->
+      <main class="content-area">
+        
+        <!-- SCREEN 1: INSTITUTION OVERVIEW -->
+        <section class="screen-content active" id="screen-overview">
+          
+          <div class="grid-3">
+            
+            <!-- Main Campus Card -->
+            <div class="card campus-card">
+              <div class="campus-header">
+                <div class="campus-name">Main Campus</div>
+                <span class="badge badge-green">Green</span>
+              </div>
+              <div class="campus-score-container">
+                <div class="campus-score green">87</div>
+                <div class="campus-alerts-info">
+                  0 critical alerts pending<br>
+                  All core domains healthy
+                </div>
+              </div>
+              <div class="domain-bars">
+                <div class="domain-bar-row">
+                  <span class="domain-label">Workforce</span>
+                  <div class="domain-bar-bg"><div class="domain-bar-fill green" style="width: 88%"></div></div>
+                  <span class="domain-value mono">88</span>
+                </div>
+                <div class="domain-bar-row">
+                  <span class="domain-label">Academic Ops</span>
+                  <div class="domain-bar-bg"><div class="domain-bar-fill green" style="width: 85%"></div></div>
+                  <span class="domain-value mono">85</span>
+                </div>
+                <div class="domain-bar-row">
+                  <span class="domain-label">Student Health</span>
+                  <div class="domain-bar-bg"><div class="domain-bar-fill green" style="width: 91%"></div></div>
+                  <span class="domain-value mono">91</span>
+                </div>
+                <div class="domain-bar-row">
+                  <span class="domain-label">Grievance</span>
+                  <div class="domain-bar-bg"><div class="domain-bar-fill green" style="width: 88%"></div></div>
+                  <span class="domain-value mono">88</span>
+                </div>
+                <div class="domain-bar-row">
+                  <span class="domain-label">Compliance</span>
+                  <div class="domain-bar-bg"><div class="domain-bar-fill green" style="width: 82%"></div></div>
+                  <span class="domain-value mono">82</span>
+                </div>
+                <div class="domain-bar-row">
+                  <span class="domain-label">Finance</span>
+                  <div class="domain-bar-bg"><div class="domain-bar-fill green" style="width: 90%"></div></div>
+                  <span class="domain-value mono">90</span>
+                </div>
+                <div class="domain-bar-row">
+                  <span class="domain-label">Infrastructure</span>
+                  <div class="domain-bar-bg"><div class="domain-bar-fill green" style="width: 72%"></div></div>
+                  <span class="domain-value mono">72</span>
+                </div>
+              </div>
+              <button class="btn btn-secondary view-details-btn" data-campus="main">View details</button>
+            </div>
+
+            <!-- North Campus Card -->
+            <div class="card campus-card">
+              <div class="campus-header">
+                <div class="campus-name">North Campus</div>
+                <span class="badge badge-amber">Amber</span>
+              </div>
+              <div class="campus-score-container">
+                <div class="campus-score amber">76</div>
+                <div class="campus-alerts-info">
+                  2 warning flags active<br>
+                  Workforce & Finance indicators low
+                </div>
+              </div>
+              <div class="domain-bars">
+                <div class="domain-bar-row">
+                  <span class="domain-label">Workforce</span>
+                  <div class="domain-bar-bg"><div class="domain-bar-fill amber" style="width: 68%"></div></div>
+                  <span class="domain-value mono">68</span>
+                </div>
+                <div class="domain-bar-row">
+                  <span class="domain-label">Academic Ops</span>
+                  <div class="domain-bar-bg"><div class="domain-bar-fill green" style="width: 84%"></div></div>
+                  <span class="domain-value mono">84</span>
+                </div>
+                <div class="domain-bar-row">
+                  <span class="domain-label">Student Health</span>
+                  <div class="domain-bar-bg"><div class="domain-bar-fill green" style="width: 74%"></div></div>
+                  <span class="domain-value mono">74</span>
+                </div>
+                <div class="domain-bar-row">
+                  <span class="domain-label">Grievance</span>
+                  <div class="domain-bar-bg"><div class="domain-bar-fill green" style="width: 85%"></div></div>
+                  <span class="domain-value mono">85</span>
+                </div>
+                <div class="domain-bar-row">
+                  <span class="domain-label">Compliance</span>
+                  <div class="domain-bar-bg"><div class="domain-bar-fill green" style="width: 76%"></div></div>
+                  <span class="domain-value mono">76</span>
+                </div>
+                <div class="domain-bar-row">
+                  <span class="domain-label">Finance</span>
+                  <div class="domain-bar-bg"><div class="domain-bar-fill amber" style="width: 61%"></div></div>
+                  <span class="domain-value mono">61</span>
+                </div>
+                <div class="domain-bar-row">
+                  <span class="domain-label">Infrastructure</span>
+                  <div class="domain-bar-bg"><div class="domain-bar-fill green" style="width: 90%"></div></div>
+                  <span class="domain-value mono">90</span>
+                </div>
+              </div>
+              <button class="btn btn-secondary view-details-btn" data-campus="north">View details</button>
+            </div>
+
+            <!-- East Campus Card -->
+            <div class="card campus-card">
+              <div class="campus-header">
+                <div class="campus-name">East Campus</div>
+                <span class="badge badge-red">Red</span>
+              </div>
+              <div class="campus-score-container">
+                <div class="campus-score red">58</div>
+                <div class="campus-alerts-info">
+                  3 critical alerts active<br>
+                  POSH & Compliance risk active
+                </div>
+              </div>
+              <div class="domain-bars">
+                <div class="domain-bar-row">
+                  <span class="domain-label">Workforce</span>
+                  <div class="domain-bar-bg"><div class="domain-bar-fill green" style="width: 70%"></div></div>
+                  <span class="domain-value mono">70</span>
+                </div>
+                <div class="domain-bar-row">
+                  <span class="domain-label">Academic Ops</span>
+                  <div class="domain-bar-bg"><div class="domain-bar-fill green" style="width: 82%"></div></div>
+                  <span class="domain-value mono">82</span>
+                </div>
+                <div class="domain-bar-row">
+                  <span class="domain-label">Student Health</span>
+                  <div class="domain-bar-bg"><div class="domain-bar-fill green" style="width: 74%"></div></div>
+                  <span class="domain-value mono">74</span>
+                </div>
+                <div class="domain-bar-row">
+                  <span class="domain-label">Grievance</span>
+                  <div class="domain-bar-bg"><div class="domain-bar-fill red" style="width: 42%"></div></div>
+                  <span class="domain-value mono">42</span>
+                </div>
+                <div class="domain-bar-row">
+                  <span class="domain-label">Compliance</span>
+                  <div class="domain-bar-bg"><div class="domain-bar-fill red" style="width: 38%"></div></div>
+                  <span class="domain-value mono">38</span>
+                </div>
+                <div class="domain-bar-row">
+                  <span class="domain-label">Finance</span>
+                  <div class="domain-bar-bg"><div class="domain-bar-fill green" style="width: 66%"></div></div>
+                  <span class="domain-value mono">66</span>
+                </div>
+                <div class="domain-bar-row">
+                  <span class="domain-label">Infrastructure</span>
+                  <div class="domain-bar-bg"><div class="domain-bar-fill green" style="width: 84%"></div></div>
+                  <span class="domain-value mono">84</span>
+                </div>
+              </div>
+              <button class="btn btn-secondary view-details-btn" data-campus="east">View details</button>
+            </div>
+
+          </div>
+
+          <h3 class="signals-feed-title">Signals Requiring Action</h3>
+
+          <div class="alerts-feed">
+            <!-- Alert 1 -->
+            <div class="alert-card red-border">
+              <div class="alert-main">
+                <div class="alert-meta">
+                  <span class="alert-campus-tag">East Campus</span>
+                  <span class="alert-domain-tag">Grievance Intelligence</span>
+                  <span class="badge badge-red">High Legal Exposure</span>
+                </div>
+                <div class="alert-description">
+                  POSH complaint filed 62 days ago — no documented ICC action recorded. Statutory inquiry window closes in 28 days.
+                </div>
+                <div class="alert-footer">
+                  <span>Consequence: POSH Act Section 11 Non-Compliance</span>
+                  <span>Target: <span class="alert-assignment">HR Head (East) + Principal</span></span>
+                </div>
+              </div>
+              <button class="btn btn-primary assign-btn" data-assignee="HR Head (East) & Principal" data-alert="POSH case handling">Assign & Act</button>
+            </div>
+
+            <!-- Alert 2 -->
+            <div class="alert-card red-border">
+              <div class="alert-main">
+                <div class="alert-meta">
+                  <span class="alert-campus-tag">East Campus</span>
+                  <span class="alert-domain-tag">Compliance & Accreditation</span>
+                  <span class="badge badge-red">NAAC Failure Risk</span>
+                </div>
+                <div class="alert-description">
+                  Anti-Ragging Committee: No meeting minutes logged for 9 months. NAAC Criterion 6 (Governance) failure risk. Next inspection in 4 months.
+                </div>
+                <div class="alert-footer">
+                  <span>Consequence: Affiliation inspection blocker</span>
+                  <span>Target: <span class="alert-assignment">IQAC Coordinator + Principal</span></span>
+                </div>
+              </div>
+              <button class="btn btn-primary assign-btn" data-assignee="IQAC Coordinator & Principal" data-alert="Anti-Ragging compliance gap">Assign & Act</button>
+            </div>
+
+            <!-- Alert 3 -->
+            <div class="alert-card red-border">
+              <div class="alert-main">
+                <div class="alert-meta">
+                  <span class="alert-campus-tag">East Campus</span>
+                  <span class="alert-domain-tag">Compliance & Accreditation</span>
+                  <span class="badge badge-red">Regulatory Penalty</span>
+                </div>
+                <div class="alert-description">
+                  Faculty qualification gap: 8 faculty below UGC minimum qualification. Affiliation renewal due in 67 days.
+                </div>
+                <div class="alert-footer">
+                  <span>Consequence: Affiliation status loss risk</span>
+                  <span>Target: <span class="alert-assignment">HR Head (East) + Registrar</span></span>
+                </div>
+              </div>
+              <button class="btn btn-primary assign-btn" data-assignee="HR Head (East) & Registrar" data-alert="UGC qualification criteria validation">Assign & Act</button>
+            </div>
+
+            <!-- Alert 4 -->
+            <div class="alert-card amber-border">
+              <div class="alert-main">
+                <div class="alert-meta">
+                  <span class="alert-campus-tag">North Campus</span>
+                  <span class="alert-domain-tag">Workforce Intelligence</span>
+                  <span class="badge badge-amber">Warning Flag</span>
+                </div>
+                <div class="alert-description">
+                  7 employees in probation month 6–11 window with no evaluation logged. Risk: Silent confirmation of non-performers.
+                </div>
+                <div class="alert-footer">
+                  <span>Deadline: 14–45 days</span>
+                  <span>Target: <span class="alert-assignment">HR Head (North)</span></span>
+                </div>
+              </div>
+              <button class="btn btn-primary assign-btn" data-assignee="HR Head (North)" data-alert="Probation evaluation process speedup">Assign & Act</button>
+            </div>
+
+            <!-- Alert 5 -->
+            <div class="alert-card amber-border">
+              <div class="alert-main">
+                <div class="alert-meta">
+                  <span class="alert-campus-tag">North Campus</span>
+                  <span class="alert-domain-tag">Finance Intelligence</span>
+                  <span class="badge badge-amber">Cash Flow Threat</span>
+                </div>
+                <div class="alert-description">
+                  Fee collection rate: 71% (target: 85%). 89 students in 60+ day default. Revenue at risk: ₹12.4L.
+                </div>
+                <div class="alert-footer">
+                  <span>Expected Cash Impact: Month 3</span>
+                  <span>Target: <span class="alert-assignment">Finance Head + Registrar</span></span>
+                </div>
+              </div>
+              <button class="btn btn-primary assign-btn" data-assignee="Finance Head & Registrar" data-alert="North Campus fee collection plan">Assign & Act</button>
+            </div>
+
+            <!-- Alert 6 -->
+            <div class="alert-card amber-border">
+              <div class="alert-main">
+                <div class="alert-meta">
+                  <span class="alert-campus-tag">Main Campus</span>
+                  <span class="alert-domain-tag">Compliance & Accreditation</span>
+                  <span class="badge badge-amber">IQAC Threshold</span>
+                </div>
+                <div class="alert-description">
+                  IQAC annual report submission due in 23 days — 40% complete. 3 critical sections not started.
+                </div>
+                <div class="alert-footer">
+                  <span>Consequence: UGC delayed reporting flag</span>
+                  <span>Target: <span class="alert-assignment">IQAC Coordinator</span></span>
+                </div>
+              </div>
+              <button class="btn btn-primary assign-btn" data-assignee="IQAC Coordinator" data-alert="IQAC annual report compilation">Assign & Act</button>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- SCREEN 2: ACADEMIC CO-PILOT (AI CHAT) -->
+        <section class="screen-content" id="screen-academic">
+          <div class="split-panel">
+            
+            <!-- LEFT PANEL: Chat Interface -->
+            <div class="left-panel">
+              <div class="chat-header">
+                <div class="chat-avatar">AI</div>
+                <div class="chat-header-text">
+                  <h3>Academic co-pilot</h3>
+                  <p>Institution Intelligence Assistant</p>
+                </div>
+                <button class="chat-reset-btn" onclick="resetChatHistory()" title="Reset Chat history">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M3 21v-5h5"></path></svg>
+                  Reset
+                </button>
+              </div>
+              
+              <div class="chat-body" id="chatBody">
+                <div class="chat-welcome">
+                  <div class="chat-welcome-title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><path d="M2 17 12 22 22 17"></path><path d="M2 12 12 17 22 12"></path></svg>
+                    edumerge Academic co-pilot
+                  </div>
+                  <div class="chat-welcome-desc">
+                    I can help you configure your upcoming semester — lesson plans, timetables, exam schedules, and UGC/AICTE compliance validation.
+                  </div>
+                  <div class="chat-chips-container">
+                    <button class="chat-chip" onclick="sendChipText('Configure Odd Semester 2026-27 for CSE Department')">
+                      "Configure Odd Semester 2026-27 for CSE Department"
+                    </button>
+                    <button class="chat-chip" onclick="sendChipText('Check faculty workload compliance — AICTE norms')">
+                      "Check faculty workload compliance — AICTE norms"
+                    </button>
+                    <button class="chat-chip" onclick="sendChipText('Generate lesson plan for Data Structures')">
+                      "Generate lesson plan for Data Structures"
+                    </button>
+                    <button class="chat-chip" onclick="sendChipText('Adjust semester start date to 1st August 2026')">
+                      "Adjust semester start date to 1st August 2026"
+                    </button>
+                    <button class="chat-chip" onclick="sendChipText('Audit classroom and infrastructure capacity allocations')">
+                      "Audit classroom & infrastructure capacity allocations"
+                    </button>
+                    <button class="chat-chip" onclick="sendChipText('Verify faculty qualification and specialization mapping')">
+                      "Verify faculty qualification & specialization mapping"
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="chat-input-container">
+                <button class="chat-attach-btn" onclick="triggerSyllabusUpload()" title="Upload Syllabus File">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                </button>
+                <input type="text" class="chat-input" id="chatInput" placeholder="Describe what you need or upload a syllabus..." onkeydown="if(event.key === 'Enter') handleSendChat()">
+                <input type="file" id="syllabusFileInput" style="display: none;" onchange="handleSyllabusFileSelected(event)">
+                <button class="btn btn-primary" onclick="handleSendChat()" style="padding: 10px 14px;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- RIGHT PANEL: Output displays -->
+            <div class="right-panel">
+              <div class="tabs-header">
+                <button class="tab-btn active" data-tab="lesson-plans">Lesson Plans</button>
+                <button class="tab-btn" data-tab="timetable">Timetable</button>
+                <button class="tab-btn" data-tab="exams">Exam Schedule</button>
+                <button class="tab-btn" data-tab="academic-compliance">Compliance</button>
+              </div>
+              
+              <div class="tabs-body" id="tabsBody">
+                
+                <!-- PLACEHOLDER STATE -->
+                <div class="output-placeholder" id="outputPlaceholder">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><path d="M2 17 12 22 22 17"></path><path d="M2 12 12 17 22 12"></path></svg>
+                  <h3>Output will appear here</h3>
+                  <p>Send a message to the Academic co-pilot to generate lesson plans, timetables, and compliance reports.</p>
+                </div>
+
+                <!-- Lesson Plans Tab Content -->
+                <div class="tab-content" id="tab-lesson-plans">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h4 style="font-size: 15px; color: var(--navy)">Lesson Plan: Data Structures (CS301) — Odd Sem 2026-27</h4>
+                    <span class="badge badge-amber">Adjustment Applied</span>
+                  </div>
+                  
+                  <div class="table-container">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Unit</th>
+                          <th>Topics Covered</th>
+                          <th>Weeks</th>
+                          <th>Hours Allocated</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td class="mono" style="font-weight:600">Unit 1</td>
+                          <td>Arrays, Linked Lists, Stacks, Queue operations and implementations</td>
+                          <td>Week 1–3</td>
+                          <td class="mono">24 hrs</td>
+                          <td><span class="badge badge-green">✓ On track</span></td>
+                        </tr>
+                        <tr>
+                          <td class="mono" style="font-weight:600">Unit 2</td>
+                          <td>Queues, Trees, Binary Search Tree (BST) traversals</td>
+                          <td>Week 4–6</td>
+                          <td class="mono">28 hrs</td>
+                          <td><span class="badge badge-green">✓ On track</span></td>
+                        </tr>
+                        <tr>
+                          <td class="mono" style="font-weight:600">Unit 3</td>
+                          <td>Heaps structure, Priority Queues, Hashing algorithms and collisions</td>
+                          <td>Week 7–8</td>
+                          <td class="mono">18 hrs</td>
+                          <td><span class="badge badge-green">✓ On track</span></td>
+                        </tr>
+                        <tr>
+                          <td class="mono" style="font-weight:600">Unit 4</td>
+                          <td>Graph Algorithms (BFS, DFS, Dijkstra's algorithm, Spanning Trees)</td>
+                          <td>Week 9–11</td>
+                          <td class="mono" style="color: var(--amber)">32 hrs</td>
+                          <td><span class="badge badge-amber">⚠ +18% buffer added</span></td>
+                        </tr>
+                        <tr>
+                          <td class="mono" style="font-weight:600">Unit 5</td>
+                          <td>Sorting & Searching (QuickSort, MergeSort, Binary Search)</td>
+                          <td>Week 12–13</td>
+                          <td class="mono">22 hrs</td>
+                          <td><span class="badge badge-green">✓ On track</span></td>
+                        </tr>
+                        <tr>
+                          <td class="mono" style="font-weight:600">Unit 6</td>
+                          <td>Dynamic Programming basics, Greedy method strategies</td>
+                          <td>Week 14–15</td>
+                          <td class="mono">18 hrs</td>
+                          <td><span class="badge badge-green">✓ On track</span></td>
+                        </tr>
+                        <tr style="background-color: var(--gray-50); font-weight: 700;">
+                          <td>Total</td>
+                          <td>All units covered</td>
+                          <td>15 weeks</td>
+                          <td class="mono" style="color: var(--red)">142 hrs</td>
+                          <td style="color: var(--red)">⚠ 8 hrs short of 150</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div class="callout callout-amber">
+                    <strong>⚠ AI Notice: 8 hours below AICTE requirement of 150 contact hours.</strong><br>
+                    Suggested fix: Add 2 tutorial sessions in weeks 7 and 12 (+8 hrs).<br>
+                    <div style="margin-top: 8px;">
+                      <button class="btn btn-primary" onclick="showToast('AI Lesson Plan adjusted and updated in Syllabus logs')">Yes — Apply Fix</button>
+                      <button class="btn btn-secondary" onclick="showToast('Action deferred. Lesson plan remains as is.')">Adjust Manually</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Timetable Tab Content -->
+                <div class="tab-content" id="tab-timetable">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h4 style="font-size: 15px; color: var(--navy)">Class Timetable: CSE Section A — Odd Sem 2026-27</h4>
+                    <span class="badge badge-amber">2 Conflicts Detected</span>
+                  </div>
+
+                  <div class="timetable-grid">
+                    <!-- Row Headers -->
+                    <div class="timetable-header">Time</div>
+                    <div class="timetable-header">MON</div>
+                    <div class="timetable-header">TUE</div>
+                    <div class="timetable-header">WED</div>
+                    <div class="timetable-header">THU</div>
+                    <div class="timetable-header">FRI</div>
+                    <div class="timetable-header">SAT</div>
+
+                    <!-- Row 8-9 -->
+                    <div class="timetable-time">8:00 - 9:00</div>
+                    <div class="timetable-cell subject-cs301"><span class="timetable-subj">CS301</span><span class="timetable-fac">Anand K</span></div>
+                    <div class="timetable-cell subject-cs401"><span class="timetable-subj">CS401</span><span class="timetable-fac">Priya N</span></div>
+                    <div class="timetable-cell subject-cs301"><span class="timetable-subj">CS301</span><span class="timetable-fac">Anand K</span></div>
+                    <div class="timetable-cell subject-cs401"><span class="timetable-subj">CS401</span><span class="timetable-fac">Priya N</span></div>
+                    <div class="timetable-cell subject-cs501"><span class="timetable-subj">CS501</span><span class="timetable-fac">Meena S</span></div>
+                    <div class="timetable-cell">—</div>
+
+                    <!-- Row 9-10 -->
+                    <div class="timetable-time">9:00 - 10:00</div>
+                    <div class="timetable-cell subject-cs201"><span class="timetable-subj">CS201</span><span class="timetable-fac">Rajesh K</span></div>
+                    <div class="timetable-cell subject-cs301"><span class="timetable-subj">CS301</span><span class="timetable-fac">Anand K</span></div>
+                    <div class="timetable-cell subject-cs501"><span class="timetable-subj">CS501</span><span class="timetable-fac">Meena S</span></div>
+                    <div class="timetable-cell subject-cs201"><span class="timetable-subj">CS201</span><span class="timetable-fac">Rajesh K</span></div>
+                    <div class="timetable-cell subject-cs301"><span class="timetable-subj">CS301</span><span class="timetable-fac">Anand K</span></div>
+                    <div class="timetable-cell subject-cs401"><span class="timetable-subj">CS401</span><span class="timetable-fac">Priya N</span></div>
+
+                    <!-- Row 10-11 -->
+                    <div class="timetable-time">10:00 - 11:00</div>
+                    <div class="timetable-cell subject-lab"><span class="timetable-subj">CS401-L</span><span class="timetable-fac">Lab Room</span></div>
+                    <div class="timetable-cell subject-lab"><span class="timetable-subj">CS401-L</span><span class="timetable-fac">Lab Room</span></div>
+                    <div class="timetable-cell subject-cs201"><span class="timetable-subj">CS201</span><span class="timetable-fac">Rajesh K</span></div>
+                    <div class="timetable-cell subject-cs501"><span class="timetable-subj">CS501</span><span class="timetable-fac">Meena S</span></div>
+                    <div class="timetable-cell subject-lab"><span class="timetable-subj">CS201-L</span><span class="timetable-fac">Lab Room</span></div>
+                    <div class="timetable-cell subject-lab"><span class="timetable-subj">CS201-L</span><span class="timetable-fac">Lab Room</span></div>
+
+                    <!-- Row 11-12 -->
+                    <div class="timetable-time">11:00 - 12:00</div>
+                    <div class="timetable-cell subject-cs501"><span class="timetable-subj">CS501</span><span class="timetable-fac">Meena S</span></div>
+                    <div class="timetable-cell subject-cs201"><span class="timetable-subj">CS201</span><span class="timetable-fac">Rajesh K</span></div>
+                    <div class="timetable-cell subject-cs401"><span class="timetable-subj">CS401</span><span class="timetable-fac">Priya N</span></div>
+                    <div class="timetable-cell subject-cs301"><span class="timetable-subj">CS301</span><span class="timetable-fac">Anand K</span></div>
+                    <div class="timetable-cell subject-cs401"><span class="timetable-subj">CS401</span><span class="timetable-fac">Priya N</span></div>
+                    <div class="timetable-cell">—</div>
+
+                    <!-- Row 2-3 -->
+                    <div class="timetable-time">2:00 - 3:00</div>
+                    <div class="timetable-cell subject-cs301"><span class="timetable-subj">CS301-T</span><span class="timetable-fac">Anand K</span></div>
+                    <div class="timetable-cell subject-cs501"><span class="timetable-subj">CS501</span><span class="timetable-fac">Meena S</span></div>
+                    <div class="timetable-cell subject-cs401"><span class="timetable-subj">CS401-T</span><span class="timetable-fac">Priya N</span></div>
+                    <div class="timetable-cell subject-cs201"><span class="timetable-subj">CS201</span><span class="timetable-fac">Rajesh K</span></div>
+                    <div class="timetable-cell subject-cs501"><span class="timetable-subj">CS501-T</span><span class="timetable-fac">Meena S</span></div>
+                    <div class="timetable-cell">—</div>
+                  </div>
+
+                  <div class="callout callout-red">
+                    <strong>🔴 Workload Violations Highlighted in Schedule:</strong><br>
+                    • <strong>Dr. Rajesh Kumar (CSE):</strong> Assigned 22 hrs/week (AICTE Limit: 18 hrs).<br>
+                    • <strong>Dr. Vikas Rao (MECH):</strong> Critical overload at 26 hrs/week (limit: 18).
+                  </div>
+                </div>
+
+                <!-- Exam Schedule Tab Content -->
+                <div class="tab-content" id="tab-exams">
+                  <h4 style="font-size: 15px; color: var(--navy); margin-bottom: 12px;">Exam Schedule: CSE Department (Semester End Examinations)</h4>
+                  
+                  <div class="table-container">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Subject Name</th>
+                          <th>Subject Code</th>
+                          <th>Date</th>
+                          <th>Time Slot</th>
+                          <th>Exam Hall</th>
+                          <th>Invigilator</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Data Structures</td>
+                          <td class="mono font-weight-600">CS301</td>
+                          <td>20 Nov 2026</td>
+                          <td>9:00 AM - 12:00 PM</td>
+                          <td>Hall A</td>
+                          <td>Dr. Anand Kumar</td>
+                        </tr>
+                        <tr>
+                          <td>Analysis of Algorithms</td>
+                          <td class="mono font-weight-600">CS401</td>
+                          <td>22 Nov 2026</td>
+                          <td>9:00 AM - 12:00 PM</td>
+                          <td>Hall B</td>
+                          <td>Dr. Priya Nair</td>
+                        </tr>
+                        <tr>
+                          <td>Operating Systems</td>
+                          <td class="mono font-weight-600">CS501</td>
+                          <td>24 Nov 2026</td>
+                          <td>9:00 AM - 12:00 PM</td>
+                          <td>Hall A</td>
+                          <td>Dr. Meena Iyer</td>
+                        </tr>
+                        <tr>
+                          <td>Database Management System</td>
+                          <td class="mono font-weight-600">CS201</td>
+                          <td>26 Nov 2026</td>
+                          <td>9:00 AM - 12:00 PM</td>
+                          <td>Hall C</td>
+                          <td>Dr. Rajesh Kumar</td>
+                        </tr>
+                        <tr>
+                          <td>Computer Networks</td>
+                          <td class="mono font-weight-600">CS601</td>
+                          <td>28 Nov 2026</td>
+                          <td>9:00 AM - 12:00 PM</td>
+                          <td>Hall B</td>
+                          <td>Dr. Arun Shetty</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px;">
+                    <span class="badge badge-green">✓ No student has two exams on the same day</span>
+                    <span class="badge badge-green">✓ Minimum 48-hour gap maintained for all subjects</span>
+                  </div>
+                </div>
+
+                <!-- Compliance Tab Content -->
+                <div class="tab-content" id="tab-academic-compliance">
+                  <div class="card" style="padding: 16px; border-left: 4px solid var(--navy);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                      <h4 style="font-size: 15px; color: var(--navy)">AICTE Workload Compliance Scorecard</h4>
+                      <span class="badge badge-amber" style="font-size:12px; font-weight:700">91% Compliance</span>
+                    </div>
+                    
+                    <div class="naac-criteria-list" style="margin-top:16px;">
+                      <div class="naac-criterion-row">
+                        <span class="naac-crit-label">Syllabus Hours Allocation</span>
+                        <div class="naac-crit-bar-bg"><div class="naac-crit-bar-fill green" style="width: 94%"></div></div>
+                        <span class="naac-crit-val mono">94.7%</span>
+                      </div>
+                      <div class="naac-criterion-row">
+                        <span class="naac-crit-label">Lab Supervision Ratio (1:15)</span>
+                        <div class="naac-crit-bar-bg"><div class="naac-crit-bar-fill green" style="width: 100%"></div></div>
+                        <span class="naac-crit-val mono">100%</span>
+                      </div>
+                      <div class="naac-criterion-row">
+                        <span class="naac-crit-label">Tutorial Session Allocation</span>
+                        <div class="naac-crit-bar-bg"><div class="naac-crit-bar-fill green" style="width: 100%"></div></div>
+                        <span class="naac-crit-val mono">100%</span>
+                      </div>
+                      <div class="naac-criterion-row">
+                        <span class="naac-crit-label">Faculty Workload Restrict</span>
+                        <div class="naac-crit-bar-bg"><div class="naac-crit-bar-fill red" style="width: 72%"></div></div>
+                        <span class="naac-crit-val mono">72%</span>
+                      </div>
+                      <div class="naac-criterion-row">
+                        <span class="naac-crit-label">Holiday Exclusions</span>
+                        <div class="naac-crit-bar-bg"><div class="naac-crit-bar-fill green" style="width: 100%"></div></div>
+                        <span class="naac-crit-val mono">100%</span>
+                      </div>
+                    </div>
+
+                    <div class="callout callout-red" style="margin-top: 16px;">
+                      <strong>⚠️ Flagged Faculty Overload Details:</strong>
+                      <ul style="margin-left: 20px; margin-top: 8px;">
+                        <li><strong>Dr. Vikas Rao (MECH):</strong> 26 hrs/week (CRITICAL - 44% Over limit).</li>
+                        <li><strong>Dr. Rajesh Kumar (CSE):</strong> 22 hrs/week assigned.</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- SCREEN 3: WORKFORCE INTELLIGENCE -->
+        <section class="screen-content" id="screen-workforce">
+          
+          <!-- Stats Row -->
+          <div class="grid-4">
+            <div class="card stats-card">
+              <span style="font-size:12px; font-weight:600; color:var(--gray-600)">Total Active Staff</span>
+              <span class="stats-val">187</span>
+            </div>
+            <div class="card stats-card">
+              <span style="font-size:12px; font-weight:600; color:var(--gray-600)">Probation Window Alerts</span>
+              <span class="stats-val" style="color:var(--amber)">7</span>
+            </div>
+            <div class="card stats-card">
+              <span style="font-size:12px; font-weight:600; color:var(--gray-600)">Attrition Risk (High)</span>
+              <span class="stats-val" style="color:var(--red)">4</span>
+            </div>
+            <div class="card stats-card">
+              <span style="font-size:12px; font-weight:600; color:var(--gray-600)">Appraisal Overdue</span>
+              <span class="stats-val" style="color:var(--amber)">12</span>
+            </div>
+          </div>
+
+          <!-- Probation table -->
+          <div class="card">
+            <div class="card-title">
+              <div>
+                Probation Evaluation Windows — Action Required
+                <div style="font-size:12px; font-weight:400; color:var(--gray-600); margin-top:4px;">
+                  Staff in month 6–11 of probation with no evaluation logged
+                </div>
+              </div>
+            </div>
+
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Employee Name</th>
+                    <th>Department</th>
+                    <th>Campus</th>
+                    <th>Months in Probation</th>
+                    <th>Evaluation Status</th>
+                    <th>Deadline Window</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="font-weight: 600;">Rajan Nair</td>
+                    <td>Computer Science</td>
+                    <td>North Campus</td>
+                    <td class="mono">9 months</td>
+                    <td><span class="badge badge-amber">⚠ No eval logged</span></td>
+                    <td class="mono">45 days</td>
+                    <td><button class="btn btn-navy" onclick="showToast('Evaluation scheduled for Rajan Nair. Tasks created for CSE HOD.')">Schedule Eval</button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600;">Deepa Krishnan</td>
+                    <td>Electronics</td>
+                    <td>North Campus</td>
+                    <td class="mono">8 months</td>
+                    <td><span class="badge badge-amber">⚠ No eval logged</span></td>
+                    <td class="mono">60 days</td>
+                    <td><button class="btn btn-navy" onclick="showToast('Evaluation scheduled for Deepa Krishnan. Tasks created for ECE HOD.')">Schedule Eval</button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600;">Arun Mehta</td>
+                    <td>Mechanical</td>
+                    <td>North Campus</td>
+                    <td class="mono">7 months</td>
+                    <td><span class="badge badge-amber">⚠ No eval logged</span></td>
+                    <td class="mono">75 days</td>
+                    <td><button class="btn btn-navy" onclick="showToast('Evaluation scheduled for Arun Mehta. Tasks created for Mech HOD.')">Schedule Eval</button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600;">Sunita Rao</td>
+                    <td>Administration</td>
+                    <td>East Campus</td>
+                    <td class="mono" style="color:var(--red); font-weight:700">11 months</td>
+                    <td><span class="badge badge-red">🔴 Critical — 14 days</span></td>
+                    <td class="mono" style="color:var(--red); font-weight:700">14 days</td>
+                    <td><button class="btn btn-primary" onclick="showToast('CRITICAL: Sunita Rao evaluation expedited. Principal notified.')">Schedule Eval</button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600;">Vikram Singh</td>
+                    <td>Library</td>
+                    <td>East Campus</td>
+                    <td class="mono" style="color:var(--red); font-weight:700">10 months</td>
+                    <td><span class="badge badge-red">🔴 Overdue</span></td>
+                    <td class="mono" style="color:var(--red); font-weight:700">7 days</td>
+                    <td><button class="btn btn-primary" onclick="showToast('CRITICAL: Vikram Singh evaluation flagged overdue. Principal notified.')">Schedule Eval</button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600;">Priya Kumar</td>
+                    <td>Accounts</td>
+                    <td>Main Campus</td>
+                    <td class="mono">6 months</td>
+                    <td><span class="badge badge-amber">⚠ No eval logged</span></td>
+                    <td class="mono">90 days</td>
+                    <td><button class="btn btn-navy" onclick="showToast('Evaluation scheduled for Priya Kumar. Tasks created for Accounts Chief.')">Schedule Eval</button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600;">Anita Desai</td>
+                    <td>Student Affairs</td>
+                    <td>Main Campus</td>
+                    <td class="mono">8 months</td>
+                    <td><span class="badge badge-amber">⚠ No eval logged</span></td>
+                    <td class="mono">60 days</td>
+                    <td><button class="btn btn-navy" onclick="showToast('Evaluation scheduled for Anita Desai. Tasks created for Student Affairs Head.')">Schedule Eval</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Attrition Risk Panel -->
+          <div class="card">
+            <div class="card-title" style="color: var(--red);">
+              High Attrition Risk — Intervention Recommended
+            </div>
+            
+            <div class="grid-2" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+              
+              <!-- Risk 1 -->
+              <div class="staff-card">
+                <div class="staff-card-header">
+                  <span class="staff-title">Dr. Meena Iyer | Associate Professor | ECE</span>
+                  <span class="badge badge-red">Risk Score: 78</span>
+                </div>
+                <div class="staff-signals high-risk">
+                  Workload: 20 hrs/week (111% of norm) | 3 LinkedIn recruiter contacts | Updated profile 12 days ago | No salary revision in 18 months
+                </div>
+                <div style="font-size:12px; color:var(--gray-600); margin-bottom:12px;">
+                  Market Rate Gap: <strong style="color:var(--gray-900)">₹9.5L current vs ₹12-14L market for profile</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size:11px; font-weight:600; color:var(--red);">Compensation review recommended</span>
+                  <button class="btn btn-primary" onclick="showToast('Retention action initiated for Dr. Meena Iyer. Compensation review scheduled.')">Initiate Retention Action</button>
+                </div>
+              </div>
+
+              <!-- Risk 2 -->
+              <div class="staff-card">
+                <div class="staff-card-header">
+                  <span class="staff-title">Dr. Prakash Reddy | Sr. Lecturer | Physics</span>
+                  <span class="badge badge-red">Risk Score: 71</span>
+                </div>
+                <div class="staff-signals high-risk">
+                  2 back-to-back unsatisfactory appraisal scores | Requested experience certificate last week | Applied for leave 3x in 30 days
+                </div>
+                <div style="font-size:12px; color:var(--gray-600); margin-bottom:12px;">
+                  Workplace Engagement: <strong style="color:var(--gray-900)">Low alignment with department curriculum strategy</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size:11px; font-weight:600; color:var(--red);">Manager dialogue recommended</span>
+                  <button class="btn btn-primary" onclick="showToast('Retention action initiated for Dr. Prakash Reddy. Consultation meeting scheduled.')">Initiate Retention Action</button>
+                </div>
+              </div>
+
+              <!-- Risk 3 -->
+              <div class="staff-card">
+                <div class="staff-card-header">
+                  <span class="staff-title">Dr. Sridhar Murthy | Associate Professor | Mechanical</span>
+                  <span class="badge badge-amber">Risk Score: 65</span>
+                </div>
+                <div class="staff-signals">
+                  No professional development budget allocated for 2 years | Active profile check | Commute duration increased (relocated)
+                </div>
+                <div style="font-size:12px; color:var(--gray-600); margin-bottom:12px;">
+                  Career growth indicators: <strong style="color:var(--gray-900)">No promotion path scheduled in current cycle</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size:11px; font-weight:600; color:var(--amber);">Career alignment review recommended</span>
+                  <button class="btn btn-primary" onclick="showToast('Retention action initiated for Dr. Sridhar Murthy. HOD notification sent.')">Initiate Retention Action</button>
+                </div>
+              </div>
+
+              <!-- Risk 4 -->
+              <div class="staff-card">
+                <div class="staff-card-header">
+                  <span class="staff-title">Prof. Ananya Sen | Assistant Professor | Chemistry</span>
+                  <span class="badge badge-amber">Risk Score: 62</span>
+                </div>
+                <div class="staff-signals">
+                  Research grants pending approval for 9 months | High publication rate (potential headhunt candidate)
+                </div>
+                <div style="font-size:12px; color:var(--gray-600); margin-bottom:12px;">
+                  Research Support: <strong style="color:var(--gray-900)">₹4.5L Seed grant stuck in administrative queue</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size:11px; font-weight:600; color:var(--amber);">Grant processing priority recommended</span>
+                  <button class="btn btn-primary" onclick="showToast('Retention action initiated for Prof. Ananya Sen. Seed grant status expedited.')">Initiate Retention Action</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </section>
+
+        <!-- SCREEN 4: GRIEVANCE INTELLIGENCE -->
+        <section class="screen-content" id="screen-grievance">
+          
+          <!-- Stats Row -->
+          <div class="grid-4">
+            <div class="card stats-card">
+              <span style="font-size:12px; font-weight:600; color:var(--gray-600)">Open Grievances</span>
+              <span class="stats-val">23</span>
+            </div>
+            <div class="card stats-card">
+              <span style="font-size:12px; font-weight:600; color:var(--gray-600)">SLA Breached</span>
+              <span class="stats-val" style="color:var(--red)">8</span>
+            </div>
+            <div class="card stats-card">
+              <span style="font-size:12px; font-weight:600; color:var(--gray-600)">POSH/ICC Open Cases</span>
+              <span class="stats-val" style="color:var(--red)">2</span>
+            </div>
+            <div class="card stats-card">
+              <span style="font-size:12px; font-weight:600; color:var(--gray-600)">Avg Resolution Time</span>
+              <span class="stats-val" style="color:var(--amber)">11.4 days</span>
+            </div>
+          </div>
+
+          <!-- POSH legal exposure tracker -->
+          <div class="card">
+            <div class="card-title" style="color: var(--red);">
+              POSH/ICC Cases — Legal Exposure Tracking
+            </div>
+            <div class="callout callout-red" style="font-weight: 600; margin-bottom: 20px;">
+              ⚠️ Statutory violations carry personal liability for Principal and Management. Inquiry must begin within 7 days.
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+              
+              <!-- POSH case 1 -->
+              <div class="staff-card" style="border-left: 4px solid var(--red);">
+                <div style="display:flex; justify-content:space-between; margin-bottom: 8px;">
+                  <strong style="color:var(--navy)">CASE #GRV-2024-089 | Sexual Harassment</strong>
+                  <span class="badge badge-red">62 Days Open</span>
+                </div>
+                <div style="font-size:12.5px; margin-bottom: 12px; line-height: 1.4;">
+                  <strong>Campus:</strong> East Campus | <strong>Filed:</strong> 18 March 2026<br>
+                  <strong>Filing status:</strong> Received and acknowledged<br>
+                  <strong>ICC Committee:</strong> Constituted ✓<br>
+                  <strong style="color:var(--red)">Inquiry status: ⚠ NOT STARTED — 62 days elapsed</strong><br>
+                  <strong>Statutory requirement:</strong> Inquiry must begin within 7 days of complaint.<br>
+                  <strong style="color:var(--red)">Legal exposure: High. Section 11, POSH Act 2013 employer liability ACTIVE.</strong>
+                </div>
+                <div class="callout callout-amber" style="padding: 8px 12px; font-size:11px; margin-bottom:12px;">
+                  Recommended action: Convene ICC within 48 hours. Document all proceedings. Inquiry window closes in 28 days.
+                </div>
+                <div style="display:flex; gap:8px;">
+                  <button class="btn btn-navy" onclick="showToast('Case details generated as PDF. Sent to ICC Chairperson.')">View Full Case</button>
+                  <button class="btn btn-primary" onclick="showToast('Assigned ICC Chairperson. Meeting agenda dispatched.')">Assign ICC Chair</button>
+                </div>
+              </div>
+
+              <!-- POSH case 2 -->
+              <div class="staff-card" style="border-left: 4px solid var(--amber);">
+                <div style="display:flex; justify-content:space-between; margin-bottom: 8px;">
+                  <strong style="color:var(--navy)">CASE #GRV-2024-091 | Hostile Work Environment</strong>
+                  <span class="badge badge-amber">47 Days Open</span>
+                </div>
+                <div style="font-size:12.5px; margin-bottom: 12px; line-height: 1.4;">
+                  <strong>Campus:</strong> Main Campus | <strong>Filed:</strong> 2 April 2026<br>
+                  <strong>Filing status:</strong> Received and acknowledged<br>
+                  <strong>ICC Committee:</strong> Constituted ✓<br>
+                  <strong>Inquiry status:</strong> Preliminary inquiry in progress<br>
+                  <strong>Legal exposure:</strong> Moderate — inquiry running but approaching 90-day limit.
+                </div>
+                <div class="callout callout-green" style="padding: 8px 12px; font-size:11px; margin-bottom:12px;">
+                  Recommended action: Expedite inquiry completion before Day 90.
+                </div>
+                <div style="display:flex; gap:8px;">
+                  <button class="btn btn-navy" onclick="showToast('Viewing Case GRV-2024-091 documentation.')">View Full Case</button>
+                  <button class="btn btn-secondary" onclick="showToast('Compliance status report generated and mailed.')">Generate Compliance Report</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Grievance Table -->
+          <div class="card">
+            <div class="card-title">All Open Grievances by Category</div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Grievance ID</th>
+                    <th>Category</th>
+                    <th>Campus</th>
+                    <th>Date Filed</th>
+                    <th>Days Open</th>
+                    <th>Status</th>
+                    <th>SLA Status</th>
+                    <th>Assigned To</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="mono font-weight-600">GRV-2026-104</td>
+                    <td>Academic — Grading Bias</td>
+                    <td>East Campus</td>
+                    <td class="mono">05 May 2026</td>
+                    <td class="mono">15 days</td>
+                    <td>Under Review</td>
+                    <td><span class="badge badge-red">Breached</span></td>
+                    <td>Dean Academics</td>
+                  </tr>
+                  <tr>
+                    <td class="mono font-weight-600">GRV-2026-107</td>
+                    <td>Financial — Refund Delay</td>
+                    <td>North Campus</td>
+                    <td class="mono">12 May 2026</td>
+                    <td class="mono">8 days</td>
+                    <td>Processing</td>
+                    <td><span class="badge badge-amber">Overdue</span></td>
+                    <td>Accounts Manager</td>
+                  </tr>
+                  <tr>
+                    <td class="mono font-weight-600">GRV-2026-110</td>
+                    <td>Hostel Facilities</td>
+                    <td>Main Campus</td>
+                    <td class="mono">16 May 2026</td>
+                    <td class="mono">4 days</td>
+                    <td>Assigned</td>
+                    <td><span class="badge badge-green">Within SLA</span></td>
+                    <td>Hostel Warden</td>
+                  </tr>
+                  <tr>
+                    <td class="mono font-weight-600">GRV-2026-098</td>
+                    <td>Academic — Course Material</td>
+                    <td>East Campus</td>
+                    <td class="mono">28 Apr 2026</td>
+                    <td class="mono">22 days</td>
+                    <td>Inquiry Concluded</td>
+                    <td><span class="badge badge-red">Breached</span></td>
+                    <td>CSE HOD</td>
+                  </tr>
+                  <tr>
+                    <td class="mono font-weight-600">GRV-2026-112</td>
+                    <td>Administrative — Bus Route</td>
+                    <td>North Campus</td>
+                    <td class="mono">19 May 2026</td>
+                    <td class="mono">1 day</td>
+                    <td>Registered</td>
+                    <td><span class="badge badge-green">Within SLA</span></td>
+                    <td>Transport In-Charge</td>
+                  </tr>
+                  <tr>
+                    <td class="mono font-weight-600">GRV-2026-101</td>
+                    <td>Behavioral — Harassment</td>
+                    <td>Main Campus</td>
+                    <td class="mono">01 May 2026</td>
+                    <td class="mono">19 days</td>
+                    <td>Committee Hearing</td>
+                    <td><span class="badge badge-red">Breached</span></td>
+                    <td>Disciplinary Cell</td>
+                  </tr>
+                  <tr>
+                    <td class="mono font-weight-600">GRV-2026-115</td>
+                    <td>Academic — Timetable overlap</td>
+                    <td>Main Campus</td>
+                    <td class="mono">20 May 2026</td>
+                    <td class="mono">0 days</td>
+                    <td>Assigned</td>
+                    <td><span class="badge badge-green">Within SLA</span></td>
+                    <td>Dean Academics</td>
+                  </tr>
+                  <tr>
+                    <td class="mono font-weight-600">GRV-2026-108</td>
+                    <td>Security Protocol</td>
+                    <td>East Campus</td>
+                    <td class="mono">13 May 2026</td>
+                    <td class="mono">7 days</td>
+                    <td>Investigation</td>
+                    <td><span class="badge badge-amber">Overdue</span></td>
+                    <td>Chief Security Officer</td>
+                  </tr>
+                  <tr>
+                    <td class="mono font-weight-600">GRV-2026-103</td>
+                    <td>Hostel Food Quality</td>
+                    <td>North Campus</td>
+                    <td class="mono">04 May 2026</td>
+                    <td class="mono">16 days</td>
+                    <td>Vendor Escalation</td>
+                    <td><span class="badge badge-red">Breached</span></td>
+                    <td>Canteen Committee</td>
+                  </tr>
+                  <tr>
+                    <td class="mono font-weight-600">GRV-2026-111</td>
+                    <td>Library Fine Waiver</td>
+                    <td>Main Campus</td>
+                    <td class="mono">18 May 2026</td>
+                    <td class="mono">2 days</td>
+                    <td>Under Review</td>
+                    <td><span class="badge badge-green">Within SLA</span></td>
+                    <td>Librarian</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Pattern Detection Banner -->
+          <div class="card callout-amber" style="display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(133, 79, 11, 0.2);">
+            <div>
+              <strong style="font-size:14px;">⚠️ Pattern Detected — Academic Grievances</strong><br>
+              <span style="font-size:12.5px;">12 grievances about exam result discrepancies filed in the last 30 days (vs. baseline: 3/month). Pattern suggests systematic issue in Paper Evaluation or result publication process. Recommend: Internal audit of evaluation process for Nov 2025 examinations.</span>
+            </div>
+            <button class="btn btn-primary" onclick="showToast('Academic evaluation process audit scheduled. Task assigned to Registrar.')" style="margin-left: 20px; flex-shrink: 0;">Initiate Audit</button>
+          </div>
+
+        </section>
+
+        <!-- SCREEN 5: COMPLIANCE & ACCREDITATION -->
+        <section class="screen-content" id="screen-compliance">
+          
+          <div class="grid-3" style="grid-template-columns: 2fr 1fr; grid-gap: 20px;">
+            
+            <!-- NAAC Readiness Card -->
+            <div class="card">
+              <div class="card-title">NAAC Readiness Profile</div>
+              
+              <div class="naac-display">
+                <div class="naac-gauge">
+                  <div class="naac-gauge-content">
+                    <span class="naac-score-val">3.24</span>
+                    <div class="naac-score-max">/ 4.00</div>
+                    <span class="badge badge-green" style="margin-top:6px;">Grade A</span>
+                  </div>
+                </div>
+                <div>
+                  <h4 style="font-size: 15px; color: var(--navy); margin-bottom: 6px;">UGC/NAAC Accreditation Cycle 3</h4>
+                  <div style="font-size:12.5px; color:var(--gray-600); margin-bottom: 12px; line-height: 1.4;">
+                    Target for Grade A+: <strong style="color:var(--gray-900)">3.51 CGPA</strong><br>
+                    Current gap to target: <span class="badge badge-red" style="padding: 2px 6px;">0.27 points gap</span><br>
+                    Accreditation Inspection Timeline: <strong style="color:var(--gray-900)">18 months remaining</strong>
+                  </div>
+                  <span style="font-size:11px; color:var(--gray-600)">*Estimates calculated dynamically based on criteria self-study uploads.</span>
+                </div>
+              </div>
+
+              <div class="naac-criteria-list">
+                <div class="naac-criterion-row">
+                  <span class="naac-crit-label">1. Curricular Aspects</span>
+                  <div class="naac-crit-bar-bg"><div class="naac-crit-bar-fill green" style="width: 85%"></div></div>
+                  <span class="naac-crit-val mono">3.40</span>
+                </div>
+                <div class="naac-criterion-row">
+                  <span class="naac-crit-label">2. Teaching-Learning & Evaluation</span>
+                  <div class="naac-crit-bar-bg"><div class="naac-crit-bar-fill green" style="width: 77%"></div></div>
+                  <span class="naac-crit-val mono">3.10</span>
+                </div>
+                <div class="naac-criterion-row">
+                  <span class="naac-crit-label">3. Research, Innovations & Extension</span>
+                  <div class="naac-crit-bar-bg"><div class="naac-crit-bar-fill amber" style="width: 65%"></div></div>
+                  <span class="naac-crit-val mono">2.60</span>
+                </div>
+                <div class="naac-criterion-row">
+                  <span class="naac-crit-label">4. Infrastructure & Learning Resources</span>
+                  <div class="naac-crit-bar-bg"><div class="naac-crit-bar-fill green" style="width: 87%"></div></div>
+                  <span class="naac-crit-val mono">3.50</span>
+                </div>
+                <div class="naac-criterion-row">
+                  <span class="naac-crit-label">5. Student Support & Progression</span>
+                  <div class="naac-crit-bar-bg"><div class="naac-crit-bar-fill green" style="width: 80%"></div></div>
+                  <span class="naac-crit-val mono">3.20</span>
+                </div>
+                <div class="naac-criterion-row">
+                  <span class="naac-crit-label">6. Governance, Leadership & Mgt</span>
+                  <div class="naac-crit-bar-bg"><div class="naac-crit-bar-fill red" style="width: 52%"></div></div>
+                  <span class="naac-crit-val mono" style="color:var(--red)">2.10</span>
+                </div>
+                <div class="naac-criterion-row">
+                  <span class="naac-crit-label">7. Institutional Values & Best Practices</span>
+                  <div class="naac-crit-bar-bg"><div class="naac-crit-bar-fill green" style="width: 75%"></div></div>
+                  <span class="naac-crit-val mono">3.00</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Gap Analysis -->
+            <div class="card">
+              <div class="card-title">Gap to A+ Analysis</div>
+              <div style="display:flex; flex-direction:column; gap:16px;">
+                
+                <div class="staff-card" style="margin: 0; padding:12px;">
+                  <strong style="color:var(--navy); font-size:12.5px; display:block; margin-bottom:4px;">Priority 1 — Criterion 6: Governance (+0.18 potential)</strong>
+                  <p style="font-size:11.5px; color:var(--gray-600); margin-bottom:8px; line-height:1.4;">
+                    • Anti-Ragging Committee: Schedule meetings + document minutes (all 3 campuses)<br>
+                    • ICC/POSH: Resolve open cases + update committee charter<br>
+                    • Internal audit: Complete pending FY25-26 audit
+                  </p>
+                  <span style="font-size:10px; font-weight:600; color:var(--green)">Effort: Low | Timeline: 45 days | Impact: HIGH</span>
+                </div>
+
+                <div class="staff-card" style="margin: 0; padding:12px;">
+                  <strong style="color:var(--navy); font-size:12.5px; display:block; margin-bottom:4px;">Priority 2 — Criterion 3: Research & Innovation (+0.14 potential)</strong>
+                  <p style="font-size:11.5px; color:var(--gray-600); margin-bottom:8px; line-height:1.4;">
+                    • Faculty PhD ratio: 62% → target 70% (need 8 more PhD faculty or enrollments)<br>
+                    • Publications: 1.2 papers/faculty/year → target 2.0<br>
+                    • Funded projects: 3 active → target 8
+                  </p>
+                  <span style="font-size:10px; font-weight:600; color:var(--amber)">Effort: HIGH | Timeline: 12 months | Impact: MEDIUM</span>
+                </div>
+
+                <div class="callout callout-green" style="margin: 0; padding: 10px; font-size:11px;">
+                  If both priorities are addressed: Projected score = <strong>3.52 CGPA</strong> → Grade <strong>A+</strong>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Mandatory Committees -->
+          <div class="card">
+            <div class="card-title">Mandatory Committee Compliance Status</div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Committee Name</th>
+                    <th>Statutory Obligation</th>
+                    <th>Status</th>
+                    <th>Last Meeting Date</th>
+                    <th>Next Scheduled Due</th>
+                    <th>Action Link</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="font-weight:600">Internal Complaints Committee (POSH)</td>
+                    <td>Yes - UGC Norms</td>
+                    <td><span class="badge badge-amber">⚠ Case open</span></td>
+                    <td class="mono">15 Jan 2026</td>
+                    <td class="mono" style="color:var(--red); font-weight:600">Overdue</td>
+                    <td><button class="btn btn-navy" onclick="showToast('Convening request dispatched to all ICC members.')">Convene</button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:600">Anti-Ragging Committee</td>
+                    <td>Yes - AICTE/UGC</td>
+                    <td><span class="badge badge-red">🔴 9 months inactive</span></td>
+                    <td class="mono">03 Aug 2025</td>
+                    <td class="mono" style="color:var(--red); font-weight:600">Overdue</td>
+                    <td><button class="btn btn-primary" onclick="showToast('Anti-Ragging committee emergency review scheduled.')">Schedule</button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:600">Grievance Redressal Cell</td>
+                    <td>Yes - UGC Regulations</td>
+                    <td><span class="badge badge-green">✓ Active</span></td>
+                    <td class="mono">12 Apr 2026</td>
+                    <td class="mono">12 May 2026</td>
+                    <td><button class="btn btn-secondary" style="padding: 4px 8px;" onclick="showToast('Viewing Grievance Cell logs.')">On track</button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:600">SC/ST Committee Cell</td>
+                    <td>Yes - SC/ST Act Norms</td>
+                    <td><span class="badge badge-green">✓ Active</span></td>
+                    <td class="mono">05 Mar 2026</td>
+                    <td class="mono">05 Jun 2026</td>
+                    <td><button class="btn btn-secondary" style="padding: 4px 8px;" onclick="showToast('Viewing SC/ST Cell logs.')">On track</button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:600">Internal Financial Audit</td>
+                    <td>Yes - Registrar Charter</td>
+                    <td><span class="badge badge-amber">⚠ Pending FY26</span></td>
+                    <td class="mono">20 Oct 2025</td>
+                    <td class="mono" style="color:var(--red); font-weight:600">Overdue</td>
+                    <td><button class="btn btn-navy" onclick="showToast('Financial internal audit task force commissioned.')">Initiate</button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:600">Internal Quality Assurance Cell (IQAC)</td>
+                    <td>Yes - NAAC Mandated</td>
+                    <td><span class="badge badge-green">✓ Active</span></td>
+                    <td class="mono">18 Apr 2026</td>
+                    <td class="mono">18 May 2026</td>
+                    <td><button class="btn btn-secondary" style="padding: 4px 8px;" onclick="showToast('Viewing IQAC portal logs.')">On track</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- SCREEN 6: FINANCE INTELLIGENCE -->
+        <section class="screen-content" id="screen-finance">
+          
+          <!-- Stats Row -->
+          <div class="grid-5">
+            <div class="card stats-card">
+              <span style="font-size:12px; font-weight:600; color:var(--gray-600)">Total Fee Billed (FY26)</span>
+              <span class="stats-val">₹14.2 Cr</span>
+            </div>
+            <div class="card stats-card">
+              <span style="font-size:12px; font-weight:600; color:var(--gray-600)">Collected Fee</span>
+              <span class="stats-val" style="color:var(--amber)">₹10.8 Cr <span style="font-size:12px; font-weight:500;">(76%)</span></span>
+            </div>
+            <div class="card stats-card">
+              <span style="font-size:12px; font-weight:600; color:var(--gray-600)">Outstanding Fee</span>
+              <span class="stats-val" style="color:var(--red)">₹3.4 Cr</span>
+            </div>
+            <div class="card stats-card">
+              <span style="font-size:12px; font-weight:600; color:var(--gray-600)">90+ Day Defaulters</span>
+              <span class="stats-val" style="color:var(--red)">47 students</span>
+            </div>
+            <div class="card stats-card">
+              <span style="font-size:12px; font-weight:600; color:var(--gray-600)">Budget Utilization</span>
+              <span class="stats-val" style="color:var(--green)">68%</span>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
+            
+            <!-- Fee Chart -->
+            <div class="card" style="margin-bottom: 0;">
+              <div class="card-title">Fee Collection by Campus (Billed vs Collected)</div>
+              <div class="chart-container">
+                <canvas id="financeChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Defaulter Aging -->
+            <div class="card" style="margin-bottom: 0;">
+              <div class="card-title">Fee Defaulter Aging Analysis</div>
+              <div class="table-container">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Campus</th>
+                      <th>30-Day</th>
+                      <th>60-Day</th>
+                      <th>90+ Day</th>
+                      <th>Total Outstanding</th>
+                      <th>Risk Level</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style="font-weight: 600;">Main Campus</td>
+                      <td class="mono">34 students</td>
+                      <td class="mono">18 students</td>
+                      <td class="mono">12 students</td>
+                      <td class="mono" style="font-weight: 600;">₹1.2 Cr</td>
+                      <td><span class="badge badge-amber">⚠ Amber</span></td>
+                    </tr>
+                    <tr>
+                      <td style="font-weight: 600;">North Campus</td>
+                      <td class="mono">41 students</td>
+                      <td class="mono">29 students</td>
+                      <td class="mono" style="font-weight: 600;">23 students</td>
+                      <td class="mono" style="font-weight: 600; color:var(--red)">₹1.4 Cr</td>
+                      <td><span class="badge badge-red">🔴 Red</span></td>
+                    </tr>
+                    <tr>
+                      <td style="font-weight: 600;">East Campus</td>
+                      <td class="mono">22 students</td>
+                      <td class="mono">15 students</td>
+                      <td class="mono">12 students</td>
+                      <td class="mono" style="font-weight: 600; color:var(--red)">₹0.8 Cr</td>
+                      <td><span class="badge badge-red">🔴 Red</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Recommendation Banner -->
+          <div class="card callout-amber" style="display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(133, 79, 11, 0.2);">
+            <div>
+              <strong style="font-size:14px; color: var(--navy)">💡 Collection Intelligence Recommendation</strong><br>
+              <div style="font-size:12.5px; margin-top: 6px; color:var(--gray-900)">
+                <strong>North Campus — 89 students in 60+ day default bucket (₹12.4L at risk)</strong><br>
+                Analysis of payment history:<br>
+                • <strong>67 students:</strong> Previously paid on time (3+ semesters). Likely temporary cash flow issue.<br>
+                &nbsp;&nbsp;Recommended: Proactive outreach + installment plan offer. Predicted recovery: ₹8.2L (82% probability)<br>
+                • <strong>22 students:</strong> Chronic delay pattern (3+ semesters).<br>
+                &nbsp;&nbsp;Recommended: Fee committee escalation + exam entry hold. Predicted recovery: ₹2.1L (41% probability)
+              </div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px; margin-left: 20px; flex-shrink:0;">
+              <button class="btn btn-primary" onclick="showToast('Collection outreach strategy deployed. Email + SMS notifications triggered.')">Deploy Strategy</button>
+              <button class="btn btn-secondary" onclick="showToast('Strategy held for committee review.')">Review First</button>
+            </div>
+          </div>
+
+        </section>
+
+      </main>
+
+    </div>
+
+  </div>
+
+  <!-- DRILL-DOWN MODAL -->
+  <dialog id="campusModal" closedby="any" aria-labelledby="modalTitle">
+    <div class="modal-header">
+      <h3 class="modal-title" id="modalTitle">East Campus — Intelligence Detail</h3>
+      <button class="modal-close" onclick="closeCampusModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="modalBody">
+      <!-- Content populated dynamically -->
+    </div>
+  </dialog>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // State management
+    let activeScreen = 'overview';
+    let financeChartInstance = null;
+
+    // Static data for modal drill downs
+    const campusDetails = {
+      main: {
+        title: "Main Campus — Intelligence Detail",
+        score: 87,
+        statusClass: "green",
+        statusText: "Green",
+        badgeClass: "badge-green",
+        domains: [
+          { name: "Workforce", score: 88, status: "green", statusText: "Green", signal: "All criteria compliant" },
+          { name: "Academic Ops", score: 85, status: "green", statusText: "Green", signal: "Syllabus on schedule" },
+          { name: "Student Health", score: 91, status: "green", statusText: "Green", signal: "Retention rate 96%" },
+          { name: "Grievance", score: 88, status: "green", statusText: "Green", signal: "All resolved in SLA" },
+          { name: "Compliance", score: 82, status: "green", statusText: "Green", signal: "Committees active" },
+          { name: "Finance", score: 90, status: "green", statusText: "Green", signal: "Collection at 82%" },
+          { name: "Infrastructure", score: 72, status: "amber", statusText: "Amber", signal: "Minor maintenance backlog" }
+        ],
+        alerts: []
+      },
+      north: {
+        title: "North Campus — Intelligence Detail",
+        score: 76,
+        statusClass: "amber",
+        statusText: "Amber",
+        badgeClass: "badge-amber",
+        domains: [
+          { name: "Workforce", score: 68, status: "amber", statusText: "Amber", signal: "7 probation evaluations missing" },
+          { name: "Academic Ops", score: 84, status: "green", statusText: "Green", signal: "On track" },
+          { name: "Student Health", score: 74, status: "green", statusText: "Green", signal: "Within variance limits" },
+          { name: "Grievance", score: 85, status: "green", statusText: "Green", signal: "1 case open" },
+          { name: "Compliance", score: 76, status: "green", statusText: "Green", signal: "Report logs ready" },
+          { name: "Finance", score: 61, status: "amber", statusText: "Amber", signal: "Collection rate at 71%" },
+          { name: "Infrastructure", score: 90, status: "green", statusText: "Green", signal: "Maintenance completed" }
+        ],
+        alerts: [
+          { text: "7 employees in probation month 6-11 window with no evaluation logged.", action: "HR Head (North)" },
+          { text: "Fee collection rate: 71% (target 85%). 89 students in 60+ day default.", action: "Finance Head + Registrar" }
+        ]
+      },
+      east: {
+        title: "East Campus — Intelligence Detail",
+        score: 58,
+        statusClass: "red",
+        statusText: "Red",
+        badgeClass: "badge-red",
+        domains: [
+          { name: "Workforce", score: 70, status: "amber", statusText: "Amber", signal: "3 probation gaps pending" },
+          { name: "Academic Ops", score: 82, status: "green", statusText: "Green", signal: "On track" },
+          { name: "Student Health", score: 74, status: "amber", statusText: "Amber", signal: "12 dropout risks flagged" },
+          { name: "Grievance", score: 42, status: "red", statusText: "Red", signal: "POSH open 62 days" },
+          { name: "Compliance", score: 38, status: "red", statusText: "Red", signal: "Committee gaps, faculty qualifications" },
+          { name: "Finance", score: 66, status: "amber", statusText: "Amber", signal: "Fee collection 68%" },
+          { name: "Infrastructure", score: 84, status: "green", statusText: "Green", signal: "Routine maintenance pending" }
+        ],
+        alerts: [
+          { text: "POSH complaint filed 62 days ago — no documented ICC action recorded.", action: "HR Head (East) + Principal" },
+          { text: "Anti-Ragging Committee: No meeting minutes logged for 9 months.", action: "IQAC Coordinator + Principal" },
+          { text: "Faculty qualification gap: 8 faculty below UGC minimum qualification.", action: "HR Head (East) + Registrar" }
+        ]
+      }
+    };
+
+    // Initialize UI handlers
+    document.addEventListener("DOMContentLoaded", () => {
+      // Setup navigation
+      document.querySelectorAll(".nav-item").forEach(item => {
+        item.addEventListener("click", () => {
+          const targetScreen = item.getAttribute("data-screen");
+          switchScreen(targetScreen);
+        });
+      });
+
+      // Setup campus dropdown select
+      const instSelectorBtn = document.getElementById("instSelectorBtn");
+      const instDropdown = document.getElementById("instDropdown");
+      
+      instSelectorBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        instDropdown.classList.toggle("active");
+      });
+
+      document.querySelectorAll(".inst-option").forEach(opt => {
+        opt.addEventListener("click", () => {
+          const val = opt.getAttribute("data-value");
+          const text = opt.innerText;
+          instSelectorBtn.querySelector("span").innerText = text;
+          instDropdown.classList.remove("active");
+          showToast(`Campus filter updated: ${text}`);
+        });
+      });
+
+      window.addEventListener("click", () => {
+        instDropdown.classList.remove("active");
+      });
+
+      // Assign & Act buttons on Screen 1
+      document.querySelectorAll(".assign-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const assignee = btn.getAttribute("data-assignee");
+          const alertDesc = btn.getAttribute("data-alert");
+          showToast(`Alert assigned to ${assignee}. Task created in Task Management. Email notification sent.`);
+        });
+      });
+
+      // View details buttons
+      document.querySelectorAll(".view-details-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const campus = btn.getAttribute("data-campus");
+          openCampusModal(campus);
+        });
+      });
+
+      // Tab switcher in Academic co-pilot
+      document.querySelectorAll(".tab-btn").forEach(tab => {
+        tab.addEventListener("click", () => {
+          const targetTab = tab.getAttribute("data-tab");
+          switchTab(targetTab);
+        });
+      });
+
+      // Fallback for light-dismiss dialog in older browsers
+      const dialog = document.getElementById('campusModal');
+      if (dialog && !('closedBy' in HTMLDialogElement.prototype)) {
+        dialog.addEventListener('click', (event) => {
+          if (event.target !== dialog) return;
+          const rect = dialog.getBoundingClientRect();
+          const isInside = (
+            rect.top <= event.clientY &&
+            event.clientY <= rect.top + rect.height &&
+            rect.left <= event.clientX &&
+            event.clientX <= rect.left + rect.width
+          );
+          if (!isInside) dialog.close();
+        });
+      }
+    });
+
+    // Screen navigation function
+    function switchScreen(screenId) {
+      if (screenId === activeScreen) return;
+
+      // Update active nav styling
+      document.querySelectorAll(".nav-item").forEach(item => {
+        if (item.getAttribute("data-screen") === screenId) {
+          item.classList.add("active");
+        } else {
+          item.classList.remove("active");
+        }
+      });
+
+      // Switch screen element
+      const currentElement = document.getElementById(`screen-${activeScreen}`);
+      const targetElement = document.getElementById(`screen-${screenId}`);
+
+      if (currentElement) {
+        currentElement.style.opacity = '0';
+        setTimeout(() => {
+          currentElement.classList.remove("active");
+          targetElement.classList.add("active");
+          setTimeout(() => {
+            targetElement.style.opacity = '1';
+          }, 50);
+        }, 150);
+      } else {
+        targetElement.classList.add("active");
+        targetElement.style.opacity = '1';
+      }
+
+      activeScreen = screenId;
+
+      // Update Page Title
+      const pageTitles = {
+        'overview': 'Institution Overview',
+        'academic': 'Academic co-pilot',
+        'workforce': 'Workforce Intelligence',
+        'grievance': 'Grievance Intelligence',
+        'compliance': 'Compliance & Accreditation',
+        'finance': 'Finance Intelligence'
+      };
+      document.getElementById("pageTitle").innerText = pageTitles[screenId] || 'Institution Overview';
+
+      // Load Chart if switching to Finance
+      if (screenId === 'finance') {
+        setTimeout(initFinanceChart, 200);
+      }
+    }
+
+    // Modal helpers
+    function openCampusModal(campusKey) {
+      const data = campusDetails[campusKey];
+      if (!data) return;
+
+      const modal = document.getElementById("campusModal");
+      const titleEl = document.getElementById("modalTitle");
+      const bodyEl = document.getElementById("modalBody");
+
+      titleEl.innerText = data.title;
+
+      let html = `
+        <div style="display:flex; align-items:center; gap:20px; margin-bottom:20px;">
+          <div class="campus-score ${data.statusClass}" style="width:72px; height:72px; font-size:36px;">${data.score}</div>
+          <div>
+            <h4 style="font-size:16px;">Overall Campus Health Status</h4>
+            <span class="badge ${data.badgeClass}" style="margin-top:4px;">${data.statusText} Status</span>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table style="width:100%;">
+            <thead>
+              <tr>
+                <th>Domain Category</th>
+                <th>Score</th>
+                <th>Status</th>
+                <th>Current Status Flag</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      data.domains.forEach(d => {
+        let textClass = d.status === 'green' ? 'var(--green)' : (d.status === 'amber' ? 'var(--amber)' : 'var(--red)');
+        let badgeType = d.status === 'green' ? 'badge-green' : (d.status === 'amber' ? 'badge-amber' : 'badge-red');
+        
+        html += `
+          <tr>
+            <td style="font-weight:600">${d.name}</td>
+            <td class="mono font-weight-700" style="color:${textClass}">${d.score}</td>
+            <td><span class="badge ${badgeType}">${d.statusText}</span></td>
+            <td style="color:var(--gray-600)">${d.signal}</td>
+          </tr>
+        `;
+      });
+
+      html += `
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      if (data.alerts && data.alerts.length > 0) {
+        html += `
+          <h4 style="margin: 20px 0 10px 0; font-size:14px; color:var(--red);">Pending Critical Campus Alerts</h4>
+          <div style="display:flex; flex-direction:column; gap:10px;">
+        `;
+        data.alerts.forEach(a => {
+          html += `
+            <div class="staff-card" style="margin:0; padding:12px; border-left:4px solid var(--red); display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:12.5px; font-weight:500;">${a.text}</span>
+              <button class="btn btn-primary" style="padding: 6px 12px; font-size:11px;" onclick="showToast('Alert reassigned to ${a.action}. Tasks dispatched.')">Assign Owner</button>
+            </div>
+          `;
+        });
+        html += `</div>`;
+      }
+
+      bodyEl.innerHTML = html;
+      modal.showModal();
+    }
+
+    function closeCampusModal() {
+      document.getElementById("campusModal").close();
+    }
+
+    // Toast function
+    function showToast(message) {
+      const container = document.getElementById("toastContainer");
+      const toast = document.createElement("div");
+      toast.className = "toast";
+      toast.innerHTML = `<span class="toast-icon">⚡</span> <span>${message}</span>`;
+      
+      container.appendChild(toast);
+      
+      // Force reflow
+      toast.offsetHeight;
+      
+      toast.classList.add("show");
+      
+      setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => {
+          toast.remove();
+        }, 300);
+      }, 3500);
+    }
+
+    // Chart.js initialization
+    function initFinanceChart() {
+      const ctx = document.getElementById('financeChart');
+      if (!ctx) return;
+      
+      if (financeChartInstance) {
+        financeChartInstance.destroy();
+      }
+
+      financeChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Main Campus', 'North Campus', 'East Campus'],
+          datasets: [
+            {
+              label: 'Fee Billed (₹ Cr)',
+              data: [6.2, 4.8, 3.2],
+              backgroundColor: '#000099', // Navy
+              borderRadius: 4,
+              borderWidth: 0
+            },
+            {
+              label: 'Fee Collected (₹ Cr)',
+              data: [5.1, 3.4, 2.3],
+              backgroundColor: '#FF9A01', // Orange
+              borderRadius: 4,
+              borderWidth: 0
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                font: {
+                  family: 'Sora',
+                  size: 11
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: '#F0F0F0'
+              },
+              ticks: {
+                font: {
+                  family: 'Sora',
+                  size: 11
+                }
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                font: {
+                  family: 'Sora',
+                  size: 11
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Switch right panel tabs in Academic co-pilot
+    function switchTab(tabId) {
+      document.querySelectorAll(".tab-btn").forEach(btn => {
+        if (btn.getAttribute("data-tab") === tabId) {
+          btn.classList.add("active");
+        } else {
+          btn.classList.remove("active");
+        }
+      });
+
+      document.querySelectorAll(".tab-content").forEach(content => {
+        if (content.id === `tab-${tabId}`) {
+          content.classList.add("active");
+        } else {
+          content.classList.remove("active");
+        }
+      });
+
+      // Hide placeholder if we show content
+      const placeholder = document.getElementById("outputPlaceholder");
+      if (placeholder) {
+        placeholder.style.display = 'none';
+      }
+    }
+
+    // State management for Syllabus demo
+    let defaultLessonPlansHtml = '';
+    const welcomeHtml = `
+                <div class="chat-welcome">
+                  <div class="chat-welcome-title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><path d="M2 17 12 22 22 17"></path><path d="M2 12 12 17 22 12"></path></svg>
+                    edumerge Academic co-pilot
+                  </div>
+                  <div class="chat-welcome-desc">
+                    I can help you configure your upcoming semester — lesson plans, timetables, exam schedules, and UGC/AICTE compliance validation.
+                  </div>
+                  <div class="chat-chips-container">
+                    <button class="chat-chip" onclick="sendChipText('Configure Odd Semester 2026-27 for CSE Department')">
+                      "Configure Odd Semester 2026-27 for CSE Department"
+                    </button>
+                    <button class="chat-chip" onclick="sendChipText('Check faculty workload compliance — AICTE norms')">
+                      "Check faculty workload compliance — AICTE norms"
+                    </button>
+                    <button class="chat-chip" onclick="sendChipText('Generate lesson plan for Data Structures')">
+                      "Generate lesson plan for Data Structures"
+                    </button>
+                    <button class="chat-chip" onclick="sendChipText('Adjust semester start date to 1st August 2026')">
+                      "Adjust semester start date to 1st August 2026"
+                    </button>
+                    <button class="chat-chip" onclick="sendChipText('Audit classroom and infrastructure capacity allocations')">
+                      "Audit classroom & infrastructure capacity allocations"
+                    </button>
+                    <button class="chat-chip" onclick="sendChipText('Verify faculty qualification and specialization mapping')">
+                      "Verify faculty qualification & specialization mapping"
+                    </button>
+                  </div>
+                </div>`;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const tabLessonPlans = document.getElementById("tab-lesson-plans");
+      if (tabLessonPlans) {
+        defaultLessonPlansHtml = tabLessonPlans.innerHTML;
+      }
+    });
+
+    function resetChatHistory() {
+      document.getElementById("chatBody").innerHTML = welcomeHtml;
+      const attachBtn = document.querySelector('.chat-attach-btn');
+      if (attachBtn) attachBtn.classList.remove('attached');
+      document.getElementById("syllabusFileInput").value = '';
+      
+      // Restore default lesson plan
+      const tabLessonPlans = document.getElementById("tab-lesson-plans");
+      if (tabLessonPlans && defaultLessonPlansHtml) {
+        tabLessonPlans.innerHTML = defaultLessonPlansHtml;
+      }
+      showToast("Chat history reset. Ready for new configuration.");
+    }
+
+    function triggerSyllabusUpload() {
+      document.getElementById('syllabusFileInput').click();
+    }
+
+    function handleSyllabusFileSelected(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const attachBtn = document.querySelector('.chat-attach-btn');
+      if (attachBtn) attachBtn.classList.add('attached');
+
+      appendMessage('user', `[File Attachment: ${file.name}]`);
+
+      // Create typing indicator
+      const chatBody = document.getElementById("chatBody");
+      const indicator = document.createElement("div");
+      indicator.className = "typing-indicator";
+      indicator.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+      chatBody.appendChild(indicator);
+      chatBody.scrollTop = chatBody.scrollHeight;
+
+      setTimeout(() => {
+        indicator.remove();
+        
+        const responseHtml = `<strong>Academic co-pilot:</strong> Successfully received and parsed syllabus file: <code>${file.name}</code>.
+
+<strong>Extracted Syllabus Data:</strong>
+• <strong>Course Title:</strong> Machine Learning & Neural Networks (CS402)
+• <strong>Target Semester:</strong> Year IV (Odd Semester 2026-27)
+• <strong>AICTE Credits:</strong> 4 Credits (L-T-P: 3-0-2)
+• <strong>Syllabus Units Detected:</strong> 5 Units (42 lectures and 12 laboratory sessions mapped)
+
+We can compile this syllabus directly into your semester plan.
+
+Select how you would like to proceed:
+<div style="margin-top: 10px; display:flex; gap: 8px; flex-wrap: wrap;">
+  <button class="btn btn-primary" style="padding: 6px 12px; font-size:11px;" onclick="buildSyllabusSemesterPlan('CS402')">Compile into Semester Plan</button>
+  <button class="btn btn-secondary" style="padding: 6px 12px; font-size:11px;" onclick="showToast('Syllabus mapped. Faculty qualifications audited.')">Run Specialization Audit</button>
+</div>`;
+        appendMessage('system', responseHtml);
+      }, 1500);
+    }
+
+    function buildSyllabusSemesterPlan(courseCode) {
+      // Append user confirmation
+      appendMessage('user', `Compile course ${courseCode} into semester plan`);
+
+      // Create typing indicator
+      const chatBody = document.getElementById("chatBody");
+      const indicator = document.createElement("div");
+      indicator.className = "typing-indicator";
+      indicator.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+      chatBody.appendChild(indicator);
+      chatBody.scrollTop = chatBody.scrollHeight;
+
+      setTimeout(() => {
+        indicator.remove();
+
+        const text = `<strong>Academic co-pilot:</strong> Compiling syllabus parameters into semester plan...`;
+        appendMessage('system', text);
+
+        // Show sub-processing animations
+        const listDiv = document.createElement("div");
+        listDiv.className = "message-bubble message-system";
+        listDiv.style.marginTop = "-8px";
+        
+        let steps = [
+          "Parsing Machine Learning course objectives...",
+          "Allocating 42 lectures across the 77 available working days...",
+          "Mapping laboratory sections for CS402 to Lab 3...",
+          "Generating 5 complete unit lesson plans...",
+          "Resolving faculty slots (assigned to Dr. Anand Kumar)...",
+          "Semester configuration compiled with syllabus!"
+        ];
+
+        let currentStep = 0;
+        listDiv.innerHTML = `<div class="chat-process-checklist" id="syllabusProcList"></div>`;
+        chatBody.appendChild(listDiv);
+        chatBody.scrollTop = chatBody.scrollHeight;
+
+        const interval = setInterval(() => {
+          const procList = document.getElementById("syllabusProcList");
+          if (currentStep < steps.length) {
+            let stepHtml = `<div class="process-step complete">✓ ${steps[currentStep]}</div>`;
+            procList.innerHTML += stepHtml;
+            chatBody.scrollTop = chatBody.scrollHeight;
+            currentStep++;
+          } else {
+            clearInterval(interval);
+            
+            // Final completion message
+            const finalMsg = `Semester configuration compiled with syllabus.
+            
+✓ Machine Learning (CS402) Lesson Plan generated
+✓ Assigned to Dr. Anand Kumar (matching AI specialization)
+✓ Scheduled 42 lectures + 12 lab sessions without conflicts
+            
+Open the output panel to review the updated Lesson Plan.`;
+            
+            appendMessage('system', finalMsg);
+            
+            // Dynamically swap the tab content
+            const tabLessonPlans = document.getElementById("tab-lesson-plans");
+            if (tabLessonPlans) {
+              tabLessonPlans.innerHTML = \`
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h4 style="font-size: 15px; color: var(--navy)">Lesson Plan: Machine Learning & Neural Networks (CS402) — Odd Sem 2026-27</h4>
+                    <span class="badge badge-green">Compiled from Syllabus Upload</span>
+                  </div>
+                  
+                  <div class="table-container">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Unit</th>
+                          <th>Topics Covered</th>
+                          <th>Weeks</th>
+                          <th>Hours Allocated</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td class="mono" style="font-weight:600">Unit 1</td>
+                          <td>Introduction to Machine Learning, Supervised Learning, Linear/Logistic Regression</td>
+                          <td>Week 1–3</td>
+                          <td class="mono">12 lectures + 4 labs</td>
+                          <td><span class="badge badge-green">✓ Compiled</span></td>
+                        </tr>
+                        <tr>
+                          <td class="mono" style="font-weight:600">Unit 2</td>
+                          <td>Decision Trees, Random Forests, Support Vector Machines (SVM) kernels</td>
+                          <td>Week 4–6</td>
+                          <td class="mono">10 lectures + 2 labs</td>
+                          <td><span class="badge badge-green">✓ Compiled</span></td>
+                        </tr>
+                        <tr>
+                          <td class="mono" style="font-weight:600">Unit 3</td>
+                          <td>Unsupervised Learning, K-Means Clustering, PCA Dimensionality Reduction</td>
+                          <td>Week 7–9</td>
+                          <td class="mono">8 lectures + 2 labs</td>
+                          <td><span class="badge badge-green">✓ Compiled</span></td>
+                        </tr>
+                        <tr>
+                          <td class="mono" style="font-weight:600">Unit 4</td>
+                          <td>Neural Networks, Backpropagation, Multilayer Perceptron (MLP) basics</td>
+                          <td>Week 10–12</td>
+                          <td class="mono">8 lectures + 2 labs</td>
+                          <td><span class="badge badge-green">✓ Compiled</span></td>
+                        </tr>
+                        <tr>
+                          <td class="mono" style="font-weight:600">Unit 5</td>
+                          <td>Model Evaluation, Cross-Validation, Bias-Variance Tradeoff, Regularization</td>
+                          <td>Week 13–15</td>
+                          <td class="mono">4 lectures + 2 labs</td>
+                          <td><span class="badge badge-green">✓ Compiled</span></td>
+                        </tr>
+                        <tr style="background-color: var(--gray-50); font-weight: 700;">
+                          <td>Total</td>
+                          <td>All units loaded from Syllabus_Machine_Learning_CS402.pdf</td>
+                          <td>15 weeks</td>
+                          <td class="mono">42 L + 12 P</td>
+                          <td><span class="badge badge-green">✓ 100% Compliant</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>\`;
+            }
+            
+            switchTab('lesson-plans');
+          }
+        }, 400);
+
+      }, 1000);
+    }
+
+    // AI Chat Engine logic
+    function sendChipText(text) {
+      const input = document.getElementById("chatInput");
+      input.value = text;
+      handleSendChat();
+    }
+
+    function appendMessage(sender, text) {
+      const chatBody = document.getElementById("chatBody");
+      const bubble = document.createElement("div");
+      bubble.className = `message-bubble ${sender === 'user' ? 'message-user' : 'message-system'}`;
+      bubble.innerHTML = text;
+      chatBody.appendChild(bubble);
+      chatBody.scrollTop = chatBody.scrollHeight;
+      return bubble;
+    }
+
+    function handleSendChat() {
+      const input = document.getElementById("chatInput");
+      const prompt = input.value.trim();
+      if (!prompt) return;
+
+      appendMessage('user', prompt);
+      input.value = '';
+
+      // Create typing indicator
+      const chatBody = document.getElementById("chatBody");
+      const indicator = document.createElement("div");
+      indicator.className = "typing-indicator";
+      indicator.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+      chatBody.appendChild(indicator);
+      chatBody.scrollTop = chatBody.scrollHeight;
+
+      // Simulate response latency
+      setTimeout(() => {
+        indicator.remove();
+        generateAIResponse(prompt);
+      }, 1500);
+    }
+
+    function generateAIResponse(prompt) {
+      const query = prompt.toLowerCase();
+      
+      // Trigger 1: Semester Configuration
+      if (query.includes("configure") && (query.includes("semester") || query.includes("odd sem") || query.includes("2026"))) {
+        const text = `<strong>Academic co-pilot:</strong> Understood. Configuring Odd Semester 2026-27 for Engineering Faculty.
+
+Let me confirm the parameters:
+• Institution: Garden City University (AICTE-affiliated)
+• Departments: CSE, ECE, MECH, CIVIL, EEE, ISE
+• Students: 847 enrolled
+• Faculty: 42 active
+• Semester start: 15 July 2026
+• Governance framework: AICTE (applied automatically)
+
+Processing... This will take a moment.`;
+        
+        appendMessage('system', text);
+        
+        // Show sub-processing animations
+        const chatBody = document.getElementById("chatBody");
+        const listDiv = document.createElement("div");
+        listDiv.className = "message-bubble message-system";
+        listDiv.style.marginTop = "-8px";
+        
+        let steps = [
+          "Parsing 124 subject syllabi...",
+          "Mapping 847 student enrollments to sections...",
+          "Loading faculty availability and workload limits...",
+          "Applying AICTE governance norms...",
+          "Generating lesson plans...",
+          "Creating conflict-free timetable...",
+          "Scheduling examinations...",
+          "Validating compliance..."
+        ];
+
+        let currentStep = 0;
+        listDiv.innerHTML = `<div class="chat-process-checklist" id="procList"></div>`;
+        chatBody.appendChild(listDiv);
+        chatBody.scrollTop = chatBody.scrollHeight;
+
+        const interval = setInterval(() => {
+          const procList = document.getElementById("procList");
+          if (currentStep < steps.length) {
+            let stepHtml = '';
+            if (currentStep === 7) {
+              stepHtml = `<div class="process-step warning">⚠ ${steps[currentStep]} 2 violations found</div>`;
+            } else {
+              stepHtml = `<div class="process-step complete">✓ ${steps[currentStep]}</div>`;
+            }
+            procList.innerHTML += stepHtml;
+            chatBody.scrollTop = chatBody.scrollHeight;
+            currentStep++;
+          } else {
+            clearInterval(interval);
+            
+            // Final completion message
+            const finalMsg = `Semester configuration complete.
+
+✓ 124 lesson plans generated (ready to review)
+✓ Timetable created — 6 departments, zero conflicts
+✓ Exam schedule set — 14-day exam window from 20 Nov
+⚠ 2 compliance flags require your attention before finalizing
+
+Open the output panel to review → Timetable tab shows the violations with suggested fixes.`;
+            
+            appendMessage('system', finalMsg);
+            switchTab('timetable');
+          }
+        }, 400);
+
+      // Trigger 2: Lesson Plan
+      } else if (query.includes("lesson plan") || query.includes("lesson")) {
+        const text = `Generating lesson plan for <strong>Data Structures (CS301) — Odd Sem 2026-27</strong>.
+
+Subject details detected:
+• Credits: 4 (L-T-P: 3-1-0)
+• AICTE contact hours required: 150 hrs
+• Working days available: 87 (after holidays + exam window)
+• Assigned faculty: Dr. Anand Kumar
+• Sessions/week: 4 (3 lectures + 1 tutorial)
+
+Lesson plan generated. ✓
+
+Note: Unit 4 (Graph Algorithms) historically takes 18% longer than planned based on institutional data. Adjusted week 9-10 accordingly. Dr. Kumar's total load: 18 hrs/week — within AICTE limit (max 18 hrs).`;
+        
+        appendMessage('system', text);
+        switchTab('lesson-plans');
+
+      // Trigger 3: Workload / Compliance
+      } else if (query.includes("workload") || query.includes("compliance") || query.includes("aicte") || query.includes("ugc")) {
+        const text = `Running <strong>AICTE workload compliance check</strong> — all 42 faculty.
+
+Checking: contact hours/week limit (max 18 hrs), lab supervision ratios, tutorial assignments, research obligation hours.
+
+Results:
+✓ 39 faculty — compliant
+⚠ 2 faculty — workload violations detected
+✗ 1 faculty — critical overload
+
+Violations:
+• <strong>Dr. Rajesh Kumar (CSE):</strong> 22 hrs/week assigned (limit: 18)
+  <span style="color:var(--green); font-weight:600">Fix:</span> Redistribute CS401 tutorial (4 hrs) → Dr. Priya Nair (14 hrs/week, 4 hrs available)
+  
+• <strong>Dr. Meena Iyer (ECE):</strong> 20 hrs/week assigned (limit: 18)
+  <span style="color:var(--green); font-weight:600">Fix:</span> Reassign EC201 lab section to Dr. Arun Shetty (12 hrs/week)
+
+• <strong>Dr. Vikas Rao (MECH):</strong> 26 hrs/week (CRITICAL — 44% over limit)
+  <span style="color:var(--green); font-weight:600">Fix:</span> Requires immediate redistribution. 2 subjects to reassign.
+  Suggest: hire 1 adjunct lecturer for ME301 OR split section.
+
+Apply all suggested fixes? 
+<div style="margin-top: 8px; display:flex; gap: 8px;">
+  <button class="btn btn-primary" style="padding: 6px 12px; font-size:11px;" onclick="showToast('Suggested workload changes applied successfully.')">Yes — Apply Fixes</button>
+  <button class="btn btn-secondary" style="padding: 6px 12px; font-size:11px;" onclick="showToast('Escalated to HOD committee for review.')">Review Each</button>
+</div>`;
+        
+        appendMessage('system', text);
+        switchTab('academic-compliance');
+
+      // Trigger 4: Adjust semester start date / Change parameters
+      } else if (query.includes("start date") || query.includes("august 2026") || query.includes("adjust semester")) {
+        const text = `<strong>Academic co-pilot:</strong> Shifting the semester start date to <strong>1st August 2026</strong> (previously 15th July 2026).
+
+Recalculating calendar limits:
+• Total available working days: <strong>77 days</strong> (down from 87 days).
+• Syllabus coverage status: <strong>Compressed</strong> (requires 12% faster delivery rate).
+• UGC/AICTE compliance impact: Core CSE classes must increase weekly contact hours to meet the 150-hour semester threshold.
+
+Suggested action adjustments:
+1. Increase weekly hours for CS301 (Data Structures) from 4 to 5 hrs/week.
+2. Mark 4 specific Saturdays as working days to recover 16 contact hours.
+
+What adjustments would you like to make?
+<div style="margin-top: 10px; display:flex; gap: 8px; flex-wrap: wrap;">
+  <button class="btn btn-primary" style="padding: 6px 12px; font-size:11px;" onclick="showToast('Weekly contact hours increased for core CS subjects.')">Increase Weekly Hours</button>
+  <button class="btn btn-secondary" style="padding: 6px 12px; font-size:11px;" onclick="showToast('4 Saturdays marked as working days. Calendar updated.')">Enable Saturday Classes</button>
+</div>`;
+        appendMessage('system', text);
+        switchTab('timetable');
+
+      // Trigger 5: Classroom & Infrastructure Capacity
+      } else if (query.includes("classroom") || query.includes("infrastructure") || query.includes("capacity")) {
+        const text = `Running <strong>Classroom and Infrastructure Capacity Audit</strong> for engineering sections.
+
+Cross-referencing class section size against scheduled room capacities:
+• <strong>CSE Section A:</strong> 76 students assigned to Room 102 (Capacity: 60)
+  <span style="color:var(--red); font-weight:600">✗ Room Overcapacity (Overloaded by 16 students)</span>
+
+• <strong>ECE Section B:</strong> 52 students assigned to Lecture Hall 304 (Capacity: 120)
+  <span style="color:var(--amber); font-weight:600">⚠ Room Underutilised (56% empty space)</span>
+
+Suggested optimization:
+Swap scheduled room assignments between CSE Section A and ECE Section B.
+
+Would you like to resolve this room bottleneck?
+<div style="margin-top: 10px; display:flex; gap: 8px;">
+  <button class="btn btn-primary" style="padding: 6px 12px; font-size:11px;" onclick="showToast('Room swap applied. CSE A moved to LH304, ECE B to Room 102.')">Swap Rooms</button>
+  <button class="btn btn-secondary" style="padding: 6px 12px; font-size:11px;" onclick="showToast('CSE Section A split scheduled into Section A1 and A2.')">Split CSE Section A</button>
+</div>`;
+        appendMessage('system', text);
+        switchTab('timetable');
+
+      // Trigger 6: Faculty Qualification / Specialization Mapping
+      } else if (query.includes("qualification") || query.includes("specialization") || query.includes("mapping")) {
+        const text = `Running <strong>UGC Faculty-Subject Qualification Audit</strong>.
+Matching faculty credentials (degrees, research fields) against assigned subject syllabi.
+
+Results:
+• <strong>CS301 (Data Structures):</strong> Dr. Anand Kumar (PhD in Algorithms) — <span style="color:var(--green); font-weight:600">✓ Verified Match</span>
+• <strong>CS201 (DBMS):</strong> Dr. Rajesh Kumar (PhD in Data Engineering) — <span style="color:var(--green); font-weight:600">✓ Verified Match</span>
+• <strong>EC402 (Electromagnetic Fields):</strong> Dr. Vikas Rao (PhD in Thermodynamics - Mech Dept)
+  <span style="color:var(--red); font-weight:600">✗ Specialization Mismatch (Mechanical faculty assigned to core ECE subject)</span>
+
+Suggested correction:
+Reassign EC402 (Electromagnetic Fields) to Dr. Sunita Krishnan (PhD in RF/Microwaves, ECE Dept), who has 4 unallocated teaching hours this semester.
+
+Apply subject reassignment?
+<div style="margin-top: 10px; display:flex; gap: 8px;">
+  <button class="btn btn-primary" style="padding: 6px 12px; font-size:11px;" onclick="showToast('Subject EC402 reassigned to Dr. Sunita Krishnan.')">Apply Reassignment</button>
+  <button class="btn btn-secondary" style="padding: 6px 12px; font-size:11px;" onclick="showToast('Specialization mismatch flagged for board review.')">Flag for Review</button>
+</div>`;
+        appendMessage('system', text);
+        switchTab('academic-compliance');
+
+      // Fallback response
+      } else {
+        const text = `I can help with that. To give you the most accurate output, let me clarify a few things:
+
+• Which department or subject are you referring to?
+• Is this for Odd Semester 2026-27 or Even Semester?
+• Do you want me to apply AICTE norms or a custom governance framework?
+
+Or try one of these:
+→ "Configure full semester for Engineering"
+→ "Check Dr. Kumar's workload compliance"
+→ "Generate exam schedule for November"`;
+        
+        appendMessage('system', text);
+      }
+    }
+  </script>
+</body>
+</html>

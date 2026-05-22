@@ -64,7 +64,7 @@ const HODReviewForm: React.FC = () => {
     ];
 
     return (
-        <Layout title="HOD Review Dashboard" description="Review and approve teaching staff appraisals" icon={UserCog} showBack>
+        <Layout title="HOD Review Central" description="Review and approve teaching staff appraisals" icon={UserCog} showBack>
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <Card className="border-amber-200 bg-amber-50">

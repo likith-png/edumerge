@@ -52,7 +52,7 @@ const AppraisalAnalytics: React.FC = () => {
     ];
 
     return (
-        <Layout title="Analytics & Governance Dashboard" description="Performance insights and institutional analytics" icon={PieChart} showBack>
+        <Layout title="Analytics & Governance" description="Performance insights and institutional analytics" icon={PieChart} showBack>
             {/* Filters */}
             <div className="flex flex-wrap gap-3 mb-4">
                 <Select value={selectedYear} onValueChange={setSelectedYear}>

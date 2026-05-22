@@ -1156,7 +1156,7 @@ export default function PrincipalDashboard() {
                 <LayoutDashboard className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-bold tracking-tight text-slate-900">Principal Dashboard</h1>
+                <h1 className="text-lg font-bold tracking-tight text-slate-900">Principal Console</h1>
                 <p className="text-slate-500 text-xs">{INSTITUTION.name} · {INSTITUTION.code} · FY {INSTITUTION.year}</p>
               </div>
             </div>

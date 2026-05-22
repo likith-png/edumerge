@@ -34,7 +34,6 @@ import MidYearReview from './pages/MidYearReview';
 import StaffPortfolio from './pages/StaffPortfolio';
 import StaffPortfolioDetail from './pages/StaffPortfolioDetail';
 import ManagerTeamDashboard from './pages/ManagerTeamDashboard';
-import CapacityIntelligenceSystem from './pages/CapacityIntelligenceSystem';
 import ReportsDashboard from './pages/ReportsDashboard';
 import LessonPlan from './pages/LessonPlan';
 import AlumniPortal from './pages/AlumniPortal';
@@ -46,10 +45,16 @@ import AdvancedLeaveManagement from './pages/AdvancedLeaveManagement';
 import PrincipalDashboard from './pages/PrincipalDashboard';
 import ResearchPublication from './pages/ResearchPublication';
 import ControlTower from './pages/ControlTower';
-import GOIControlTower from './pages/GOIControlTower';
 import VehicleManagement from './pages/VehicleManagement';
 import WorkforceIntelligence from './pages/WorkforceIntelligence';
-
+import CapacityPlanner from './pages/CapacityPlanner';
+import AcademicGuide from './pages/AcademicGuide';
+import GrievanceIntelligence from './pages/GrievanceIntelligence';
+import ComplianceNAAC from './pages/ComplianceNAAC';
+import FinanceIntelligence from './pages/FinanceIntelligence';
+import OnlinePaperEvaluation from './pages/OnlinePaperEvaluation';
+import MentorManagement from './pages/MentorManagement';
+import AiCopilot from './pages/AiCopilot';
 import { PersonaProvider } from './contexts/PersonaContext';
 import { StaffProvider } from './contexts/StaffContext';
 
@@ -69,7 +74,6 @@ function App() {
           <Route path="/learning-development" element={<LearningDevelopment />} />
           <Route path="/hr-dashboard" element={<HRDashboard />} />
           <Route path="/talent-dashboard" element={<TalentDashboard />} />
-          <Route path="/capacity-intelligence" element={<CapacityIntelligenceSystem />} />
           <Route path="/reports" element={<ReportsDashboard />} />
           <Route path="/probation-dashboard" element={<ProbationDashboard />} />
           <Route path="/lesson-plan" element={<LessonPlan />} />
@@ -118,15 +122,23 @@ function App() {
           {/* HRMS Control Tower */}
           <Route path="/control-tower" element={<ControlTower />} />
 
-          {/* GOI Control Tower */}
-          <Route path="/goi-control-tower" element={<GOIControlTower />} />
-
           {/* Vehicle Management */}
           <Route path="/vehicle-management" element={<VehicleManagement />} />
 
           {/* Workforce Intelligence */}
           <Route path="/workforce-intelligence" element={<WorkforceIntelligence />} />
 
+          {/* Capacity Planner */}
+          <Route path="/capacity-planner" element={<CapacityPlanner />} />
+
+          {/* Institution Intelligence & Paper Evaluation Modules */}
+          <Route path="/academic-guide" element={<AcademicGuide />} />
+          <Route path="/grievance-intelligence" element={<GrievanceIntelligence />} />
+          <Route path="/compliance-naac" element={<ComplianceNAAC />} />
+          <Route path="/finance-intelligence" element={<FinanceIntelligence />} />
+          <Route path="/online-paper-evaluation" element={<OnlinePaperEvaluation />} />
+          <Route path="/mentor-management" element={<MentorManagement />} />
+          <Route path="/ai-copilot" element={<AiCopilot />} />
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

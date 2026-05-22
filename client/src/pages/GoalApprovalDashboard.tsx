@@ -98,7 +98,7 @@ const GoalApprovalDashboard: React.FC = () => {
 
     return (
         <Layout
-            title="Goal Approval Dashboard"
+            title="Goal Approval Console"
             description="Review and approve employee goal submissions"
             icon={CheckCircle}
             showBack

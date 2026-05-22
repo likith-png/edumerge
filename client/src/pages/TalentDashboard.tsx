@@ -73,7 +73,7 @@ const TalentDashboard: React.FC = () => {
     );
 
     return (
-        <Layout title="Talent Dashboard" description="Strategic insights into acquisition, development & retention" icon={TrendingUp} showHome>
+        <Layout title="Talent Central" description="Strategic insights into acquisition, development & retention" icon={TrendingUp} showHome>
             {/* Standard Tab Bar */}
             <div className="sticky top-0 z-30 -mx-4 px-4 md:-mx-8 md:px-8 mb-8 bg-white/80 backdrop-blur-md border-b border-slate-200 py-3">
                 <div className="flex gap-2 overflow-x-auto no-scrollbar scroll-smooth">

@@ -30,7 +30,7 @@ const ManagerTeamDashboard: React.FC = () => {
 
     return (
         <Layout
-            title={`Team Dashboard`}
+            title={`Team Portal`}
             description={`Managing ${user.department || 'Academic'} Department Team`}
             icon={Users}
         >

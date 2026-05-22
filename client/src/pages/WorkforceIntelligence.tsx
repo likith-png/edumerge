@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import {
     LayoutDashboard, Activity, ShieldCheck, ShieldAlert,
-    TrendingUp, ChevronRight, X, Info, LayoutGrid, AlertCircle, CheckCircle2, Database, Search, History, Clock, AlertTriangle, Check, Download
+    TrendingUp, ChevronRight, X, Info, LayoutGrid, AlertCircle, CheckCircle2, Database, Search, History, Clock, AlertTriangle, Check, Download,
+    Home
 } from 'lucide-react';
 import { usePersona } from '../contexts/PersonaContext';
+import { useNavigate } from 'react-router-dom';
 
 // Shared Status Badge tailored to the design specs
 const StatusBadge = ({ type, text, tooltip }: { type: 'stable' | 'watch' | 'fragile' | 'matched' | 'mismatch' | 'strong' | 'developing' | 'weak' | 'structural' | 'isolated' | 'default' | 'documented' | 'good' | 'bad' | 'warning', text: string, tooltip?: string }) => {
@@ -167,6 +169,7 @@ const actionHistoryData = [
 ];
 
 const WorkforceIntelligence: React.FC = () => {
+    const navigate = useNavigate();
     const { role } = usePersona();
     const [activeTab, setActiveTab] = useState('overview');
     const [drawerData, setDrawerData] = useState<{ title: string, data: any } | null>(null);
@@ -2452,6 +2455,16 @@ const WorkforceIntelligence: React.FC = () => {
                 
                 {/* Nav items */}
                 <div className="p-4 flex-1 overflow-y-auto">
+                    <div className="space-y-1 mb-4 border-b border-[#E2E0D8] pb-3">
+                        <button
+                            onClick={() => navigate('/')}
+                            className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-[#000099] transition-colors"
+                        >
+                            <Home className="w-4 h-4 text-slate-400" />
+                            Home Dashboard
+                        </button>
+                    </div>
+                    
                     <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3 px-2">Reports</div>
                     <div className="space-y-1">
                         {tabs.map(tab => (

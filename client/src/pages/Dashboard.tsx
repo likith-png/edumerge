@@ -14,7 +14,6 @@ import {
     ChevronRight,
     CheckCircle,
     Users,
-    BrainCircuit,
     PieChart,
     Calendar,
     XCircle,
@@ -27,7 +26,9 @@ import {
     Truck,
     Search,
     Building2,
-    Activity
+    Activity,
+    Brain,
+    UserCheck
 } from 'lucide-react';
 import { usePersona } from '../contexts/PersonaContext';
 import EmployeeDashboard from './EmployeeDashboard';
@@ -35,6 +36,7 @@ import ManagerTeamDashboard from './ManagerTeamDashboard';
 import { Switch } from '../components/ui/switch';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../components/ui/select';
 
 
 const categories = [
@@ -57,6 +59,12 @@ const categories = [
         color: "indigo",
         modules: [
             {
+                title: "edumerge co-pilot",
+                description: "Chat with edumerge's unified AI assistant — get answers across academics, finance, compliance, grievances, paper evaluation and mentoring.",
+                icon: Brain,
+                path: "/ai-copilot"
+            },
+            {
                 title: "Lesson Plan & Curriculum",
                 description: "Manage lesson plans, curriculum design, and academic schedules.",
                 icon: BookOpen,
@@ -67,6 +75,24 @@ const categories = [
                 description: "Track academic papers, projects, and calculate UGC API scores.",
                 icon: GraduationCap,
                 path: "/research-publication"
+            },
+            {
+                title: "Academic co-pilot",
+                description: "AI-driven timetable scheduling, workload conflict alerts, and AICTE compliance scorecards.",
+                icon: BookOpen,
+                path: "/academic-guide"
+            },
+            {
+                title: "Online Paper Evaluation",
+                description: "AI-assisted scoring tool utilizing handwritten script OCR scans and custom grading rubrics.",
+                icon: Brain,
+                path: "/online-paper-evaluation"
+            },
+            {
+                title: "Mentor Management",
+                description: "Early warning student risk tracking, NAAC Criterion 5 mentoring compliance, and automated parent communication.",
+                icon: UserCheck,
+                path: "/mentor-management"
             }
         ]
     },
@@ -143,6 +169,12 @@ const categories = [
         color: "slate",
         modules: [
             {
+                title: "Capacity Planner",
+                description: "Visualise staff strength, identify gaps, and model future hiring needs against regulatory ratios.",
+                icon: Network,
+                path: "/capacity-planner"
+            },
+            {
                 title: "Principal Dashboard",
                 description: "Smart KPIs, student analytics, staff performance, finance health, and action centre for institution leadership.",
                 icon: GraduationCap,
@@ -150,21 +182,33 @@ const categories = [
             },
             {
                 title: "HRMS Control Tower",
-                description: "Real-time HRMS command centre — plug-and-play widgets, GOI view, payroll readiness, approvals and more.",
+                description: "Real-time HRMS command centre — plug-and-play widgets, payroll readiness, approvals and more.",
                 icon: Zap,
                 path: "/control-tower"
             },
             {
-                title: "GOI Control Tower",
-                description: "Group of Institutions command centre — aggregates data from Fee, HRMS, Student Performance, Visitor, etc.",
-                icon: Building2,
-                path: "/goi-control-tower"
+                title: "Workforce Intelligence",
+                description: "Track workforce analytics, stability, retention indexes, and faculty retention indicators.",
+                icon: Activity,
+                path: "/workforce-intelligence"
             },
             {
-                title: "Capacity Intelligence (ICIS)",
-                description: "Unified AI engine for academic, faculty, infra, and financial capacity.",
-                icon: BrainCircuit,
-                path: "/capacity-intelligence"
+                title: "Grievance Intelligence",
+                description: "AI-powered statutory POSH case analytics, predictive escalation models, and sentiment-based resolution tracking.",
+                icon: MessageSquare,
+                path: "/grievance-intelligence"
+            },
+            {
+                title: "Compliance & NAAC",
+                description: "AI-driven compliance risk prediction, automated document gaps detection, and real-time NAAC criteria progress audits.",
+                icon: ShieldCheck,
+                path: "/compliance-naac"
+            },
+            {
+                title: "Finance Intelligence",
+                description: "AI-predicted billing collections, cash flow anomaly detection, fee aging analysis, and proactive recovery modeling.",
+                icon: TrendingUp,
+                path: "/finance-intelligence"
             }
         ]
     },
@@ -260,27 +304,62 @@ const Dashboard: React.FC = () => {
         localStorage.setItem('hrms_hidden_modules', JSON.stringify(newHidden));
     };
 
-    const filteredCategories = (searchQuery 
-        ? categories.map(cat => ({
-            ...cat,
-            modules: cat.modules.filter(mod => 
-                (mod.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                mod.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                cat.name.toLowerCase().includes(searchQuery.toLowerCase())) &&
-                !hiddenModules.includes(mod.title)
-            )
-        })).filter(cat => cat.modules.length > 0)
-        : categories.map(cat => ({
-            ...cat,
-            modules: cat.modules.filter(mod => !hiddenModules.includes(mod.title))
-        })).filter(cat => cat.modules.length > 0)
-    );
+    const [viewMode, setViewMode] = React.useState<'hrms' | 'ai'>(() => {
+        const saved = localStorage.getItem('hrms_dashboard_view_mode');
+        return (saved === 'ai' || saved === 'hrms') ? saved : 'hrms';
+    });
+
+    React.useEffect(() => {
+        localStorage.setItem('hrms_dashboard_view_mode', viewMode);
+    }, [viewMode]);
+
+    const filteredCategories = React.useMemo(() => {
+        const aiModuleTitles = [
+            "edumerge co-pilot",
+            "Academic co-pilot",
+            "Online Paper Evaluation",
+            "Workforce Intelligence",
+            "Grievance Intelligence",
+            "Compliance & NAAC",
+            "Finance Intelligence",
+            "Mentor Management"
+        ];
+
+        return categories.map(cat => {
+            const filteredModules = cat.modules.filter(mod => {
+                // 1. Filter by hidden modules
+                if (hiddenModules.includes(mod.title)) return false;
+
+                // 2. Filter by viewMode (HRMS vs AI Innovations)
+                const isAiModule = aiModuleTitles.includes(mod.title);
+                if (viewMode === 'hrms' && isAiModule) return false;
+                if (viewMode === 'ai' && !isAiModule) return false;
+
+                // 3. Filter by search query
+                if (searchQuery) {
+                    const query = searchQuery.toLowerCase();
+                    return (
+                        mod.title.toLowerCase().includes(query) ||
+                        mod.description.toLowerCase().includes(query) ||
+                        cat.name.toLowerCase().includes(query)
+                    );
+                }
+
+                return true;
+            });
+
+            return {
+                ...cat,
+                modules: filteredModules
+            };
+        }).filter(cat => cat.modules.length > 0);
+    }, [viewMode, searchQuery, hiddenModules]);
 
     return (
         <Layout
-            title={isEmployee ? "Employee Portal" : isManager ? "Manager Console" : "HRMS Dashboard"}
-            description={isEmployee ? `Welcome back, ${user.name}` : isManager ? `Team Overview - ${user.name}` : "Unified Human Resource Management Environment"}
-            icon={isEmployee ? Users : isManager ? Briefcase : Network}
+            title={isEmployee ? "Employee Portal" : isManager ? "Manager Console" : (viewMode === 'ai' ? "edumerge co-pilot" : "HRMS Platform")}
+            description={isEmployee ? `Welcome back, ${user.name}` : isManager ? `Team Overview - ${user.name}` : (viewMode === 'ai' ? "AI-Powered Institution Intelligence Co-Pilot" : "Unified Human Resource Management Environment")}
+            icon={isEmployee ? Users : isManager ? Briefcase : (viewMode === 'ai' ? Brain : Network)}
         >
             {isEmployee ? (
                 <EmployeeDashboard user={user} />
@@ -289,27 +368,64 @@ const Dashboard: React.FC = () => {
             ) : (
                 <div className="space-y-8 pb-10">
                     {/* Welcome Banner */}
-                    <div className="bg-white border border-slate-200 rounded-xl p-8 shadow-sm">
+                    <div className={`border rounded-xl p-8 shadow-sm transition-all duration-500 ${viewMode === 'ai' ? 'bg-gradient-to-r from-white via-purple-50/10 to-indigo-50/20 border-purple-200 shadow-purple-100/50' : 'bg-white border-slate-200 shadow-sm'}`}>
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                            <div>
-                                <h2 className="text-2xl font-bold text-slate-900">Welcome back, Admin</h2>
-                                <p className="text-slate-500 mt-1">Manage institutional operations and staff intelligence.</p>
+                            <div className="flex-1">
+                                <div className="flex items-center gap-3">
+                                    <h2 className="text-2xl font-bold text-slate-900">Welcome back, Admin</h2>
+                                    {viewMode === 'ai' && (
+                                        <span className="px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider bg-purple-100 text-purple-700 border border-purple-200 rounded-full animate-pulse">
+                                            AI Innovations Active
+                                        </span>
+                                    )}
+                                </div>
+                                <p className="text-slate-500 mt-1">
+                                    {viewMode === 'ai' 
+                                        ? "Exploring the next-generation AI-driven institution command center roadmap."
+                                        : "Manage institutional operations and staff intelligence."}
+                                </p>
                                 
-                                <div className="max-w-md relative mt-6">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                                    <Input
-                                        placeholder="Search modules..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="pl-10 h-10 border-slate-200 focus:ring-blue-500 rounded-lg"
-                                    />
+                                <div className="flex flex-col sm:flex-row items-center gap-3 mt-6">
+                                    <div className="w-full sm:w-80 relative">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                        <Input
+                                            placeholder="Search modules..."
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="pl-10 h-10 border-slate-200 focus:ring-blue-500 rounded-lg bg-white"
+                                        />
+                                    </div>
+                                    <div className="w-full sm:w-64">
+                                        <Select
+                                            value={viewMode}
+                                            onValueChange={(val: 'hrms' | 'ai') => setViewMode(val)}
+                                        >
+                                            <SelectTrigger className="h-10 border-slate-200 focus:ring-blue-500 rounded-lg bg-white text-slate-700 font-medium">
+                                                <SelectValue placeholder="Select Module Suite" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="hrms" className="text-slate-700">
+                                                    <span className="flex items-center gap-2">
+                                                        <Network className="h-4 w-4 text-blue-500" />
+                                                        HRMS Platform
+                                                    </span>
+                                                </SelectItem>
+                                                <SelectItem value="ai" className="text-slate-700">
+                                                    <span className="flex items-center gap-2">
+                                                        <Brain className="h-4 w-4 text-purple-500 animate-pulse" />
+                                                        AI - Innovations & Roadmap
+                                                    </span>
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
                                 </div>
                             </div>
                             
                             <Button
                                 variant="outline"
                                 onClick={() => setShowPinModal(true)}
-                                className="border-slate-200 text-slate-600 hover:bg-slate-50 gap-2"
+                                className="border-slate-200 text-slate-600 hover:bg-slate-50 gap-2 shrink-0 self-start md:self-center"
                             >
                                 <Settings2 className="w-4 h-4" /> Configuration
                             </Button>
@@ -338,7 +454,13 @@ const Dashboard: React.FC = () => {
                                     <Card
                                         key={module.path}
                                         className="hover:border-blue-300 hover:shadow-md transition-all cursor-pointer group border-slate-200"
-                                        onClick={() => navigate(module.path)}
+                                        onClick={() => {
+                                            if (module.path.endsWith('.html')) {
+                                                window.location.href = module.path;
+                                            } else {
+                                                navigate(module.path);
+                                            }
+                                        }}
                                     >
                                         <CardContent className="p-5">
                                             <div className="flex items-start gap-4">

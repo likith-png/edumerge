@@ -19,8 +19,7 @@ const mockReports = [
     { id: 4, title: 'Top Performers List', module: 'Appraisal', type: 'Excel', lastRun: 'Last Month', icon: BarChart2, color: 'text-blue-700', bg: 'bg-blue-50/50' },
     { id: 5, title: 'Attrition Rate Analysis', module: 'Exit Management', type: 'PDF/Excel', lastRun: 'Yesterday', icon: LogOut, color: 'text-red-600', bg: 'bg-red-50' },
     { id: 6, title: 'Exit Interview Sentiments', module: 'Exit Management', type: 'PDF', lastRun: '3 days ago', icon: FileCheck, color: 'text-orange-600', bg: 'bg-orange-50' },
-    { id: 7, title: 'Space Utilization Summary', module: 'Capacity Intelligence', type: 'PDF/Excel', lastRun: '12 hours ago', icon: PieChart, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { id: 8, title: 'Hostel Waitlist Report', module: 'Capacity Intelligence', type: 'Excel', lastRun: 'Today', icon: Table, color: 'text-emerald-500', bg: 'bg-emerald-50/50' },
+
     { id: 9, title: 'Recruitment Funnel & Metrics', module: 'Talent Acquisition', type: 'PDF/Excel', lastRun: '1 hour ago', icon: Briefcase, color: 'text-purple-600', bg: 'bg-purple-50' },
     { id: 10, title: 'Monthly Availed Leave Report', module: 'Leave Management', type: 'Excel', lastRun: 'Today', icon: Calendar, color: 'text-rose-600', bg: 'bg-rose-50' },
     { id: 11, title: 'Yearly Leave Book Details', module: 'Leave Management', type: 'Excel', lastRun: '2 days ago', icon: Calendar, color: 'text-amber-600', bg: 'bg-amber-50' },
@@ -36,7 +35,7 @@ const mockReports = [
     { id: 21, title: 'Staff Details by Department', module: 'NHC', type: 'Excel', lastRun: 'New', icon: Users, color: 'text-emerald-700', bg: 'bg-emerald-50' },
 ];
 
-const mockModules = ['Onboarding', 'Appraisal', 'Exit Management', 'Capacity Intelligence', 'Staff Portfolio', 'Talent Acquisition', 'Leave Management', 'Payroll', 'Attendance', 'NHC'];
+const mockModules = ['Onboarding', 'Appraisal', 'Exit Management', 'Staff Portfolio', 'Talent Acquisition', 'Leave Management', 'Payroll', 'Attendance', 'NHC'];
 
 const ONBOARDING_DATA = [
     { id: 0, name: 'Mr. Arvind Sharma', role: 'Mathematics Teacher', dept: 'Mathematics', stage: 'Offer Accepted', status: 'Completed', joinDate: '2026-04-01' },

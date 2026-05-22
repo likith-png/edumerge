@@ -623,8 +623,7 @@ const WIDGET_CATALOGUE: WidgetMeta[] = [
   { id: 'WGT_FEEDBACK360_SCORES', name: 'Top 360 Competency Scores', category: 'talent', description: 'Average 360 rating per competency — strengths & development areas', defaultChartType: 'bar', availableChartTypes: ['bar', 'table'], sourceModule: 'Feedback 360', roles: ['HR_MANAGER'], context: 'both', icon: Star, colSpan: 2 },
   // ── Calibration ─────────────────────────────────────────────────────────────
   { id: 'WGT_CALIBRATION_STATUS', name: 'Calibration Session Status', category: 'talent', description: 'Open / completed calibration sessions with bell-curve distribution', defaultChartType: 'status_matrix', availableChartTypes: ['status_matrix', 'bar'], sourceModule: 'Calibration', roles: ['HR_MANAGER', 'CHAIRMAN'], context: 'both', icon: Sliders, colSpan: 2 },
-  // ── Capacity Intelligence ────────────────────────────────────────────────────
-  { id: 'WGT_CAPACITY_UTILISATION', name: 'Workforce Capacity Utilisation', category: 'workforce', description: 'Teaching load vs sanctioned capacity — under/over-utilised staff flags', defaultChartType: 'bar', availableChartTypes: ['bar', 'horizontal_bar', 'table'], sourceModule: 'Capacity Intelligence', roles: ['PRINCIPAL', 'HR_MANAGER', 'CHAIRMAN'], context: 'both', icon: Database, colSpan: 2 },
+
   // ── Alumni ───────────────────────────────────────────────────────────────────
   { id: 'WGT_ALUMNI_STATS', name: 'Alumni Network Summary', category: 'hr_ops', description: 'Total alumni, active portal users, placement rate, re-hire requests', defaultChartType: 'kpi_card', availableChartTypes: ['kpi_card', 'table'], sourceModule: 'Alumni Portal', roles: ['HR_MANAGER', 'CHAIRMAN'], context: 'both', icon: GraduationCap },
   // ── Research & Publications ──────────────────────────────────────────────────
