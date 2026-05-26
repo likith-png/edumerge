@@ -1,0 +1,3616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="edumerge Academic Content Intelligence. AI-driven curriculum content generator and compliance dashboard for institutional leadership and faculty.">
+  <title>edumerge — Academic Content Intelligence</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Lucide Icons for premium aesthetics -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* CSS Variables & Theme (Institutional Enterprise) */
+    :root {
+      --navy: #000099;          /* Primary Brand */
+      --navy-dark: #000066;
+      --navy-light: #E6E6FF;    /* Sidebar active / light highlights */
+      --navy-xlight: #F0F0FF;
+      --orange: #FF9A01;        /* Accent Brand */
+      --orange-light: #FFF4E0;
+      --orange-dark: #CC7A00;
+      
+      /* Status Semantics */
+      --green: #0F6E56;
+      --green-light: #E1F5EE;
+      --green-text: #0B5240;
+      
+      --amber: #854F0B;
+      --amber-light: #FAEEDA;
+      --amber-text: #663C07;
+      
+      --red: #993C1D;
+      --red-light: #FAECE7;
+      --red-text: #732D15;
+      
+      /* Grays */
+      --gray-50: #F8F8F8;
+      --gray-100: #F1F1F1;
+      --gray-200: #E2E2E2;
+      --gray-400: #9E9E9E;
+      --gray-600: #5F5F5F;
+      --gray-900: #1A1A1A;
+      
+      --white: #FFFFFF;
+      
+      /* Layout & Shadows */
+      --font: 'Sora', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+      --radius: 8px;
+      --radius-lg: 12px;
+      
+      --shadow: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+      --shadow-lg: 0 10px 25px -3px rgba(0,0,0,0.08);
+    }
+
+    /* Reset & Base Setup */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font);
+      background-color: var(--gray-50);
+      color: var(--gray-900);
+      font-size: 14px;
+      line-height: 1.5;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+
+    .mono {
+      font-family: var(--mono);
+    }
+
+    /* Layout structure */
+    .topbar {
+      height: 52px;
+      background-color: var(--white);
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-edu {
+      color: var(--navy);
+      font-weight: 700;
+      font-size: 18px;
+    }
+    
+    .brand-merge {
+      color: var(--orange);
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .topbar-separator {
+      color: var(--gray-200);
+      font-weight: 300;
+      font-size: 18px;
+    }
+
+    .module-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--gray-600);
+    }
+
+    .topbar-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: var(--navy);
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .app-body {
+      display: flex;
+      margin-top: 52px;
+      height: calc(100vh - 52px);
+      width: 100vw;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background-color: var(--white);
+      border-right: 1px solid var(--gray-200);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      line-height: 1;
+    }
+
+    .sidebar-subtitle {
+      font-size: 10px;
+      color: var(--gray-400);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    .sidebar-context {
+      padding: 12px;
+      background-color: var(--navy-xlight);
+      border-radius: var(--radius);
+      margin: 16px 12px 12px 12px;
+      border: 1px solid var(--navy-light);
+    }
+
+    .context-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--navy-dark);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    .context-title {
+      font-weight: 600;
+      color: var(--navy);
+      font-size: 12px;
+      margin-bottom: 2px;
+    }
+
+    .context-subtitle {
+      font-size: 11px;
+      color: var(--gray-600);
+      margin-bottom: 2px;
+    }
+
+    .context-meta {
+      font-size: 10px;
+      color: var(--gray-400);
+      font-weight: 500;
+    }
+
+    .sidebar-dropdowns {
+      padding: 0 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .dropdown-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .dropdown-group label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--gray-600);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .dropdown-group select {
+      width: 100%;
+      height: 32px;
+      padding: 0 8px;
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      background-color: var(--white);
+      color: var(--gray-900);
+      font-family: var(--font);
+      font-size: 12px;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .dropdown-group select:focus {
+      border-color: var(--navy);
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 8px 0;
+      border-top: 1px solid var(--gray-100);
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 20px;
+      color: var(--gray-600);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 13px;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .nav-item:hover {
+      background-color: var(--gray-50);
+      color: var(--navy);
+    }
+
+    .nav-item.active {
+      background-color: var(--navy-light);
+      color: var(--navy);
+      font-weight: 600;
+      border-left: 3px solid var(--navy);
+    }
+
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--gray-100);
+      font-size: 11px;
+      color: var(--gray-400);
+      font-weight: 500;
+      text-align: center;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Screens container */
+    .screen {
+      display: none;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* Cards */
+    .card {
+      background-color: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    /* Context Bar style */
+    .context-bar {
+      background-color: var(--navy-xlight);
+      border-left: 4px solid var(--navy);
+      border-radius: 4px var(--radius) var(--radius) 4px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .context-bar-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .context-bar-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--navy);
+    }
+
+    .context-bar-metadata {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px 24px;
+      font-size: 12px;
+      color: var(--gray-600);
+      font-weight: 500;
+    }
+
+    .metadata-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .metadata-item i {
+      color: var(--navy);
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Content generation grid */
+    .generator-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 1024px) {
+      .generator-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .generator-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .gen-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 180px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .gen-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .gen-card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .gen-card-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius);
+      background-color: var(--navy-xlight);
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .gen-card-title {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--gray-900);
+      margin-bottom: 4px;
+    }
+
+    .gen-card-desc {
+      font-size: 11px;
+      color: var(--gray-600);
+      line-height: 1.4;
+    }
+
+    .gen-btn {
+      width: 100%;
+      height: 36px;
+      border-radius: var(--radius);
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      border: 1px solid var(--navy);
+      background-color: var(--navy);
+      color: var(--white);
+    }
+
+    .gen-btn:hover {
+      background-color: var(--navy-dark);
+      border-color: var(--navy-dark);
+    }
+
+    .btn-orange {
+      background-color: var(--orange);
+      border-color: var(--orange);
+      color: var(--white);
+    }
+
+    .btn-orange:hover {
+      background-color: var(--orange-dark);
+      border-color: var(--orange-dark);
+    }
+
+    .btn-outline-navy {
+      background-color: transparent;
+      border: 1px solid var(--navy);
+      color: var(--navy);
+    }
+
+    .btn-outline-navy:hover {
+      background-color: var(--navy-xlight);
+    }
+
+    .btn-outline-gray {
+      background-color: transparent;
+      border: 1px solid var(--gray-200);
+      color: var(--gray-600);
+    }
+
+    .btn-outline-gray:hover {
+      background-color: var(--gray-100);
+      color: var(--gray-900);
+    }
+
+    .btn-full {
+      width: 100%;
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: var(--radius);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    /* Output Panel */
+    .output-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      min-height: 200px;
+    }
+
+    .output-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--gray-400);
+      border: 2px dashed var(--gray-200);
+      border-radius: var(--radius-lg);
+      background-color: var(--white);
+    }
+
+    .output-empty i {
+      font-size: 40px;
+      margin-bottom: 16px;
+      color: var(--gray-200);
+    }
+
+    .output-empty p {
+      font-size: 13px;
+      max-width: 400px;
+      margin-top: 4px;
+    }
+
+    /* Loader Simulation */
+    .generation-loader {
+      background-color: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .loader-title {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--gray-900);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--gray-200);
+      border-top: 2px solid var(--navy);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loader-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .loader-step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--gray-600);
+      font-family: var(--mono);
+    }
+
+    .loader-step.pending {
+      color: var(--gray-400);
+    }
+
+    .loader-step.active {
+      color: var(--navy);
+      font-weight: 500;
+    }
+
+    .loader-step.success {
+      color: var(--green);
+    }
+
+    .step-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    /* Generated Output Blocks */
+    .output-block {
+      background-color: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .output-header {
+      background-color: var(--gray-50);
+      border-bottom: 1px solid var(--gray-100);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .output-header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .ai-badge {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background-color: var(--orange-light);
+      color: var(--orange-dark);
+      letter-spacing: 0.5px;
+    }
+
+    .ai-badge.saved {
+      background-color: var(--green-light);
+      color: var(--green);
+    }
+
+    .output-type-title {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--gray-900);
+    }
+
+    .output-timestamp {
+      font-size: 11px;
+      color: var(--gray-400);
+      font-family: var(--mono);
+    }
+
+    .output-body {
+      padding: 20px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--gray-900);
+      overflow-x: auto;
+    }
+
+    .output-body h3 {
+      font-size: 14px;
+      margin-top: 18px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid var(--gray-100);
+      padding-bottom: 4px;
+      color: var(--navy);
+    }
+
+    .output-body h3:first-child {
+      margin-top: 0;
+    }
+
+    .output-body p {
+      margin-bottom: 12px;
+    }
+
+    .highlight-box {
+      background-color: var(--navy-xlight);
+      border: 1px solid var(--navy-light);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin: 12px 0;
+    }
+
+    .warning-box {
+      background-color: var(--amber-light);
+      border: 1px solid var(--amber-text);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin: 12px 0;
+      color: var(--amber-text);
+      font-size: 12px;
+    }
+    
+    .warning-box strong {
+      color: var(--amber);
+      font-size: 13px;
+    }
+
+    .output-actionbar {
+      border-top: 1px solid var(--gray-100);
+      padding: 12px 20px;
+      background-color: var(--gray-50);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .approve-all-banner {
+      background-color: var(--white);
+      border: 1px solid var(--orange);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .approve-all-text {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gray-900);
+    }
+
+    .approve-all-text strong {
+      color: var(--orange-dark);
+    }
+
+    .save-confirm-card {
+      background-color: var(--green-light);
+      border: 1px solid var(--green);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      color: var(--green-text);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Screen 2: Repository Table & Filters */
+    .repo-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .repo-filters .filter-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 150px;
+      flex: 1;
+    }
+
+    .repo-filters .filter-item.search {
+      flex: 2;
+    }
+
+    .repo-filters label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--gray-600);
+      letter-spacing: 0.5px;
+    }
+
+    .repo-filters select,
+    .repo-filters input {
+      height: 36px;
+      padding: 0 12px;
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      font-family: var(--font);
+      font-size: 12px;
+      outline: none;
+      background-color: var(--white);
+    }
+
+    .repo-filters input {
+      width: 100%;
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .stat-card {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 16px;
+    }
+
+    .stat-val {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--navy);
+      font-family: var(--mono);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--gray-600);
+      font-weight: 500;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      background-color: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 12px;
+    }
+
+    .data-table th {
+      background-color: var(--gray-50);
+      border-bottom: 1px solid var(--gray-200);
+      padding: 12px 16px;
+      font-weight: 600;
+      color: var(--gray-600);
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: 0.5px;
+    }
+
+    .data-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--gray-100);
+      color: var(--gray-900);
+    }
+
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .status-badge.approved {
+      background-color: var(--green-light);
+      color: var(--green);
+    }
+
+    .status-badge.pending {
+      background-color: var(--amber-light);
+      color: var(--amber);
+    }
+
+    .action-link {
+      color: var(--navy);
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .action-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Screen 3: Quiz Builder */
+    .quiz-split {
+      display: grid;
+      grid-template-columns: 4fr 6fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .quiz-split {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .quiz-left-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .question-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 600px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .question-row {
+      padding: 12px;
+      background-color: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s;
+    }
+
+    .question-row:hover {
+      border-color: var(--navy-light);
+      background-color: var(--gray-50);
+    }
+
+    .question-details {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .question-text {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--gray-900);
+    }
+
+    .question-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      font-size: 9px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background-color: var(--gray-100);
+      color: var(--gray-600);
+      font-family: var(--mono);
+    }
+
+    .tag.easy { background-color: var(--green-light); color: var(--green); }
+    .tag.medium { background-color: var(--amber-light); color: var(--amber); }
+    .tag.hard { background-color: var(--red-light); color: var(--red); }
+    .tag.co { background-color: var(--navy-light); color: var(--navy); }
+
+    .quiz-composer {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .composer-form {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+
+    .composer-form .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .composer-form label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--gray-600);
+    }
+
+    .composer-form input,
+    .composer-form select {
+      height: 36px;
+      padding: 0 10px;
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      font-family: var(--font);
+      font-size: 12px;
+      outline: none;
+    }
+
+    .composer-form .full-width {
+      grid-column: span 2;
+    }
+
+    .drop-zone {
+      border: 2px dashed var(--gray-200);
+      border-radius: var(--radius-lg);
+      padding: 30px 20px;
+      text-align: center;
+      background-color: var(--gray-50);
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: var(--gray-400);
+    }
+
+    .composer-questions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .composer-question-row {
+      padding: 10px 14px;
+      background-color: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      width: 100%;
+    }
+
+    .composer-question-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+
+    .remove-question-btn {
+      color: var(--red);
+      cursor: pointer;
+      font-size: 16px;
+      border: none;
+      background: none;
+    }
+
+    .composer-meta-summary {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--navy);
+      padding: 8px 4px;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .composer-report {
+      background-color: var(--navy-xlight);
+      border: 1px solid var(--navy-light);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      font-size: 12px;
+      color: var(--navy-dark);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      line-height: 1.6;
+    }
+
+    .composer-report-title {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--navy);
+      border-bottom: 1px dashed var(--navy-light);
+      padding-bottom: 8px;
+    }
+
+    .composer-report-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .composer-report-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .composer-report-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--green);
+      font-weight: 500;
+    }
+
+    /* Screen 4: Analytics Heatmap */
+    .heatmap-card {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .heatmap-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 4px;
+    }
+
+    .heatmap-table th {
+      padding: 8px;
+      font-size: 10px;
+      text-transform: uppercase;
+      color: var(--gray-600);
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .heatmap-table td {
+      padding: 16px 8px;
+      text-align: center;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 11px;
+    }
+
+    .heatmap-subject {
+      background-color: var(--gray-100) !important;
+      color: var(--gray-900);
+      text-align: left !important;
+      padding-left: 12px !important;
+      font-weight: 600;
+      font-size: 12px;
+      width: 150px;
+    }
+
+    .heatmap-cell {
+      cursor: help;
+      position: relative;
+    }
+
+    .heatmap-cell.green {
+      background-color: var(--green-light);
+      color: var(--green);
+      border: 1px solid rgba(15,110,86,0.2);
+    }
+
+    .heatmap-cell.amber {
+      background-color: var(--amber-light);
+      color: var(--amber);
+      border: 1px solid rgba(133,79,11,0.2);
+    }
+
+    .heatmap-cell.gray {
+      background-color: var(--gray-100);
+      color: var(--gray-400);
+    }
+
+    .analytics-flex-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .analytics-flex-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .value-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+    }
+
+    .savings-breakdown {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .savings-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      border-bottom: 1px dashed var(--gray-200);
+      padding-bottom: 6px;
+    }
+
+    .savings-item-label {
+      color: var(--gray-600);
+      font-weight: 500;
+    }
+
+    .savings-item-val {
+      font-weight: 600;
+      font-family: var(--mono);
+    }
+
+    .savings-total-box {
+      background-color: var(--navy-xlight);
+      border: 1px solid var(--navy-light);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-top: 12px;
+    }
+
+    /* Tabs style inside Output Blocks */
+    .tab-container {
+      display: flex;
+      border-bottom: 1px solid var(--gray-200);
+      margin-bottom: 16px;
+      gap: 4px;
+    }
+
+    .tab-btn {
+      padding: 8px 16px;
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--gray-600);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      color: var(--navy);
+    }
+
+    .tab-btn.active {
+      color: var(--navy);
+      border-bottom-color: var(--navy);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* MCQ Answers list */
+    .mcq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .mcq-question {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .mcq-q-text {
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .mcq-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .mcq-options {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .mcq-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .mcq-option.correct {
+      background-color: var(--green-light);
+      border-color: var(--green);
+      color: var(--green-text);
+      font-weight: 600;
+    }
+
+    .mcq-bullet {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 1px solid var(--gray-400);
+      display: inline-block;
+    }
+
+    .mcq-option.correct .mcq-bullet {
+      background-color: var(--green);
+      border-color: var(--green);
+    }
+
+    .mcq-explanation {
+      font-size: 11px;
+      color: var(--gray-600);
+      background-color: var(--gray-50);
+      padding: 8px 12px;
+      border-left: 2px solid var(--navy);
+      margin-top: 4px;
+    }
+
+    /* Short & Long Answers */
+    .answer-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .answer-block {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .answer-q {
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .answer-model {
+      font-size: 12px;
+      background-color: var(--navy-xlight);
+      border: 1px solid var(--navy-light);
+      padding: 12px;
+      border-radius: var(--radius);
+    }
+
+    /* Summary Card revision style */
+    .summary-revision-card {
+      border: 2px solid var(--navy);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      max-width: 500px;
+      margin: 0 auto;
+      background-color: var(--white);
+    }
+
+    .summary-rev-header {
+      background-color: var(--navy);
+      color: var(--white);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .summary-rev-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .summary-section-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--navy-dark);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 1px solid var(--gray-200);
+      padding-bottom: 4px;
+      margin-bottom: 6px;
+    }
+
+    .summary-points-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-left: 16px;
+    }
+
+    .summary-one-line {
+      font-family: var(--mono);
+      background-color: var(--gray-50);
+      padding: 10px;
+      border-radius: var(--radius);
+      font-size: 11px;
+      border: 1px solid var(--gray-200);
+    }
+
+    .summary-highlight-tag {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+      font-size: 10px;
+      color: var(--gray-600);
+      justify-content: center;
+    }
+
+    /* PPT Slide list */
+    .ppt-slides {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .ppt-slide-card {
+      background-color: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .ppt-slide-num {
+      width: 24px;
+      height: 24px;
+      background-color: var(--navy);
+      color: var(--white);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .ppt-slide-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .ppt-slide-title {
+      font-weight: 600;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .ppt-slide-time {
+      font-size: 11px;
+      color: var(--orange-dark);
+      font-family: var(--mono);
+      font-weight: 500;
+    }
+
+    .ppt-slide-details {
+      font-size: 12px;
+      color: var(--gray-600);
+    }
+
+    /* Toast Notification CSS */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1000;
+    }
+
+    .toast {
+      background-color: var(--navy);
+      color: var(--white);
+      padding: 12px 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: toast-fade-in 0.3s forwards;
+      max-width: 350px;
+    }
+
+    @keyframes toast-fade-in {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .toast.fade-out {
+      animation: toast-fade-out 0.3s forwards;
+    }
+
+    @keyframes toast-fade-out {
+      to {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+    }
+
+    /* Modal dialog overrides */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-container {
+      background-color: var(--white);
+      border-radius: var(--radius-lg);
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-lg);
+      animation: modal-enter 0.2s ease-out;
+    }
+
+    @keyframes modal-enter {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+
+    .modal-close {
+      font-size: 20px;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--gray-400);
+    }
+
+    .modal-close:hover {
+      color: var(--gray-900);
+    }
+
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .modal-footer {
+      padding: 12px 20px;
+      border-top: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: flex-end;
+      background-color: var(--gray-50);
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="brand-edu">edu</span><span class="brand-merge">merge</span>
+      <span class="topbar-separator">·</span>
+      <span class="module-title" id="page-title">Academic Content Intelligence</span>
+    </div>
+    <div class="topbar-right">
+      <div class="user-avatar" title="Dr. Anand Kumar">AK</div>
+    </div>
+  </header>
+
+  <!-- App Body Container -->
+  <div class="app-body">
+    
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <span class="brand-edu">edu</span><span class="brand-merge">merge</span>
+        </div>
+        <div class="sidebar-subtitle">Academic Content AI</div>
+      </div>
+      
+      <!-- Context Panel -->
+      <div class="sidebar-context">
+        <div class="context-label">Active Context</div>
+        <div class="context-title" id="context-panel-subject">Data Structures · CS301</div>
+        <div class="context-subtitle" id="context-panel-instructor">Dr. Anand Kumar · Sem 3</div>
+        <div class="context-meta" id="context-panel-class">CSE Department · 42 students</div>
+      </div>
+      
+      <!-- Dropdown Selectors -->
+      <div class="sidebar-dropdowns">
+        <div class="dropdown-group">
+          <label for="subject-select">Subject</label>
+          <select id="subject-select" onchange="onContextDropdownChange()">
+            <option value="CS301">CS301 Data Structures</option>
+            <option value="CS401">CS401 Algorithms</option>
+            <option value="CS501">CS501 OS</option>
+            <option value="CS201">CS201 DBMS</option>
+            <option value="CS601">CS601 Computer Networks</option>
+            <option value="CS602">CS602 Software Engineering</option>
+            <option value="CS603">CS603 Artificial Intelligence</option>
+          </select>
+        </div>
+        <div class="dropdown-group">
+          <label for="unit-select">Unit</label>
+          <select id="unit-select" onchange="onContextDropdownChange()">
+            <option value="Unit 1">Unit 1 — Linear Structures</option>
+            <option value="Unit 2">Unit 2 — Binary & BST Trees</option>
+            <option value="Unit 3" selected>Unit 3 — Graph Algorithms</option>
+            <option value="Unit 4">Unit 4 — Greedy & Dynamic</option>
+            <option value="Unit 5">Unit 5 — Sort, Search & Hash</option>
+          </select>
+        </div>
+        <div class="dropdown-group">
+          <label for="topic-select">Topic</label>
+          <select id="topic-select" onchange="onTopicDropdownChange()">
+            <option value="BFS Algorithm" selected>BFS Algorithm</option>
+            <option value="DFS Algorithm">DFS Algorithm</option>
+            <option value="Dijkstra">Dijkstra</option>
+            <option value="MST (Minimum Spanning Tree)">MST (Minimum Spanning Tree)</option>
+            <option value="Topological Sort">Topological Sort</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Navigation Links -->
+      <nav class="sidebar-nav">
+        <a class="nav-item active" onclick="switchScreen('generate', this)">
+          <i data-lucide="sparkles"></i>
+          <span>Generate</span>
+        </a>
+        <a class="nav-item" onclick="switchScreen('repository', this)">
+          <i data-lucide="folder-open"></i>
+          <span>Repository</span>
+        </a>
+        <a class="nav-item" onclick="switchScreen('quiz-builder', this)">
+          <i data-lucide="help-circle"></i>
+          <span>Quiz Builder</span>
+        </a>
+        <a class="nav-item" onclick="switchScreen('analytics', this)">
+          <i data-lucide="bar-chart-2"></i>
+          <span>Analytics</span>
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        Garden City University · FY 2026–27
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- SCREEN 1: GENERATE (Default active) -->
+      <section id="screen-generate" class="screen active">
+        
+        <!-- Context Bar -->
+        <div class="context-bar">
+          <div class="context-bar-row">
+            <span class="context-bar-title" id="bar-main-title">Generating for: BFS Algorithm · Unit 3 · CS301 Data Structures</span>
+          </div>
+          <div class="context-bar-row">
+            <div class="context-bar-metadata">
+              <div class="metadata-item">
+                <i data-lucide="user"></i>
+                <span id="bar-faculty">Faculty: Dr. Anand Kumar</span>
+              </div>
+              <div class="metadata-item">
+                <i data-lucide="users"></i>
+                <span id="bar-class">Section: CSE-3A · 42 students</span>
+              </div>
+              <div class="metadata-item">
+                <i data-lucide="clock"></i>
+                <span id="bar-hours">AICTE contact hours: 6 hrs</span>
+              </div>
+              <div class="metadata-item">
+                <i data-lucide="check-square"></i>
+                <span id="bar-co">CO mapped: CO3, CO4</span>
+              </div>
+              <div class="metadata-item">
+                <i data-lucide="calendar"></i>
+                <span id="bar-assessment">Internal Assessment: 18 days away</span>
+              </div>
+              <div class="metadata-item">
+                <i data-lucide="brain"></i>
+                <span id="bar-blooms">Bloom's level: Understand / Apply</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5 Content Cards Grid -->
+        <div class="generator-grid">
+          <!-- Card 1: Topic Notes -->
+          <div class="card gen-card">
+            <div class="gen-card-header">
+              <div class="gen-card-icon"><i data-lucide="file-text"></i></div>
+              <div>
+                <div class="gen-card-title">Topic Notes</div>
+                <div class="gen-card-desc">Detailed notes with examples, definitions, and CO outcome mapping.</div>
+              </div>
+            </div>
+            <button class="gen-btn" onclick="startGeneration('notes')">Generate Notes</button>
+          </div>
+
+          <!-- Card 2: Quiz Bank -->
+          <div class="card gen-card">
+            <div class="gen-card-header">
+              <div class="gen-card-icon"><i data-lucide="help-circle"></i></div>
+              <div>
+                <div class="gen-card-title">Quiz Bank</div>
+                <div class="gen-card-desc">MCQs, short answer, and long answer questions tagged by Bloom's taxonomy levels.</div>
+              </div>
+            </div>
+            <button class="gen-btn" onclick="startGeneration('quiz')">Generate Quiz</button>
+          </div>
+
+          <!-- Card 3: Summary -->
+          <div class="card gen-card">
+            <div class="gen-card-header">
+              <div class="gen-card-icon"><i data-lucide="list"></i></div>
+              <div>
+                <div class="gen-card-title">Summary</div>
+                <div class="gen-card-desc">One-page review and exam revision sheet for students containing core takeaways.</div>
+              </div>
+            </div>
+            <button class="gen-btn" onclick="startGeneration('summary')">Generate Summary</button>
+          </div>
+
+          <!-- Card 4: Student Guide -->
+          <div class="card gen-card">
+            <div class="gen-card-header">
+              <div class="gen-card-icon"><i data-lucide="compass"></i></div>
+              <div>
+                <div class="gen-card-title">Student Guide</div>
+                <div class="gen-card-desc">Self-study guidance outlining pre-requisites, core points, and recommended practice flows.</div>
+              </div>
+            </div>
+            <button class="gen-btn" onclick="startGeneration('guide')">Generate Guide</button>
+          </div>
+
+          <!-- Card 5: PPT Outline -->
+          <div class="card gen-card">
+            <div class="gen-card-header">
+              <div class="gen-card-icon"><i data-lucide="presentation"></i></div>
+              <div>
+                <div class="gen-card-title">PPT Outline</div>
+                <div class="gen-card-desc">Slide-by-slide structure with content guidelines, visual cues, and duration allocations.</div>
+              </div>
+            </div>
+            <button class="gen-btn" onclick="startGeneration('ppt')">Generate PPT</button>
+          </div>
+        </div>
+
+        <!-- Generate All Button -->
+        <button class="btn-full btn-orange animate-pulse" onclick="startGeneration('all')">
+          <i data-lucide="zap"></i>
+          <span>⚡ Generate All Content for This Topic</span>
+        </button>
+
+        <!-- Output Panel Container -->
+        <div class="output-panel" id="output-panel-container">
+          <!-- Default Empty State -->
+          <div class="output-empty" id="output-empty-state">
+            <i data-lucide="sparkles"></i>
+            <h3>No Content Generated Yet</h3>
+            <p>Select a content type above or click "Generate All" to begin compiling AI-driven syllabus materials.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCREEN 2: REPOSITORY -->
+      <section id="screen-repository" class="screen">
+        <div class="repo-filters card">
+          <div class="filter-item">
+            <label for="repo-subject">Subject</label>
+            <select id="repo-subject" onchange="filterRepository()">
+              <option value="all">All Subjects</option>
+              <option value="CS301">CS301 Data Structures</option>
+              <option value="CS401">CS401 Algorithms</option>
+              <option value="CS501">CS501 OS</option>
+              <option value="CS201">CS201 DBMS</option>
+              <option value="CS601">CS601 Computer Networks</option>
+              <option value="CS602">CS602 Software Engineering</option>
+              <option value="CS603">CS603 Artificial Intelligence</option>
+            </select>
+          </div>
+          <div class="filter-item">
+            <label for="repo-unit">Unit</label>
+            <select id="repo-unit" onchange="filterRepository()">
+              <option value="all">All Units</option>
+              <option value="Unit 1">Unit 1</option>
+              <option value="Unit 2">Unit 2</option>
+              <option value="Unit 3">Unit 3</option>
+              <option value="Unit 4">Unit 4</option>
+              <option value="Unit 5">Unit 5</option>
+            </select>
+          </div>
+          <div class="filter-item">
+            <label for="repo-type">Content Type</label>
+            <select id="repo-type" onchange="filterRepository()">
+              <option value="all">All Types</option>
+              <option value="Notes">Notes</option>
+              <option value="Quiz Bank">Quiz Bank</option>
+              <option value="Summary">Summary</option>
+              <option value="Student Guide">Student Guide</option>
+              <option value="PPT Outline">PPT Outline</option>
+            </select>
+          </div>
+          <div class="filter-item search">
+            <label for="repo-search">Search Repository</label>
+            <input type="text" id="repo-search" placeholder="Type to filter..." oninput="filterRepository()">
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="card stat-card">
+            <span class="stat-val" id="stats-total">47</span>
+            <span class="stat-label">Total Items</span>
+          </div>
+          <div class="card stat-card">
+            <span class="stat-val" id="stats-approved" style="color: var(--green);">38</span>
+            <span class="stat-label">Approved & Released</span>
+          </div>
+          <div class="card stat-card">
+            <span class="stat-val" id="stats-pending" style="color: var(--orange);">9</span>
+            <span class="stat-label">Pending HOD Review</span>
+          </div>
+          <div class="card stat-card">
+            <span class="stat-val">4</span>
+            <span class="stat-label">Active Subjects</span>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table" id="repo-table">
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>Unit</th>
+                <th>Topic</th>
+                <th>Type</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Faculty</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="repo-table-body">
+              <!-- Seeded rows dynamically generated -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SCREEN 3: QUIZ BUILDER -->
+      <section id="screen-quiz-builder" class="screen">
+        <div class="quiz-split">
+          
+          <!-- Left Question Bank Explorer -->
+          <div class="quiz-question-explorer">
+            <div class="quiz-left-title">
+              <span>Question Bank</span>
+              <span class="tag" style="background-color: var(--navy-light); color: var(--navy);" id="qbank-count">10 Available</span>
+            </div>
+            
+            <div class="repo-filters card" style="padding: 12px; margin-bottom: 12px; gap: 8px;">
+              <div class="filter-item" style="min-width: 90px;">
+                <select id="qb-difficulty" style="height: 30px; font-size: 11px;" onchange="filterQuestionBank()">
+                  <option value="all">All Difficulties</option>
+                  <option value="Easy">Easy</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Hard">Hard</option>
+                </select>
+              </div>
+              <div class="filter-item" style="min-width: 90px;">
+                <select id="qb-co" style="height: 30px; font-size: 11px;" onchange="filterQuestionBank()">
+                  <option value="all">All COs</option>
+                  <option value="CO3">CO3</option>
+                  <option value="CO4">CO4</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="question-list" id="qbank-list-container">
+              <!-- Question rows dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Right Assessment Composer -->
+          <div class="quiz-composer card">
+            <h3>Assessment Composer</h3>
+            <div class="composer-form">
+              <div class="form-group full-width">
+                <label for="comp-title">Assessment Title</label>
+                <input type="text" id="comp-title" value="Internal Assessment 1 — CS301">
+              </div>
+              <div class="form-group">
+                <label for="comp-duration">Duration</label>
+                <input type="text" id="comp-duration" value="2 hours">
+              </div>
+              <div class="form-group">
+                <label for="comp-date">Assessment Date</label>
+                <input type="date" id="comp-date" value="2026-06-10">
+              </div>
+              <div class="form-group full-width">
+                <label for="comp-section">Assigned Section(s)</label>
+                <input type="text" id="comp-section" value="CSE-3A, CSE-3B, CSE-3C">
+              </div>
+            </div>
+
+            <div class="composer-meta-summary">
+              <span>Selected Questions: <span id="comp-q-count">0</span></span>
+              <span>Total Marks: <span id="comp-marks">0</span> marks</span>
+            </div>
+
+            <!-- Composer Drop / Added Questions Zone -->
+            <div class="drop-zone" id="composer-drop-zone">
+              <i data-lucide="plus-circle" style="width: 24px; height: 24px;"></i>
+              <p>Add questions from the left side panel to compose your exam paper, or click the button below to auto-compose.</p>
+              <div class="composer-questions" id="composer-questions-container" style="display: none;">
+                <!-- Added questions appear here -->
+              </div>
+            </div>
+
+            <button class="gen-btn btn-orange btn-full" style="height: 42px;" onclick="simulateAutoCompose()">
+              <i data-lucide="wand-2"></i>
+              <span>Auto-Compose Assessment</span>
+            </button>
+
+            <!-- Auto-composed report output -->
+            <div class="composer-report" id="composer-report-panel" style="display: none;">
+              <div class="composer-report-title" id="report-heading">Auto-composed Internal Assessment 1 — CS301</div>
+              <div class="composer-report-metrics">
+                <div>
+                  <strong>Structure Breakdown:</strong>
+                  <div style="margin-top: 4px;">• 8 MCQs (Easy 3, Medium 3, Hard 2) = 16 marks</div>
+                  <div>• 4 Short Answer (Medium 2, Hard 2) = 20 marks</div>
+                  <div>• 1 Long Answer (Hard) = 14 marks</div>
+                  <div style="margin-top: 4px; font-weight: bold;">Total: 50 marks · 2 hours</div>
+                </div>
+                <div>
+                  <strong>Outcome Mapping (COs):</strong>
+                  <div style="margin-top: 4px;">• CO1: 20% · CO2: 20%</div>
+                  <div>• CO3: 30% · CO4: 30%</div>
+                  <strong style="display: block; margin-top: 8px;">Bloom's Taxonomy:</strong>
+                  <div>• Remember: 20% · Understand: 30%</div>
+                  <div>• Apply: 30% · Analyse: 20%</div>
+                </div>
+              </div>
+              <div style="font-size: 11px; margin-top: 4px;">
+                <strong>Unit weights:</strong> Unit 1 (20%) · Unit 2 (30%) · Unit 3 (50%)
+              </div>
+              <div class="composer-report-list">
+                <div class="composer-report-item">
+                  <i data-lucide="check-circle-2" style="width: 14px; height: 14px;"></i>
+                  <span>No questions used in Section A before (safe for Section A/B)</span>
+                </div>
+                <div class="composer-report-item">
+                  <i data-lucide="check-circle-2" style="width: 14px; height: 14px;"></i>
+                  <span>Difficulty curve: Easy to Medium to Hard conforms to standards</span>
+                </div>
+                <div class="composer-report-item">
+                  <i data-lucide="check-circle-2" style="width: 14px; height: 14px;"></i>
+                  <span>AICTE outcome-based compliance: PASS</span>
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; margin-top: 8px;">
+                <button class="gen-btn btn-outline-navy" style="flex: 1;" onclick="triggerToast('✓ Assessment saved to repository')">Save Assessment</button>
+                <button class="gen-btn btn-outline-gray" style="flex: 1;" onclick="triggerToast('✓ Exporting assessment paper as PDF')">Export as PDF</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- SCREEN 4: ANALYTICS -->
+      <section id="screen-analytics" class="screen">
+        <div class="stats-row">
+          <div class="card stat-card">
+            <span class="stat-val">47</span>
+            <span class="stat-label">Content Generated This Semester</span>
+          </div>
+          <div class="card stat-card">
+            <span class="stat-val" style="color: var(--green);">94 hrs</span>
+            <span class="stat-label">Faculty Hours Saved</span>
+          </div>
+          <div class="card stat-card">
+            <span class="stat-val">284</span>
+            <span class="stat-label">Quiz Questions in Bank</span>
+          </div>
+          <div class="card stat-card">
+            <span class="stat-val">128</span>
+            <span class="stat-label">Student Downloads This Week</span>
+          </div>
+        </div>
+
+        <div class="analytics-flex-row">
+          <!-- Syllabus Heatmap -->
+          <div class="card heatmap-card">
+            <h3>Syllabus Coverage Heatmap</h3>
+            <div style="font-size: 11px; color: var(--gray-600); margin-bottom: 8px;">
+              Approved content mapped across subjects and syllabus units:
+            </div>
+            <table class="heatmap-table">
+              <thead>
+                <tr>
+                  <th>Subject</th>
+                  <th>Unit 1</th>
+                  <th>Unit 2</th>
+                  <th>Unit 3</th>
+                  <th>Unit 4</th>
+                  <th>Unit 5</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="heatmap-subject">CS301 Data Structures</td>
+                  <td class="heatmap-cell green" title="Approved content exists">✓</td>
+                  <td class="heatmap-cell green" title="Approved content exists">✓</td>
+                  <td class="heatmap-cell green" title="Approved content exists">✓</td>
+                  <td class="heatmap-cell gray" title="Not yet generated">—</td>
+                  <td class="heatmap-cell gray" title="Not yet generated">—</td>
+                </tr>
+                <tr>
+                  <td class="heatmap-subject">CS401 Algorithms</td>
+                  <td class="heatmap-cell green" title="Approved content exists">✓</td>
+                  <td class="heatmap-cell amber" title="Generated, pending HOD approval">⏳</td>
+                  <td class="heatmap-cell gray" title="Not yet generated">—</td>
+                  <td class="heatmap-cell gray" title="Not yet generated">—</td>
+                  <td class="heatmap-cell gray" title="Not yet generated">—</td>
+                </tr>
+                <tr>
+                  <td class="heatmap-subject">CS501 OS</td>
+                  <td class="heatmap-cell gray" title="Not yet generated">—</td>
+                  <td class="heatmap-cell green" title="Approved content exists">✓</td>
+                  <td class="heatmap-cell gray" title="Not yet generated">—</td>
+                  <td class="heatmap-cell gray" title="Not yet generated">—</td>
+                  <td class="heatmap-cell gray" title="Not yet generated">—</td>
+                </tr>
+                <tr>
+                  <td class="heatmap-subject">CS201 DBMS</td>
+                  <td class="heatmap-cell green" title="Approved content exists">✓</td>
+                  <td class="heatmap-cell green" title="Approved content exists">✓</td>
+                  <td class="heatmap-cell green" title="Approved content exists">✓</td>
+                  <td class="heatmap-cell gray" title="Not yet generated">—</td>
+                  <td class="heatmap-cell gray" title="Not yet generated">—</td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="display: flex; gap: 16px; margin-top: 8px; justify-content: flex-end; font-size: 11px;">
+              <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 8px; height: 8px; border-radius: 2px; background-color: var(--green-light); border: 1px solid var(--green); display: inline-block;"></span> Approved</span>
+              <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 8px; height: 8px; border-radius: 2px; background-color: var(--amber-light); border: 1px solid var(--amber); display: inline-block;"></span> Pending Approval</span>
+              <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 8px; height: 8px; border-radius: 2px; background-color: var(--gray-100); display: inline-block;"></span> Not Generated</span>
+            </div>
+          </div>
+
+          <!-- Chart.js Graph Card -->
+          <div class="card">
+            <h3>Faculty Hours Saved by Subject</h3>
+            <div style="height: 220px; position: relative;">
+              <canvas id="savingsChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="analytics-flex-row">
+          <!-- Faculty Contributions -->
+          <div class="card">
+            <h3>Faculty Contribution Roster</h3>
+            <div class="table-container" style="border: none; box-shadow: none;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Faculty Member</th>
+                    <th>Subject</th>
+                    <th>Generated</th>
+                    <th>Approved</th>
+                    <th>Pending</th>
+                    <th>Avg Approval Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Dr. Anand Kumar</strong></td>
+                    <td class="mono">CS301</td>
+                    <td>22 items</td>
+                    <td>20</td>
+                    <td><span style="color: var(--amber); font-weight: bold;">2</span></td>
+                    <td>0.8 days</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Dr. Priya Nair</strong></td>
+                    <td class="mono">CS401</td>
+                    <td>11 items</td>
+                    <td>7</td>
+                    <td><span style="color: var(--amber); font-weight: bold;">4</span></td>
+                    <td>2.1 days</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Dr. Meena Sharma</strong></td>
+                    <td class="mono">CS501</td>
+                    <td>8 items</td>
+                    <td>8</td>
+                    <td>0</td>
+                    <td>0.5 days</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Dr. Rajesh Kumar</strong></td>
+                    <td class="mono">CS201</td>
+                    <td>6 items</td>
+                    <td>3</td>
+                    <td><span style="color: var(--amber); font-weight: bold;">3</span></td>
+                    <td>3.4 days</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Cost and Time Savings Card -->
+          <div class="card value-card">
+            <h3>Foresight & Economic Value</h3>
+            <div class="savings-breakdown">
+              <div class="savings-item">
+                <span class="savings-item-label">Topic Notes (18 items × 3.0 hrs avg)</span>
+                <span class="savings-item-val">54.0 hrs</span>
+              </div>
+              <div class="savings-item">
+                <span class="savings-item-label">Quiz Banks (12 items × 1.5 hrs avg)</span>
+                <span class="savings-item-val">18.0 hrs</span>
+              </div>
+              <div class="savings-item">
+                <span class="savings-item-label">Revision Summaries (10 items × 0.5 hrs avg)</span>
+                <span class="savings-item-val">5.0 hrs</span>
+              </div>
+              <div class="savings-item">
+                <span class="savings-item-label">Student Guides (5 items × 1.0 hr avg)</span>
+                <span class="savings-item-val">5.0 hrs</span>
+              </div>
+              <div class="savings-item">
+                <span class="savings-item-label">PPT Lecture Outlines (2 items × 2.0 hrs avg)</span>
+                <span class="savings-item-val">4.0 hrs</span>
+              </div>
+            </div>
+            
+            <div class="savings-total-box">
+              <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 13px; color: var(--navy-dark); margin-bottom: 4px;">
+                <span>Total Items Saved:</span>
+                <span>47 items · 86.0 hrs</span>
+              </div>
+              <div style="font-size: 11px; color: var(--gray-600); margin-bottom: 8px;">
+                Calculated at an institutional baseline of ₹450 per faculty hour:
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--navy);">Value Saved:</span>
+                <span style="font-size: 20px; font-weight: 700; color: var(--navy);">₹38,700 <span style="font-size: 11px; font-weight: 500; color: var(--gray-600);">this sem</span></span>
+              </div>
+              <div style="border-top: 1px dashed var(--navy-light); margin-top: 8px; padding-top: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 600; color: var(--green);">
+                <span>Projected University Savings (6 Depts):</span>
+                <span>₹2.3 Lakh / Sem</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Toast Notification Center -->
+  <div class="toast-container" id="toast-center"></div>
+
+  <!-- Modal Dialog Overlay -->
+  <div class="modal-overlay" id="modal-wrapper">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h4 class="modal-title" id="modal-title-text">Modal Header</h4>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-body-content">
+        Modal Content
+      </div>
+      <div class="modal-footer" id="modal-footer-actions">
+        <button class="gen-btn btn-outline-gray" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS Logic & Core Functions -->
+  <script>
+    // State management
+    const appState = {
+      activeSubject: 'CS301',
+      activeUnit: 'Unit 3',
+      activeTopic: 'BFS Algorithm',
+      activeScreen: 'generate',
+      
+      // Seeded repository database
+      repository: [
+        { subject: 'CS301', unit: 'Unit 3', topic: 'BFS Algorithm', type: 'Notes', date: '24 May 2026', status: 'Approved', faculty: 'Dr. Anand K' },
+        { subject: 'CS301', unit: 'Unit 3', topic: 'BFS Algorithm', type: 'Quiz Bank', date: '24 May 2026', status: 'Approved', faculty: 'Dr. Anand K' },
+        { subject: 'CS301', unit: 'Unit 3', topic: 'BFS Algorithm', type: 'Summary', date: '24 May 2026', status: 'Approved', faculty: 'Dr. Anand K' },
+        { subject: 'CS301', unit: 'Unit 3', topic: 'BFS Algorithm', type: 'Student Guide', date: '24 May 2026', status: 'Approved', faculty: 'Dr. Anand K' },
+        { subject: 'CS301', unit: 'Unit 3', topic: 'BFS Algorithm', type: 'PPT Outline', date: '24 May 2026', status: 'Approved', faculty: 'Dr. Anand K' },
+        { subject: 'CS301', unit: 'Unit 2', topic: 'Binary Search Tree', type: 'Notes', date: '10 May 2026', status: 'Approved', faculty: 'Dr. Anand K' },
+        { subject: 'CS301', unit: 'Unit 2', topic: 'Binary Search Tree', type: 'Quiz Bank', date: '10 May 2026', status: 'Approved', faculty: 'Dr. Anand K' },
+        { subject: 'CS301', unit: 'Unit 1', topic: 'Linked Lists', type: 'Notes', date: '02 Apr 2026', status: 'Approved', faculty: 'Dr. Anand K' },
+        { subject: 'CS401', unit: 'Unit 1', topic: 'Dynamic Programming', type: 'Notes', date: '18 May 2026', status: 'Pending', faculty: 'Dr. Priya N' },
+        { subject: 'CS401', unit: 'Unit 1', topic: 'Dynamic Programming', type: 'Quiz Bank', date: '18 May 2026', status: 'Pending', faculty: 'Dr. Priya N' },
+        { subject: 'CS501', unit: 'Unit 2', topic: 'Process Scheduling', type: 'Summary', date: '05 May 2026', status: 'Approved', faculty: 'Dr. Meena S' },
+        { subject: 'CS201', unit: 'Unit 3', topic: 'SQL Joins', type: 'PPT Outline', date: '28 Apr 2026', status: 'Approved', faculty: 'Dr. Rajesh K' }
+      ],
+
+      // Preseeded Question Bank for Quiz Builder
+      questionBank: [
+        { id: 1, text: "Which data structure does BFS use internally?", difficulty: "Easy", type: "MCQ", co: "CO3", blooms: "Remember", options: ["Stack", "Queue", "Priority Queue", "Linked List"], answerIdx: 1, explanation: "BFS uses Queue (FIFO) to process vertices level by level." },
+        { id: 2, text: "Time complexity of BFS with V vertices and E edges?", difficulty: "Medium", type: "MCQ", co: "CO3", blooms: "Understand", options: ["O(V²)", "O(E log V)", "O(V+E)", "O(V×E)"], answerIdx: 2, explanation: "BFS visits each vertex once O(V) and each edge once O(E)." },
+        { id: 3, text: "BFS is preferred for shortest path in unweighted graphs because:", difficulty: "Medium", type: "MCQ", co: "CO4", blooms: "Apply", options: ["It uses less memory", "It explores level by level, guaranteeing minimum hops", "It is always faster than DFS", "It handles negative weights correctly"], answerIdx: 1, explanation: "Exploring level by level ensures the first time we visit a node, it is through the path of minimum edges." },
+        { id: 4, text: "Finding connections within 3 degrees in a 1-million-user social network. Most efficient approach:", difficulty: "Hard", type: "MCQ", co: "CO4", blooms: "Analyse", options: ["BFS limited to depth 3", "DFS with backtracking", "Dijkstra's algorithm", "Dynamic programming"], answerIdx: 0, explanation: "BFS will query level by level, stopping when depth reaches 3, which is highly efficient for degree expansion." },
+        { id: 5, text: "When is a vertex added to the visited array in BFS?", difficulty: "Easy", type: "MCQ", co: "CO3", blooms: "Remember", options: ["When first discovered — before enqueuing", "When dequeued for processing", "When all its neighbours are visited", "When enqueued a second time"], answerIdx: 0, explanation: "Adding to visited before enqueuing prevents duplicate entries in the queue." },
+        { id: 6, text: "Explain BFS with a suitable example. Trace execution step by step.", difficulty: "Medium", type: "Short Answer", co: "CO3", blooms: "Understand", marks: 5, answer: "BFS starts at source, marks visited, enqueues. Repeatedly dequeues, processes, enqueues unvisited neighbours. Award 2 marks for algorithm + 3 marks for correct trace with queue states." },
+        { id: 7, text: "Compare BFS and DFS. When would you prefer BFS?", difficulty: "Medium", type: "Short Answer", co: "CO4", blooms: "Understand", marks: 5, answer: "4 key comparison points + 2 BFS use cases. 1 mark per valid comparison (max 3) + 2 marks for use cases." },
+        { id: 8, text: "Implement BFS for an undirected graph as adjacency list. Trace for given graph. Draw BFS tree.", difficulty: "Hard", type: "Long Answer", co: "CO3", blooms: "Apply", marks: 10, answer: "Marking breakdown: Algorithm 4 marks · Adjacency list 2 marks · Trace 3 marks · Tree 1 mark." },
+        { id: 9, text: "Can you trace BFS for a 6-vertex graph in under 5 minutes?", difficulty: "Easy", type: "Short Answer", co: "CO3", blooms: "Remember", marks: 5, answer: "Standard 6-vertex cycle and traversal path demonstration." },
+        { id: 10, text: "Dijkstra's algorithm vs BFS for shortest paths in weighted graphs.", difficulty: "Hard", type: "Short Answer", co: "CO4", blooms: "Analyse", marks: 5, answer: "Explanation of priority queues vs FIFO queues. BFS failure modes on weighted edges." }
+      ],
+      
+      // Question Builder: Composer State
+      composerQuestions: [],
+      
+      // Tracking generated state for current session
+      generatedTypes: {
+        notes: false,
+        quiz: false,
+        summary: false,
+        guide: false,
+        ppt: false
+      },
+      savedTypes: {
+        notes: false,
+        quiz: false,
+        summary: false,
+        guide: false,
+        ppt: false
+      },
+      generationVariation: {
+        notes: 0,
+        quiz: 0,
+        summary: 0,
+        guide: 0,
+        ppt: 0
+      }
+    };
+
+    // Subject/Unit/Topic context mappings for dynamic details
+    const contextMetadata = {
+      CS301: { name: "Data Structures", dept: "CSE Department", hours: "6 hrs", co: "CO3, CO4", instructor: "Dr. Anand Kumar", sem: "Semester 3" },
+      CS401: { name: "Algorithms", dept: "CSE Department", hours: "8 hrs", co: "CO1, CO2", instructor: "Dr. Priya Nair", sem: "Semester 4" },
+      CS501: { name: "Operating Systems", dept: "IT Department", hours: "6 hrs", co: "CO2, CO5", instructor: "Dr. Meena Sharma", sem: "Semester 5" },
+      CS201: { name: "Database Systems", dept: "CSE Department", hours: "6 hrs", co: "CO1, CO3", instructor: "Dr. Rajesh Kumar", sem: "Semester 2" },
+      CS601: { name: "Computer Networks", dept: "ECE/CSE Department", hours: "8 hrs", co: "CO2, CO4", instructor: "Dr. Sandeep Verma", sem: "Semester 6" },
+      CS602: { name: "Software Engineering", dept: "CSE Department", hours: "6 hrs", co: "CO1, CO5", instructor: "Dr. Shalini Gupta", sem: "Semester 5" },
+      CS603: { name: "Artificial Intelligence", dept: "CSE Department", hours: "8 hrs", co: "CO3, CO6", instructor: "Dr. Amit Roy", sem: "Semester 6" }
+    };
+
+    const subjectSyllabus = {
+      CS301: {
+        units: {
+          'Unit 1': { name: 'Unit 1 — Linear Structures', topics: ['Linked Lists', 'Stacks', 'Queues', 'Arrays'] },
+          'Unit 2': { name: 'Unit 2 — Binary & BST Trees', topics: ['Binary Trees', 'BST Operations', 'AVL Trees', 'B-Trees'] },
+          'Unit 3': { name: 'Unit 3 — Graph Algorithms', topics: ['BFS Algorithm', 'DFS Algorithm', 'Dijkstra', 'MST (Minimum Spanning Tree)', 'Topological Sort'] },
+          'Unit 4': { name: 'Unit 4 — Hashing & Heaps', topics: ['Hash Tables', 'Collision Resolution', 'Binary Heaps', 'Heap Sort'] },
+          'Unit 5': { name: 'Unit 5 — Search & Sort Trees', topics: ['Red-Black Trees', 'Splay Trees', 'Tries', 'Suffix Trees'] }
+        }
+      },
+      CS401: {
+        units: {
+          'Unit 1': { name: 'Unit 1 — Divide and Conquer', topics: ['Merge Sort', 'Quick Sort', 'Binary Search', 'Strassen Matrix'] },
+          'Unit 2': { name: 'Unit 2 — Greedy Method', topics: ['Fractional Knapsack', 'Huffman Coding', 'Job Sequencing', 'Prim Algorithm'] },
+          'Unit 3': { name: 'Unit 3 — Dynamic Programming', topics: ['0/1 Knapsack', 'LCS', 'Matrix Chain Multiplication', 'Floyd-Warshall'] },
+          'Unit 4': { name: 'Unit 4 — Backtracking', topics: ['N-Queens Problem', 'Graph Coloring', 'TSP (Traveling Salesperson)', 'Hamiltonian Cycles'] },
+          'Unit 5': { name: 'Unit 5 — NP-Completeness', topics: ['P vs NP Classes', 'NP-Hard Problems', 'Vertex Cover', 'Clique Problem'] }
+        }
+      },
+      CS501: {
+        units: {
+          'Unit 1': { name: 'Unit 1 — Processes & Threads', topics: ['Process Concept', 'Thread Lifecycle', 'System Calls', 'Context Switching'] },
+          'Unit 2': { name: 'Unit 2 — CPU Scheduling', topics: ['FCFS Scheduling', 'SJF Scheduling', 'Round Robin', 'Priority Scheduling'] },
+          'Unit 3': { name: 'Unit 3 — Synchronization', topics: ['Mutex & Semaphores', 'Producer-Consumer', 'Reader-Writer', 'Dining Philosophers'] },
+          'Unit 4': { name: 'Unit 4 — Memory Management', topics: ['Paging', 'Segmentation', 'Virtual Memory', 'Page Replacement (LRU)'] },
+          'Unit 5': { name: 'Unit 5 — File & Disk Systems', topics: ['File Allocation', 'Disk Scheduling (SSTF)', 'RAID Levels', 'Directory Structures'] }
+        }
+      },
+      CS201: {
+        units: {
+          'Unit 1': { name: 'Unit 1 — ER & Relational Model', topics: ['Entity-Relationship', 'Schema Design', 'Relational Algebra', 'Integrity Constraints'] },
+          'Unit 2': { name: 'Unit 2 — SQL Programming', topics: ['SQL Joins', 'Subqueries', 'Group By & Aggregations', 'Views & Indexes'] },
+          'Unit 3': { name: 'Unit 3 — Normalization', topics: ['1NF & 2NF', '3NF & BCNF', '4NF & 5NF', 'Functional Dependencies'] },
+          'Unit 4': { name: 'Unit 4 — Transactions & Concurrency', topics: ['ACID Properties', 'Two-Phase Locking', 'Serializability', 'Deadlocks'] },
+          'Unit 5': { name: 'Unit 5 — Storage & Indexing', topics: ['B+ Trees', 'Hashing Indices', 'RAID Database Storage', 'Query Execution Plans'] }
+        }
+      },
+      CS601: {
+        units: {
+          'Unit 1': { name: 'Unit 1 — Physical & Link Layer', topics: ['OSI Model vs TCP/IP', 'Ethernet Protocols', 'Error Detection (CRC)', 'Flow Control'] },
+          'Unit 2': { name: 'Unit 2 — Network Layer', topics: ['IPv4 & IPv6', 'Subnetting', 'Routing Algorithms (OSPF)', 'Distance Vector Routing'] },
+          'Unit 3': { name: 'Unit 3 — Transport Layer', topics: ['TCP 3-Way Handshake', 'UDP Protocol', 'Congestion Control (AIMD)', 'Flow Control (Sliding Window)'] },
+          'Unit 4': { name: 'Unit 4 — Application Layer', topics: ['DNS Resolution', 'HTTP/HTTPS Protocols', 'SMTP & Email', 'DHCP Operations'] },
+          'Unit 5': { name: 'Unit 5 — Network Security', topics: ['Symmetric Encryption', 'RSA Algorithm', 'Firewalls & IDS', 'TLS/SSL Handshake'] }
+        }
+      },
+      CS602: {
+        units: {
+          'Unit 1': { name: 'Unit 1 — SDLC Models', topics: ['Waterfall Model', 'Agile Scrum', 'Spiral Model', 'Incremental Lifecycle'] },
+          'Unit 2': { name: 'Unit 2 — Requirements Analysis', topics: ['SRS Document', 'Use Case Diagrams', 'Feasibility Study', 'Functional Requirements'] },
+          'Unit 3': { name: 'Unit 3 — System Design', topics: ['UML Class Diagrams', 'Sequence Diagrams', 'Design Patterns', 'Microservices Architecture'] },
+          'Unit 4': { name: 'Unit 4 — Software Testing', topics: ['White-Box Testing', 'Black-Box Testing', 'Unit vs Integration', 'Regression Testing'] },
+          'Unit 5': { name: 'Unit 5 — DevOps & Maintenance', topics: ['CI/CD Pipelines', 'Git Workflows', 'Software Refactoring', 'Configuration Management'] }
+        }
+      },
+      CS603: {
+        units: {
+          'Unit 1': { name: 'Unit 1 — Search & Agents', topics: ['A* Search', 'Minimax Algorithm', 'Alpha-Beta Pruning', 'Heuristic Search'] },
+          'Unit 2': { name: 'Unit 2 — Knowledge & Logic', topics: ['Propositional Logic', 'First-Order Logic', 'Resolution Proofs', 'Inference Rules'] },
+          'Unit 3': { name: 'Unit 3 — Machine Learning', topics: ['Linear Regression', 'Decision Trees', 'Support Vector Machines', 'K-Means Clustering'] },
+          'Unit 4': { name: 'Unit 4 — Neural Networks', topics: ['Perceptrons', 'Backpropagation', 'Activation Functions', 'Deep Learning Basics'] },
+          'Unit 5': { name: 'Unit 5 — NLP & Computer Vision', topics: ['Tokenization & NLP', 'CNN Architecture', 'Word Embeddings', 'Transformer Models'] }
+        }
+      }
+    };
+
+    function rebuildUnitSelect(subjectCode) {
+      const unitSelect = document.getElementById('unit-select');
+      const currentSelectedUnit = unitSelect.value;
+      unitSelect.innerHTML = '';
+      
+      const syllabus = subjectSyllabus[subjectCode] || subjectSyllabus['CS301'];
+      Object.keys(syllabus.units).forEach(unitKey => {
+        const option = document.createElement('option');
+        option.value = unitKey;
+        option.textContent = syllabus.units[unitKey].name;
+        if (unitKey === currentSelectedUnit) {
+          option.selected = true;
+        }
+        unitSelect.appendChild(option);
+      });
+      if (!unitSelect.value) {
+        unitSelect.selectedIndex = 0;
+      }
+    }
+
+    function rebuildTopicSelect(subjectCode, unitVal) {
+      const topicSelect = document.getElementById('topic-select');
+      topicSelect.innerHTML = '';
+      
+      const syllabus = subjectSyllabus[subjectCode] || subjectSyllabus['CS301'];
+      const topics = syllabus.units[unitVal]?.topics || [];
+      topics.forEach((topic, idx) => {
+        const option = document.createElement('option');
+        option.value = topic;
+        option.textContent = topic;
+        if (idx === 0) option.selected = true;
+        topicSelect.appendChild(option);
+      });
+    }
+
+    window.onload = function() {
+      // Rebuild units and topics dropdowns for default subject 'CS301'
+      rebuildUnitSelect('CS301');
+      document.getElementById('unit-select').value = 'Unit 3';
+      rebuildTopicSelect('CS301', 'Unit 3');
+      document.getElementById('topic-select').value = 'BFS Algorithm';
+
+      // Create icons
+      lucide.createIcons();
+      
+      // Build repo table
+      renderRepositoryTable();
+      
+      // Build Question Bank in Quiz Builder
+      renderQuestionBank();
+      
+      // Render the analytics chart
+      renderAnalyticsChart();
+    };
+
+    // Custom Toast Notification Engine
+    function triggerToast(message) {
+      const container = document.getElementById('toast-center');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `<i data-lucide="info" style="width: 14px; height: 14px;"></i> <span>${message}</span>`;
+      container.appendChild(toast);
+      lucide.createIcons();
+      
+      // Fade out and remove
+      setTimeout(() => {
+        toast.classList.add('fade-out');
+        toast.addEventListener('animationend', () => {
+          toast.remove();
+        });
+      }, 3500);
+    }
+
+    // Screen Router
+    function switchScreen(screenName, navElement) {
+      // Update nav active styles
+      const navItems = document.querySelectorAll('.nav-item');
+      navItems.forEach(item => item.classList.remove('active'));
+      navElement.classList.add('active');
+
+      // Update screen visibility
+      const screens = document.querySelectorAll('.screen');
+      screens.forEach(screen => screen.classList.remove('active'));
+      
+      const targetScreen = document.getElementById(`screen-${screenName}`);
+      targetScreen.classList.add('active');
+      
+      appState.activeScreen = screenName;
+      
+      // Update page title
+      const titleEl = document.getElementById('page-title');
+      if (screenName === 'generate') titleEl.textContent = 'Academic Content Intelligence';
+      if (screenName === 'repository') titleEl.textContent = 'Curriculum Repository';
+      if (screenName === 'quiz-builder') titleEl.textContent = 'Quiz & Assessment Builder';
+      if (screenName === 'analytics') titleEl.textContent = 'Coverage & Impact Analytics';
+
+      // Re-create icons in case elements were newly rendered
+      lucide.createIcons();
+    }
+
+    // Dropdown change handlers
+    function onContextDropdownChange() {
+      const subjectCode = document.getElementById('subject-select').value;
+      
+      // If subject changed, rebuild units select list
+      if (appState.activeSubject !== subjectCode) {
+        appState.activeSubject = subjectCode;
+        rebuildUnitSelect(subjectCode);
+      }
+      
+      const unitVal = document.getElementById('unit-select').value;
+      appState.activeUnit = unitVal;
+      
+      // Rebuild topics select list based on subject & unit
+      rebuildTopicSelect(subjectCode, unitVal);
+      
+      const topicVal = document.getElementById('topic-select').value;
+      appState.activeTopic = topicVal || '';
+
+      updateContextUI();
+      triggerToast(`Context updated — ready to generate for ${appState.activeTopic}`);
+    }
+
+    function onTopicDropdownChange() {
+      const topicVal = document.getElementById('topic-select').value;
+      appState.activeTopic = topicVal;
+      updateContextUI();
+      triggerToast(`Context updated — ready to generate for ${appState.activeTopic}`);
+    }
+
+    // Update Layout and UI values based on active state variables
+    function updateContextUI() {
+      const subMeta = contextMetadata[appState.activeSubject] || { name: "", dept: "", hours: "6 hrs", co: "CO3, CO4", instructor: "", sem: "" };
+      
+      // Update Sidebar context panel
+      document.getElementById('context-panel-subject').textContent = `${subMeta.name} · ${appState.activeSubject}`;
+      document.getElementById('context-panel-instructor').textContent = `${subMeta.instructor} · ${subMeta.sem}`;
+      document.getElementById('context-panel-class').textContent = `${subMeta.dept} · 42 students`;
+      
+      // Update Generate Screen Context Bar
+      document.getElementById('bar-main-title').textContent = `Generating for: ${appState.activeTopic} · ${appState.activeUnit} · ${appState.activeSubject} ${subMeta.name}`;
+      document.getElementById('bar-faculty').textContent = `Faculty: ${subMeta.instructor}`;
+      document.getElementById('bar-class').textContent = `Section: CSE-3A · 42 students`;
+      document.getElementById('bar-hours').textContent = `AICTE contact hours: ${subMeta.hours}`;
+      document.getElementById('bar-co').textContent = `CO mapped: ${subMeta.co}`;
+      document.getElementById('bar-assessment').textContent = `Internal Assessment: 18 days away`;
+      document.getElementById('bar-blooms').textContent = `Bloom's level: Understand / Apply`;
+
+      // Reset generated state if context shifts
+      appState.generatedTypes = { notes: false, quiz: false, summary: false, guide: false, ppt: false };
+      appState.savedTypes = { notes: false, quiz: false, summary: false, guide: false, ppt: false };
+      
+      // Clear output panel
+      const container = document.getElementById('output-panel-container');
+      container.innerHTML = `
+        <div class="output-empty" id="output-empty-state">
+          <i data-lucide="sparkles"></i>
+          <h3>No Content Generated Yet</h3>
+          <p>Select a content type above or click "Generate All" to begin compiling AI-driven syllabus materials.</p>
+        </div>
+      `;
+      lucide.createIcons();
+    }
+
+    // Simulated content generation steps animation
+    function startGeneration(type) {
+      // Increment the variation for the type being generated
+      if (type === 'all') {
+        appState.generationVariation.notes = (appState.generationVariation.notes + 1) % 3;
+        appState.generationVariation.quiz = (appState.generationVariation.quiz + 1) % 3;
+        appState.generationVariation.summary = (appState.generationVariation.summary + 1) % 3;
+        appState.generationVariation.guide = (appState.generationVariation.guide + 1) % 3;
+        appState.generationVariation.ppt = (appState.generationVariation.ppt + 1) % 3;
+      } else {
+        appState.generationVariation[type] = (appState.generationVariation[type] + 1) % 3;
+      }
+      
+      const container = document.getElementById('output-panel-container');
+      
+      // Clear previous empty states or stacked layouts during load
+      container.innerHTML = `
+        <div class="generation-loader" id="gen-loader">
+          <div class="loader-title">
+            <div class="spinner"></div>
+            <span>Academic Content AI is compiling resources...</span>
+          </div>
+          <div class="loader-steps">
+            <div class="loader-step pending" id="step-1"><span class="step-icon">⟳</span> Loading syllabus structure for ${appState.activeSubject} ${appState.activeUnit}</div>
+            <div class="loader-step pending" id="step-2"><span class="step-icon">⟳</span> Reading outcome mapping for active Course Outcomes</div>
+            <div class="loader-step pending" id="step-3"><span class="step-icon">⟳</span> Applying AICTE depth limits to materials</div>
+            <div class="loader-step pending" id="step-4"><span class="step-icon">⟳</span> Checking assessment schedule timelines</div>
+            <div class="loader-step pending" id="step-5"><span class="step-icon">⟳</span> Generating academic content at Bloom's levels...</div>
+          </div>
+        </div>
+      `;
+      
+      // Run visual timeline steps
+      const steps = [
+        { id: 'step-1', text: `✓ Loaded syllabus structure for ${appState.activeSubject} ${appState.activeUnit}` },
+        { id: 'step-2', text: `✓ Verified active Course Outcomes mapping` },
+        { id: 'step-3', text: `✓ Calibrated contact hour depths` },
+        { id: 'step-4', text: `✓ Scanned internal assessment timeline (18 days out)` },
+        { id: 'step-5', text: `✓ Generated syllabus materials at Understand/Apply Bloom's level` }
+      ];
+      
+      steps.forEach((step, index) => {
+        setTimeout(() => {
+          const el = document.getElementById(step.id);
+          if (el) {
+            el.className = 'loader-step success';
+            el.innerHTML = `<span class="step-icon">✓</span> ${step.text}`;
+          }
+        }, 300 * (index + 1));
+      });
+
+      // Complete generation process after loading threshold
+      setTimeout(() => {
+        renderGeneratedOutput(type);
+      }, 1600);
+    }
+
+    // Helper dynamic HTML content generators for topics and variations
+    function getTopicNotesHTML(subject, unit, topic, variation) {
+      const subMeta = contextMetadata[subject] || { name: "Subject", co: "CO1, CO2" };
+      const coList = subMeta.co;
+      
+      if (variation === 0) { // Theory & Concept Focus
+        return `
+          <h3>TOPIC NOTES — ${topic} (Theory Focus)</h3>
+          <p><strong>Subject:</strong> ${subject} ${subMeta.name} · <strong>Unit:</strong> ${unit}</p>
+          <p><strong>Mapped Outcomes:</strong> ${coList} | <strong>Depth:</strong> Understand (Bloom's L2)</p>
+          
+          <h3>1. CONCEPT OVERVIEW</h3>
+          <p>The study of <strong>${topic}</strong> is a core component of the ${subMeta.name} syllabus. At a high level, it provides the fundamental models and theoretical constructs required to solve complex problems in this domain.</p>
+          <p><strong>Conceptual Analogy:</strong> Think of ${topic} like a well-organized library indexing system: it ensures that information is retrieved systematically and efficiently, preventing chaos and redundant searches.</p>
+          
+          <h3>2. KEY DEFINITIONS</h3>
+          <div class="highlight-box">
+            <p><strong>${topic}:</strong> The specific method or architectural framework designed to handle active operations within this module.</p>
+            <p><strong>Context Node:</strong> The individual processing unit containing state variables and relational linkages.</p>
+            <p><strong>Visited State:</strong> A boolean or numerical value tracking whether a specific state has been evaluated to avoid infinite loops.</p>
+          </div>
+
+          <h3>3. PROCESS FLOW</h3>
+          <p><strong>Step 1:</strong> Initialize the primary boundary conditions and setup initial state parameters.</p>
+          <p><strong>Step 2:</strong> While active nodes exist in the boundary frontiers:</p>
+          <p style="padding-left: 16px;">a. Select the next candidate based on priority rules.</p>
+          <p style="padding-left: 16px;">b. Evaluate constraints and update state variables of neighboring elements.</p>
+          <p><strong>Step 3:</strong> Output the final computed path, relation, or value.</p>
+
+          <h3>4. WORKED EXAMPLE</h3>
+          <p>Consider a sample problem representing ${topic} under standard classroom constraints:</p>
+          <p style="font-family: var(--mono); background-color: var(--gray-50); padding: 8px 12px; border-radius: var(--radius);">
+            Input Setup: [Start State S0] → transitions: S0 to S1 (weight 2), S0 to S2 (weight 4)<br>
+            Iteration 1: Process S0 → state frontier updated to [S1, S2]<br>
+            Iteration 2: Process S1 → state frontier updated to [S2, S3]<br>
+            Final Trace Order: S0 → S1 → S2 → S3
+          </p>
+          <p><strong>Result:</strong> State convergence successfully reached in 4 iterations.</p>
+
+          <h3>5. COMPLEXITY & CHARACTERISTICS</h3>
+          <p><strong>Time Complexity:</strong> O(N + M) under optimal linear indexing. <strong>Space Complexity:</strong> O(N) auxiliary space representing the recursion stack or storage queue.</p>
+
+          <h3>6. COMMON MISCONCEPTIONS</h3>
+          <div class="warning-box">
+            <strong>⚠ Standard Pitfall:</strong> Neglecting bound checks during state expansion leads to stack overflow or memory leaks.
+          </div>
+
+          <h3>7. REAL-WORLD APPLICATIONS</h3>
+          <p>• Industrial automation — tracking logical sequences</p>
+          <p>• Distributed database coordination and protocol validation</p>
+
+          <h3>8. CONNECTS TO</h3>
+          <p>← Previous: Foundation Concepts<br>
+          → Next: Advanced Optimization Methods</p>
+        `;
+      } else if (variation === 1) { // Applied & Code Focus
+        return `
+          <h3>TOPIC NOTES — ${topic} (Applied & Code Focus)</h3>
+          <p><strong>Subject:</strong> ${subject} ${subMeta.name} · <strong>Unit:</strong> ${unit}</p>
+          <p><strong>Mapped Outcomes:</strong> ${coList} | <strong>Depth:</strong> Apply & Implement (Bloom's L3)</p>
+          
+          <h3>1. CODING / PSEUDOCODE IMPLEMENTATION</h3>
+          <p>Here is a complete, clean implementation of the <strong>${topic}</strong> logic written in an expressive programming syntax:</p>
+          <pre style="font-family: var(--mono); background-color: var(--gray-50); padding: 12px; border-radius: var(--radius); overflow-x: auto; font-size: 11px; color: var(--navy-dark); border-left: 4px solid var(--orange);">
+// Implementation of ${topic}
+function run${topic.replace(/[^a-zA-Z0-9]/g, '')}(inputData) {
+    if (!inputData || inputData.length === 0) return null;
+    
+    let visited = new Set();
+    let frontier = [inputData[0]]; // Initialize with start node
+    let results = [];
+    
+    while (frontier.length > 0) {
+        let current = frontier.shift(); // Fetch next node
+        if (!visited.has(current.id)) {
+            visited.add(current.id);
+            results.push(current.value);
+            
+            // Expand neighbors
+            for (let neighbor of current.neighbors) {
+                if (!visited.has(neighbor.id)) {
+                    frontier.push(neighbor);
+                }
+            }
+        }
+    }
+    return results;
+}
+          </pre>
+
+          <h3>2. LINE-BY-LINE EXECUTION ANALYSIS</h3>
+          <p>• <strong>Line 3:</strong> Corner case protection checking for empty input vectors.</p>
+          <p>• <strong>Line 5-6:</strong> Initializing tracker collections ensuring O(1) membership lookups.</p>
+          <p>• <strong>Line 9:</strong> Primary control loop executing until no active tasks remain.</p>
+
+          <h3>3. MEMORY TRACE DURING EXECUTION</h3>
+          <table class="data-table" style="font-size: 11px; margin-top: 8px;">
+            <thead>
+              <tr>
+                <th>Step</th>
+                <th>Current Node</th>
+                <th>Frontier State</th>
+                <th>Visited Set</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>0</td>
+                <td>null</td>
+                <td>[Node A]</td>
+                <td>{}</td>
+              </tr>
+              <tr>
+                <td>1</td>
+                <td>Node A</td>
+                <td>[Node B, Node C]</td>
+                <td>{A}</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>Node B</td>
+                <td>[Node C, Node D]</td>
+                <td>{A, B}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>4. PRACTICAL SYSTEM APPLICATIONS</h3>
+          <p>In modern systems, this pattern forms the foundation of garbage collection algorithms (tracing heap allocations) and indexing engines in databases.</p>
+        `;
+      } else { // Exam & Assessment Focus
+        return `
+          <h3>TOPIC NOTES — ${topic} (Exam Prep Focus)</h3>
+          <p><strong>Subject:</strong> ${subject} ${subMeta.name} · <strong>Unit:</strong> ${unit}</p>
+          <p><strong>Mapped Outcomes:</strong> ${coList} | <strong>Depth:</strong> Exam & Grade Optimization</p>
+          
+          <h3>1. HIGH-YIELD CHEAT SHEET</h3>
+          <ul class="summary-points-list" style="font-size: 12px;">
+            <li><strong>Core Complexity:</strong> Time O(V+E) and Space O(V) are non-negotiable answers on exam papers.</li>
+            <li><strong>Crucial Graph Rule:</strong> Always specify if the graph is directed or undirected.</li>
+            <li><strong>Bloom's Hint:</strong> Be ready to trace queue states explicitly; drawing the trees scores 40% of the total marks.</li>
+          </ul>
+
+          <h3>2. SAMPLE EXAM QUESTION (10 Marks)</h3>
+          <div class="warning-box" style="background-color: var(--navy-light); color: var(--navy-dark); border-color: var(--navy);">
+            <strong>Question:</strong> Formulate and trace the ${topic} execution sequence for a 6-vertex cyclic graph starting from the lowest degree vertex. Show the detailed state changes.
+          </div>
+
+          <h3>3. DETAILED MARKING SCHEME & RUBRIC</h3>
+          <table class="data-table" style="font-size: 11px; margin-top: 8px;">
+            <thead>
+              <tr>
+                <th>Component</th>
+                <th>Marks Mapped</th>
+                <th>Target Criteria</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Algorithm Formulation</td>
+                <td>3 Marks</td>
+                <td>Correct variable declarations and loop bounds.</td>
+              </tr>
+              <tr>
+                <td>Dry-Run Trace Table</td>
+                <td>4 Marks</td>
+                <td>Showing visited and queue states at every step.</td>
+              </tr>
+              <tr>
+                <td>Complexity Proof</td>
+                <td>3 Marks</td>
+                <td>Writing out V and E equations with text descriptions.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>4. TYPICAL STUDENT PITFALLS (Where Marks are Lost)</h3>
+          <p>• ❌ Forgetting to mark nodes as visited *before* enqueuing, resulting in double-processing logs.</p>
+          <p>• ❌ Explaining the algorithm theoretically without writing the mathematical complexity notations.</p>
+        `;
+      }
+    }
+
+    function getQuizBankHTML(subject, unit, topic, variation) {
+      const subMeta = contextMetadata[subject] || { co: "CO3" };
+      if (variation === 0) { // Theory Focus
+        return `
+          <div class="composer-meta-summary" style="margin-bottom: 12px; color: var(--navy);">
+            <span>5 MCQs · 3 Short Answer · Theory & Concepts Focus</span>
+          </div>
+          
+          <div class="tab-container">
+            <button class="tab-btn active" onclick="switchOutputTab(this, 'mcq-content')">MCQ</button>
+            <button class="tab-btn" onclick="switchOutputTab(this, 'sa-content')">Short Answer</button>
+          </div>
+
+          <div class="tab-content active" id="mcq-content">
+            <div class="mcq-list">
+              <div class="mcq-question">
+                <div class="mcq-q-text">Q1 [Easy · ${subMeta.co} · Bloom's: Remember] What is the primary abstract objective of ${topic}?</div>
+                <div class="mcq-options">
+                  <div class="mcq-option correct"><span class="mcq-bullet"></span> Systematically explore/evaluate all states or nodes</div>
+                  <div class="mcq-option"><span class="mcq-bullet"></span> Compress the memory footprint to zero</div>
+                  <div class="mcq-option"><span class="mcq-bullet"></span> Delete orphan records automatically</div>
+                  <div class="mcq-option"><span class="mcq-bullet"></span> Establish a hardware firewall connection</div>
+                </div>
+                <div class="mcq-explanation"><strong>Explanation:</strong> ${topic} is designed for structured traversal and discovery of elements.</div>
+              </div>
+              <div class="mcq-question">
+                <div class="mcq-q-text">Q2 [Medium · ${subMeta.co} · Bloom's: Understand] Which state collection prevents infinite loops in ${topic}?</div>
+                <div class="mcq-options">
+                  <div class="mcq-option"><span class="mcq-bullet"></span> The recursion stack</div>
+                  <div class="mcq-option correct"><span class="mcq-bullet"></span> The visited list/array</div>
+                  <div class="mcq-option"><span class="mcq-bullet"></span> The temporary buffer register</div>
+                  <div class="mcq-option"><span class="mcq-bullet"></span> The system garbage collector</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="sa-content">
+            <div class="answer-list">
+              <div class="answer-block">
+                <div class="answer-q">Q1 [5 marks] Explain the theoretical difference between ${topic} and its linear alternatives.</div>
+                <div class="answer-model">
+                  <strong>Model Answer:</strong> Detail the trade-offs in search direction (breadth vs depth) and buffer space requirements.
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (variation === 1) { // Practical/Code Focus
+        return `
+          <div class="composer-meta-summary" style="margin-bottom: 12px; color: var(--navy);">
+            <span>5 MCQs · 3 Short Answer · Applied Code & Dry-runs Focus</span>
+          </div>
+          
+          <div class="tab-container">
+            <button class="tab-btn active" onclick="switchOutputTab(this, 'mcq-content')">MCQ</button>
+            <button class="tab-btn" onclick="switchOutputTab(this, 'sa-content')">Short Answer</button>
+          </div>
+
+          <div class="tab-content active" id="mcq-content">
+            <div class="mcq-list">
+              <div class="mcq-question">
+                <div class="mcq-q-text">Q1 [Medium] Given an empty input array to the ${topic} function, what does the implementation return?</div>
+                <div class="mcq-options">
+                  <div class="mcq-option"><span class="mcq-bullet"></span> Throw an error</div>
+                  <div class="mcq-option correct"><span class="mcq-bullet"></span> null / empty array</div>
+                  <div class="mcq-option"><span class="mcq-bullet"></span> Infinite loop</div>
+                  <div class="mcq-option"><span class="mcq-bullet"></span> Uncaught exception</div>
+                </div>
+              </div>
+              <div class="mcq-question">
+                <div class="mcq-q-text">Q2 [Hard] What is the space complexity overhead if we implement ${topic} recursively?</div>
+                <div class="mcq-options">
+                  <div class="mcq-option"><span class="mcq-bullet"></span> O(1) constant</div>
+                  <div class="mcq-option correct"><span class="mcq-bullet"></span> O(N) due to call stack frames</div>
+                  <div class="mcq-option"><span class="mcq-bullet"></span> O(N^2) exponential</div>
+                  <div class="mcq-option"><span class="mcq-bullet"></span> Undefined</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="sa-content">
+            <div class="answer-list">
+              <div class="answer-block">
+                <div class="answer-q">Q1 [5 marks] Write the boundary conditions check for a robust ${topic} function.</div>
+                <div class="answer-model">
+                  <strong>Model Answer:</strong> Checking for null, empty arrays, and single element loops.
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else { // Exam Prep Focus
+        return `
+          <div class="composer-meta-summary" style="margin-bottom: 12px; color: var(--navy);">
+            <span>5 MCQs · 3 Short Answer · Past Exam Papers & Grading Focus</span>
+          </div>
+          
+          <div class="tab-container">
+            <button class="tab-btn active" onclick="switchOutputTab(this, 'mcq-content')">MCQ</button>
+            <button class="tab-btn" onclick="switchOutputTab(this, 'sa-content')">Short Answer</button>
+          </div>
+
+          <div class="tab-content active" id="mcq-content">
+            <div class="mcq-list">
+              <div class="mcq-question">
+                <div class="mcq-q-text">Q1 [GATE Question] Let G be a connected graph. Traversal of G using ${topic} results in:</div>
+                <div class="mcq-options">
+                  <div class="mcq-option correct"><span class="mcq-bullet"></span> A spanning tree of G</div>
+                  <div class="mcq-option"><span class="mcq-bullet"></span> A Hamiltonian cycle in G</div>
+                  <div class="mcq-option"><span class="mcq-bullet"></span> A bipartite subgraph</div>
+                  <div class="mcq-option"><span class="mcq-bullet"></span> A Eulerian circuit</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="sa-content">
+            <div class="answer-list">
+              <div class="answer-block">
+                <div class="answer-q">Q1 [10 marks] Derive the time complexity equation for ${topic} and show where students usually make calculation mistakes.</div>
+                <div class="answer-model">
+                  <strong>Model Answer:</strong> Total visits is bounded by O(V) and edge expansions by O(E), totaling O(V+E). Point out that forgetting E bounds loses 4 marks.
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function getSummaryHTML(subject, unit, topic, variation) {
+      const subMeta = contextMetadata[subject] || { name: "Subject", co: "CO3" };
+      let variationTitle = variation === 0 ? "Conceptual Revision" : variation === 1 ? "Code & Reference Sheet" : "Last-Minute Exam Review";
+      
+      return `
+        <div class="summary-revision-card">
+          <div class="summary-rev-header">
+            <span style="font-weight: 700;">TOPIC SUMMARY (${variationTitle})</span>
+            <span class="mono" style="font-size: 11px;">${subject} · ${unit} · Quick Card</span>
+          </div>
+          <div class="summary-rev-body">
+            <div>
+              <div class="summary-section-title">FOCUS OBJECTIVE</div>
+              <p style="font-size: 12px; color: var(--gray-600);">
+                Quick breakdown of <strong>${topic}</strong> optimized for ${variationTitle.toLowerCase()} under AICTE guidelines.
+              </p>
+            </div>
+            
+            <div>
+              <div class="summary-section-title">KEY CRITERIA</div>
+              <ul class="summary-points-list" style="font-size: 12px; color: var(--gray-600);">
+                ${variation === 0 ? `
+                  <li>Focuses on theoretical foundations and relational properties.</li>
+                  <li>Essential to understand basic complexity variables.</li>
+                  <li>Analogies: indexed catalog searches.</li>
+                ` : variation === 1 ? `
+                  <li>Syntax parameters and edge check conditions.</li>
+                  <li>Tracking internal variable states during dry runs.</li>
+                  <li>Efficiency tips: use standard libraries when possible.</li>
+                ` : `
+                  <li>Past papers indicate 85% probability of a 10-mark trace question.</li>
+                  <li>Always write complexity bounds explicitly.</li>
+                  <li>Follow the exact dry-run format to secure full credits.</li>
+                `}
+              </ul>
+            </div>
+
+            <div style="background-color: var(--orange-light); color: var(--orange-dark); padding: 8px; border-radius: var(--radius); text-align: center; font-weight: 700; font-size: 11px;">
+              KEY REMINDER: ${topic} represents a structured path check. Stay focused on boundary conditions.
+            </div>
+            
+            <div class="summary-highlight-tag">
+              <span>${subMeta.co}</span> · <span>AICTE: Understand/Apply</span> · <span>8 contact hrs</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function getStudentGuideHTML(subject, unit, topic, variation) {
+      const subMeta = contextMetadata[subject] || { name: "Subject" };
+      let variationTitle = variation === 0 ? "Conceptual Self-Study" : variation === 1 ? "Hands-on Practice & Lab" : "Grade Optimization Guide";
+
+      return `
+        <h3>STUDENT TOPIC GUIDE — ${topic} (${variationTitle})</h3>
+        <p class="mono" style="font-size: 11px;">${subject} ${subMeta.name} · ${unit}</p>
+        
+        <h3>WHAT IS THIS FOCUS ABOUT?</h3>
+        <p>This study guide focuses on the <strong>${variationTitle}</strong> aspects of <strong>${topic}</strong>. It aligns directly with the target Course Outcomes for this semester.</p>
+        
+        <h3>LEARNING MILESTONES</h3>
+        <div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px;">
+          <div>✓ Step 1: Grasp core definitions and mathematical representations.</div>
+          <div>✓ Step 2: Implement or trace sample data inputs manually.</div>
+          <div>✓ Step 3: Complete self-check exercises without external help.</div>
+        </div>
+
+        <h3>SELF-CHECK EXERCISE</h3>
+        <p>1. Can you explain the core mechanism of ${topic} to a peer in 2 minutes?</p>
+        <p>2. What is the execution behavior when boundary conditions are violated?</p>
+        <p style="font-weight: 600; color: var(--green);">Answer these confidently to verify your progress.</p>
+      `;
+    }
+
+    function getPPTOutlineHTML(subject, unit, topic, variation) {
+      const subMeta = contextMetadata[subject] || { name: "Subject", instructor: "Faculty" };
+      let variationTitle = variation === 0 ? "Conceptual Lecture" : variation === 1 ? "Code & Lab Walkthrough" : "Exam Prep Session";
+
+      return `
+        <h3>PRESENTATION OUTLINE — ${topic} (${variationTitle})</h3>
+        <p class="mono" style="font-size: 11px; margin-bottom: 16px;">${subject} · ${subMeta.instructor} · 42 students</p>
+        
+        <div class="ppt-slides">
+          <div class="ppt-slide-card">
+            <div class="ppt-slide-num">1</div>
+            <div class="ppt-slide-content">
+              <div class="ppt-slide-title">Slide Title: Introduction & Session Goals <span class="ppt-slide-time">3 min</span></div>
+              <div class="ppt-slide-details">Session agenda and outcomes mapped to ${subMeta.name} syllabus. Focus style: ${variationTitle}.</div>
+            </div>
+          </div>
+          
+          <div class="ppt-slide-card">
+            <div class="ppt-slide-num">2</div>
+            <div class="ppt-slide-content">
+              <div class="ppt-slide-title">Slide Title: Core Discussion Point <span class="ppt-slide-time">5 min</span></div>
+              <div class="ppt-slide-details">${variation === 0 ? 'Theoretical derivations and core properties.' : variation === 1 ? 'Detailed code walkthrough line-by-line.' : 'Exam question patterns and rubrics.'}</div>
+            </div>
+          </div>
+
+          <div class="ppt-slide-card">
+            <div class="ppt-slide-num">3</div>
+            <div class="ppt-slide-content">
+              <div class="ppt-slide-title">Slide Title: Live Q&A and Recap <span class="ppt-slide-time">4 min</span></div>
+              <div class="ppt-slide-details">Wrap up, homework assignment, and next week preparation guide.</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Render Generated Content Bodies
+    function renderGeneratedOutput(type) {
+      const container = document.getElementById('output-panel-container');
+      container.innerHTML = ''; // Clear loader
+      
+      const timestamp = new Date().toLocaleString();
+      const topicName = appState.activeTopic;
+      const subMeta = contextMetadata[appState.activeSubject] || { co: "CO3, CO4" };
+
+      // Helper function to build single output blocks
+      function createBlockHTML(blockType, headerTitle, bodyHTML, stateKey) {
+        const isSaved = appState.savedTypes[stateKey];
+        const variationIdx = appState.generationVariation[stateKey] || 0;
+        const variationLabels = ['Theory Focus', 'Practical Focus', 'Exam Focus'];
+        const variationLabel = variationLabels[variationIdx];
+
+        return `
+          <div class="output-block" id="block-${stateKey}">
+            <div class="output-header">
+              <div class="output-header-left">
+                <span class="ai-badge ${isSaved ? 'saved' : ''}" id="badge-${stateKey}">
+                  ${isSaved ? 'Saved to Repository ✓' : 'AI Generated'}
+                </span>
+                <span class="focus-badge" style="background-color: var(--navy-light); color: var(--navy); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; margin-left: 8px;">
+                  ${variationLabel}
+                </span>
+                <span class="output-type-title">${headerTitle} — ${topicName}</span>
+              </div>
+              <span class="output-timestamp">Generated: ${timestamp}</span>
+            </div>
+            <div class="output-body">
+              ${bodyHTML}
+            </div>
+            <div class="output-actionbar" id="actions-${stateKey}">
+              ${isSaved ? `
+                <button class="gen-btn btn-outline-navy" onclick="switchScreen('repository', document.querySelectorAll('.nav-item')[1])">View in Repository</button>
+                <button class="gen-btn btn-outline-gray" onclick="triggerToast('✓ PDF download started for ${headerTitle}')"><i data-lucide="download" style="width: 14px; height: 14px;"></i> Download PDF</button>
+              ` : `
+                <button class="gen-btn btn-outline-gray" onclick="triggerToast('✓ Editing mode enabled for ${headerTitle}')">Edit</button>
+                <button class="gen-btn btn-orange" onclick="approveAndSave('${stateKey}', '${headerTitle}')">Approve & Save</button>
+                <button class="gen-btn btn-outline-navy" onclick="startGeneration('${stateKey}')">Regenerate</button>
+                <button class="gen-btn btn-outline-gray" onclick="triggerToast('✓ PDF download started for ${headerTitle}')"><i data-lucide="download" style="width: 14px; height: 14px;"></i> Download PDF</button>
+              `}
+            </div>
+          </div>
+        `;
+      }
+
+      // Generate Bodies using new helper functions
+      const notesBody = getTopicNotesHTML(appState.activeSubject, appState.activeUnit, topicName, appState.generationVariation.notes);
+      const quizBody = getQuizBankHTML(appState.activeSubject, appState.activeUnit, topicName, appState.generationVariation.quiz);
+      const summaryBody = getSummaryHTML(appState.activeSubject, appState.activeUnit, topicName, appState.generationVariation.summary);
+      const guideBody = getStudentGuideHTML(appState.activeSubject, appState.activeUnit, topicName, appState.generationVariation.guide);
+      const pptBody = getPPTOutlineHTML(appState.activeSubject, appState.activeUnit, topicName, appState.generationVariation.ppt);
+
+      // Stack building
+      if (type === 'all') {
+        appState.generatedTypes = { notes: true, quiz: true, summary: true, guide: true, ppt: true };
+        
+        // Render Approve All Header at top
+        const approveAllHeader = `
+          <div class="approve-all-banner" id="all-approval-banner">
+            <div class="approve-all-text">
+              ⚡ Generated <strong>all 5 content types</strong> for <strong>${topicName}</strong>. Review and save them in bulk.
+            </div>
+            <button class="gen-btn btn-orange" onclick="approveAllAndSave()">Approve All & Save to Repository</button>
+          </div>
+          <div id="all-saved-confirmation" style="display: none;"></div>
+        `;
+        
+        container.innerHTML = approveAllHeader + 
+          createBlockHTML('Topic Notes', 'Topic Notes', notesBody, 'notes') +
+          createBlockHTML('Quiz Bank', 'Quiz Bank', quizBody, 'quiz') +
+          createBlockHTML('Summary', 'Summary', summaryBody, 'summary') +
+          createBlockHTML('Student Guide', 'Student Guide', guideBody, 'guide') +
+          createBlockHTML('PPT Outline', 'PPT Outline', pptBody, 'ppt');
+      } else {
+        appState.generatedTypes[type] = true;
+        container.innerHTML = createBlockHTML(type === 'notes' ? 'Topic Notes' : type === 'quiz' ? 'Quiz Bank' : type === 'summary' ? 'Summary' : type === 'guide' ? 'Student Guide' : 'PPT Outline', type === 'notes' ? 'Topic Notes' : type === 'quiz' ? 'Quiz Bank' : type === 'summary' ? 'Summary' : type === 'guide' ? 'Student Guide' : 'PPT Outline', type === 'notes' ? notesBody : type === 'quiz' ? quizBody : type === 'summary' ? summaryBody : type === 'guide' ? guideBody : pptBody, type);
+      }
+      
+      lucide.createIcons();
+    }
+
+    // Approve and Save functions
+    function approveAndSave(key, headerTitle) {
+      appState.savedTypes[key] = true;
+      
+      // Update badge UI
+      const badge = document.getElementById(`badge-${key}`);
+      if (badge) {
+        badge.className = 'ai-badge saved';
+        badge.textContent = 'Saved to Repository ✓';
+      }
+
+      // Update actionbar
+      const actionbar = document.getElementById(`actions-${key}`);
+      if (actionbar) {
+        actionbar.innerHTML = `
+          <button class="gen-btn btn-outline-navy" onclick="switchScreen('repository', document.querySelectorAll('.nav-item')[1])">View in Repository</button>
+          <button class="gen-btn btn-outline-gray" onclick="triggerToast('✓ PDF download started for ${headerTitle}')"><i data-lucide="download" style="width: 14px; height: 14px;"></i> Download PDF</button>
+        `;
+      }
+      
+      // Push new record dynamically into repository database
+      const existing = appState.repository.find(item => 
+        item.subject === appState.activeSubject && 
+        item.unit === appState.activeUnit && 
+        item.topic === appState.activeTopic && 
+        item.type === headerTitle
+      );
+      
+      if (!existing) {
+        const subMeta = contextMetadata[appState.activeSubject] || { instructor: "Dr. Anand K" };
+        appState.repository.unshift({
+          subject: appState.activeSubject,
+          unit: appState.activeUnit,
+          topic: appState.activeTopic,
+          type: headerTitle,
+          date: '24 May 2026',
+          status: 'Approved',
+          faculty: subMeta.instructor.replace('Kumar', 'K').replace('Sharma', 'S').replace('Nair', 'N')
+        });
+        
+        // Re-render repo screen contents
+        renderRepositoryTable();
+      }
+
+      triggerToast(`✓ ${headerTitle} saved to ${appState.activeSubject} repository`);
+      lucide.createIcons();
+    }
+
+    function approveAllAndSave() {
+      const keys = ['notes', 'quiz', 'summary', 'guide', 'ppt'];
+      const subMeta = contextMetadata[appState.activeSubject] || { instructor: "Dr. Anand K" };
+      const facultyShort = subMeta.instructor.replace('Kumar', 'K').replace('Sharma', 'S').replace('Nair', 'N');
+
+      keys.forEach(key => {
+        appState.savedTypes[key] = true;
+        
+        // Update individual visual cards
+        const badge = document.getElementById(`badge-${key}`);
+        if (badge) {
+          badge.className = 'ai-badge saved';
+          badge.textContent = 'Saved to Repository ✓';
+        }
+
+        const actionbar = document.getElementById(`actions-${key}`);
+        if (actionbar) {
+          const typeName = key === 'notes' ? 'Topic Notes' : key === 'quiz' ? 'Quiz Bank' : key === 'summary' ? 'Summary' : key === 'guide' ? 'Student Guide' : 'PPT Outline';
+          actionbar.innerHTML = `
+            <button class="gen-btn btn-outline-navy" onclick="switchScreen('repository', document.querySelectorAll('.nav-item')[1])">View in Repository</button>
+            <button class="gen-btn btn-outline-gray" onclick="triggerToast('✓ PDF download started for ${typeName}')"><i data-lucide="download" style="width: 14px; height: 14px;"></i> Download PDF</button>
+          `;
+        }
+
+        // Add to db if not present
+        const typeName = key === 'notes' ? 'Notes' : key === 'quiz' ? 'Quiz Bank' : key === 'summary' ? 'Summary' : key === 'guide' ? 'Student Guide' : 'PPT Outline';
+        const existing = appState.repository.find(item => 
+          item.subject === appState.activeSubject && 
+          item.unit === appState.activeUnit && 
+          item.topic === appState.activeTopic && 
+          item.type === typeName
+        );
+
+        if (!existing) {
+          appState.repository.unshift({
+            subject: appState.activeSubject,
+            unit: appState.activeUnit,
+            topic: appState.activeTopic,
+            type: typeName,
+            date: '24 May 2026',
+            status: 'Approved',
+            faculty: facultyShort
+          });
+        }
+      });
+
+      // Update bulk header banner to success card
+      const banner = document.getElementById('all-approval-banner');
+      banner.style.display = 'none';
+
+      const confirmCard = document.getElementById('all-saved-confirmation');
+      confirmCard.className = 'save-confirm-card';
+      confirmCard.style.display = 'flex';
+      confirmCard.innerHTML = `
+        <i data-lucide="check-circle-2" style="width: 20px; height: 20px;"></i>
+        <div>
+          <strong>✓ All 5 content items saved to ${appState.activeSubject} / ${appState.activeUnit} / ${appState.activeTopic} repository.</strong><br>
+          <span style="font-size: 11px;">Available to: ${subMeta.instructor} (author) · HOD (review) · Students (after release)</span>
+        </div>
+      `;
+      
+      // Update repository count stats
+      renderRepositoryTable();
+      triggerToast("✓ All 5 items saved to repository");
+      lucide.createIcons();
+    }
+
+    // Toggle Tab Panels within Quiz Output Block
+    function switchOutputTab(btn, targetContentId) {
+      // Deactivate all sibling buttons and tabs in the parent output card
+      const parentBlock = btn.closest('.output-block');
+      const buttons = parentBlock.querySelectorAll('.tab-btn');
+      const tabs = parentBlock.querySelectorAll('.tab-content');
+
+      buttons.forEach(b => b.classList.remove('active'));
+      tabs.forEach(t => t.classList.remove('active'));
+
+      btn.classList.add('active');
+      parentBlock.querySelector(`#${targetContentId}`).classList.add('active');
+    }
+
+    // Modal helpers
+    function openModal(title, bodyHTML) {
+      document.getElementById('modal-title-text').textContent = title;
+      document.getElementById('modal-body-content').innerHTML = bodyHTML;
+      document.getElementById('modal-wrapper').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('modal-wrapper').classList.remove('active');
+    }
+
+    // Click outside to close modal
+    document.getElementById('modal-wrapper').onclick = function(e) {
+      if (e.target === this) closeModal();
+    };
+
+    // Render Repository Screen Database Table
+    function renderRepositoryTable() {
+      const tbody = document.getElementById('repo-table-body');
+      tbody.innerHTML = '';
+      
+      let approvedCount = 0;
+      let pendingCount = 0;
+
+      // Filter state
+      const subVal = document.getElementById('repo-subject').value;
+      const unitVal = document.getElementById('repo-unit').value;
+      const typeVal = document.getElementById('repo-type').value;
+      const query = document.getElementById('repo-search').value.toLowerCase();
+
+      appState.repository.forEach(item => {
+        // Apply filters
+        if (subVal !== 'all' && item.subject !== subVal) return;
+        if (unitVal !== 'all' && item.unit !== unitVal) return;
+        if (typeVal !== 'all' && item.type !== typeVal) return;
+        if (query) {
+          const match = item.topic.toLowerCase().includes(query) || item.type.toLowerCase().includes(query) || item.faculty.toLowerCase().includes(query);
+          if (!match) return;
+        }
+
+        // Count stats
+        if (item.status === 'Approved') approvedCount++;
+        else pendingCount++;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="mono" style="font-weight: 600;">${item.subject}</td>
+          <td>${item.unit}</td>
+          <td><strong>${item.topic}</strong></td>
+          <td>${item.type}</td>
+          <td class="mono">${item.date}</td>
+          <td>
+            <span class="status-badge ${item.status === 'Approved' ? 'approved' : 'pending'}">
+              ${item.status === 'Approved' ? '✓ Approved' : '⏳ Pending'}
+            </span>
+          </td>
+          <td>${item.faculty}</td>
+          <td>
+            ${item.status === 'Approved' 
+              ? `<span class="action-link" onclick="viewRepoItem('${item.topic}', '${item.type}')">View/Download</span>` 
+              : `<span class="action-link" style="color: var(--orange-dark);" onclick="reviewRepoItem('${item.topic}', '${item.type}')">Review</span>`}
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      // Update counters
+      document.getElementById('stats-total').textContent = appState.repository.length;
+      document.getElementById('stats-approved').textContent = approvedCount;
+      document.getElementById('stats-pending').textContent = pendingCount;
+    }
+
+    function filterRepository() {
+      renderRepositoryTable();
+    }
+
+    // View Repo Item Modal Content Simulation
+    function viewRepoItem(topic, type) {
+      const heading = `${topic} — ${type} Content`;
+      let content = `
+        <div style="padding: 10px; border: 1px solid var(--gray-200); border-radius: var(--radius); background-color: var(--gray-50);">
+          <h4 style="color: var(--navy); margin-bottom: 8px;">CS301 Curriculum Repository Asset</h4>
+          <p style="margin-bottom: 8px;"><strong>File Format:</strong> Institutional Syllabus Standard compliant PDF/MarkDown</p>
+          <p style="margin-bottom: 8px;"><strong>Outcome Target:</strong> Mapped to Course Outcomes CO3, CO4 and Bloom's Level L2/L3.</p>
+          <p style="margin-bottom: 12px; line-height: 1.5;">This resource is validated by HOD and released to student portal structures. You can download the physical file package locally below.</p>
+          
+          <button class="gen-btn btn-orange" style="margin-top: 8px;" onclick="triggerToast('✓ Starting download package'); closeModal();"><i data-lucide="download" style="width: 14px; height: 14px;"></i> Download PDF Package</button>
+        </div>
+      `;
+      openModal(heading, content);
+      lucide.createIcons();
+    }
+
+    // Review Pending Repo Items Modal
+    function reviewRepoItem(topic, type) {
+      const heading = `Review Pending Asset: ${topic} (${type})`;
+      let content = `
+        <div>
+          <p style="margin-bottom: 12px;">Submitted by: <strong>Dr. Priya Nair</strong> for HOD review approval cycles.</p>
+          <div style="background-color: var(--amber-light); padding: 12px; border-radius: var(--radius); margin-bottom: 16px; border: 1px solid var(--amber);">
+            <strong style="color: var(--amber);">Pending HOD Action:</strong> Please verify syllabus compliance alignment before releasing document scopes to course portals.
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="gen-btn btn-orange" onclick="approvePendingItem('${topic}', '${type}')">Approve & Release</button>
+            <button class="gen-btn btn-outline-gray" onclick="closeModal()">Close</button>
+          </div>
+        </div>
+      `;
+      openModal(heading, content);
+      lucide.createIcons();
+    }
+
+    function approvePendingItem(topic, type) {
+      const item = appState.repository.find(r => r.topic === topic && r.type === type);
+      if (item) {
+        item.status = 'Approved';
+        renderRepositoryTable();
+        closeModal();
+        triggerToast(`✓ Approved and released ${topic} ${type} to repository`);
+      }
+    }
+
+    // SCREEN 3: QUIZ BUILDER LOGIC
+    function renderQuestionBank() {
+      const container = document.getElementById('qbank-list-container');
+      container.innerHTML = '';
+
+      // Filters
+      const diffVal = document.getElementById('qb-difficulty').value;
+      const coVal = document.getElementById('qb-co').value;
+
+      const filteredList = appState.questionBank.filter(q => {
+        if (diffVal !== 'all' && q.difficulty !== diffVal) return false;
+        if (coVal !== 'all' && q.co !== coVal) return false;
+        return true;
+      });
+
+      document.getElementById('qbank-count').textContent = `${filteredList.length} Available`;
+
+      filteredList.forEach(q => {
+        const isAdded = appState.composerQuestions.some(added => added.id === q.id);
+        const row = document.createElement('div');
+        row.className = 'question-row';
+        row.innerHTML = `
+          <div class="question-details">
+            <span class="question-text">${q.text}</span>
+            <div class="question-tags">
+              <span class="tag ${q.difficulty.toLowerCase()}">${q.difficulty}</span>
+              <span class="tag">${q.type}</span>
+              <span class="tag co">${q.co}</span>
+            </div>
+          </div>
+          <button class="gen-btn ${isAdded ? 'btn-outline-gray' : ''}" style="width: 50px; height: 28px; font-size: 11px; flex-shrink: 0;" ${isAdded ? 'disabled' : ''} onclick="addQuestionToComposer(${q.id})">
+            ${isAdded ? 'Added' : 'Add'}
+          </button>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function filterQuestionBank() {
+      renderQuestionBank();
+    }
+
+    function addQuestionToComposer(qId) {
+      const q = appState.questionBank.find(item => item.id === qId);
+      if (q && !appState.composerQuestions.some(item => item.id === qId)) {
+        appState.composerQuestions.push(q);
+        updateComposerUI();
+        renderQuestionBank();
+      }
+    }
+
+    function removeQuestionFromComposer(qId) {
+      appState.composerQuestions = appState.composerQuestions.filter(item => item.id !== qId);
+      updateComposerUI();
+      renderQuestionBank();
+    }
+
+    function updateComposerUI() {
+      const container = document.getElementById('composer-questions-container');
+      const dropZoneText = document.getElementById('composer-drop-zone').querySelectorAll('p, i');
+      
+      if (appState.composerQuestions.length === 0) {
+        container.style.display = 'none';
+        dropZoneText.forEach(el => el.style.display = 'block');
+      } else {
+        container.style.display = 'flex';
+        dropZoneText.forEach(el => el.style.display = 'none');
+        
+        container.innerHTML = '';
+        appState.composerQuestions.forEach((q, idx) => {
+          const row = document.createElement('div');
+          row.className = 'composer-question-row';
+          
+          let marksVal = 2; // Default MCQ
+          if (q.type === 'Short Answer') marksVal = 5;
+          if (q.type === 'Long Answer') marksVal = 10;
+
+          row.innerHTML = `
+            <div class="composer-question-info">
+              <span><strong>Q${idx + 1}:</strong> ${q.text}</span>
+              <div class="question-tags" style="margin-top: 4px;">
+                <span class="tag ${q.difficulty.toLowerCase()}">${q.difficulty}</span>
+                <span class="tag">${q.type}</span>
+                <span class="tag" style="background-color: var(--navy-xlight); color: var(--navy); font-weight: bold;">${marksVal} Marks</span>
+              </div>
+            </div>
+            <button class="remove-question-btn" onclick="removeQuestionFromComposer(${q.id})">&times;</button>
+          `;
+          container.appendChild(row);
+        });
+      }
+
+      // Calculations
+      let totalMarks = 0;
+      appState.composerQuestions.forEach(q => {
+        let marks = 2;
+        if (q.type === 'Short Answer') marks = 5;
+        if (q.type === 'Long Answer') marks = 10;
+        totalMarks += marks;
+      });
+
+      document.getElementById('comp-q-count').textContent = appState.composerQuestions.length;
+      document.getElementById('comp-marks').textContent = totalMarks;
+    }
+
+    // Auto compose algorithm simulator
+    function simulateAutoCompose() {
+      // Trigger loader spinner inside composite area
+      const btn = document.querySelector('.btn-full[onclick="simulateAutoCompose()"]');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<div class="spinner" style="border-top-color: var(--white);"></div> <span>Composing Exam Paper...</span>`;
+      btn.disabled = true;
+
+      setTimeout(() => {
+        // Reset button
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+
+        // Auto add matching questions to composers
+        appState.composerQuestions = [
+          appState.questionBank[0], // MCQ Q1
+          appState.questionBank[1], // MCQ Q2
+          appState.questionBank[2], // MCQ Q3
+          appState.questionBank[3], // MCQ Q4
+          appState.questionBank[4], // MCQ Q5
+          appState.questionBank[5], // SA Q1
+          appState.questionBank[6], // SA Q2
+          appState.questionBank[7]  // LA Q1
+        ];
+
+        updateComposerUI();
+        renderQuestionBank();
+        
+        // Show report panel
+        const reportTitle = document.getElementById('comp-title').value;
+        document.getElementById('report-heading').innerHTML = `Auto-composed Paper: ${reportTitle}`;
+        document.getElementById('composer-report-panel').style.display = 'flex';
+        
+        triggerToast("✓ Assessment composed — 50 marks, balanced CO coverage");
+      }, 1000);
+    }
+
+    // SCREEN 4: ANALYTICS GRAPH
+    function renderAnalyticsChart() {
+      const ctx = document.getElementById('savingsChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['CS301 (Data Structures)', 'CS401 (Algorithms)', 'CS501 (OS)', 'CS201 (DBMS)'],
+          datasets: [
+            {
+              label: 'Faculty Hours Saved',
+              data: [44.0, 22.0, 16.0, 12.0],
+              backgroundColor: '#000099', // Navy Primary
+              borderColor: '#000099',
+              borderWidth: 1
+            },
+            {
+              label: 'Direct Economic Value (₹ x 100)',
+              data: [198, 99, 72, 54], // Maps to ₹19,800, ₹9,900, ₹7,200, ₹5,400
+              backgroundColor: '#FF9A01', // Orange Accent
+              borderColor: '#FF9A01',
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                font: {
+                  family: 'Sora',
+                  size: 11
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: '#E2E2E2'
+              },
+              ticks: {
+                font: {
+                  family: 'Sora',
+                  size: 10
+                }
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                font: {
+                  family: 'Sora',
+                  size: 10
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>

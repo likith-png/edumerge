@@ -93,6 +93,12 @@ const categories = [
                 description: "Early warning student risk tracking, NAAC Criterion 5 mentoring compliance, and automated parent communication.",
                 icon: UserCheck,
                 path: "/mentor-management"
+            },
+            {
+                title: "Academic Content Intelligence",
+                description: "AI-powered curriculum content generation system mapped to course outcomes and syllabus units.",
+                icon: Brain,
+                path: "/academic-content-intelligence"
             }
         ]
     },
@@ -260,6 +266,7 @@ const Dashboard: React.FC = () => {
     const [showPinModal, setShowPinModal] = React.useState(false);
     const [pinInput, setPinInput] = React.useState("");
     const [pinError, setPinError] = React.useState(false);
+    const [configTab, setConfigTab] = React.useState<'hrms' | 'ai'>('hrms');
     const [hiddenModules, setHiddenModules] = React.useState<string[]>(() => {
         const saved = localStorage.getItem('hrms_hidden_modules');
         return saved ? JSON.parse(saved) : [
@@ -271,6 +278,35 @@ const Dashboard: React.FC = () => {
             "Vehicle Management"
         ];
     });
+
+    const aiModuleTitles = React.useMemo(() => [
+        "edumerge co-pilot",
+        "Academic co-pilot",
+        "Online Paper Evaluation",
+        "Workforce Intelligence",
+        "Grievance Intelligence",
+        "Compliance & NAAC",
+        "Finance Intelligence",
+        "Mentor Management",
+        "Academic Content Intelligence"
+    ], []);
+
+    const enableAllAiModules = () => {
+        const nextHidden = hiddenModules.filter(title => !aiModuleTitles.includes(title));
+        setHiddenModules(nextHidden);
+        localStorage.setItem('hrms_hidden_modules', JSON.stringify(nextHidden));
+    };
+
+    const disableAllAiModules = () => {
+        const newHidden = [...hiddenModules];
+        aiModuleTitles.forEach(title => {
+            if (!newHidden.includes(title)) {
+                newHidden.push(title);
+            }
+        });
+        setHiddenModules(newHidden);
+        localStorage.setItem('hrms_hidden_modules', JSON.stringify(newHidden));
+    };
 
     const handlePinSubmit = (e?: React.FormEvent) => {
         if (e) e.preventDefault();
@@ -322,7 +358,8 @@ const Dashboard: React.FC = () => {
             "Grievance Intelligence",
             "Compliance & NAAC",
             "Finance Intelligence",
-            "Mentor Management"
+            "Mentor Management",
+            "Academic Content Intelligence"
         ];
 
         return categories.map(cat => {
@@ -576,41 +613,125 @@ const Dashboard: React.FC = () => {
                             </button>
                         </div>
 
+                        {/* Sub-tabs switchers */}
+                        <div className="shrink-0 px-10 py-3 border-b border-white/10 bg-black/10 flex gap-4 relative z-10">
+                            <button
+                                onClick={() => setConfigTab('hrms')}
+                                className={`px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${configTab === 'hrms' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20 border border-blue-500/30' : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'}`}
+                            >
+                                HRMS Core Modules
+                            </button>
+                            <button
+                                onClick={() => setConfigTab('ai')}
+                                className={`px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${configTab === 'ai' ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/20 border border-purple-500/30' : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'}`}
+                            >
+                                AI Co-Pilots & Intelligence
+                            </button>
+                        </div>
+
                         {/* Content */}
                         <div className="flex-grow overflow-y-auto p-10 space-y-12 relative z-10 no-scrollbar">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                                {categories.map(category => (
-                                    <div key={category.name} className="space-y-6">
-                                        <div className="flex items-center gap-4 px-4">
-                                            <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.6)]"></div>
-                                            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/50">{category.name}</h3>
+                            {configTab === 'hrms' ? (
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                                    {categories.map(category => {
+                                        const hrmsModules = category.modules.filter(m => !aiModuleTitles.includes(m.title));
+                                        if (hrmsModules.length === 0) return null;
+                                        return (
+                                            <div key={category.name} className="space-y-6">
+                                                <div className="flex items-center gap-4 px-4">
+                                                    <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.6)]"></div>
+                                                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/50">{category.name}</h3>
+                                                </div>
+                                                <div className="space-y-3">
+                                                    {hrmsModules.map(module => (
+                                                        <div 
+                                                            key={module.title}
+                                                            className={`p-5 rounded-[28px] border transition-all flex items-center justify-between group ${hiddenModules.includes(module.title) ? 'bg-white/5 border-white/5 opacity-40' : 'bg-white/10 border-white/10 hover:border-white/30 hover:bg-white/15'}`}
+                                                        >
+                                                            <div className="flex items-center gap-5">
+                                                                <div className={`p-3 rounded-2xl shadow-inner ${hiddenModules.includes(module.title) ? 'bg-white/5 text-white/20' : 'bg-white text-slate-900'}`}>
+                                                                    <module.icon className="w-5 h-5" />
+                                                                </div>
+                                                                <div className="space-y-1">
+                                                                    <h4 className="text-sm font-black text-white tracking-tight">{module.title}</h4>
+                                                                    <p className="text-[10px] text-white/40 font-bold uppercase tracking-wider">{category.name} Integration</p>
+                                                                </div>
+                                                            </div>
+                                                            <Switch 
+                                                                checked={!hiddenModules.includes(module.title)}
+                                                                onCheckedChange={() => toggleModuleVisibility(module.title)}
+                                                                className="data-[state=checked]:bg-blue-600 border-none shadow-xl scale-110"
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <div className="space-y-8">
+                                    {/* AI Master control panel */}
+                                    <div className="p-6 bg-white/5 border border-white/10 rounded-[36px] flex flex-col sm:flex-row justify-between items-center gap-4">
+                                        <div className="space-y-1 text-center sm:text-left">
+                                            <h4 className="text-sm font-black text-white uppercase tracking-wider">AI Co-Pilots Master Switches</h4>
+                                            <p className="text-[10px] text-white/40 font-bold uppercase">Toggle visibility of all neural command widgets</p>
                                         </div>
-                                        <div className="space-y-3">
-                                            {category.modules.map(module => (
+                                        <div className="flex gap-3">
+                                            <button 
+                                                onClick={disableAllAiModules}
+                                                className="bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 border border-rose-500/30 px-5 py-2.5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all"
+                                            >
+                                                Disable All AI Modules
+                                            </button>
+                                            <button 
+                                                onClick={enableAllAiModules}
+                                                className="bg-purple-600/20 hover:bg-purple-600/30 text-purple-400 border border-purple-500/30 px-5 py-2.5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all"
+                                            >
+                                                Enable All AI Modules
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* AI modules listing */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        {(() => {
+                                            const renderedAiTitles = new Set();
+                                            const aiList: any[] = [];
+                                            categories.forEach(cat => {
+                                                cat.modules.forEach(mod => {
+                                                    if (aiModuleTitles.includes(mod.title) && !renderedAiTitles.has(mod.title)) {
+                                                        renderedAiTitles.add(mod.title);
+                                                        aiList.push({ ...mod, categoryName: cat.name });
+                                                    }
+                                                });
+                                            });
+
+                                            return aiList.map(module => (
                                                 <div 
                                                     key={module.title}
-                                                    className={`p-5 rounded-[28px] border transition-all flex items-center justify-between group ${hiddenModules.includes(module.title) ? 'bg-white/5 border-white/5 opacity-40' : 'bg-white/10 border-white/10 hover:border-white/30 hover:bg-white/15'}`}
+                                                    className={`p-6 rounded-[32px] border transition-all flex items-center justify-between gap-4 ${hiddenModules.includes(module.title) ? 'bg-white/5 border-white/5 opacity-40' : 'bg-white/10 border-white/10 hover:border-white/30 hover:bg-white/15'}`}
                                                 >
-                                                    <div className="flex items-center gap-5">
-                                                        <div className={`p-3 rounded-2xl shadow-inner ${hiddenModules.includes(module.title) ? 'bg-white/5 text-white/20' : 'bg-white text-slate-900'}`}>
+                                                    <div className="flex items-center gap-5 flex-1 min-w-0">
+                                                        <div className={`p-3.5 rounded-2xl shrink-0 shadow-inner ${hiddenModules.includes(module.title) ? 'bg-white/5 text-white/20' : 'bg-white text-slate-900'}`}>
                                                             <module.icon className="w-5 h-5" />
                                                         </div>
-                                                        <div className="space-y-1">
-                                                            <h4 className="text-sm font-black text-white tracking-tight">{module.title}</h4>
-                                                            <p className="text-[10px] text-white/40 font-bold uppercase tracking-wider">{category.name} Integration</p>
+                                                        <div className="space-y-1 min-w-0">
+                                                            <h4 className="text-sm font-black text-white tracking-tight truncate">{module.title}</h4>
+                                                            <p className="text-[10px] text-white/40 font-bold uppercase tracking-wider">{module.categoryName} Integration</p>
                                                         </div>
                                                     </div>
                                                     <Switch 
                                                         checked={!hiddenModules.includes(module.title)}
                                                         onCheckedChange={() => toggleModuleVisibility(module.title)}
-                                                        className="data-[state=checked]:bg-blue-600 border-none shadow-xl scale-110"
+                                                        className="data-[state=checked]:bg-purple-600 border-none shadow-xl scale-110 shrink-0"
                                                     />
                                                 </div>
-                                            ))}
-                                        </div>
+                                            ));
+                                        })()}
                                     </div>
-                                ))}
-                            </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Footer */}

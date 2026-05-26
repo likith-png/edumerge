@@ -8,7 +8,8 @@ import { Input } from '../components/ui/input';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import {
   FileText, Upload, CheckCircle2, ChevronRight,
-  ShieldAlert, Settings, RefreshCw, Brain, Sparkles
+  ShieldAlert, Settings, RefreshCw, Brain, Sparkles,
+  Eye
 } from 'lucide-react';
 
 interface QuestionEvaluation {
@@ -685,6 +686,7 @@ export default function OnlinePaperEvaluation() {
 
   const [isRubricLoading, setIsRubricLoading] = useState(false);
   const [rubricPreset, setRubricPreset] = useState('End Semester — Algorithm Design');
+  const [scriptViewMode, setScriptViewMode] = useState<'ocr' | 'scanned'>('ocr');
   
   // Custom states for interactive mock elements
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
@@ -1216,17 +1218,59 @@ Q3. Answer: Kruskal sort weight. Forms tree structure.
 
               {/* OCR Handwritten Extractions Screen */}
               <Card className="shadow-sm border-slate-200 flex flex-col h-[480px]">
-                <div className="bg-slate-900 text-slate-300 px-4 py-2.5 border-b border-slate-800 flex items-center justify-between shrink-0">
-                  <h3 className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
-                    <FileText className="w-4 h-4 text-blue-400" />
-                    OCR Script Extraction
-                  </h3>
+                <div className="bg-slate-900 text-slate-300 px-4 py-2 border-b border-slate-800 flex items-center justify-between shrink-0">
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+                      <FileText className="w-4 h-4 text-blue-400" />
+                      Answer Script
+                    </h3>
+                    <div className="flex bg-slate-800 rounded p-0.5 border border-slate-700">
+                      <button
+                        onClick={() => setScriptViewMode('ocr')}
+                        className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all ${
+                          scriptViewMode === 'ocr'
+                            ? 'bg-slate-700 text-white shadow-sm'
+                            : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        OCR Text
+                      </button>
+                      <button
+                        onClick={() => setScriptViewMode('scanned')}
+                        className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all ${
+                          scriptViewMode === 'scanned'
+                            ? 'bg-slate-700 text-white shadow-sm'
+                            : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        Scanned Paper
+                      </button>
+                    </div>
+                  </div>
                   <Badge className="bg-slate-800 text-slate-300 border-slate-700 py-0.5 px-2 text-[9px]">
                     {selectedStudent.rollNo}
                   </Badge>
                 </div>
-                <CardContent className="p-0 flex-1 overflow-y-auto bg-slate-950 font-mono text-[11px] leading-relaxed p-4 text-slate-300 whitespace-pre-wrap select-all">
-                  {selectedStudent.ocrText}
+                <CardContent className="p-0 flex-1 overflow-y-auto bg-slate-950 font-mono text-[11px] leading-relaxed text-slate-300 whitespace-pre-wrap select-all flex flex-col">
+                  {scriptViewMode === 'ocr' ? (
+                    <div className="p-4 w-full h-full overflow-y-auto">
+                      {selectedStudent.ocrText}
+                    </div>
+                  ) : (
+                    <div className="p-2 w-full h-full flex flex-col items-center justify-center bg-slate-900 overflow-y-auto">
+                      <div className="relative border border-slate-800 rounded bg-slate-950 p-1 flex items-center justify-center max-h-full max-w-full">
+                        <img
+                          src="/scanned_exam_paper.png"
+                          alt="Scanned Student Answer Sheet"
+                          className="max-h-[380px] object-contain rounded border border-slate-850"
+                        />
+                        <div className="absolute top-2 left-2 bg-emerald-600/90 text-white font-sans text-[8px] font-bold px-1.5 py-0.5 rounded shadow flex items-center gap-1">
+                          <Eye className="w-2.5 h-2.5" />
+                          <span>Scanned Script Sheet</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 

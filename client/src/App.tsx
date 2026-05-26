@@ -55,6 +55,7 @@ import FinanceIntelligence from './pages/FinanceIntelligence';
 import OnlinePaperEvaluation from './pages/OnlinePaperEvaluation';
 import MentorManagement from './pages/MentorManagement';
 import AiCopilot from './pages/AiCopilot';
+import AcademicContentIntelligence from './pages/AcademicContentIntelligence';
 import { PersonaProvider } from './contexts/PersonaContext';
 import { StaffProvider } from './contexts/StaffContext';
 
@@ -139,6 +140,7 @@ function App() {
           <Route path="/online-paper-evaluation" element={<OnlinePaperEvaluation />} />
           <Route path="/mentor-management" element={<MentorManagement />} />
           <Route path="/ai-copilot" element={<AiCopilot />} />
+          <Route path="/academic-content-intelligence" element={<AcademicContentIntelligence />} />
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

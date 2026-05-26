@@ -212,6 +212,7 @@ export default function AiCopilot() {
   const [activeModule, setActiveModule] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [inputText, setInputText] = useState('');
+  const [apiConnected, setApiConnected] = useState<boolean>(true);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'intro',
@@ -251,6 +252,18 @@ export default function AiCopilot() {
     setIsTyping(true);
 
     setTimeout(() => {
+      if (!apiConnected) {
+        const botMsg: ChatMessage = {
+          id: makeId(),
+          role: 'bot',
+          text: `⚠️ **API Connection Error**: The co-pilot is currently offline. Please click the status badge in the top bar to reconnect the API.`,
+          timestamp: formatTime(),
+        };
+        setMessages(prev => [...prev, botMsg]);
+        setIsTyping(false);
+        return;
+      }
+
       const match = findBestMatch(text, activeModule);
       const answer = match ? match.answer : FALLBACK_ANSWER;
       const moduleLabel = match ? MODULES.find(m => m.id === match.module)?.label || '' : '';
@@ -318,7 +331,21 @@ export default function AiCopilot() {
             <span className="font-black text-[#000099] text-base tracking-tight">edumerge</span>
             <span className="text-slate-300 text-lg font-light">|</span>
             <span className="text-sm font-bold text-slate-600">co-pilot</span>
-            <span className="text-[10px] font-black uppercase tracking-wider bg-[#FF9A01]/15 text-[#FF9A01] px-2 py-0.5 rounded-full border border-[#FF9A01]/30 animate-pulse">AI</span>
+            <span className="text-[10px] font-black uppercase tracking-wider bg-[#FF9A01]/15 text-[#FF9A01] px-2 py-0.5 rounded-full border border-[#FF9A01]/30 animate-pulse mr-2">AI</span>
+            
+            {/* API Connection Indicator */}
+            <button
+              onClick={() => setApiConnected(!apiConnected)}
+              className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest transition-all duration-300 border ${
+                apiConnected 
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' 
+                  : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100 animate-pulse'
+              }`}
+              title="Click to toggle connection state"
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${apiConnected ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
+              <span>API {apiConnected ? 'Connected' : 'Offline'}</span>
+            </button>
           </div>
         </div>
         <div className="flex items-center gap-2">
