@@ -621,6 +621,30 @@ export default function LessonPlan() {
     showToast(`Chapter "${newChapterName}" added successfully`);
   };
 
+  const getChapterStatus = (chapter: Chapter, today: Date): 'completed' | 'on-track' | 'target-delay' | 'overdue' => {
+    if (chapter.completionStatus === 'Completed') {
+      return 'completed';
+    }
+    if (!chapter.targetDate) {
+      return 'on-track';
+    }
+    const tDate = new Date(chapter.targetDate);
+    const todayZero = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const targetZero = new Date(tDate.getFullYear(), tDate.getMonth(), tDate.getDate());
+    
+    if (todayZero.getTime() <= targetZero.getTime()) {
+      return 'on-track';
+    }
+    
+    const buffer = chapter.bufferDays || 0;
+    const bufferLimitDate = new Date(targetZero.getTime() + buffer * 24 * 60 * 60 * 1000);
+    
+    if (todayZero.getTime() <= bufferLimitDate.getTime()) {
+      return 'target-delay';
+    }
+    return 'overdue';
+  };
+
   const handleDeleteChapter = (subjectName: string, chapterId: number) => {
     // Sync with unitsList if English
     if (subjectName === "English") {
