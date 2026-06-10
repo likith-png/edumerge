@@ -29,6 +29,7 @@ import AppraisalCycleSetup from './pages/AppraisalCycleSetup';
 import PerformanceTrackingDashboard from './pages/PerformanceTrackingDashboard';
 import GoalApprovalDashboard from './pages/GoalApprovalDashboard';
 import Feedback360Workflow from './pages/Feedback360Workflow';
+import Feedback360Analysis from './pages/Feedback360Analysis';
 import CalibrationDashboard from './pages/CalibrationDashboard';
 import MidYearReview from './pages/MidYearReview';
 import StaffPortfolio from './pages/StaffPortfolio';
@@ -56,6 +57,7 @@ import OnlinePaperEvaluation from './pages/OnlinePaperEvaluation';
 import MentorManagement from './pages/MentorManagement';
 import AiCopilot from './pages/AiCopilot';
 import AcademicContentIntelligence from './pages/AcademicContentIntelligence';
+import AcademicCreditBank from './pages/AcademicCreditBank';
 import { PersonaProvider } from './contexts/PersonaContext';
 import { StaffProvider } from './contexts/StaffContext';
 
@@ -91,6 +93,7 @@ function App() {
           <Route path="/appraisal/tracking" element={<PerformanceTrackingDashboard />} />
           <Route path="/appraisal/goal-approval" element={<GoalApprovalDashboard />} />
           <Route path="/appraisal/feedback360" element={<Feedback360Workflow />} />
+          <Route path="/appraisal/feedback360-analysis" element={<Feedback360Analysis />} />
           <Route path="/appraisal/calibration" element={<CalibrationDashboard />} />
           <Route path="/appraisal/mid-year" element={<MidYearReview />} />
           <Route path="/staff-portfolio" element={<StaffPortfolio />} />
@@ -141,6 +144,7 @@ function App() {
           <Route path="/mentor-management" element={<MentorManagement />} />
           <Route path="/ai-copilot" element={<AiCopilot />} />
           <Route path="/academic-content-intelligence" element={<AcademicContentIntelligence />} />
+          <Route path="/academic-credit-bank" element={<AcademicCreditBank />} />
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

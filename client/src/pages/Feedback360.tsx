@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { Button } from '../components/ui/button';
@@ -31,6 +32,7 @@ interface Weights {
 }
 
 const Feedback360: React.FC = () => {
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('cycles');
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
@@ -118,7 +120,11 @@ const Feedback360: React.FC = () => {
                             </h3>
                             <div className="grid grid-cols-1 gap-4">
                                 {cycles.filter(c => c.status === 'Completed').map(cycle => (
-                                    <Card key={cycle.id} className="border border-slate-200 shadow-sm bg-white rounded-2xl overflow-hidden hover:shadow-md transition-all group flex items-center">
+                                    <Card 
+                                        key={cycle.id} 
+                                        onClick={() => navigate('/appraisal/feedback360-analysis')}
+                                        className="border border-slate-200 shadow-sm bg-white rounded-2xl overflow-hidden hover:shadow-md hover:border-indigo-300 transition-all group flex items-center cursor-pointer"
+                                    >
                                         <CardContent className="p-6 flex items-center justify-between w-full">
                                             <div className="flex items-center gap-6">
                                                 <div className="p-4 bg-slate-50 rounded-xl text-slate-400 group-hover:bg-slate-900 group-hover:text-white transition-all duration-300">

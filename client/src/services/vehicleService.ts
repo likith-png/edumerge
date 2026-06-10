@@ -150,6 +150,39 @@ export interface ChallanRecord {
     issue_date: string;
 }
 
+export interface IncidentRecord {
+    id: number;
+    vehicle_id: number;
+    driver_id?: number;
+    severity: 'MINOR' | 'MAJOR' | 'CRITICAL';
+    incident_date: string;
+    location?: string;
+    description?: string;
+    photo_url?: string;
+    resolution_status: 'PENDING' | 'RESOLVED';
+    resolution_details?: string;
+    reg_number: string;
+    make_model: string;
+    driver_name?: string;
+}
+
+export interface GPSLog {
+    id: number;
+    vehicle_id: number;
+    latitude: number;
+    longitude: number;
+    speed_kmh: number;
+    heading: number;
+    ignition: number;
+    event_type: string;
+    location_name?: string;
+    odometer: number;
+    recorded_at: string;
+    reg_number: string;
+    make_model: string;
+    status: string;
+}
+
 const get = (url: string) => fetch(BASE + url).then(r => r.json());
 const post = (url: string, body: any) =>
     fetch(BASE + url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(r => r.json());
@@ -200,5 +233,17 @@ export const vehicleService = {
 
     // Tolls & Fines
     getTollsAndFines: () => get('/tolls_fines'),
-    payChallan: (id: number) => patch(`/challans/${id}/pay`, {})
+    payChallan: (id: number) => patch(`/challans/${id}/pay`, {}),
+
+    // Incidents (TRM v2 Phase 1)
+    getIncidents: () => get('/incidents'),
+    addIncident: (data: any) => post('/incidents', data),
+    resolveIncident: (id: number, resolution_details: string) => patch(`/incidents/${id}/resolve`, { resolution_details }),
+
+    // GPS tracking (TRM v2 Phase 1)
+    getLatestGPS: () => get('/gps/latest'),
+    updateGPS: (data: any) => post('/gps/update', data),
+
+    // Reports (TRM v2 Phase 1)
+    getReportData: (type: string) => get(`/reports/${type}`)
 };

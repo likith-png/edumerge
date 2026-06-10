@@ -1,24 +1,26 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import {
     Activity, CheckCircle,
     Layout as LayoutIcon, FileText, Users, Target, MessageSquare,
-    Shield, GraduationCap
+    Shield, GraduationCap, Brain
 } from 'lucide-react';
 import SurveyBuilder from './SurveyBuilder';
 import Feedback360 from './Feedback360';
 
 const Feedback: React.FC = () => {
+    const navigate = useNavigate();
     const [activeView, setActiveView] = useState('overview');
 
     const menuItems = [
         { id: 'overview', label: 'Overview', icon: LayoutIcon },
         { id: 'builder', label: 'Survey Builder', icon: FileText },
         { id: '360', label: '360° Feedback', icon: Users },
+        { id: 'ai-analysis', label: 'AI Feedback Analysis', icon: Brain },
         { id: 'responses', label: 'Responses', icon: MessageSquare },
-        { id: 'competency', label: 'Competency Framework', icon: Target },
         { id: 'external', label: 'Student/Parent', icon: GraduationCap },
         { id: 'action', label: 'Action Tracker', icon: CheckCircle },
         { id: 'governance', label: 'Governance', icon: Shield },
@@ -187,7 +189,13 @@ const Feedback: React.FC = () => {
                 {menuItems.map((item) => (
                     <button
                         key={item.id}
-                        onClick={() => setActiveView(item.id)}
+                        onClick={() => {
+                            if (item.id === 'ai-analysis') {
+                                navigate('/appraisal/feedback360-analysis');
+                            } else {
+                                setActiveView(item.id);
+                            }
+                        }}
                         className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider transition-all duration-200 ${activeView === item.id
                             ? 'bg-slate-900 text-white shadow-sm'
                             : 'bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-900 border border-slate-200'

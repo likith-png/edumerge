@@ -59,6 +59,7 @@ router.post('/resign', (req, res) => {
             }
             // Determine Initial Stage & Notice Period Correctly using Employee Role
             db_1.default.get(`SELECT role FROM employees WHERE id = ?`, [employee_id], (err, emp) => {
+                var _a;
                 if (err)
                     return res.status(500).json({ error: err.message });
                 // Recalculate Notice Days with Role
@@ -81,8 +82,9 @@ router.post('/resign', (req, res) => {
                     approval_stage = 'HoD Review';
                     current_approver_role = 'Head of Department';
                 }
-                const sql = `INSERT INTO exits (employee_id, resignation_date, reason, lwd_proposed, comments, resignation_type, notice_period_end, attachment_url, approval_stage, current_approver_role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-                const params = [employee_id, resignation_date, reason, lwd_proposed, comments, resignation_type || 'Voluntary', notice_period_end, attachment_url, approval_stage, current_approver_role];
+                const meeting_status = ((_a = config.workflow) === null || _a === void 0 ? void 0 : _a.requireOneOnOne) ? 'Pending' : 'Waived';
+                const sql = `INSERT INTO exits (employee_id, resignation_date, reason, lwd_proposed, comments, resignation_type, notice_period_end, attachment_url, approval_stage, current_approver_role, meeting_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+                const params = [employee_id, resignation_date, reason, lwd_proposed, comments, resignation_type || 'Voluntary', notice_period_end, attachment_url, approval_stage, current_approver_role, meeting_status];
                 db_1.default.run(sql, params, function (err) {
                     if (err) {
                         return res.status(400).json({ error: err.message });
@@ -95,20 +97,18 @@ router.post('/resign', (req, res) => {
                         // 1. Generate NOC Requests based on Config
                         if (config.noc && config.noc.enabled) {
                             const departments = [];
-                            if (config.noc.departments.library)
-                                departments.push('Library');
                             if (config.noc.departments.it)
                                 departments.push('IT');
-                            if (config.noc.departments.assets)
-                                departments.push('Asset Management');
-                            if (config.noc.departments.inventory)
-                                departments.push('Inventory / Stores');
+                            if (config.noc.departments.admin)
+                                departments.push('Admin');
                             if (config.noc.departments.finance)
                                 departments.push('Finance');
-                            if (config.noc.departments.hostel)
-                                departments.push('Hostel');
-                            if (config.noc.departments.transport)
-                                departments.push('Transport');
+                            if (config.noc.departments.hod)
+                                departments.push('HOD');
+                            if (config.noc.departments.library)
+                                departments.push('Library');
+                            if (config.noc.departments.payroll)
+                                departments.push('Payroll');
                             if (departments.length > 0 && ((_a = config.noc.systemBehavior) === null || _a === void 0 ? void 0 : _a.autoCreateTasks)) {
                                 const nocStmt = db_1.default.prepare(`INSERT INTO noc_clearances (exit_id, department, status) VALUES (?, ?, 'Pending')`);
                                 departments.forEach(dept => {
@@ -120,7 +120,7 @@ router.post('/resign', (req, res) => {
                         else {
                             // Fallback if config disabled or missing
                             if (!configRow) {
-                                const defaultDepts = ['IT', 'Library', 'Finance', 'Admin'];
+                                const defaultDepts = ['IT', 'Admin', 'Finance', 'HOD', 'Library', 'Payroll'];
                                 const nocStmt = db_1.default.prepare(`INSERT INTO noc_clearances (exit_id, department, status) VALUES (?, ?, 'Pending')`);
                                 defaultDepts.forEach(dept => {
                                     nocStmt.run(exitId, dept);
@@ -166,6 +166,72 @@ router.post('/resign', (req, res) => {
                                 message: "Resignation submitted successfully",
                                 id: exitId
                             });
+                        });
+                    });
+                });
+            });
+        });
+    });
+});
+// Involuntary Termination (HR Initiated)
+router.post('/terminate', (req, res) => {
+    const { employee_id, reason, lwd_proposed, comments } = req.body;
+    const resignation_date = new Date().toISOString().split('T')[0];
+    const resignation_type = 'Termination';
+    // Check for existing active requests
+    const checkSql = `SELECT * FROM exits WHERE employee_id = ? AND status NOT IN ('Rejected', 'Withdrawn', 'Completed')`;
+    db_1.default.get(checkSql, [employee_id], (err, row) => {
+        if (err)
+            return res.status(500).json({ error: err.message });
+        if (row) {
+            return res.status(400).json({ error: "Employee already has an active exit process." });
+        }
+        // Fetch Configuration
+        db_1.default.get(`SELECT value FROM configurations WHERE key = 'exit_config'`, (err, configRow) => {
+            let config = {};
+            if (configRow) {
+                try {
+                    config = JSON.parse(configRow.value);
+                }
+                catch (e) {
+                    console.error("Error parsing config", e);
+                }
+            }
+            // Notice period is immediate for termination
+            const notice_period_end = resignation_date;
+            // Immediate Approval since HR initiated
+            const status = 'Approved';
+            const approval_stage = 'Approved';
+            const current_approver_role = null;
+            db_1.default.get(`SELECT role FROM employees WHERE id = ?`, [employee_id], (err, emp) => {
+                if (err)
+                    return res.status(500).json({ error: err.message });
+                const sql = `INSERT INTO exits (employee_id, resignation_date, reason, lwd_proposed, lwd_approved, comments, resignation_type, notice_period_end, status, approval_stage, current_approver_role, meeting_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Waived')`;
+                const params = [employee_id, resignation_date, reason, lwd_proposed, lwd_proposed, comments, resignation_type, notice_period_end, status, approval_stage, current_approver_role];
+                db_1.default.run(sql, params, function (err) {
+                    if (err)
+                        return res.status(400).json({ error: err.message });
+                    const exitId = this.lastID;
+                    // Audit Log
+                    db_1.default.run(`INSERT INTO audit_logs (exit_id, action, performed_by, details) VALUES (?, ?, ?, ?)`, [exitId, 'Terminated', 'HR Admin', `Involuntary termination initiated. Reason: ${reason}`]);
+                    db_1.default.serialize(() => {
+                        // 1. Generate NOC Requests
+                        const defaultDepts = ['IT', 'Admin', 'Finance', 'HOD', 'Library', 'Payroll'];
+                        const nocStmt = db_1.default.prepare(`INSERT INTO noc_clearances (exit_id, department, status) VALUES (?, ?, 'Pending')`);
+                        defaultDepts.forEach(dept => nocStmt.run(exitId, dept));
+                        nocStmt.finalize();
+                        // 2. Auto-populate Handover Items
+                        db_1.default.all(`SELECT name, type FROM assets WHERE assigned_to = ?`, [employee_id], (err, assets) => {
+                            const handoverStmt = db_1.default.prepare(`INSERT INTO handover_items (exit_id, item_name, category, status) VALUES (?, ?, ?, 'Pending')`);
+                            if (assets)
+                                assets.forEach(asset => handoverStmt.run(exitId, `${asset.name} (${asset.type})`, 'Asset'));
+                            const adminItems = [
+                                { name: "System Access & Ownership Transfer", category: "Administrative" },
+                                { name: "ID Card & Physical Keys", category: "Administrative" }
+                            ];
+                            adminItems.forEach(item => handoverStmt.run(exitId, item.name, item.category));
+                            handoverStmt.finalize();
+                            res.json({ message: "Employee terminated and exit process initiated", id: exitId });
                         });
                     });
                 });
@@ -556,37 +622,6 @@ router.get('/analytics/dashboard', (req, res) => {
     });
 });
 // --- Final Settlement APIs ---
-// Get Settlement Details
-router.get('/:id/settlement', (req, res) => {
-    const exitId = req.params.id;
-    db_1.default.get(`SELECT * FROM final_settlements WHERE exit_id = ?`, [exitId], (err, row) => {
-        if (err)
-            return res.status(500).json({ error: err.message });
-        if (!row) {
-            // Create initial mock settlement
-            // For demo, we'll calculate random dues
-            const dummySettlement = {
-                salary_due: 45000,
-                leave_encashment: 12000,
-                bonus: 5000,
-                deductions: 0,
-                net_payable: 62000
-            };
-            const insertSql = `INSERT INTO final_settlements (exit_id, salary_due, leave_encashment, bonus, deductions, net_payable) VALUES (?, ?, ?, ?, ?, ?)`;
-            db_1.default.run(insertSql, [exitId, dummySettlement.salary_due, dummySettlement.leave_encashment, dummySettlement.bonus, dummySettlement.deductions, dummySettlement.net_payable], function (err) {
-                if (err)
-                    return res.status(500).json({ error: err.message });
-                // Return the newly created row
-                db_1.default.get(`SELECT * FROM final_settlements WHERE id = ?`, [this.lastID], (err, newRow) => {
-                    res.json({ data: newRow });
-                });
-            });
-        }
-        else {
-            res.json({ data: row });
-        }
-    });
-});
 // Update Settlement
 router.patch('/settlement/:id', (req, res) => {
     const { salary_due, leave_encashment, bonus, deductions, net_payable, status, remarks } = req.body;
@@ -662,16 +697,24 @@ router.patch('/:id/waiver-approve', (req, res) => {
 // ===== SETTLEMENT MANAGEMENT =====
 // Helper function to calculate settlement
 function calculateSettlementAmounts(employee, exit, inputData = {}) {
-    const monthlySalary = inputData.monthly_salary || 50000; // Default or from employee record
+    const monthlySalary = inputData.monthly_salary || employee.salary || 50000;
     const joiningDate = new Date(employee.joining_date || new Date());
     const exitDate = new Date(exit.lwd_approved || exit.lwd_proposed);
     const yearsOfService = (exitDate.getTime() - joiningDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+    // 0. Salary Due (Pro-rata for the last month)
+    const lastDayOfMonth = new Date(exitDate.getFullYear(), exitDate.getMonth() + 1, 0).getDate();
+    const daysWorkedInLastMonth = exitDate.getDate();
+    const salaryDue = (monthlySalary / lastDayOfMonth) * daysWorkedInLastMonth;
     // 1. Leave Encashment
     const pendingLeaves = inputData.pending_leaves || 0;
     const dailyRate = monthlySalary / 30;
     const leaveEncashment = pendingLeaves * dailyRate;
     // 2. Bonus (Pro-rated for current financial year)
-    const fiscalYearStart = new Date(exitDate.getFullYear(), 3, 1); // April 1st
+    let fiscalYearStart = new Date(exitDate.getFullYear(), 3, 1); // April 1st of current year
+    if (exitDate < fiscalYearStart) {
+        // If exitDate is before April 1st, fiscal year started previous year
+        fiscalYearStart = new Date(exitDate.getFullYear() - 1, 3, 1);
+    }
     const monthsWorked = inputData.months_worked || Math.min(12, Math.floor((exitDate.getTime() - fiscalYearStart.getTime()) / (1000 * 60 * 60 * 24 * 30)));
     const annualBonus = inputData.annual_bonus || monthlySalary; // Default to 1 month
     const bonus = (annualBonus / 12) * monthsWorked;
@@ -691,19 +734,20 @@ function calculateSettlementAmounts(employee, exit, inputData = {}) {
     const otherDues = inputData.other_dues || 0;
     // 6. Deductions
     let noticeShortfallDeduction = 0;
-    if (exit.waiver_approved !== 1 && exit.shortfall_days > 0) {
-        noticeShortfallDeduction = (exit.shortfall_days / 30) * monthlySalary;
+    if (exit.waiver_approved !== 1 && (exit.shortfall_days || 0) > 0) {
+        noticeShortfallDeduction = ((exit.shortfall_days || 0) / 30) * monthlySalary;
     }
     const advanceDeductions = inputData.advance_deductions || 0;
     const otherDeductions = inputData.other_deductions || 0;
     // 7. Calculate Totals
-    const grossSettlement = leaveEncashment + bonus + gratuity + pfAmount + esiAmount + otherDues;
+    const grossSettlement = salaryDue + leaveEncashment + bonus + gratuity + pfAmount + esiAmount + otherDues;
     const totalDeductions = noticeShortfallDeduction + advanceDeductions + otherDeductions;
     const netSettlement = grossSettlement - totalDeductions;
     return {
         monthly_salary: monthlySalary,
         years_of_service: parseFloat(yearsOfService.toFixed(2)),
         joining_date: employee.joining_date,
+        salary_due: parseFloat(salaryDue.toFixed(2)),
         pending_leaves: pendingLeaves,
         leave_encashment: parseFloat(leaveEncashment.toFixed(2)),
         bonus: parseFloat(bonus.toFixed(2)),
@@ -753,7 +797,8 @@ router.post('/:id/settlement/calculate', (req, res) => {
                     other_dues = ?, other_dues_remarks = ?,
                     notice_shortfall_deduction = ?, advance_deductions = ?,
                     other_deductions = ?, deduction_remarks = ?,
-                    gross_settlement = ?, total_deductions = ?, net_settlement = ?,
+                    gross_settlement = ?, total_deductions = ?, net_settlement = ?, net_payable = ?,
+                    salary_due = ?,
                     calculated_by = ?, calculated_date = ?, status = 'Calculated',
                     updated_at = ?
                     WHERE exit_id = ?`;
@@ -766,7 +811,8 @@ router.post('/:id/settlement/calculate', (req, res) => {
                     calculated.other_dues, calculated.other_dues_remarks,
                     calculated.notice_shortfall_deduction, calculated.advance_deductions,
                     calculated.other_deductions, calculated.deduction_remarks,
-                    calculated.gross_settlement, calculated.total_deductions, calculated.net_settlement,
+                    calculated.gross_settlement, calculated.total_deductions, calculated.net_settlement, calculated.net_settlement,
+                    calculated.salary_due,
                     calculatedBy, currentDate, currentDate, id
                 ];
                 db_1.default.run(updateSql, params, function (err) {
@@ -787,9 +833,10 @@ router.post('/:id/settlement/calculate', (req, res) => {
                     other_dues, other_dues_remarks,
                     notice_shortfall_deduction, advance_deductions,
                     other_deductions, deduction_remarks,
-                    gross_settlement, total_deductions, net_settlement,
+                    gross_settlement, total_deductions, net_settlement, net_payable,
+                    salary_due,
                     status, calculated_by, calculated_date, created_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Calculated', ?, ?, ?)`;
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Calculated', ?, ?, ?)`;
                 const params = [
                     id, record.employee_id,
                     calculated.monthly_salary, calculated.years_of_service, calculated.joining_date,
@@ -800,7 +847,8 @@ router.post('/:id/settlement/calculate', (req, res) => {
                     calculated.other_dues, calculated.other_dues_remarks,
                     calculated.notice_shortfall_deduction, calculated.advance_deductions,
                     calculated.other_deductions, calculated.deduction_remarks,
-                    calculated.gross_settlement, calculated.total_deductions, calculated.net_settlement,
+                    calculated.gross_settlement, calculated.total_deductions, calculated.net_settlement, calculated.net_settlement,
+                    calculated.salary_due,
                     calculatedBy, currentDate, currentDate
                 ];
                 db_1.default.run(insertSql, params, function (err) {

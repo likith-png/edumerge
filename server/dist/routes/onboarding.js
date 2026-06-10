@@ -34,45 +34,91 @@ router.post('/initiate', (req, res) => {
 });
 // 2. Get Dashboard Stats & List
 router.get('/dashboard', (req, res) => {
-    const sql = `
-        SELECT 
-            e.id, e.name, e.department, e.designation, e.joining_date, e.status,
-            ow.current_stage, ow.stage_status, ow.updated_at
-        FROM employees e
-        LEFT JOIN onboarding_workflow ow ON e.id = ow.employee_id
-        WHERE e.status = 'Onboarding'
-    `;
-    db_1.default.all(sql, [], (err, rows) => {
-        if (err) {
-            res.status(500).json({ error: err.message });
-            return;
+    // First fetch config for SLAs
+    db_1.default.get("SELECT value FROM configurations WHERE key = 'onboarding_stages'", (confErr, confRow) => {
+        let stageSlas = [];
+        if (!confErr && confRow) {
+            try {
+                stageSlas = JSON.parse(confRow.value);
+            }
+            catch (e) { }
         }
-        // Helper to calc SLA breach (if stage not updated in 5 days)
-        const checkSlaBreach = (updatedAt) => {
-            if (!updatedAt)
-                return false;
-            const lastUpdate = new Date(updatedAt).getTime();
-            const now = new Date().getTime();
-            const diffDays = (now - lastUpdate) / (1000 * 3600 * 24);
-            return diffDays > 5;
-        };
-        const stats = {
-            total: rows.length,
-            stage1: rows.filter(r => r.current_stage === 1).length,
-            stage2: rows.filter(r => r.current_stage === 2).length,
-            stage3: rows.filter(r => r.current_stage === 3).length,
-            stage4: rows.filter(r => r.current_stage === 4).length,
-            stage5: rows.filter(r => r.current_stage === 5).length,
-            // New Metrics
-            slaBreaches: rows.filter(r => checkSlaBreach(r.updated_at)).length,
-            probationDue: rows.filter(r => r.current_stage === 5).length, // Simplified: Everyone in Stage 5 is "Due"
-            // Mocking Percentages for Demo (To be replaced with real aggregations later)
-            documentPendingPercent: 34,
-            assetPendingPercent: 12,
-            trainingCompletionPercent: 78,
-            earlyDropoff: 2 // Mock count
-        };
-        res.json({ stats, candidates: rows });
+        const sql = `
+            SELECT 
+                e.id, e.name, e.department, e.designation, e.joining_date, e.status, e.email,
+                ow.current_stage, ow.stage_status, ow.updated_at
+            FROM employees e
+            INNER JOIN onboarding_workflow ow ON e.id = ow.employee_id
+            WHERE e.status = 'Onboarding'
+        `;
+        db_1.default.all(sql, [], (err, rows) => {
+            if (err) {
+                res.status(500).json({ error: err.message });
+                return;
+            }
+            const checkSlaBreach = (stageId, updatedAt) => {
+                if (!updatedAt)
+                    return false;
+                const stageConf = stageSlas.find(s => s.id === stageId);
+                const slaDays = stageConf ? stageConf.sla : 5; // Default to 5 if not found
+                const lastUpdate = new Date(updatedAt).getTime();
+                const now = new Date().getTime();
+                const diffDays = (now - lastUpdate) / (1000 * 3600 * 24);
+                return diffDays > slaDays;
+            };
+            const stats = {
+                total: rows.length,
+                stage1: rows.filter(r => r.current_stage === 1).length,
+                stage2: rows.filter(r => r.current_stage === 2).length,
+                stage3: rows.filter(r => r.current_stage === 3).length,
+                stage4: rows.filter(r => r.current_stage === 4).length,
+                stage5: rows.filter(r => r.current_stage === 5).length,
+                slaBreaches: rows.filter(r => checkSlaBreach(r.current_stage, r.updated_at)).length,
+                probationDue: rows.filter(r => r.current_stage === 5).length,
+                documentPendingPercent: 34,
+                assetPendingPercent: 12,
+                trainingCompletionPercent: 78,
+                earlyDropoff: 2
+            };
+            res.json({ stats, candidates: rows });
+        });
+    });
+});
+// 8. Get Onboarding Configuration
+router.get('/config', (req, res) => {
+    const keys = ['onboarding_stages', 'onboarding_docs', 'onboarding_general_settings', 'onboarding_integrations', 'onboarding_checklist'];
+    const sql = `SELECT key, value FROM configurations WHERE key IN (${keys.map(() => '?').join(',')})`;
+    db_1.default.all(sql, keys, (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        const config = {};
+        rows.forEach(row => {
+            try {
+                config[row.key] = JSON.parse(row.value);
+            }
+            catch (e) {
+                config[row.key] = row.value;
+            }
+        });
+        res.json(config);
+    });
+});
+// 9. Save Onboarding Configuration
+router.post('/config', (req, res) => {
+    const configs = req.body; // Expecting { key: value } pairs
+    const stmt = db_1.default.prepare("INSERT OR REPLACE INTO configurations (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)");
+    db_1.default.serialize(() => {
+        Object.keys(configs).forEach(key => {
+            const value = typeof configs[key] === 'string' ? configs[key] : JSON.stringify(configs[key]);
+            stmt.run(key, value);
+        });
+        stmt.finalize((err) => {
+            if (err) {
+                return res.status(500).json({ error: err.message });
+            }
+            res.json({ message: "Configuration saved successfully" });
+        });
     });
 });
 // 3. Get Single Candidate Onboarding Details
@@ -128,36 +174,57 @@ router.post('/:id/advance', (req, res) => {
             res.status(500).json({ error: err.message });
             return;
         }
-        // If workflow is marked as Completed (last stage finished) -> Move Employee to Probation & Propagate Data
-        if (status === 'Completed') {
-            db_1.default.serialize(() => {
-                // 1. Update Employee Status
-                db_1.default.run("UPDATE employees SET status = 'Probation' WHERE id = ?", [id]);
-                // 2. Fetch Module Integrations Configuration
-                db_1.default.get("SELECT value FROM configurations WHERE key = 'onboarding_integrations'", (err, row) => {
-                    if (!err && row) {
-                        try {
-                            const integrations = JSON.parse(row.value);
-                            // 3. Initialize Probation Reviews (30/60/90 Day)
-                            const cycles = ['30_Day', '60_Day', '90_Day'];
-                            const probStmt = db_1.default.prepare("INSERT INTO probation_reviews (employee_id, review_cycle, status) VALUES (?, ?, 'Pending')");
-                            cycles.forEach(cycle => probStmt.run(id, cycle));
-                            probStmt.finalize();
-                            // 4. Initialize Mandatory Trainings
-                            if (integrations.mandatoryTraining && Array.isArray(integrations.mandatoryTraining)) {
-                                const trainStmt = db_1.default.prepare("INSERT INTO onboarding_training (employee_id, module_name, status) VALUES (?, ?, 'Pending')");
-                                integrations.mandatoryTraining.forEach((module) => trainStmt.run(id, module));
-                                trainStmt.finalize();
-                            }
-                        }
-                        catch (e) {
-                            console.error("Failed to parse onboarding integrations for propagation", e);
-                        }
-                    }
-                });
-            });
-        }
         res.json({ message: "Workflow updated" });
+    });
+});
+// Candidate Sign-Off
+router.post('/:id/sign-off', (req, res) => {
+    const { id } = req.params;
+    db_1.default.serialize(() => {
+        // Update workflow status to indicate candidate signed off
+        db_1.default.run("UPDATE onboarding_workflow SET stage_status = 'Signed Off', updated_at = CURRENT_TIMESTAMP WHERE employee_id = ?", [id]);
+        // Generate a sign-out document record
+        const docSql = "INSERT INTO onboarding_documents (employee_id, document_name, file_url, status, remarks) VALUES (?, 'Onboarding Completion Sign-Off', 'https://example.com/sign-off.pdf', 'Verified', 'System generated document')";
+        db_1.default.run(docSql, [id], function (err) {
+            if (err) {
+                res.status(500).json({ error: err.message });
+                return;
+            }
+            res.json({ message: "Candidate signed off and document generated" });
+        });
+    });
+});
+// HR Activate Probation
+router.post('/:id/activate-probation', (req, res) => {
+    const { id } = req.params;
+    db_1.default.serialize(() => {
+        // Update Employee Status
+        db_1.default.run("UPDATE employees SET status = 'Probation' WHERE id = ?", [id]);
+        // Update workflow stage
+        db_1.default.run("UPDATE onboarding_workflow SET stage_status = 'Probation Activated', updated_at = CURRENT_TIMESTAMP WHERE employee_id = ?", [id]);
+        // Fetch Module Integrations Configuration
+        db_1.default.get("SELECT value FROM configurations WHERE key = 'onboarding_integrations'", (err, row) => {
+            if (!err && row) {
+                try {
+                    const integrations = JSON.parse(row.value);
+                    // Initialize Probation Reviews (30/60/90 Day)
+                    const cycles = ['30_Day', '60_Day', '90_Day'];
+                    const probStmt = db_1.default.prepare("INSERT INTO probation_reviews (employee_id, review_cycle, status) VALUES (?, ?, 'Pending')");
+                    cycles.forEach(cycle => probStmt.run(id, cycle));
+                    probStmt.finalize();
+                    // Initialize Mandatory Trainings
+                    if (integrations.mandatoryTraining && Array.isArray(integrations.mandatoryTraining)) {
+                        const trainStmt = db_1.default.prepare("INSERT INTO onboarding_training (employee_id, module_name, status) VALUES (?, ?, 'Pending')");
+                        integrations.mandatoryTraining.forEach((module) => trainStmt.run(id, module));
+                        trainStmt.finalize();
+                    }
+                }
+                catch (e) {
+                    console.error("Failed to parse onboarding integrations for propagation", e);
+                }
+            }
+        });
+        res.json({ message: "Probation successfully activated" });
     });
 });
 // 5. Upload Document (Mock URL)
@@ -198,43 +265,6 @@ router.post('/:id/training', (req, res) => {
             db_1.default.run("INSERT INTO onboarding_training (employee_id, module_name, status, completion_date) VALUES (?, ?, ?, CURRENT_TIMESTAMP)", [id, module_name, status]);
         }
         res.json({ message: "Training updated" });
-    });
-});
-// 8. Get Onboarding Configuration
-router.get('/config', (req, res) => {
-    const keys = ['onboarding_stages', 'onboarding_docs', 'onboarding_general_settings', 'onboarding_integrations'];
-    const sql = `SELECT key, value FROM configurations WHERE key IN (${keys.map(() => '?').join(',')})`;
-    db_1.default.all(sql, keys, (err, rows) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        const config = {};
-        rows.forEach(row => {
-            try {
-                config[row.key] = JSON.parse(row.value);
-            }
-            catch (e) {
-                config[row.key] = row.value;
-            }
-        });
-        res.json(config);
-    });
-});
-// 9. Save Onboarding Configuration
-router.post('/config', (req, res) => {
-    const configs = req.body; // Expecting { key: value } pairs
-    const stmt = db_1.default.prepare("INSERT OR REPLACE INTO configurations (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)");
-    db_1.default.serialize(() => {
-        Object.keys(configs).forEach(key => {
-            const value = typeof configs[key] === 'string' ? configs[key] : JSON.stringify(configs[key]);
-            stmt.run(key, value);
-        });
-        stmt.finalize((err) => {
-            if (err) {
-                return res.status(500).json({ error: err.message });
-            }
-            res.json({ message: "Configuration saved successfully" });
-        });
     });
 });
 exports.default = router;

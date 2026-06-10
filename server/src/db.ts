@@ -639,6 +639,22 @@ function initTables() {
       FOREIGN KEY (vehicle_id) REFERENCES vehicles(id)
     )`);
 
+    // Vehicle Incidents (TRM v2 Phase 1)
+    db.run(`CREATE TABLE IF NOT EXISTS vehicle_incidents (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      vehicle_id INTEGER NOT NULL,
+      driver_id INTEGER,
+      severity TEXT NOT NULL,
+      incident_date TEXT NOT NULL,
+      location TEXT,
+      description TEXT,
+      photo_url TEXT,
+      resolution_status TEXT DEFAULT 'PENDING',
+      resolution_details TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (vehicle_id) REFERENCES vehicles(id)
+    )`);
+
     // Seed vehicle data
     db.get("SELECT count(*) as count FROM vehicles", (err, row: any) => {
       if (!err && row.count === 0) {
@@ -787,6 +803,23 @@ function initTables() {
         chStmt.run(2, 2, "CH-KA01-7734", "Signal Jump", "Koramangala 8th Block", 500, "PAID", dFmt(past));
         chStmt.run(4, 4, "CH-KA01-1122", "No Parking", "Hebbal Underpass", 1500, "PENDING", dFmt(fut5)); // Mock
         chStmt.finalize();
+
+        // Seed incidents (TRM v2 Phase 1)
+        const incStmt = db.prepare(`INSERT INTO vehicle_incidents (vehicle_id, driver_id, severity, incident_date, location, description, photo_url, resolution_status, resolution_details) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+        incStmt.run(1, 1, "MINOR", dFmt(past), "Electronic City", "Minor scratch while taking a tight turn near Electronic City gate", null, "RESOLVED", "Bumper polished and scratch removed.");
+        incStmt.run(2, 2, "MAJOR", dFmt(past), "Koramangala 8th Block", "Engine overheating during route run: radiator coolant leak.", null, "RESOLVED", "Radiator flushed, coolant replaced under warranty.");
+        incStmt.run(4, 4, "CRITICAL", dFmt(past), "Hebbal Flyover", "Minor rear-end collision by a two-wheeler. No student injuries.", null, "PENDING", null);
+        incStmt.finalize();
+
+        // Seed GPS coordinates logs (TRM v2 Phase 1)
+        const gpsStmt = db.prepare(`INSERT INTO vehicle_gps_logs (vehicle_id, latitude, longitude, speed_kmh, heading, ignition, event_type, location_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`);
+        gpsStmt.run(1, 12.9716, 77.5946, 42, 180, 1, "MOVING", "Main Gate");
+        gpsStmt.run(2, 12.9516, 77.5846, 0, 90, 0, "STOPPED", "Koramangala Depot");
+        gpsStmt.run(3, 12.9616, 77.6046, 15, 270, 1, "MOVING", "BTM Layout");
+        gpsStmt.run(4, 12.9816, 77.5746, 35, 0, 1, "MOVING", "Hebbal Junction");
+        gpsStmt.run(5, 12.9916, 77.6146, 50, 45, 1, "MOVING", "Whitefield Road");
+        gpsStmt.run(6, 12.9416, 77.5646, 0, 220, 0, "STOPPED", "Branch Campus");
+        gpsStmt.finalize();
       }
     });
 

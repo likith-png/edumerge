@@ -99,6 +99,12 @@ const categories = [
                 description: "AI-powered curriculum content generation system mapped to course outcomes and syllabus units.",
                 icon: Brain,
                 path: "/academic-content-intelligence"
+            },
+            {
+                title: "Academic Credit Bank",
+                description: "NEP-compliant Academic Bank of Credits (ABC) portal. Sync credits via DigiLocker, manage credit transfers, and push academic records.",
+                icon: GraduationCap,
+                path: "/academic-credit-bank"
             }
         ]
     },

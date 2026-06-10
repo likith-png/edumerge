@@ -5,6 +5,9 @@ import {
   XCircle, Search, Plus, ChevronRight, ArrowLeft, FileText, CheckCircle,
   Calendar, Activity, User, GraduationCap, Info, Lock, Send, Sparkles
 } from 'lucide-react';
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend
+} from 'recharts';
 
 interface Interaction {
   date: string;
@@ -253,11 +256,256 @@ export default function MentorManagement() {
         { date: '11 Sep 2024', type: 'Progress Review', notes: 'Welfare check. Student requested info on honors project allocation rules.', faculty: 'Prof. Ramesh Nair', yearTag: 'Year 2' },
         { date: '05 Mar 2024', type: 'General Welfare', notes: 'Comfortable with Year 1 curriculum. Advised on balancing coding club tasks.', faculty: 'Prof. Ramesh Nair', yearTag: 'Year 1' }
       ]
+    },
+    {
+      id: 'rahul-verma',
+      name: 'Rahul Verma',
+      year: 'ECE Yr 2',
+      risk: 'RED',
+      attendance: 63,
+      marks: 36,
+      feeStatus: 'Overdue',
+      feeAmount: 28000,
+      feeDaysOverdue: 15,
+      lastMetDays: 32,
+      cgpa: 5.6,
+      backlogsCount: 3,
+      disciplinaryStatus: 'Warning Alert',
+      hostelStatus: 'Hosteller (C Block, Room 208)',
+      studentPhone: '+91 98860 90123',
+      parentPhone: '+91 94480 45678',
+      parentEmail: 'sanjay.verma@gmail.com',
+      academicHistory: [
+        { year: 'Year 1', sgpaSem1: 6.0, sgpaSem2: 5.2, attendance: 70, backlogs: 1 }
+      ],
+      history: [
+        { date: '14 Sep 2024', type: 'Attendance Concern', notes: 'Student has high absenteeism in labs. Discussed strict warning.', faculty: 'Prof. Rajesh Kumar', yearTag: 'Year 2' }
+      ]
+    },
+    {
+      id: 'ananya-sen',
+      name: 'Ananya Sen',
+      year: 'ECE Yr 2',
+      risk: 'AMBER',
+      attendance: 73,
+      marks: 52,
+      feeStatus: 'Current',
+      feeAmount: 0,
+      lastMetDays: 14,
+      cgpa: 6.8,
+      backlogsCount: 0,
+      disciplinaryStatus: 'No Issues',
+      hostelStatus: 'Day Scholar (Banashankari)',
+      studentPhone: '+91 98860 91234',
+      parentPhone: '+91 94480 56789',
+      parentEmail: 'd.sen@gmail.com',
+      academicHistory: [
+        { year: 'Year 1', sgpaSem1: 6.9, sgpaSem2: 6.7, attendance: 78, backlogs: 0 }
+      ],
+      history: [
+        { date: '10 Sep 2024', type: 'Progress Review', notes: 'Welfare check. Performance is stable, needs minor improvement in math.', faculty: 'Prof. Rajesh Kumar', yearTag: 'Year 2' }
+      ]
+    },
+    {
+      id: 'kabir-kapoor',
+      name: 'Kabir Kapoor',
+      year: 'ECE Yr 1',
+      risk: 'GREEN',
+      attendance: 86,
+      marks: 74,
+      feeStatus: 'Current',
+      feeAmount: 0,
+      lastMetDays: 8,
+      cgpa: 8.0,
+      backlogsCount: 0,
+      disciplinaryStatus: 'No Issues',
+      hostelStatus: 'Hosteller (A Block, Room 104)',
+      studentPhone: '+91 98860 92345',
+      parentPhone: '+91 94480 67890',
+      parentEmail: 'r.kapoor@gmail.com',
+      academicHistory: [],
+      history: [
+        { date: '22 Oct 2024', type: 'General Welfare', notes: 'Excellent start in basic electronics lab. Adjusting well to hostel.', faculty: 'Prof. Meera Deshmukh', yearTag: 'Year 1' }
+      ]
+    },
+    {
+      id: 'divya-nair',
+      name: 'Divya Nair',
+      year: 'ECE Yr 1',
+      risk: 'GREEN',
+      attendance: 89,
+      marks: 70,
+      feeStatus: 'Current',
+      feeAmount: 0,
+      lastMetDays: 6,
+      cgpa: 7.6,
+      backlogsCount: 0,
+      disciplinaryStatus: 'No Issues',
+      hostelStatus: 'Day Scholar (Jayanagar)',
+      studentPhone: '+91 98860 93456',
+      parentPhone: '+91 94480 78901',
+      parentEmail: 'radha.nair@gmail.com',
+      academicHistory: [],
+      history: [
+        { date: '20 Oct 2024', type: 'General Welfare', notes: 'Introductory check completed. Standard freshman registration active.', faculty: 'Prof. Meera Deshmukh', yearTag: 'Year 1' }
+      ]
+    },
+    {
+      id: 'sameer-shah',
+      name: 'Sameer Shah',
+      year: 'MBA Yr 2',
+      risk: 'RED',
+      attendance: 60,
+      marks: 45,
+      feeStatus: 'Overdue',
+      feeAmount: 55000,
+      feeDaysOverdue: 30,
+      lastMetDays: 45,
+      cgpa: 5.8,
+      backlogsCount: 2,
+      disciplinaryStatus: 'Disciplinary Probation',
+      hostelStatus: 'Day Scholar (Hebbal)',
+      studentPhone: '+91 98860 94567',
+      parentPhone: '+91 94480 89012',
+      parentEmail: 'kirit.shah@gmail.com',
+      academicHistory: [
+        { year: 'Year 1', sgpaSem1: 6.4, sgpaSem2: 5.8, attendance: 65, backlogs: 1 }
+      ],
+      history: [
+        { date: '18 Sep 2024', type: 'Attendance Concern', notes: 'Discussed severe attendance shortage and disciplinary action for lab absence.', faculty: 'Dr. Vikram Seth', yearTag: 'Year 2' }
+      ]
+    },
+    {
+      id: 'neha-gupta',
+      name: 'Neha Gupta',
+      year: 'MBA Yr 1',
+      risk: 'AMBER',
+      attendance: 71,
+      marks: 55,
+      feeStatus: 'Current',
+      feeAmount: 0,
+      lastMetDays: 20,
+      cgpa: 6.2,
+      backlogsCount: 1,
+      disciplinaryStatus: 'No Issues',
+      hostelStatus: 'Hosteller (A Block, Room 410)',
+      studentPhone: '+91 98860 95678',
+      parentPhone: '+91 94480 90123',
+      parentEmail: 'vijay.gupta@gmail.com',
+      academicHistory: [],
+      history: [
+        { date: '11 Oct 2024', type: 'General Welfare', notes: 'First semester adjustment. Experiencing minor difficulty in accounting syllabus.', faculty: 'Prof. Ritu Anand', yearTag: 'Year 1' }
+      ]
+    },
+    {
+      id: 'yash-vardhan',
+      name: 'Yash Vardhan',
+      year: 'MBA Yr 2',
+      risk: 'GREEN',
+      attendance: 90,
+      marks: 82,
+      feeStatus: 'Current',
+      feeAmount: 0,
+      lastMetDays: 4,
+      cgpa: 8.5,
+      backlogsCount: 0,
+      disciplinaryStatus: 'No Issues',
+      hostelStatus: 'Hosteller (B Block, Room 415)',
+      studentPhone: '+91 98860 96789',
+      parentPhone: '+91 94480 01234',
+      parentEmail: 'harish.vardhan@gmail.com',
+      academicHistory: [
+        { year: 'Year 1', sgpaSem1: 8.2, sgpaSem2: 8.6, attendance: 92, backlogs: 0 }
+      ],
+      history: [
+        { date: '16 Sep 2024', type: 'Placement Guidance', notes: 'Student is preparing for investment banking campus interviews.', faculty: 'Dr. Vikram Seth', yearTag: 'Year 2' }
+      ]
+    },
+    {
+      id: 'amit-patel',
+      name: 'Amit Patel',
+      year: 'Civil Yr 2',
+      risk: 'AMBER',
+      attendance: 74,
+      marks: 48,
+      feeStatus: 'Overdue',
+      feeAmount: 12000,
+      feeDaysOverdue: 10,
+      lastMetDays: 25,
+      cgpa: 6.1,
+      backlogsCount: 1,
+      disciplinaryStatus: 'No Issues',
+      hostelStatus: 'Day Scholar (Kengeri)',
+      studentPhone: '+91 98860 97890',
+      parentPhone: '+91 94480 12345',
+      parentEmail: 'mahesh.patel@gmail.com',
+      academicHistory: [
+        { year: 'Year 1', sgpaSem1: 6.3, sgpaSem2: 6.0, attendance: 75, backlogs: 1 }
+      ],
+      history: [
+        { date: '12 Sep 2024', type: 'Progress Review', notes: 'Discussed clearing engineering mechanics backlog in coming exam.', faculty: 'Prof. Suresh Hegde', yearTag: 'Year 2' }
+      ]
+    },
+    {
+      id: 'pooja-sharma',
+      name: 'Pooja Sharma',
+      year: 'Civil Yr 1',
+      risk: 'GREEN',
+      attendance: 88,
+      marks: 65,
+      feeStatus: 'Current',
+      feeAmount: 0,
+      lastMetDays: 12,
+      cgpa: 7.4,
+      backlogsCount: 0,
+      disciplinaryStatus: 'No Issues',
+      hostelStatus: 'Day Scholar (Whitefield)',
+      studentPhone: '+91 98860 98901',
+      parentPhone: '+91 94480 23456',
+      parentEmail: 'rakesh.sharma@gmail.com',
+      academicHistory: [],
+      history: [
+        { date: '19 Oct 2024', type: 'General Welfare', notes: 'Good academic engagement. Highly active in surveying practicals.', faculty: 'Prof. Anil Joshi', yearTag: 'Year 1' }
+      ]
+    },
+    {
+      id: 'kiran-kumar',
+      name: 'Kiran Kumar',
+      year: 'Civil Yr 2',
+      risk: 'RED',
+      attendance: 54,
+      marks: 32,
+      feeStatus: 'Overdue',
+      feeAmount: 32000,
+      feeDaysOverdue: 40,
+      lastMetDays: 40,
+      cgpa: 4.8,
+      backlogsCount: 4,
+      disciplinaryStatus: 'Warning Alert',
+      hostelStatus: 'Hosteller (C Block, Room 309)',
+      studentPhone: '+91 98860 99012',
+      parentPhone: '+91 94480 34567',
+      parentEmail: 'suresh.kumar@gmail.com',
+      academicHistory: [
+        { year: 'Year 1', sgpaSem1: 5.2, sgpaSem2: 4.6, attendance: 58, backlogs: 3 }
+      ],
+      history: [
+        { date: '05 Sep 2024', type: 'Attendance Concern', notes: 'Severe backlog and attendance issues. Parents notified by mail.', faculty: 'Prof. Suresh Hegde', yearTag: 'Year 2' }
+      ]
     }
   ]);
 
   // Selected Student for Student 360 profile
   const [selectedStudentId, setSelectedStudentId] = useState<string>('arjun-mehta');
+  
+  // Principal report tab selection: 'naac' | 'departments' | 'courses' | 'roster'
+  const [principalReportTab, setPrincipalReportTab] = useState<'naac' | 'departments' | 'courses' | 'roster'>('naac');
+
+  // Selected Department for department reports
+  const [selectedDept, setSelectedDept] = useState<string>('CSE');
+
+  // Selected Class for course/class reports
+  const [selectedClass, setSelectedClass] = useState<string>('CSE Yr 2');
   
   // Selected Student ID for pre-filling Log Form
   const [prefilledStudentId, setPrefilledStudentId] = useState<string>('arjun-mehta');
@@ -320,7 +568,7 @@ export default function MentorManagement() {
     showToast(`Switched view to ${newPersona === 'mentor' ? 'Prof. Ramesh (Mentor)' : 'Dr. Anita Bose (Principal)'}`, 'info');
     
     // Automatically switch tabs if current tab is restricted
-    if (newPersona === 'principal' && activeTab !== 'problem' && activeTab !== 'naac') {
+    if (newPersona === 'principal' && activeTab !== 'problem' && activeTab !== 'naac' && activeTab !== 'profile') {
       setActiveTab('naac');
     } else if (newPersona === 'mentor' && activeTab === 'naac') {
       setActiveTab('mentees');
@@ -429,7 +677,7 @@ export default function MentorManagement() {
     if (persona === 'mentor') {
       return tabName === 'naac';
     } else {
-      return tabName !== 'naac';
+      return tabName !== 'naac' && tabName !== 'profile';
     }
   };
 
@@ -690,10 +938,10 @@ export default function MentorManagement() {
               <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-5 shadow-sm space-y-2">
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Mentorship Coverage</h3>
                 <p className="text-3xl font-black text-slate-900">
-                  86.5%
+                  {((dynamicStudentsCovered / 520) * 100).toFixed(1)}%
                 </p>
                 <p className="text-[10px] text-emerald-600 font-extrabold uppercase tracking-wider">
-                  450 / 520 Students Met
+                  {dynamicStudentsCovered} / 520 Students Met
                 </p>
               </div>
 
@@ -955,23 +1203,25 @@ export default function MentorManagement() {
         {/* SCREEN 3 — STUDENT 360 PROFILE */}
         {activeTab === 'profile' && (
           <div className="space-y-6">
-            {/* Warning State if Principal view */}
-            {persona === 'principal' ? (
-              <div className="bg-red-50 border border-red-200 rounded-[10px] p-6 text-center max-w-xl mx-auto space-y-4">
-                <Lock className="w-10 h-10 text-[#D94F4F] mx-auto" />
-                <h3 className="text-lg font-black text-slate-900">Access Restricted</h3>
-                <p className="text-xs text-slate-500 leading-relaxed font-medium">
-                  The Student 360 Profile dashboard is reserved for Faculty Mentors. You are currently logged in as the Principal.
-                </p>
-                <button 
-                  onClick={() => handlePersonaChange('mentor')} 
-                  className="px-4 py-2 bg-[#000099] text-white text-xs font-black uppercase tracking-wider rounded-[10px]"
+            {persona === 'principal' && (
+              <div className="bg-[#E6F0FA] border border-[#B3CCE6] rounded-[10px] p-4 flex items-center justify-between gap-4 max-w-4xl mx-auto shadow-sm">
+                <div className="flex items-center gap-3">
+                  <GraduationCap className="w-5 h-5 text-[#000099]" />
+                  <div>
+                    <p className="text-xs font-black text-slate-800 uppercase tracking-wide">Executive Read-Only View</p>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Logged in as Principal (Dr. Anita Bose)</p>
+                  </div>
+                </div>
+                <button
+                  id="btn-return-reports"
+                  onClick={() => setActiveTab('naac')}
+                  className="px-3.5 py-1.5 bg-[#000099] text-white text-[10px] font-black uppercase tracking-wider rounded-[6px] hover:bg-[#000099]/90 transition"
                 >
-                  Switch to Mentor (Prof. Ramesh)
+                  Return to Reports
                 </button>
               </div>
-            ) : (
-              <div className="max-w-4xl mx-auto space-y-6">
+            )}
+            <div className="max-w-4xl mx-auto space-y-6">
                 
                 {/* Back Link */}
                 <div>
@@ -1435,7 +1685,6 @@ export default function MentorManagement() {
                 </div>
 
               </div>
-            )}
           </div>
         )}
 
@@ -1581,234 +1830,880 @@ export default function MentorManagement() {
             ) : (
               <div className="space-y-6">
                 
-                {/* Header */}
-                <div className="border-b border-[#E2E0D8] pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div>
-                    <h1 className="text-2xl font-black text-slate-900">NAAC Criterion 5 — Student Mentoring Evidence</h1>
-                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">
-                      Academic Year 2025-26 · Semester 1 · Executive compliance oversight
-                    </p>
-                  </div>
-                  
-                  {/* Action Button */}
-                  <div>
-                    <button
-                      onClick={handleGenerateNaacReport}
-                      disabled={isGeneratingNaac}
-                      className="px-5 py-2.5 bg-[#FF9A01] text-white font-extrabold text-xs tracking-wider uppercase rounded-[10px] hover:bg-[#FF9A01]/90 shadow transition flex items-center gap-2 disabled:opacity-50"
-                    >
-                      <FileText className="w-4 h-4" />
-                      <span>{isGeneratingNaac ? 'Compiling Report...' : 'Generate NAAC Report'}</span>
-                    </button>
-                  </div>
+                {/* Principal Sub-navigation Bar */}
+                <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-2 flex flex-wrap gap-2 shadow-sm">
+                  {[
+                    { id: 'naac', label: 'NAAC Compliance', icon: FileText },
+                    { id: 'departments', label: 'Department Analytics', icon: Users },
+                    { id: 'courses', label: 'Course & Class Reports', icon: GraduationCap },
+                    { id: 'roster', label: 'At-Risk Roster', icon: AlertTriangle }
+                  ].map(subTab => {
+                    const IconComp = subTab.icon;
+                    const isSelected = principalReportTab === subTab.id;
+                    return (
+                      <button
+                        key={subTab.id}
+                        id={`principal-subtab-${subTab.id}`}
+                        onClick={() => setPrincipalReportTab(subTab.id as any)}
+                        className={`px-4 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all ${
+                          isSelected
+                            ? 'bg-[#000099] text-white shadow-md'
+                            : 'text-slate-500 hover:bg-[#000099]/5 hover:text-[#000099]'
+                        }`}
+                      >
+                        <IconComp className="w-4 h-4" />
+                        <span>{subTab.label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
 
-                {/* Progress Bar (Generates in 2 seconds) */}
-                {isGeneratingNaac && (
-                  <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-6 shadow-sm space-y-3">
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="font-extrabold text-[#000099] uppercase tracking-wider">Compiling PDF verification bundle...</span>
-                      <span className="font-black">{naacProgress}%</span>
+                {/* SUB TAB: NAAC COMPLIANCE (Original View) */}
+                {principalReportTab === 'naac' && (
+                  <div className="space-y-6 animate-fadeIn">
+                    {/* Header */}
+                    <div className="border-b border-[#E2E0D8] pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div>
+                        <h1 className="text-2xl font-black text-slate-900">NAAC Criterion 5 — Student Mentoring Evidence</h1>
+                        <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">
+                          Academic Year 2025-26 · Semester 1 · Executive compliance oversight
+                        </p>
+                      </div>
+                      
+                      {/* Action Button */}
+                      <div>
+                        <button
+                          onClick={handleGenerateNaacReport}
+                          disabled={isGeneratingNaac}
+                          className="px-5 py-2.5 bg-[#FF9A01] text-white font-extrabold text-xs tracking-wider uppercase rounded-[10px] hover:bg-[#FF9A01]/90 shadow transition flex items-center gap-2 disabled:opacity-50"
+                        >
+                          <FileText className="w-4 h-4" />
+                          <span>{isGeneratingNaac ? 'Compiling Report...' : 'Generate NAAC Report'}</span>
+                        </button>
+                      </div>
                     </div>
-                    <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
-                      <div 
-                        className="h-full bg-[#27AE60] transition-all duration-200" 
-                        style={{ width: `${naacProgress}%` }}
-                      />
+
+                    {/* Progress Bar (Generates in 2 seconds) */}
+                    {isGeneratingNaac && (
+                      <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-6 shadow-sm space-y-3">
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="font-extrabold text-[#000099] uppercase tracking-wider">Compiling PDF verification bundle...</span>
+                          <span className="font-black">{naacProgress}%</span>
+                        </div>
+                        <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                          <div 
+                            className="h-full bg-[#27AE60] transition-all duration-200" 
+                            style={{ width: `${naacProgress}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Stat Box Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                      
+                      <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-5 shadow-sm space-y-2">
+                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Logs Recorded</h3>
+                        <p className="text-3xl font-black text-[#000099]">{dynamicTotalInteractions}</p>
+                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Across active faculty roster</p>
+                      </div>
+
+                      <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-5 shadow-sm space-y-2">
+                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Mentees Covered</h3>
+                        <p className="text-3xl font-black text-slate-900">
+                          {dynamicStudentsCovered} <span className="text-lg text-slate-400 font-normal">/ 520</span>
+                        </p>
+                        <p className="text-[10px] text-emerald-600 font-extrabold uppercase tracking-wider">
+                          Compliance target: {((dynamicStudentsCovered/520)*100).toFixed(0)}%
+                        </p>
+                      </div>
+
+                      <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-5 shadow-sm space-y-2">
+                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Inactive Mentors</h3>
+                        <p className="text-3xl font-black text-[#D94F4F]">3</p>
+                        <p className="text-[10px] text-[#D94F4F] font-bold uppercase tracking-wider">Zero logs submitted this month</p>
+                      </div>
+
+                      <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-5 shadow-sm space-y-2">
+                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">At-Risk Contacted</h3>
+                        <p className="text-3xl font-black text-slate-900">
+                          38 <span className="text-lg text-slate-400 font-normal">/ 44</span>
+                        </p>
+                        <p className="text-[10px] text-emerald-600 font-extrabold uppercase tracking-wider">
+                          86% Contact Rate (Goal: 100%)
+                        </p>
+                      </div>
+
+                    </div>
+
+                    {/* AI Compliance Audit Readiness & Trend Analysis */}
+                    <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-6 shadow-sm space-y-6">
+                      <div className="flex items-center justify-between border-b border-[#E2E0D8] pb-3">
+                        <div className="flex items-center gap-2">
+                          <Sparkles className="w-5 h-5 text-[#000099]" />
+                          <h2 className="text-sm font-black text-slate-900 uppercase tracking-wide">
+                            AI Compliance Audit Readiness &amp; Trend Analysis
+                          </h2>
+                        </div>
+                        <span className="px-2.5 py-0.5 rounded-[5px] text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-[#27AE60] border border-emerald-200">
+                          96.5% AI Success Probability
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Left Column: Criteria Progress & Advisory */}
+                        <div className="space-y-4">
+                          <h4 className="text-[10px] font-black uppercase tracking-wider text-slate-400">NAAC Criterion 5 Metrics Analysis</h4>
+                          
+                          <div className="space-y-3.5">
+                            {/* Crit 5.1.1 */}
+                            <div className="space-y-1">
+                              <div className="flex justify-between text-xs font-semibold text-slate-700">
+                                <span>Criterion 5.1.1: Student Support Schemes</span>
+                                <span className="font-extrabold text-[#27AE60]">98% Ready</span>
+                              </div>
+                              <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200/60">
+                                <div className="h-full bg-[#27AE60] rounded-full" style={{ width: '98%' }} />
+                              </div>
+                            </div>
+
+                            {/* Crit 5.1.3 */}
+                            <div className="space-y-1">
+                              <div className="flex justify-between text-xs font-semibold text-slate-700">
+                                <span>Criterion 5.1.3: Capacity Development &amp; Skills Enhancement</span>
+                                <span className="font-extrabold text-[#27AE60]">95% Ready</span>
+                              </div>
+                              <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200/60">
+                                <div className="h-full bg-[#27AE60] rounded-full" style={{ width: '95%' }} />
+                              </div>
+                            </div>
+
+                            {/* Crit 5.2.2 */}
+                            <div className="space-y-1">
+                              <div className="flex justify-between text-xs font-semibold text-slate-700">
+                                <span>Criterion 5.2.2: Student Progression to Higher Education</span>
+                                <span className="font-extrabold text-[#F5A623]">84% Ready</span>
+                              </div>
+                              <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200/60">
+                                <div className="h-full bg-[#F5A623] rounded-full" style={{ width: '84%' }} />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Advisory Callout */}
+                          <div className="bg-amber-50/50 border border-amber-200/40 rounded-lg p-3.5 flex items-start gap-2.5">
+                            <AlertTriangle className="w-4 h-4 text-[#F5A623] flex-shrink-0 mt-0.5" />
+                            <div className="text-xs">
+                              <p className="font-extrabold text-[#F5A623] uppercase text-[10px]">AI Compliance Advisory</p>
+                              <p className="text-slate-600 font-medium leading-relaxed mt-1">
+                                Missing mentoring logs in the Civil Engineering department for Criterion 5.1.1 (currently at 70% coverage) could lower the compliance rating score. Complete log verification before the NAAC submission window closes.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Right Column: Historical Growth Chart */}
+                        <div className="space-y-4 border-t md:border-t-0 md:border-l border-[#E2E0D8] pt-4 md:pt-0 md:pl-6">
+                          <h4 className="text-[10px] font-black uppercase tracking-wider text-slate-400">Historical Interaction Volume Growth</h4>
+                          <p className="text-xs text-slate-500 font-medium">
+                            Log trends showcase institutional consistency and compliance scaling over consecutive semesters.
+                          </p>
+
+                          <div className="h-36 bg-[#F8F8F6] border border-[#E2E0D8] rounded-[10px] p-4 flex flex-col justify-between">
+                            <div className="flex items-end justify-around h-24 px-2">
+                              {[
+                                { sem: 'Odd \'24', logs: 420 },
+                                { sem: 'Even \'25', logs: 580 },
+                                { sem: 'Odd \'25', logs: 640 },
+                                { sem: 'Odd \'26 (Current)', logs: 847 + extraInteractionsCount, highlight: true }
+                              ].map((item, idx) => {
+                                const maxVal = 950;
+                                const pctHeight = (item.logs / maxVal) * 100;
+                                return (
+                                  <div key={idx} className="flex flex-col items-center gap-1 w-1/4 group relative">
+                                    <div className="absolute bottom-full mb-1 bg-slate-900 text-white text-[9px] font-black px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                                      {item.logs} Logs
+                                    </div>
+                                    <div 
+                                      className="w-6 rounded-t-[3px] transition-all hover:brightness-95" 
+                                      style={{ 
+                                        height: `${pctHeight * 0.7}px`, 
+                                        backgroundColor: item.highlight ? '#000099' : '#E2E0D8'
+                                      }} 
+                                    />
+                                    <span className={`text-[8px] font-extrabold text-center ${item.highlight ? 'text-[#000099]' : 'text-slate-400'}`}>
+                                      {item.sem}
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                            <div className="text-center text-[9px] text-[#000099] font-bold uppercase border-t border-[#E2E0D8]/60 pt-2">
+                              📈 Documented logs expanded by {(((847 + extraInteractionsCount - 420) / 420) * 100).toFixed(1)}% since Odd &apos;24
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Summary Table */}
+                    <div className="bg-white border border-[#E2E0D8] rounded-[10px] shadow-sm overflow-hidden">
+                      <div className="bg-slate-50 border-b border-[#E2E0D8] px-6 py-4 flex items-center justify-between">
+                        <h3 className="font-extrabold text-slate-900 text-sm uppercase tracking-wide">
+                          Department-wise Interaction Summary
+                        </h3>
+                        <span className="text-[10px] bg-slate-200 text-slate-600 font-black px-2 py-0.5 rounded-full uppercase">
+                          4 Departments
+                        </span>
+                      </div>
+
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left text-xs border-collapse">
+                          <thead>
+                            <tr className="bg-slate-50/50 text-slate-400 font-black uppercase tracking-wider border-b border-[#E2E0D8] text-[9px]">
+                              <th className="px-6 py-3">Department</th>
+                              <th className="px-6 py-3 text-center">Faculty Mentors</th>
+                              <th className="px-6 py-3 text-center">Total Interactions</th>
+                              <th className="px-6 py-3 text-center">Students Covered</th>
+                              <th className="px-6 py-3 text-center">At-Risk Flagged</th>
+                              <th className="px-6 py-3 text-center">At-Risk Contacted</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-[#E2E0D8]">
+                            {[
+                              { dept: 'CSE', mentors: 18, logs: 312 + extraInteractionsCount, coverage: `${148 + (extraInteractionsCount > 0 ? 1 : 0)} / 180`, flagged: 18, contacted: 16 },
+                              { dept: 'ECE', mentors: 14, logs: 241, coverage: '112 / 140', flagged: 12, contacted: 11 },
+                              { dept: 'MBA', mentors: 10, logs: 178, coverage: '89 / 110', flagged: 8, contacted: 7 },
+                              { dept: 'Civil', mentors: 8, logs: 116, coverage: '63 / 90', flagged: 6, contacted: 4 }
+                            ].map((row, idx) => (
+                              <tr key={idx} className="hover:bg-slate-50/60 font-semibold text-slate-700">
+                                <td className="px-6 py-4 font-extrabold text-[#000099]">{row.dept}</td>
+                                <td className="px-6 py-4 text-center">{row.mentors}</td>
+                                <td className="px-6 py-4 text-center font-bold">{row.logs}</td>
+                                <td className="px-6 py-4 text-center text-slate-500">{row.coverage}</td>
+                                <td className="px-6 py-4 text-center text-[#F5A623]">{row.flagged}</td>
+                                <td className="px-6 py-4 text-center text-[#27AE60]">{row.contacted}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   </div>
                 )}
 
-                {/* Stat Box Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                  
-                  <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-5 shadow-sm space-y-2">
-                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Logs Recorded</h3>
-                    <p className="text-3xl font-black text-[#000099]">{dynamicTotalInteractions}</p>
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Across active faculty roster</p>
-                  </div>
-
-                  <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-5 shadow-sm space-y-2">
-                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Mentees Covered</h3>
-                    <p className="text-3xl font-black text-slate-900">
-                      {dynamicStudentsCovered} <span className="text-lg text-slate-400 font-normal">/ 520</span>
-                    </p>
-                    <p className="text-[10px] text-emerald-600 font-extrabold uppercase tracking-wider">
-                      Compliance target: {((dynamicStudentsCovered/520)*100).toFixed(0)}%
-                    </p>
-                  </div>
-
-                  <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-5 shadow-sm space-y-2">
-                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Inactive Mentors</h3>
-                    <p className="text-3xl font-black text-[#D94F4F]">3</p>
-                    <p className="text-[10px] text-[#D94F4F] font-bold uppercase tracking-wider">Zero logs submitted this month</p>
-                  </div>
-
-                  <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-5 shadow-sm space-y-2">
-                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">At-Risk Contacted</h3>
-                    <p className="text-3xl font-black text-slate-900">
-                      38 <span className="text-lg text-slate-400 font-normal">/ 44</span>
-                    </p>
-                    <p className="text-[10px] text-emerald-600 font-extrabold uppercase tracking-wider">
-                      86% Contact Rate (Goal: 100%)
-                    </p>
-                  </div>
-
-                </div>
-
-                {/* AI Compliance Audit Readiness & Trend Analysis */}
-                <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-6 shadow-sm space-y-6">
-                  <div className="flex items-center justify-between border-b border-[#E2E0D8] pb-3">
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="w-5 h-5 text-[#000099]" />
-                      <h2 className="text-sm font-black text-slate-900 uppercase tracking-wide">
-                        AI Compliance Audit Readiness &amp; Trend Analysis
-                      </h2>
-                    </div>
-                    <span className="px-2.5 py-0.5 rounded-[5px] text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-[#27AE60] border border-emerald-200">
-                      96.5% AI Success Probability
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Left Column: Criteria Progress & Advisory */}
-                    <div className="space-y-4">
-                      <h4 className="text-[10px] font-black uppercase tracking-wider text-slate-400">NAAC Criterion 5 Metrics Analysis</h4>
+                {/* SUB TAB: DEPARTMENT ANALYTICS */}
+                {principalReportTab === 'departments' && (
+                  <div className="space-y-6 animate-fadeIn">
+                    {/* Header & Department Selector */}
+                    <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+                      <div className="space-y-1">
+                        <h2 className="text-xl font-black text-slate-900">Department Performance Analytics</h2>
+                        <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">
+                          Drill down into mentorship and compliance stats by academic department
+                        </p>
+                      </div>
                       
-                      <div className="space-y-3.5">
-                        {/* Crit 5.1.1 */}
-                        <div className="space-y-1">
-                          <div className="flex justify-between text-xs font-semibold text-slate-700">
-                            <span>Criterion 5.1.1: Student Support Schemes</span>
-                            <span className="font-extrabold text-[#27AE60]">98% Ready</span>
-                          </div>
-                          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200/60">
-                            <div className="h-full bg-[#27AE60] rounded-full" style={{ width: '98%' }} />
-                          </div>
-                        </div>
-
-                        {/* Crit 5.1.3 */}
-                        <div className="space-y-1">
-                          <div className="flex justify-between text-xs font-semibold text-slate-700">
-                            <span>Criterion 5.1.3: Capacity Development &amp; Skills Enhancement</span>
-                            <span className="font-extrabold text-[#27AE60]">95% Ready</span>
-                          </div>
-                          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200/60">
-                            <div className="h-full bg-[#27AE60] rounded-full" style={{ width: '95%' }} />
-                          </div>
-                        </div>
-
-                        {/* Crit 5.2.2 */}
-                        <div className="space-y-1">
-                          <div className="flex justify-between text-xs font-semibold text-slate-700">
-                            <span>Criterion 5.2.2: Student Progression to Higher Education</span>
-                            <span className="font-extrabold text-[#F5A623]">84% Ready</span>
-                          </div>
-                          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200/60">
-                            <div className="h-full bg-[#F5A623] rounded-full" style={{ width: '84%' }} />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Advisory Callout */}
-                      <div className="bg-amber-50/50 border border-amber-200/40 rounded-lg p-3.5 flex items-start gap-2.5">
-                        <AlertTriangle className="w-4 h-4 text-[#F5A623] flex-shrink-0 mt-0.5" />
-                        <div className="text-xs">
-                          <p className="font-extrabold text-[#F5A623] uppercase text-[10px]">AI Compliance Advisory</p>
-                          <p className="text-slate-600 font-medium leading-relaxed mt-1">
-                            Missing mentoring logs in the Civil Engineering department for Criterion 5.1.1 (currently at 70% coverage) could lower the compliance rating score. Complete log verification before the NAAC submission window closes.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Right Column: Historical Growth Chart */}
-                    <div className="space-y-4 border-t md:border-t-0 md:border-l border-[#E2E0D8] pt-4 md:pt-0 md:pl-6">
-                      <h4 className="text-[10px] font-black uppercase tracking-wider text-slate-400">Historical Interaction Volume Growth</h4>
-                      <p className="text-xs text-slate-500 font-medium">
-                        Log trends showcase institutional consistency and compliance scaling over consecutive semesters.
-                      </p>
-
-                      <div className="h-36 bg-[#F8F8F6] border border-[#E2E0D8] rounded-[10px] p-4 flex flex-col justify-between">
-                        <div className="flex items-end justify-around h-24 px-2">
-                          {[
-                            { sem: 'Odd \'24', logs: 420 },
-                            { sem: 'Even \'25', logs: 580 },
-                            { sem: 'Odd \'25', logs: 640 },
-                            { sem: 'Odd \'26 (Current)', logs: 847 + extraInteractionsCount, highlight: true }
-                          ].map((item, idx) => {
-                            const maxVal = 950;
-                            const pctHeight = (item.logs / maxVal) * 100;
-                            return (
-                              <div key={idx} className="flex flex-col items-center gap-1 w-1/4 group relative">
-                                <div className="absolute bottom-full mb-1 bg-slate-900 text-white text-[9px] font-black px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                                  {item.logs} Logs
-                                </div>
-                                <div 
-                                  className="w-6 rounded-t-[3px] transition-all hover:brightness-95" 
-                                  style={{ 
-                                    height: `${pctHeight * 0.7}px`, 
-                                    backgroundColor: item.highlight ? '#000099' : '#E2E0D8'
-                                  }} 
-                                />
-                                <span className={`text-[8px] font-extrabold text-center ${item.highlight ? 'text-[#000099]' : 'text-slate-400'}`}>
-                                  {item.sem}
-                                </span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                        <div className="text-center text-[9px] text-[#000099] font-bold uppercase border-t border-[#E2E0D8]/60 pt-2">
-                          📈 Documented logs expanded by {(((847 + extraInteractionsCount - 420) / 420) * 100).toFixed(1)}% since Odd &apos;24
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Summary Table */}
-                <div className="bg-white border border-[#E2E0D8] rounded-[10px] shadow-sm overflow-hidden">
-                  <div className="bg-slate-50 border-b border-[#E2E0D8] px-6 py-4 flex items-center justify-between">
-                    <h3 className="font-extrabold text-slate-900 text-sm uppercase tracking-wide">
-                      Department-wise Interaction Summary
-                    </h3>
-                    <span className="text-[10px] bg-slate-200 text-slate-600 font-black px-2 py-0.5 rounded-full uppercase">
-                      4 Departments
-                    </span>
-                  </div>
-
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs border-collapse">
-                      <thead>
-                        <tr className="bg-slate-50/50 text-slate-400 font-black uppercase tracking-wider border-b border-[#E2E0D8] text-[9px]">
-                          <th className="px-6 py-3">Department</th>
-                          <th className="px-6 py-3 text-center">Faculty Mentors</th>
-                          <th className="px-6 py-3 text-center">Total Interactions</th>
-                          <th className="px-6 py-3 text-center">Students Covered</th>
-                          <th className="px-6 py-3 text-center">At-Risk Flagged</th>
-                          <th className="px-6 py-3 text-center">At-Risk Contacted</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-[#E2E0D8]">
-                        {[
-                          { dept: 'CSE', mentors: 18, logs: 312 + extraInteractionsCount, coverage: `${148 + (extraInteractionsCount > 0 ? 1 : 0)} / 180`, flagged: 18, contacted: 16 },
-                          { dept: 'ECE', mentors: 14, logs: 241, coverage: '112 / 140', flagged: 12, contacted: 11 },
-                          { dept: 'MBA', mentors: 10, logs: 178, coverage: '89 / 110', flagged: 8, contacted: 7 },
-                          { dept: 'Civil', mentors: 8, logs: 116, coverage: '63 / 90', flagged: 6, contacted: 4 }
-                        ].map((row, idx) => (
-                          <tr key={idx} className="hover:bg-slate-50/60 font-semibold text-slate-700">
-                            <td className="px-6 py-4 font-extrabold text-[#000099]">{row.dept}</td>
-                            <td className="px-6 py-4 text-center">{row.mentors}</td>
-                            <td className="px-6 py-4 text-center font-bold">{row.logs}</td>
-                            <td className="px-6 py-4 text-center text-slate-500">{row.coverage}</td>
-                            <td className="px-6 py-4 text-center text-[#F5A623]">{row.flagged}</td>
-                            <td className="px-6 py-4 text-center text-[#27AE60]">{row.contacted}</td>
-                          </tr>
+                      {/* Department Select Buttons */}
+                      <div className="flex bg-[#F8F8F6] p-1 rounded-lg border border-[#E2E0D8] self-start md:self-auto">
+                        {['CSE', 'ECE', 'MBA', 'Civil'].map(dept => (
+                          <button
+                            key={dept}
+                            id={`dept-select-${dept}`}
+                            onClick={() => setSelectedDept(dept)}
+                            className={`px-4 py-2 rounded-md text-xs font-black uppercase transition-all ${
+                              selectedDept === dept
+                                ? 'bg-[#000099] text-white shadow-sm'
+                                : 'text-slate-600 hover:text-slate-900'
+                            }`}
+                          >
+                            {dept}
+                          </button>
                         ))}
-                      </tbody>
-                    </table>
+                      </div>
+                    </div>
+
+                    {/* Department Level KPIs */}
+                    {(() => {
+                      const deptMentees = mentees.filter(m => m.year.startsWith(selectedDept));
+                      const totalCount = deptMentees.length;
+                      const redCount = deptMentees.filter(m => m.risk === 'RED').length;
+                      const amberCount = deptMentees.filter(m => m.risk === 'AMBER').length;
+                      const greenCount = deptMentees.filter(m => m.risk === 'GREEN').length;
+                      const avgAttd = totalCount > 0 ? (deptMentees.reduce((sum, m) => sum + m.attendance, 0) / totalCount).toFixed(1) : '0';
+                      const avgMarks = totalCount > 0 ? (deptMentees.reduce((sum, m) => sum + m.marks, 0) / totalCount).toFixed(1) : '0';
+                      
+                      // Mocking total mentors & logs for department reports to scale up realistically
+                      const deptMeta = {
+                        CSE: { mentors: 18, logs: 312 + extraInteractionsCount, coverage: 92, inactive: 1 },
+                        ECE: { mentors: 14, logs: 241, coverage: 80, inactive: 1 },
+                        MBA: { mentors: 10, logs: 178, coverage: 81, inactive: 1 },
+                        Civil: { mentors: 8, logs: 116, coverage: 70, inactive: 1 }
+                      }[selectedDept as 'CSE'|'ECE'|'MBA'|'Civil'] || { mentors: 0, logs: 0, coverage: 0, inactive: 0 };
+
+                      // Pie Chart data
+                      const riskChartData = [
+                        { name: 'Red Risk', value: redCount, color: '#D94F4F' },
+                        { name: 'Amber Risk', value: amberCount, color: '#F5A623' },
+                        { name: 'Green Risk', value: greenCount, color: '#27AE60' }
+                      ].filter(d => d.value > 0);
+
+                      // Department mentors mock data
+                      const departmentMentors = {
+                        CSE: [
+                          { name: 'Prof. Ramesh Nair', role: 'Yr 2 Coordinator', mentees: 8, logs: 42 + extraInteractionsCount, lastActive: 'Today', status: 'ACTIVE' },
+                          { name: 'Prof. Sunita Rao', role: 'Yr 1 Advisor', mentees: 10, logs: 35, lastActive: '2 days ago', status: 'ACTIVE' },
+                          { name: 'Prof. Amit Verma', role: 'Yr 2 Advisor', mentees: 8, logs: 0, lastActive: '28 days ago', status: 'INACTIVE' }
+                        ],
+                        ECE: [
+                          { name: 'Prof. Rajesh Kumar', role: 'Yr 2 Coordinator', mentees: 12, logs: 28, lastActive: '4 days ago', status: 'ACTIVE' },
+                          { name: 'Prof. Meera Deshmukh', role: 'Yr 1 Coordinator', mentees: 10, logs: 24, lastActive: '1 day ago', status: 'ACTIVE' },
+                          { name: 'Prof. K. R. Sharma', role: 'Yr 2 Advisor', mentees: 8, logs: 0, lastActive: '45 days ago', status: 'INACTIVE' }
+                        ],
+                        MBA: [
+                          { name: 'Dr. Vikram Seth', role: 'Yr 2 Coordinator', mentees: 15, logs: 38, lastActive: '3 days ago', status: 'ACTIVE' },
+                          { name: 'Prof. Ritu Anand', role: 'Yr 1 Coordinator', mentees: 12, logs: 32, lastActive: '2 days ago', status: 'ACTIVE' },
+                          { name: 'Dr. H. S. Prasad', role: 'Yr 1 Advisor', mentees: 10, logs: 0, lastActive: '60 days ago', status: 'INACTIVE' }
+                        ],
+                        Civil: [
+                          { name: 'Prof. Suresh Hegde', role: 'Yr 2 Coordinator', mentees: 14, logs: 22, lastActive: '5 days ago', status: 'ACTIVE' },
+                          { name: 'Prof. Anil Joshi', role: 'Yr 1 Coordinator', mentees: 12, logs: 18, lastActive: '2 days ago', status: 'ACTIVE' },
+                          { name: 'Prof. Ravi Shanker', role: 'Yr 2 Advisor', mentees: 8, logs: 0, lastActive: '35 days ago', status: 'INACTIVE' }
+                        ]
+                      }[selectedDept as 'CSE'|'ECE'|'MBA'|'Civil'] || [];
+
+                      return (
+                        <div className="space-y-6">
+                          {/* KPI Row */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-5 shadow-sm space-y-2">
+                              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Faculty Mentors</h3>
+                              <p className="text-3xl font-black text-[#000099]">{deptMeta.mentors}</p>
+                              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Active in selected cycle</p>
+                            </div>
+
+                            <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-5 shadow-sm space-y-2">
+                              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Mentoring Logs</h3>
+                              <p className="text-3xl font-black text-slate-900">{deptMeta.logs}</p>
+                              <p className="text-[10px] text-emerald-600 font-extrabold uppercase tracking-wider">Compliance Target Met</p>
+                            </div>
+
+                            <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-5 shadow-sm space-y-2">
+                              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Coverage Rate</h3>
+                              <p className="text-3xl font-black text-[#27AE60]">{deptMeta.coverage}%</p>
+                              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Target threshold: 75%</p>
+                            </div>
+
+                            <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-5 shadow-sm space-y-2">
+                              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Inactive Mentors</h3>
+                              <p className="text-3xl font-black text-[#D94F4F]">{deptMeta.inactive}</p>
+                              <p className="text-[10px] text-[#D94F4F] font-bold uppercase tracking-wider">Needs immediate reminder</p>
+                            </div>
+                          </div>
+
+                          {/* Charts and Mentorship Status */}
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            
+                            {/* Left: Pie Chart showing risk distribution */}
+                            <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-6 shadow-sm space-y-4">
+                              <h3 className="font-extrabold text-slate-900 text-sm uppercase tracking-wide border-b border-[#E2E0D8] pb-3">
+                                Roster Risk Breakdown
+                              </h3>
+                              
+                              {riskChartData.length > 0 ? (
+                                <div className="flex flex-col sm:flex-row items-center justify-around gap-4 h-48">
+                                  <div className="w-40 h-40">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                      <PieChart>
+                                        <Pie
+                                          data={riskChartData}
+                                          cx="50%"
+                                          cy="50%"
+                                          innerRadius={45}
+                                          outerRadius={70}
+                                          paddingAngle={3}
+                                          dataKey="value"
+                                        >
+                                          {riskChartData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={entry.color} />
+                                          ))}
+                                        </Pie>
+                                        <Tooltip />
+                                      </PieChart>
+                                    </ResponsiveContainer>
+                                  </div>
+                                  <div className="space-y-2 text-xs">
+                                    {riskChartData.map((d, i) => (
+                                      <div key={i} className="flex items-center gap-2 font-semibold">
+                                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: d.color }} />
+                                        <span className="text-slate-600">{d.name}:</span>
+                                        <span className="font-black text-slate-900">{d.value} ({((d.value/totalCount)*100).toFixed(0)}%)</span>
+                                      </div>
+                                    ))}
+                                    <p className="text-[10px] text-slate-400 font-bold uppercase border-t border-slate-100 pt-1.5 mt-2">
+                                      Total Department Roster: {totalCount} Students
+                                    </p>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="h-48 flex items-center justify-center text-slate-400 font-semibold text-xs border border-dashed border-[#E2E0D8] rounded-lg">
+                                  No student records found for this department.
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Right: Academic Context & Inactive Alert Callout */}
+                            <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-6 shadow-sm flex flex-col justify-between gap-4">
+                              <div>
+                                <h3 className="font-extrabold text-slate-900 text-sm uppercase tracking-wide border-b border-[#E2E0D8] pb-3 mb-4">
+                                  Department Performance Insights
+                                </h3>
+                                <div className="space-y-3.5 text-xs font-semibold text-slate-600">
+                                  <div className="flex justify-between items-center">
+                                    <span>Average Class Attendance:</span>
+                                    <span className={`font-black ${parseFloat(avgAttd) < 75 ? 'text-[#D94F4F]' : 'text-slate-900'}`}>{avgAttd}%</span>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span>Average Internal Marks:</span>
+                                    <span className={`font-black ${parseFloat(avgMarks) < 50 ? 'text-[#F5A623]' : 'text-slate-900'}`}>{avgMarks}%</span>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span>At-Risk Resolution Progress:</span>
+                                    <span className="font-black text-emerald-600">
+                                      {selectedDept === 'CSE' ? '88% Resolved' : selectedDept === 'ECE' ? '82% Resolved' : '75% Resolved'}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 space-y-3">
+                                <div className="flex items-center gap-2">
+                                  <AlertTriangle className="w-4.5 h-4.5 text-[#FF9A01] flex-shrink-0" />
+                                  <span className="text-xs font-black text-[#FF9A01] uppercase tracking-wide">
+                                    Inactive Advisor Warning Alert
+                                  </span>
+                                </div>
+                                <p className="text-[11px] text-slate-600 font-medium leading-relaxed">
+                                  System detected 1 mentor in {selectedDept} department has not logged any mentoring interaction in the last 15 days. Missing records will affect NAAC compliance scoring.
+                                </p>
+                                <button
+                                  id={`btn-remind-mentors-${selectedDept}`}
+                                  onClick={() => showToast(`Sent compliance reminders to inactive mentors in ${selectedDept} department.`, 'success')}
+                                  className="px-3.5 py-2 bg-[#FF9A01] text-white text-[10px] font-black uppercase tracking-wider rounded-[6px] hover:bg-[#FF9A01]/95 transition shadow-sm"
+                                >
+                                  Email Inactive Mentors
+                                </button>
+                              </div>
+                            </div>
+
+                          </div>
+
+                          {/* Department Faculty Mentors Table */}
+                          <div className="bg-white border border-[#E2E0D8] rounded-[10px] shadow-sm overflow-hidden">
+                            <div className="bg-slate-50 border-b border-[#E2E0D8] px-6 py-4 flex items-center justify-between">
+                              <h3 className="font-extrabold text-slate-900 text-sm uppercase tracking-wide">
+                                Mentor Log Compliance Tracker
+                              </h3>
+                              <span className="text-[10px] bg-slate-200 text-slate-600 font-black px-2 py-0.5 rounded-full uppercase">
+                                {departmentMentors.length} Advisors Assigned
+                              </span>
+                            </div>
+
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-left text-xs border-collapse">
+                                <thead>
+                                  <tr className="bg-slate-50/50 text-slate-400 font-black uppercase tracking-wider border-b border-[#E2E0D8] text-[9px]">
+                                    <th className="px-6 py-3">Mentor Name</th>
+                                    <th className="px-6 py-3">Role / Designation</th>
+                                    <th className="px-6 py-3 text-center">Assigned Mentees</th>
+                                    <th className="px-6 py-3 text-center">Interactions Logged</th>
+                                    <th className="px-6 py-3 text-center">Last Activity Date</th>
+                                    <th className="px-6 py-3 text-center">Compliance Status</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-[#E2E0D8]">
+                                  {departmentMentors.map((row, idx) => (
+                                    <tr key={idx} className="hover:bg-slate-50/60 font-semibold text-slate-700">
+                                      <td className="px-6 py-4 font-extrabold text-slate-950">{row.name}</td>
+                                      <td className="px-6 py-4 text-slate-500">{row.role}</td>
+                                      <td className="px-6 py-4 text-center">{row.mentees}</td>
+                                      <td className="px-6 py-4 text-center font-bold">{row.logs}</td>
+                                      <td className="px-6 py-4 text-center text-slate-500">{row.lastActive}</td>
+                                      <td className="px-6 py-4 text-center">
+                                        <span className={`px-2 py-0.5 rounded-[5px] text-[9px] font-black uppercase ${
+                                          row.status === 'ACTIVE' 
+                                            ? 'bg-green-50 text-[#27AE60]' 
+                                            : 'bg-red-50 text-[#D94F4F] animate-pulse'
+                                        }`}>
+                                          {row.status}
+                                        </span>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
-                </div>
+                )}
+
+                {/* SUB TAB: COURSE & CLASS REPORTS */}
+                {principalReportTab === 'courses' && (
+                  <div className="space-y-6 animate-fadeIn">
+                    {/* Header & Class Selector */}
+                    <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+                      <div className="space-y-1">
+                        <h2 className="text-xl font-black text-slate-900">Course &amp; Class Reports</h2>
+                        <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">
+                          Monitor attendance benchmarks and performance risk indicators by class cohorts
+                        </p>
+                      </div>
+                      
+                      {/* Class Selection Dropdown */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-slate-400 uppercase">Select Class Cohort:</span>
+                        <select
+                          value={selectedClass}
+                          id="class-selector-dropdown"
+                          onChange={(e) => setSelectedClass(e.target.value)}
+                          className="px-3 py-2 text-xs font-black uppercase border border-[#E2E0D8] rounded-[10px] bg-white focus:outline-none focus:border-[#000099] transition shadow-sm"
+                        >
+                          {[
+                            'CSE Yr 1', 'CSE Yr 2',
+                            'ECE Yr 1', 'ECE Yr 2',
+                            'MBA Yr 1', 'MBA Yr 2',
+                            'Civil Yr 1', 'Civil Yr 2'
+                          ].map(cls => (
+                            <option key={cls} value={cls}>{cls}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Class metrics and roster */}
+                    {(() => {
+                      const classMentees = mentees.filter(m => m.year === selectedClass);
+                      const totalCount = classMentees.length;
+                      
+                      const avgAttd = totalCount > 0 ? Math.round(classMentees.reduce((sum, m) => sum + m.attendance, 0) / totalCount) : 0;
+                      const avgMarks = totalCount > 0 ? Math.round(classMentees.reduce((sum, m) => sum + m.marks, 0) / totalCount) : 0;
+                      const avgCgpa = totalCount > 0 ? (classMentees.reduce((sum, m) => sum + m.cgpa, 0) / totalCount).toFixed(1) : '0';
+                      const backlogCount = classMentees.reduce((sum, m) => sum + m.backlogsCount, 0);
+
+                      // Bar Chart Data for attendance vs marks
+                      const chartData = classMentees.map(m => ({
+                        name: m.name.split(' ')[0], // only first name for chart label space
+                        Attendance: m.attendance,
+                        Marks: m.marks
+                      }));
+
+                      return (
+                        <div className="space-y-6">
+                          {/* KPI row */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-5 shadow-sm space-y-2">
+                              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Average Attendance</h3>
+                              <p className="text-3xl font-black text-slate-900" style={{ color: avgAttd < 75 ? '#D94F4F' : '#000099' }}>{avgAttd}%</p>
+                              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">UGC Standard: 75% Min</p>
+                            </div>
+
+                            <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-5 shadow-sm space-y-2">
+                              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Average Marks</h3>
+                              <p className="text-3xl font-black text-slate-900">{avgMarks}%</p>
+                              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Pass Mark Threshold: 40%</p>
+                            </div>
+
+                            <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-5 shadow-sm space-y-2">
+                              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Average CGPA</h3>
+                              <p className="text-3xl font-black text-[#27AE60]">{avgCgpa}</p>
+                              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Class Progression Track</p>
+                            </div>
+
+                            <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-5 shadow-sm space-y-2">
+                              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Backlogs</h3>
+                              <p className="text-3xl font-black text-slate-900" style={{ color: backlogCount > 0 ? '#F5A623' : '#27AE60' }}>{backlogCount}</p>
+                              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Across active cohort roster</p>
+                            </div>
+                          </div>
+
+                          {/* Chart Grid */}
+                          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            
+                            {/* Left: Bar Chart showing attendance & marks distribution */}
+                            <div className="lg:col-span-2 bg-white border border-[#E2E0D8] rounded-[10px] p-6 shadow-sm space-y-4">
+                              <h3 className="font-extrabold text-slate-900 text-sm uppercase tracking-wide border-b border-[#E2E0D8] pb-3">
+                                Cohort Performance Distribution (Attendance vs. Internal Marks)
+                              </h3>
+                              
+                              {chartData.length > 0 ? (
+                                <div className="h-64 pt-2">
+                                  <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                      <XAxis dataKey="name" tick={{ fontSize: 10, fontWeight: 'bold', fill: '#64748B' }} />
+                                      <YAxis domain={[0, 100]} tick={{ fontSize: 10, fontWeight: 'bold', fill: '#64748B' }} />
+                                      <Tooltip />
+                                      <Legend wrapperStyle={{ fontSize: 11, fontWeight: 'bold' }} />
+                                      <Bar dataKey="Attendance" fill="#000099" radius={[3, 3, 0, 0]} />
+                                      <Bar dataKey="Marks" fill="#FF9A01" radius={[3, 3, 0, 0]} />
+                                    </BarChart>
+                                  </ResponsiveContainer>
+                                </div>
+                              ) : (
+                                <div className="h-64 flex items-center justify-center text-slate-400 font-semibold text-xs border border-dashed border-[#E2E0D8] rounded-lg">
+                                  No student records found to generate visual charts.
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Right: Quick Action Controls */}
+                            <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-6 shadow-sm flex flex-col justify-between gap-4">
+                              <div>
+                                <h3 className="font-extrabold text-slate-900 text-sm uppercase tracking-wide border-b border-[#E2E0D8] pb-3 mb-4">
+                                  Executive Action Center
+                                </h3>
+                                <p className="text-xs text-slate-500 font-medium leading-relaxed mb-4">
+                                  Simulate admin interventions for this specific class cohort based on overall compliance status.
+                                </p>
+                              </div>
+
+                              <div className="space-y-3.5">
+                                <button
+                                  id="btn-broadcast-parents"
+                                  onClick={() => showToast(`Dispatched parental notifications for attendance drops in ${selectedClass}.`, 'success')}
+                                  className="w-full py-3 bg-[#000099] text-white text-xs font-black uppercase tracking-wider rounded-[8px] hover:bg-[#000099]/90 transition shadow-sm active:scale-98"
+                                >
+                                  Broadcast Parental Warnings
+                                </button>
+                                
+                                <button
+                                  id="btn-schedule-remedial"
+                                  onClick={() => showToast(`Created remedial classes directive for ${selectedClass} at-risk students.`, 'success')}
+                                  className="w-full py-3 bg-[#FF9A01] text-white text-xs font-black uppercase tracking-wider rounded-[8px] hover:bg-[#FF9A01]/90 transition shadow-sm active:scale-98"
+                                >
+                                  Schedule Remedial Classes
+                                </button>
+                                
+                                <div className="text-[10px] text-slate-400 font-bold uppercase text-center mt-2.5">
+                                  ⚡ Interventions log in UGC compliance archive
+                                </div>
+                              </div>
+                            </div>
+
+                          </div>
+
+                          {/* Class Roster Table */}
+                          <div className="bg-white border border-[#E2E0D8] rounded-[10px] shadow-sm overflow-hidden">
+                            <div className="bg-slate-50 border-b border-[#E2E0D8] px-6 py-4 flex items-center justify-between">
+                              <h3 className="font-extrabold text-slate-900 text-sm uppercase tracking-wide">
+                                Class Student Roster
+                              </h3>
+                              <span className="text-[10px] bg-slate-200 text-slate-600 font-black px-2 py-0.5 rounded-full uppercase">
+                                {totalCount} Students Enrolled
+                              </span>
+                            </div>
+
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-left text-xs border-collapse">
+                                <thead>
+                                  <tr className="bg-slate-50/50 text-slate-400 font-black uppercase tracking-wider border-b border-[#E2E0D8] text-[9px]">
+                                    <th className="px-6 py-3">Student Name</th>
+                                    <th className="px-6 py-3 text-center">Risk Level</th>
+                                    <th className="px-6 py-3 text-center">Attendance</th>
+                                    <th className="px-6 py-3 text-center">Internal Marks</th>
+                                    <th className="px-6 py-3 text-center">CGPA</th>
+                                    <th className="px-6 py-3 text-center">Active Backlogs</th>
+                                    <th className="px-6 py-3 text-center">Fee Status</th>
+                                    <th className="px-6 py-3 text-center">Assigned Advisor</th>
+                                    <th className="px-6 py-3 text-center">Action</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-[#E2E0D8]">
+                                  {classMentees.map((row, idx) => {
+                                    const badgeColor = 
+                                      row.risk === 'RED' ? '#D94F4F' : 
+                                      row.risk === 'AMBER' ? '#F5A623' : '#27AE60';
+                                    const badgeBg = 
+                                      row.risk === 'RED' ? '#FCEBEB' : 
+                                      row.risk === 'AMBER' ? '#FFF6E6' : '#EBF7EE';
+                                    
+                                    const mentorName = row.history[0]?.faculty || {
+                                      CSE: 'Prof. Ramesh Nair',
+                                      ECE: 'Prof. Rajesh Kumar',
+                                      MBA: 'Dr. Vikram Seth',
+                                      Civil: 'Prof. Suresh Hegde'
+                                    }[row.year.split(' ')[0]] || 'Prof. Ramesh Nair';
+
+                                    return (
+                                      <tr key={idx} className="hover:bg-slate-50/60 font-semibold text-slate-700">
+                                        <td className="px-6 py-4 font-extrabold text-slate-950">{row.name}</td>
+                                        <td className="px-6 py-4 text-center">
+                                          <span 
+                                            className="px-2 py-0.5 rounded-[5px] text-[9px] font-black uppercase tracking-wider"
+                                            style={{ backgroundColor: badgeBg, color: badgeColor }}
+                                          >
+                                            {row.risk}
+                                          </span>
+                                        </td>
+                                        <td className={`px-6 py-4 text-center ${row.attendance < 75 ? 'text-[#D94F4F] font-black' : ''}`}>{row.attendance}%</td>
+                                        <td className={`px-6 py-4 text-center ${row.marks < 40 ? 'text-[#D94F4F] font-black' : ''}`}>{row.marks}%</td>
+                                        <td className="px-6 py-4 text-center font-bold">{row.cgpa.toFixed(1)}</td>
+                                        <td className={`px-6 py-4 text-center ${row.backlogsCount > 0 ? 'text-[#D94F4F] font-black' : ''}`}>{row.backlogsCount}</td>
+                                        <td className={`px-6 py-4 text-center ${row.feeStatus === 'Overdue' ? 'text-[#D94F4F]' : 'text-[#27AE60]'}`}>
+                                          {row.feeStatus === 'Overdue' ? `₹${row.feeAmount.toLocaleString('en-IN')}` : 'Cleared'}
+                                        </td>
+                                        <td className="px-6 py-4 text-slate-500 text-center">{mentorName}</td>
+                                        <td className="px-6 py-4 text-center">
+                                          <button
+                                            id={`btn-view-profile-course-${row.id}`}
+                                            onClick={() => {
+                                              setSelectedStudentId(row.id);
+                                              setActiveTab('profile');
+                                            }}
+                                            className="text-[#000099] font-black uppercase text-[10px] hover:underline"
+                                          >
+                                            View Profile
+                                          </button>
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+
+                {/* SUB TAB: AT-RISK STUDENT ROSTER */}
+                {principalReportTab === 'roster' && (
+                  <div className="space-y-6 animate-fadeIn">
+                    <div className="bg-white border border-[#E2E0D8] rounded-[10px] p-6 shadow-sm space-y-2">
+                      <h2 className="text-xl font-black text-slate-900">Institutional At-Risk Student Roster</h2>
+                      <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">
+                        A consolidated list of all RED and AMBER risk students across all departments
+                      </p>
+                    </div>
+
+                    {(() => {
+                      const atRiskMentees = mentees.filter(m => m.risk === 'RED' || m.risk === 'AMBER');
+                      const totalCount = atRiskMentees.length;
+                      
+                      return (
+                        <div className="bg-white border border-[#E2E0D8] rounded-[10px] shadow-sm overflow-hidden">
+                          <div className="bg-slate-50 border-b border-[#E2E0D8] px-6 py-4 flex items-center justify-between">
+                            <h3 className="font-extrabold text-slate-900 text-sm uppercase tracking-wide">
+                              Flagged Student Roster
+                            </h3>
+                            <span className="text-[10px] bg-[#D94F4F]/10 text-[#D94F4F] font-black px-2.5 py-0.5 rounded-full uppercase">
+                              {totalCount} Flags Active
+                            </span>
+                          </div>
+
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-left text-xs border-collapse">
+                              <thead>
+                                <tr className="bg-slate-50/50 text-slate-400 font-black uppercase tracking-wider border-b border-[#E2E0D8] text-[9px]">
+                                  <th className="px-6 py-3">Student Name</th>
+                                  <th className="px-6 py-3">Dept</th>
+                                  <th className="px-6 py-3">Class</th>
+                                  <th className="px-6 py-3 text-center">Risk</th>
+                                  <th className="px-6 py-3 text-center">Attendance</th>
+                                  <th className="px-6 py-3 text-center">Internal Marks</th>
+                                  <th className="px-6 py-3 text-center">Backlogs</th>
+                                  <th className="px-6 py-3 text-center">Primary Risk Drivers</th>
+                                  <th className="px-6 py-3 text-center">Assigned Advisor</th>
+                                  <th className="px-6 py-3 text-center">Actions</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-[#E2E0D8]">
+                                {atRiskMentees.map((row, idx) => {
+                                  const badgeColor = 
+                                    row.risk === 'RED' ? '#D94F4F' : '#F5A623';
+                                  const badgeBg = 
+                                    row.risk === 'RED' ? '#FCEBEB' : '#FFF6E6';
+                                  
+                                  const dept = row.year.split(' ')[0];
+
+                                  const mentorName = row.history[0]?.faculty || {
+                                    CSE: 'Prof. Ramesh Nair',
+                                    ECE: 'Prof. Rajesh Kumar',
+                                    MBA: 'Dr. Vikram Seth',
+                                    Civil: 'Prof. Suresh Hegde'
+                                  }[dept] || 'Prof. Ramesh Nair';
+
+                                  // Determine main risk reasons
+                                  const reasons = [];
+                                  if (row.attendance < 75) reasons.push('Low Attd');
+                                  if (row.marks < 40) reasons.push('Low Marks');
+                                  if (row.backlogsCount > 0) reasons.push(`${row.backlogsCount} Backlogs`);
+                                  if (row.feeStatus === 'Overdue') reasons.push('Fees Overdue');
+                                  if (row.disciplinaryStatus !== 'No Issues') reasons.push('Disciplinary Alert');
+
+                                  return (
+                                    <tr key={idx} className="hover:bg-slate-50/60 font-semibold text-slate-700">
+                                      <td className="px-6 py-4 font-extrabold text-slate-950">{row.name}</td>
+                                      <td className="px-6 py-4 text-slate-500 font-extrabold">{dept}</td>
+                                      <td className="px-6 py-4 text-slate-500">{row.year}</td>
+                                      <td className="px-6 py-4 text-center">
+                                        <span 
+                                          className="px-2 py-0.5 rounded-[5px] text-[9px] font-black uppercase tracking-wider"
+                                          style={{ backgroundColor: badgeBg, color: badgeColor }}
+                                        >
+                                          {row.risk}
+                                        </span>
+                                      </td>
+                                      <td className={`px-6 py-4 text-center ${row.attendance < 75 ? 'text-[#D94F4F] font-black' : ''}`}>{row.attendance}%</td>
+                                      <td className={`px-6 py-4 text-center ${row.marks < 40 ? 'text-[#D94F4F] font-black' : ''}`}>{row.marks}%</td>
+                                      <td className={`px-6 py-4 text-center ${row.backlogsCount > 0 ? 'text-[#D94F4F] font-black' : ''}`}>{row.backlogsCount}</td>
+                                      <td className="px-6 py-4 text-center">
+                                        <div className="flex justify-center gap-1.5 flex-wrap">
+                                          {reasons.map((r, i) => (
+                                            <span key={i} className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[9px] font-extrabold uppercase border border-slate-200">
+                                              {r}
+                                            </span>
+                                          ))}
+                                        </div>
+                                      </td>
+                                      <td className="px-6 py-4 text-slate-500 text-center">{mentorName}</td>
+                                      <td className="px-6 py-4 text-center">
+                                        <div className="flex justify-center gap-2">
+                                          <button
+                                            id={`btn-view-profile-roster-${row.id}`}
+                                            onClick={() => {
+                                              setSelectedStudentId(row.id);
+                                              setActiveTab('profile');
+                                            }}
+                                            className="text-[#000099] font-black uppercase text-[10px] hover:underline"
+                                          >
+                                            Profile
+                                          </button>
+                                          <span className="text-slate-300">|</span>
+                                          <button
+                                            id={`btn-alert-roster-${row.id}`}
+                                            onClick={() => showToast(`Sent parental alert and advisor warning for ${row.name}.`, 'success')}
+                                            className="text-[#FF9A01] font-black uppercase text-[10px] hover:underline"
+                                          >
+                                            Alert
+                                          </button>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
 
               </div>
             )}

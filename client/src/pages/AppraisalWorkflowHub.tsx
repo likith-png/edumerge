@@ -17,7 +17,8 @@ import {
     Calendar,
     Clock,
     ArrowRight,
-    Settings
+    Settings,
+    Brain
 } from 'lucide-react';
 import { usePersona } from '../contexts/PersonaContext';
 import {
@@ -336,6 +337,15 @@ const AppraisalWorkflowHub: React.FC = () => {
                     <CardContent className="pt-6 text-center">
                         <TrendingUp className="h-8 w-8 text-green-600 mx-auto mb-2" />
                         <p className="text-sm font-medium">Analytics</p>
+                    </CardContent>
+                </Card>
+                <Card
+                    className="cursor-pointer border-slate-200 hover:shadow-sm transition-all animate-pulse"
+                    onClick={() => navigate('/appraisal/feedback360-analysis')}
+                >
+                    <CardContent className="pt-6 text-center">
+                        <Brain className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+                        <p className="text-sm font-medium">AI 360 Analysis</p>
                     </CardContent>
                 </Card>
                 {myAppraisal.isPIP && (
