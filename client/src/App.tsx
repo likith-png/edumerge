@@ -44,7 +44,6 @@ import LeaveConfiguration from './pages/LeaveConfiguration';
 import YearlyLeaveBook from './pages/YearlyLeaveBook';
 import AdvancedLeaveManagement from './pages/AdvancedLeaveManagement';
 import PrincipalDashboard from './pages/PrincipalDashboard';
-import ResearchPublication from './pages/ResearchPublication';
 import ControlTower from './pages/ControlTower';
 import VehicleManagement from './pages/VehicleManagement';
 import WorkforceIntelligence from './pages/WorkforceIntelligence';
@@ -55,9 +54,14 @@ import ComplianceNAAC from './pages/ComplianceNAAC';
 import FinanceIntelligence from './pages/FinanceIntelligence';
 import OnlinePaperEvaluation from './pages/OnlinePaperEvaluation';
 import MentorManagement from './pages/MentorManagement';
-import AiCopilot from './pages/AiCopilot';
 import AcademicContentIntelligence from './pages/AcademicContentIntelligence';
 import AcademicCreditBank from './pages/AcademicCreditBank';
+import AiQuestionGenerator from './pages/AiQuestionGenerator';
+import GandosavaExamManagement from './pages/GandosavaExamManagement';
+import AutoTimetableModule from './pages/AutoTimetableModule';
+import GroupBoard from './pages/GroupBoard';
+import DegreeAwardingSystem from './pages/DegreeAwardingSystem';
+import ResourceReservation from './pages/ResourceReservation';
 import { PersonaProvider } from './contexts/PersonaContext';
 import { StaffProvider } from './contexts/StaffContext';
 
@@ -120,8 +124,7 @@ function App() {
           {/* Alumni Portal */}
           <Route path="/alumni-portal" element={<AlumniPortal />} />
 
-          {/* Research & Publication */}
-          <Route path="/research-publication" element={<ResearchPublication />} />
+
 
           {/* HRMS Control Tower */}
           <Route path="/control-tower" element={<ControlTower />} />
@@ -142,9 +145,14 @@ function App() {
           <Route path="/finance-intelligence" element={<FinanceIntelligence />} />
           <Route path="/online-paper-evaluation" element={<OnlinePaperEvaluation />} />
           <Route path="/mentor-management" element={<MentorManagement />} />
-          <Route path="/ai-copilot" element={<AiCopilot />} />
           <Route path="/academic-content-intelligence" element={<AcademicContentIntelligence />} />
           <Route path="/academic-credit-bank" element={<AcademicCreditBank />} />
+          <Route path="/ai-question-generator" element={<AiQuestionGenerator />} />
+          <Route path="/gandosava-exams" element={<GandosavaExamManagement />} />
+          <Route path="/timetable-config" element={<AutoTimetableModule />} />
+          <Route path="/group-board" element={<GroupBoard />} />
+          <Route path="/degree-awarding" element={<DegreeAwardingSystem />} />
+          <Route path="/resource-reservation" element={<ResourceReservation />} />
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

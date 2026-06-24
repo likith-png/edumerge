@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import { User, Briefcase, UserCog, GraduationCap, Users, X, Truck } from 'lucide-react';
 
-export type UserRole = 'HR_ADMIN' | 'MANAGER' | 'EMPLOYEE' | 'ADMIN' | 'ALUMNI' | 'DRIVER' | 'HOD' | 'TRUSTEE' | 'CHAIRMAN' | 'PAYROLL';
+export type UserRole = 'HR_ADMIN' | 'MANAGER' | 'EMPLOYEE' | 'ADMIN' | 'ALUMNI' | 'DRIVER' | 'HOD' | 'TRUSTEE' | 'CHAIRMAN' | 'PAYROLL' | 'STUDENT';
 
 interface PersonaContextType {
     role: UserRole;
@@ -33,6 +33,7 @@ export const PersonaProvider = ({ children }: { children: ReactNode }) => {
             case 'ADMIN': return { name: 'System Admin', id: 'admin-001', department: 'IT' };
             case 'ALUMNI': return { name: 'Jane Ex-Faculty', id: 'alum-001', department: 'Mechanical Engineering' };
             case 'DRIVER': return { name: 'Rajesh Kumar', id: 'driver-001', department: 'Transport' };
+            case 'STUDENT': return { name: 'Student 1 (Class 10-A)', id: 'stu-10a-1', department: 'Class 10-A' };
             default: return { name: 'Guest', id: 'guest-000' };
         }
     };
@@ -75,7 +76,8 @@ export const PersonaProvider = ({ children }: { children: ReactNode }) => {
                         { id: 'MANAGER', label: 'Manager (HOD)', icon: Briefcase, activeClass: 'bg-blue-600 text-white shadow-blue-100', hoverClass: 'hover:bg-blue-50 text-slate-600 hover:text-blue-600', iconColor: 'text-blue-500' },
                         { id: 'EMPLOYEE', label: 'Employee', icon: User, activeClass: 'bg-sky-600 text-white shadow-sky-100', hoverClass: 'hover:bg-sky-50 text-slate-600 hover:text-sky-600', iconColor: 'text-sky-500' },
                         { id: 'ALUMNI', label: 'Alumni', icon: GraduationCap, activeClass: 'bg-emerald-600 text-white shadow-emerald-100', hoverClass: 'hover:bg-emerald-50 text-slate-600 hover:text-emerald-600', iconColor: 'text-emerald-500' },
-                        { id: 'DRIVER', label: 'Driver', icon: Truck, activeClass: 'bg-orange-600 text-white shadow-orange-100', hoverClass: 'hover:bg-orange-50 text-slate-600 hover:text-orange-600', iconColor: 'text-orange-500' }
+                        { id: 'DRIVER', label: 'Driver', icon: Truck, activeClass: 'bg-orange-600 text-white shadow-orange-100', hoverClass: 'hover:bg-orange-50 text-slate-600 hover:text-orange-600', iconColor: 'text-orange-500' },
+                        { id: 'STUDENT', label: 'Student', icon: GraduationCap, activeClass: 'bg-teal-600 text-white shadow-teal-100', hoverClass: 'hover:bg-teal-50 text-slate-600 hover:text-teal-600', iconColor: 'text-teal-500' }
                     ].map((persona) => {
                         const Icon = persona.icon;
                         const isActive = role === persona.id;

@@ -59,22 +59,10 @@ const categories = [
         color: "indigo",
         modules: [
             {
-                title: "edumerge co-pilot",
-                description: "Chat with edumerge's unified AI assistant — get answers across academics, finance, compliance, grievances, paper evaluation and mentoring.",
-                icon: Brain,
-                path: "/ai-copilot"
-            },
-            {
                 title: "Lesson Plan & Curriculum",
                 description: "Manage lesson plans, curriculum design, and academic schedules.",
                 icon: BookOpen,
                 path: "/lesson-plan"
-            },
-            {
-                title: "Research & Publication",
-                description: "Track academic papers, projects, and calculate UGC API scores.",
-                icon: GraduationCap,
-                path: "/research-publication"
             },
             {
                 title: "Academic co-pilot",
@@ -83,10 +71,47 @@ const categories = [
                 path: "/academic-guide"
             },
             {
+                title: "Academic Content Intelligence",
+                description: "AI-powered curriculum content generation system mapped to course outcomes and syllabus units.",
+                icon: Brain,
+                path: "/academic-content-intelligence"
+            },
+            {
+                title: "Gandosava Exam Management",
+                description: "Manage Guru & Student registrations, schedule exams, allocate centers capacity-aware, and publish results.",
+                icon: GraduationCap,
+                path: "/gandosava-exams"
+            },
+            {
+                title: "Timetable Configuration",
+                description: "Setup wizard to configure school timetables, manage hard/soft constraints, load matrices, and substitution pools.",
+                icon: Calendar,
+                path: "/timetable-config"
+            }
+        ]
+    },
+    {
+        name: "College Suite",
+        icon: GraduationCap,
+        color: "orange",
+        modules: [
+            {
                 title: "Online Paper Evaluation",
                 description: "AI-assisted scoring tool utilizing handwritten script OCR scans and custom grading rubrics.",
                 icon: Brain,
                 path: "/online-paper-evaluation"
+            },
+            {
+                title: "Academic Credit Bank",
+                description: "NEP-compliant Academic Bank of Credits (ABC) portal. Sync credits via DigiLocker, manage credit transfers, and push academic records.",
+                icon: GraduationCap,
+                path: "/academic-credit-bank"
+            },
+            {
+                title: "AI Question Paper Generator",
+                description: "AI-powered school and college test builder aligned to difficulty levels and Bloom's Taxonomy.",
+                icon: Brain,
+                path: "/ai-question-generator"
             },
             {
                 title: "Mentor Management",
@@ -95,16 +120,10 @@ const categories = [
                 path: "/mentor-management"
             },
             {
-                title: "Academic Content Intelligence",
-                description: "AI-powered curriculum content generation system mapped to course outcomes and syllabus units.",
-                icon: Brain,
-                path: "/academic-content-intelligence"
-            },
-            {
-                title: "Academic Credit Bank",
-                description: "NEP-compliant Academic Bank of Credits (ABC) portal. Sync credits via DigiLocker, manage credit transfers, and push academic records.",
+                title: "Degree Awarding System",
+                description: "UGC-compliant degree award prototype. 5-point eligibility checks, manual overrides, batch operations, audit log, and certificate generator.",
                 icon: GraduationCap,
-                path: "/academic-credit-bank"
+                path: "/degree-awarding"
             }
         ]
     },
@@ -181,6 +200,12 @@ const categories = [
         color: "slate",
         modules: [
             {
+                title: "Group Board",
+                description: "Executive view of market segmentation, support status, and opportunities across institutions.",
+                icon: Building2,
+                path: "/group-board"
+            },
+            {
                 title: "Capacity Planner",
                 description: "Visualise staff strength, identify gaps, and model future hiring needs against regulatory ratios.",
                 icon: Network,
@@ -194,7 +219,7 @@ const categories = [
             },
             {
                 title: "HRMS Control Tower",
-                description: "Real-time HRMS command centre — plug-and-play widgets, payroll readiness, approvals and more.",
+                description: "Real-time HRMS command centre - plug-and-play widgets, payroll readiness, approvals and more.",
                 icon: Zap,
                 path: "/control-tower"
             },
@@ -234,6 +259,12 @@ const categories = [
                 description: "Fleet registry, compliance engine, fuel tracking, driver management, routes, fees and analytics.",
                 icon: Truck,
                 path: "/vehicle-management"
+            },
+            {
+                title: "Resource Reservation",
+                description: "Campus space-and-time registry. Seminar halls, auditorium, sports grounds, classrooms, and labs scheduler.",
+                icon: Calendar,
+                path: "/resource-reservation"
             }
         ]
     },
@@ -285,8 +316,8 @@ const Dashboard: React.FC = () => {
         ];
     });
 
+
     const aiModuleTitles = React.useMemo(() => [
-        "edumerge co-pilot",
         "Academic co-pilot",
         "Online Paper Evaluation",
         "Workforce Intelligence",
@@ -294,7 +325,8 @@ const Dashboard: React.FC = () => {
         "Compliance & NAAC",
         "Finance Intelligence",
         "Mentor Management",
-        "Academic Content Intelligence"
+        "Academic Content Intelligence",
+        "AI Question Paper Generator"
     ], []);
 
     const enableAllAiModules = () => {
@@ -346,9 +378,9 @@ const Dashboard: React.FC = () => {
         localStorage.setItem('hrms_hidden_modules', JSON.stringify(newHidden));
     };
 
-    const [viewMode, setViewMode] = React.useState<'hrms' | 'ai'>(() => {
+    const [viewMode, setViewMode] = React.useState<'hrms' | 'ai' | 'college'>(() => {
         const saved = localStorage.getItem('hrms_dashboard_view_mode');
-        return (saved === 'ai' || saved === 'hrms') ? saved : 'hrms';
+        return (saved === 'ai' || saved === 'hrms' || saved === 'college') ? saved : 'hrms';
     });
 
     React.useEffect(() => {
@@ -357,7 +389,6 @@ const Dashboard: React.FC = () => {
 
     const filteredCategories = React.useMemo(() => {
         const aiModuleTitles = [
-            "edumerge co-pilot",
             "Academic co-pilot",
             "Online Paper Evaluation",
             "Workforce Intelligence",
@@ -365,44 +396,55 @@ const Dashboard: React.FC = () => {
             "Compliance & NAAC",
             "Finance Intelligence",
             "Mentor Management",
-            "Academic Content Intelligence"
+            "Academic Content Intelligence",
+            "AI Question Paper Generator"
         ];
 
-        return categories.map(cat => {
-            const filteredModules = cat.modules.filter(mod => {
-                // 1. Filter by hidden modules
-                if (hiddenModules.includes(mod.title)) return false;
-
-                // 2. Filter by viewMode (HRMS vs AI Innovations)
-                const isAiModule = aiModuleTitles.includes(mod.title);
-                if (viewMode === 'hrms' && isAiModule) return false;
-                if (viewMode === 'ai' && !isAiModule) return false;
-
-                // 3. Filter by search query
-                if (searchQuery) {
-                    const query = searchQuery.toLowerCase();
-                    return (
-                        mod.title.toLowerCase().includes(query) ||
-                        mod.description.toLowerCase().includes(query) ||
-                        cat.name.toLowerCase().includes(query)
-                    );
+        return categories
+            .filter(cat => {
+                if (cat.name === "College Suite") {
+                    return viewMode === 'college';
                 }
-
+                if (viewMode === 'college') {
+                    return false;
+                }
                 return true;
-            });
+            })
+            .map(cat => {
+                const filteredModules = cat.modules.filter(mod => {
+                    // 1. Filter by hidden modules
+                    if (hiddenModules.includes(mod.title)) return false;
 
-            return {
-                ...cat,
-                modules: filteredModules
-            };
-        }).filter(cat => cat.modules.length > 0);
+                    // 2. Filter by viewMode (HRMS vs AI Innovations)
+                    const isAiModule = aiModuleTitles.includes(mod.title);
+                    if (viewMode === 'hrms' && isAiModule) return false;
+                    if (viewMode === 'ai' && !isAiModule) return false;
+
+                    // 3. Filter by search query
+                    if (searchQuery) {
+                        const query = searchQuery.toLowerCase();
+                        return (
+                            mod.title.toLowerCase().includes(query) ||
+                            mod.description.toLowerCase().includes(query) ||
+                            cat.name.toLowerCase().includes(query)
+                        );
+                    }
+
+                    return true;
+                });
+
+                return {
+                    ...cat,
+                    modules: filteredModules
+                };
+            }).filter(cat => cat.modules.length > 0);
     }, [viewMode, searchQuery, hiddenModules]);
 
     return (
         <Layout
-            title={isEmployee ? "Employee Portal" : isManager ? "Manager Console" : (viewMode === 'ai' ? "edumerge co-pilot" : "HRMS Platform")}
-            description={isEmployee ? `Welcome back, ${user.name}` : isManager ? `Team Overview - ${user.name}` : (viewMode === 'ai' ? "AI-Powered Institution Intelligence Co-Pilot" : "Unified Human Resource Management Environment")}
-            icon={isEmployee ? Users : isManager ? Briefcase : (viewMode === 'ai' ? Brain : Network)}
+            title={isEmployee ? "Employee Portal" : isManager ? "Manager Console" : (viewMode === 'ai' ? "AI Innovations" : viewMode === 'college' ? "College Suite" : "HRMS Platform")}
+            description={isEmployee ? `Welcome back, ${user.name}` : isManager ? `Team Overview - ${user.name}` : (viewMode === 'ai' ? "AI-Powered Institution Intelligence" : viewMode === 'college' ? "Advanced College Academic Features" : "Unified Human Resource Management Environment")}
+            icon={isEmployee ? Users : isManager ? Briefcase : (viewMode === 'ai' ? Brain : viewMode === 'college' ? GraduationCap : Network)}
         >
             {isEmployee ? (
                 <EmployeeDashboard user={user} />
@@ -411,7 +453,7 @@ const Dashboard: React.FC = () => {
             ) : (
                 <div className="space-y-8 pb-10">
                     {/* Welcome Banner */}
-                    <div className={`border rounded-xl p-8 shadow-sm transition-all duration-500 ${viewMode === 'ai' ? 'bg-gradient-to-r from-white via-purple-50/10 to-indigo-50/20 border-purple-200 shadow-purple-100/50' : 'bg-white border-slate-200 shadow-sm'}`}>
+                    <div className={`border rounded-xl p-8 shadow-sm transition-all duration-500 ${viewMode === 'ai' ? 'bg-gradient-to-r from-white via-purple-50/10 to-indigo-50/20 border-purple-200 shadow-purple-100/50' : viewMode === 'college' ? 'bg-gradient-to-r from-white via-orange-50/10 to-amber-50/20 border-orange-200 shadow-orange-100/50' : 'bg-white border-slate-200 shadow-sm'}`}>
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                             <div className="flex-1">
                                 <div className="flex items-center gap-3">
@@ -421,10 +463,17 @@ const Dashboard: React.FC = () => {
                                             AI Innovations Active
                                         </span>
                                     )}
+                                    {viewMode === 'college' && (
+                                        <span className="px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider bg-orange-100 text-orange-700 border border-orange-200 rounded-full animate-pulse">
+                                            College Suite Active
+                                        </span>
+                                    )}
                                 </div>
                                 <p className="text-slate-500 mt-1">
                                     {viewMode === 'ai' 
                                         ? "Exploring the next-generation AI-driven institution command center roadmap."
+                                        : viewMode === 'college'
+                                        ? "Access specialized college academic tools and credits repository."
                                         : "Manage institutional operations and staff intelligence."}
                                 </p>
                                 
@@ -441,7 +490,7 @@ const Dashboard: React.FC = () => {
                                     <div className="w-full sm:w-64">
                                         <Select
                                             value={viewMode}
-                                            onValueChange={(val: 'hrms' | 'ai') => setViewMode(val)}
+                                            onValueChange={(val: 'hrms' | 'ai' | 'college') => setViewMode(val)}
                                         >
                                             <SelectTrigger className="h-10 border-slate-200 focus:ring-blue-500 rounded-lg bg-white text-slate-700 font-medium">
                                                 <SelectValue placeholder="Select Module Suite" />
@@ -457,6 +506,12 @@ const Dashboard: React.FC = () => {
                                                     <span className="flex items-center gap-2">
                                                         <Brain className="h-4 w-4 text-purple-500 animate-pulse" />
                                                         AI - Innovations & Roadmap
+                                                    </span>
+                                                </SelectItem>
+                                                <SelectItem value="college" className="text-slate-700">
+                                                    <span className="flex items-center gap-2">
+                                                        <GraduationCap className="h-4 w-4 text-orange-500 animate-pulse" />
+                                                        College Suite
                                                     </span>
                                                 </SelectItem>
                                             </SelectContent>
@@ -639,41 +694,43 @@ const Dashboard: React.FC = () => {
                         <div className="flex-grow overflow-y-auto p-10 space-y-12 relative z-10 no-scrollbar">
                             {configTab === 'hrms' ? (
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                                    {categories.map(category => {
-                                        const hrmsModules = category.modules.filter(m => !aiModuleTitles.includes(m.title));
-                                        if (hrmsModules.length === 0) return null;
-                                        return (
-                                            <div key={category.name} className="space-y-6">
-                                                <div className="flex items-center gap-4 px-4">
-                                                    <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.6)]"></div>
-                                                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/50">{category.name}</h3>
-                                                </div>
-                                                <div className="space-y-3">
-                                                    {hrmsModules.map(module => (
-                                                        <div 
-                                                            key={module.title}
-                                                            className={`p-5 rounded-[28px] border transition-all flex items-center justify-between group ${hiddenModules.includes(module.title) ? 'bg-white/5 border-white/5 opacity-40' : 'bg-white/10 border-white/10 hover:border-white/30 hover:bg-white/15'}`}
-                                                        >
-                                                            <div className="flex items-center gap-5">
-                                                                <div className={`p-3 rounded-2xl shadow-inner ${hiddenModules.includes(module.title) ? 'bg-white/5 text-white/20' : 'bg-white text-slate-900'}`}>
-                                                                    <module.icon className="w-5 h-5" />
+                                    {categories
+                                        .filter(cat => cat.name !== "College Suite" || viewMode === "college")
+                                        .map(category => {
+                                            const hrmsModules = category.modules.filter(m => !aiModuleTitles.includes(m.title));
+                                            if (hrmsModules.length === 0) return null;
+                                            return (
+                                                <div key={category.name} className="space-y-6">
+                                                    <div className="flex items-center gap-4 px-4">
+                                                        <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.6)]"></div>
+                                                        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/50">{category.name}</h3>
+                                                    </div>
+                                                    <div className="space-y-3">
+                                                        {hrmsModules.map(module => (
+                                                            <div 
+                                                                key={module.title}
+                                                                className={`p-5 rounded-[28px] border transition-all flex items-center justify-between group ${hiddenModules.includes(module.title) ? 'bg-white/5 border-white/5 opacity-40' : 'bg-white/10 border-white/10 hover:border-white/30 hover:bg-white/15'}`}
+                                                            >
+                                                                <div className="flex items-center gap-5">
+                                                                    <div className={`p-3 rounded-2xl shadow-inner ${hiddenModules.includes(module.title) ? 'bg-white/5 text-white/20' : 'bg-white text-slate-900'}`}>
+                                                                        <module.icon className="w-5 h-5" />
+                                                                    </div>
+                                                                    <div className="space-y-1">
+                                                                        <h4 className="text-sm font-black text-white tracking-tight">{module.title}</h4>
+                                                                        <p className="text-[10px] text-white/40 font-bold uppercase tracking-wider">{category.name} Integration</p>
+                                                                    </div>
                                                                 </div>
-                                                                <div className="space-y-1">
-                                                                    <h4 className="text-sm font-black text-white tracking-tight">{module.title}</h4>
-                                                                    <p className="text-[10px] text-white/40 font-bold uppercase tracking-wider">{category.name} Integration</p>
-                                                                </div>
+                                                                <Switch 
+                                                                    checked={!hiddenModules.includes(module.title)}
+                                                                    onCheckedChange={() => toggleModuleVisibility(module.title)}
+                                                                    className="data-[state=checked]:bg-blue-600 border-none shadow-xl scale-110"
+                                                                />
                                                             </div>
-                                                            <Switch 
-                                                                checked={!hiddenModules.includes(module.title)}
-                                                                onCheckedChange={() => toggleModuleVisibility(module.title)}
-                                                                className="data-[state=checked]:bg-blue-600 border-none shadow-xl scale-110"
-                                                            />
-                                                        </div>
-                                                    ))}
+                                                        ))}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        );
-                                    })}
+                                            );
+                                        })}
                                 </div>
                             ) : (
                                 <div className="space-y-8">
@@ -704,14 +761,16 @@ const Dashboard: React.FC = () => {
                                         {(() => {
                                             const renderedAiTitles = new Set();
                                             const aiList: any[] = [];
-                                            categories.forEach(cat => {
-                                                cat.modules.forEach(mod => {
-                                                    if (aiModuleTitles.includes(mod.title) && !renderedAiTitles.has(mod.title)) {
-                                                        renderedAiTitles.add(mod.title);
-                                                        aiList.push({ ...mod, categoryName: cat.name });
-                                                    }
+                                            categories
+                                                .filter(cat => cat.name !== "College Suite" || viewMode === "college")
+                                                .forEach(cat => {
+                                                    cat.modules.forEach(mod => {
+                                                        if (aiModuleTitles.includes(mod.title) && !renderedAiTitles.has(mod.title)) {
+                                                            renderedAiTitles.add(mod.title);
+                                                            aiList.push({ ...mod, categoryName: cat.name });
+                                                        }
+                                                    });
                                                 });
-                                            });
 
                                             return aiList.map(module => (
                                                 <div 

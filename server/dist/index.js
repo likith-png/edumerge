@@ -11,6 +11,8 @@ const api_1 = __importDefault(require("./routes/api"));
 const exit_1 = __importDefault(require("./routes/exit"));
 const employee_1 = __importDefault(require("./routes/employee"));
 const research_1 = __importDefault(require("./routes/research"));
+const academic_1 = __importDefault(require("./routes/academic"));
+const resourceReservation_1 = __importDefault(require("./routes/resourceReservation"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5002;
@@ -30,6 +32,8 @@ app.use('/api/onboarding', onboarding_1.default);
 app.use('/api/talent', talent_1.default);
 app.use('/api/probation', probation_1.default);
 app.use('/api/vehicle', vehicle_1.default);
+app.use('/api/academic', academic_1.default);
+app.use('/api/reservation', resourceReservation_1.default);
 // Health check
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });

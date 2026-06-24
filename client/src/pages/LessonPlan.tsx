@@ -28,7 +28,8 @@ import {
   LayoutGrid,
   FileText,
   List,
-  Library
+  Library,
+  Sparkles
 } from 'lucide-react';
 
 // -----------------------------------------------------------------------------
@@ -371,6 +372,15 @@ export default function LessonPlan() {
   const [newChapterPeriods, setNewChapterPeriods] = useState<number>(5);
   const [newChapterAssessment, setNewChapterAssessment] = useState<string>("FA1");
   const [newSubtopicName, setNewSubtopicName] = useState<Record<number, string>>({});
+  const [syllabusInputMode, setSyllabusInputMode] = useState<'manual' | 'ai'>('manual');
+  const [aiOutlineText, setAiOutlineText] = useState<string>("");
+  const [aiTotalWeeks, setAiTotalWeeks] = useState<number>(16);
+  const [aiPeriodsPerWeek, setAiPeriodsPerWeek] = useState<number>(5);
+  const [aiFocusPath, setAiFocusPath] = useState<string>("Standard");
+  const [aiSyncCalendar, setAiSyncCalendar] = useState<boolean>(true);
+  const [isAiGenerating, setIsAiGenerating] = useState<boolean>(false);
+  const [aiGeneratedChapters, setAiGeneratedChapters] = useState<Chapter[] | null>(null);
+  const [aiGenerationStep, setAiGenerationStep] = useState<string>("");
   const [subjectPlans, setSubjectPlans] = useState<SubjectPlan[]>([
     {
       subject: "English",
@@ -567,6 +577,184 @@ export default function LessonPlan() {
     setTimeout(() => {
       setActiveToast(prev => prev === msg ? null : prev);
     }, 2000);
+  };
+
+  // ── IRIS MENTOR AI PLAN GENERATION ENGINE ────────────────────
+  const generateAiSyllabusPlan = (
+    subject: string,
+    outlineText: string,
+    focus: string,
+    totalWeeks: number,
+    periodsPerWeek: number
+  ) => {
+    let chapterNames: string[] = [];
+    if (outlineText && outlineText.trim()) {
+      chapterNames = outlineText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    }
+    
+    if (chapterNames.length === 0) {
+      if (subject.toLowerCase().includes('math')) {
+        chapterNames = [
+          "Shapes & Spatial Orientation",
+          "Number Sense & Place Value (1 to 100)",
+          "Addition & Subtraction Foundations",
+          "Patterns & Symmetry",
+          "Introduction to Measurement",
+          "Time, Calendars & Money Concepts",
+          "Data Handling & Representation"
+        ];
+      } else if (subject.toLowerCase().includes('english')) {
+        chapterNames = [
+          "Welcome & Naming Words (Nouns)",
+          "Pronouns & Action Verbs",
+          "Basic Punctuation & Articles",
+          "Vocabulary Building & Synonyms",
+          "Simple Sentence Construction",
+          "Reading Comprehension & Short Stories",
+          "Poetry Recitation & Rhyming Patterns"
+        ];
+      } else if (subject.toLowerCase().includes('science')) {
+        chapterNames = [
+          "Living & Non-Living Things",
+          "Plant Life Cycles & Structure",
+          "Animals: Habitats & Feeding",
+          "The Human Body & Five Senses",
+          "Air, Water, and Weather Seasons",
+          "Light, Sound, and Shadow Patterns",
+          "Force, Motion & Simple Machines"
+        ];
+      } else {
+        chapterNames = [
+          "Unit 1: Fundamentals & Overview",
+          "Unit 2: Core Concepts & Principles",
+          "Unit 3: Intermediate Applications",
+          "Unit 4: Advanced Problem Solving",
+          "Unit 5: Case Studies & Project Work",
+          "Unit 6: Semester Review & Final Assessment"
+        ];
+      }
+    }
+
+    const chapters: Chapter[] = [];
+    const totalPeriods = totalWeeks * periodsPerWeek;
+    const periodsPerChapter = Math.max(2, Math.floor(totalPeriods / chapterNames.length));
+    let currentDate = new Date(2025, 5, 1); // 1 June 2025
+
+    chapterNames.forEach((name, index) => {
+      const chId = Date.now() + index;
+      let subtopicNames: string[] = [];
+      if (subject.toLowerCase().includes('math')) {
+        subtopicNames = [
+          `Introduction to ${name}`,
+          `Core rules and operations for ${name}`,
+          `Practical exercises and word problems`,
+          `Concept check & classroom activity`
+        ];
+      } else {
+        subtopicNames = [
+          `Key concepts of ${name}`,
+          `Detailed study and explanations`,
+          `Workbook exercises and activities`,
+          `Chapter summary and assessment`
+        ];
+      }
+
+      const subtopics: Subtopic[] = subtopicNames.map((sName, sIdx) => ({
+        id: chId * 10 + sIdx,
+        name: sName,
+        status: 'Planned'
+      }));
+
+      currentDate.setDate(currentDate.getDate() + 15 + Math.floor(index * 2));
+      const formattedDate = currentDate.toISOString().split('T')[0];
+
+      let assessment = 'Not Assessed';
+      if (index < 2) assessment = 'FA1';
+      else if (index < 4) assessment = 'SA1';
+      else if (index < 6) assessment = 'FA3';
+      else assessment = 'SA2';
+
+      chapters.push({
+        id: index + 100,
+        name: name.includes(":") || name.toLowerCase().startsWith("chapter") || name.toLowerCase().startsWith("unit") ? name : `Chapter ${index + 1}: ${name}`,
+        plannedPeriods: periodsPerChapter,
+        subtopics,
+        assessmentTag: assessment,
+        targetDate: formattedDate,
+        targetDays: periodsPerChapter,
+        bufferDays: Math.floor(periodsPerChapter * 0.3),
+        completionStatus: 'Planned',
+        actualDaysSpent: 0
+      });
+    });
+
+    return chapters;
+  };
+
+  const handleTriggerIrisGeneration = () => {
+    setIsAiGenerating(true);
+    setAiGenerationStep("Initializing Iris Mentor Planner Engine...");
+    
+    setTimeout(() => {
+      setAiGenerationStep("Parsing input chapters & syllabus core topics...");
+      setTimeout(() => {
+        setAiGenerationStep("Syncing with Academic Calendar for holidays & Bagless days...");
+        setTimeout(() => {
+          setAiGenerationStep("Optimizing period distribution & setting buffer thresholds...");
+          setTimeout(() => {
+            const generated = generateAiSyllabusPlan(selectedSyllabusSubject, aiOutlineText, aiFocusPath, aiTotalWeeks, aiPeriodsPerWeek);
+            setAiGeneratedChapters(generated);
+            setIsAiGenerating(false);
+            showToast("Syllabus generated successfully by Iris Mentor!");
+          }, 600);
+        }, 600);
+      }, 600);
+    }, 600);
+  };
+
+  const handleApplyAiGeneratedPlan = () => {
+    if (!aiGeneratedChapters) return;
+    
+    setSubjectPlans(prev => prev.map(sp => {
+      if (sp.subject === selectedSyllabusSubject) {
+        return {
+          ...sp,
+          chapters: aiGeneratedChapters,
+          progressPercent: 0
+        };
+      }
+      return sp;
+    }));
+
+    if (selectedSyllabusSubject === "English") {
+      const newUnits: Unit[] = aiGeneratedChapters.map(ch => {
+        let month = 'September';
+        const term = ch.assessmentTag === 'FA3' || ch.assessmentTag === 'SA2' ? 'Term 2' : 'Term 1';
+        if (term === 'Term 1') {
+          month = ch.assessmentTag === 'FA1' ? 'June' : 'August';
+        } else {
+          month = ch.assessmentTag === 'FA3' ? 'October' : 'December';
+        }
+        return {
+          id: ch.id,
+          name: ch.name,
+          type: "Course Book",
+          term: term,
+          assessment: (ch.assessmentTag || 'Not Assessed') as any,
+          sessions: ch.plannedPeriods,
+          plannedMonth: month
+        };
+      });
+      setUnitsList(prev => [
+        ...prev.filter(u => !u.name.toLowerCase().includes("noun") && !u.name.toLowerCase().includes("pronoun") && !u.name.toLowerCase().includes("auxiliary")),
+        ...newUnits
+      ]);
+    }
+    
+    setAiGeneratedChapters(null);
+    setAiOutlineText("");
+    setSyllabusInputMode("manual");
+    showToast(`Iris Mentor AI Planner applied to ${selectedSyllabusSubject}!`);
   };
 
   // Syllabus Plan Action Handlers
@@ -1929,12 +2117,9 @@ export default function LessonPlan() {
                   </p>
                 </div>
                 
-                <button
-                  onClick={() => setIsAddDrawerOpen(true)}
-                  className="bg-[#FF9A01] hover:bg-[#e08800] text-white text-xs font-bold px-4.5 py-2 rounded-[8px] flex items-center gap-1.5 shadow-md shadow-orange-500/10 hover:scale-105 transition-all cursor-pointer"
-                >
-                  <Plus className="w-4 h-4 stroke-[3]" /> Add Unit
-                </button>
+                <div className="bg-slate-100 text-slate-500 border border-slate-200 text-[10px] font-black uppercase px-3 py-1.5 rounded-lg select-none">
+                  Read-Only View
+                </div>
               </div>
 
               {/* ALP Status Bar (Part F3 & I2) */}
@@ -1957,12 +2142,6 @@ export default function LessonPlan() {
                     className="text-slate-400 hover:text-slate-600 font-bold underline cursor-pointer"
                   >
                     View History
-                  </button>
-                  <button
-                    onClick={() => showToast("ALP submitted for approval")}
-                    className="bg-[#000099] hover:bg-blue-900 text-white font-bold px-4 py-1.5 rounded-[6px] transition-colors cursor-pointer"
-                  >
-                    Submit for Approval
                   </button>
                 </div>
               </div>
@@ -2025,8 +2204,6 @@ export default function LessonPlan() {
                             pillColor = 'bg-purple-50 text-purple-800 border-purple-200';
                           }
 
-                          const isEditing = editingUnitId === unit.id;
-
                           return (
                             <div key={unit.id} className="p-3.5 flex items-center justify-between hover:bg-slate-50/50 transition-colors">
                               <div className="flex items-center gap-3">
@@ -2043,46 +2220,14 @@ export default function LessonPlan() {
                               </div>
 
                               <div className="flex items-center gap-4">
-                                {/* Inline Editable Sessions Counter */}
-                                <div className="flex items-center gap-1.5">
-                                  {isEditing ? (
-                                    <div className="flex items-center border border-[#000099] rounded-[6px] bg-white overflow-hidden shadow-inner">
-                                      <input
-                                        type="number"
-                                        value={editingSessionVal}
-                                        onChange={(e) => setEditingSessionVal(e.target.value)}
-                                        className="w-10 text-center py-1 text-xs font-bold focus:outline-none"
-                                        min="1"
-                                      />
-                                      <button 
-                                        onClick={() => handleSaveSessions(unit.id)}
-                                        className="bg-[#000099] text-white px-2 py-1 text-xs font-bold hover:bg-blue-900"
-                                      >
-                                        Save
-                                      </button>
-                                    </div>
-                                  ) : (
-                                    <div 
-                                      onClick={() => handleStartEditing(unit.id, unit.sessions)}
-                                      className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-[#E2E0D8] rounded-[6px] hover:border-[#FF9A01] cursor-pointer group transition-all"
-                                    >
-                                      <span className="text-xs font-bold text-slate-700">{unit.sessions} Sessions</span>
-                                      <Edit2 className="w-3 h-3 text-slate-400 group-hover:text-[#FF9A01]" />
-                                    </div>
-                                  )}
+                                {/* Read-Only Sessions Counter */}
+                                <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-[#E2E0D8] rounded-[6px]">
+                                  <span className="text-xs font-bold text-slate-700">{unit.sessions} Sessions</span>
                                 </div>
 
                                 <span className="bg-slate-100 text-slate-600 border border-slate-200 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
                                   {unit.assessment}
                                 </span>
-
-                                <button 
-                                  onClick={() => handleDeleteUnit(unit.id)}
-                                  className="text-slate-400 hover:text-red-600 p-1 hover:bg-red-50 rounded-[4px] transition-colors"
-                                  title="Delete Unit"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
                               </div>
                             </div>
                           );
@@ -2106,136 +2251,6 @@ export default function LessonPlan() {
                   <span>SA2: {unitsList.filter(u => u.assessment === 'SA2').reduce((a, b) => a + b.sessions, 0)}</span>
                 </div>
               </div>
-
-              {/* Add Unit drawer (Slide-in Right side) */}
-              {isAddDrawerOpen && (
-                <div className="fixed inset-0 z-50 bg-black/40 flex justify-end">
-                  <div className="w-96 bg-white h-full shadow-2xl p-6 flex flex-col justify-between border-l border-[#E2E0D8] animate-slideIn">
-                    
-                    <div className="space-y-6">
-                      <div className="flex items-center justify-between border-b border-[#E2E0D8] pb-3">
-                        <h2 className="text-sm font-black text-[#000099] uppercase tracking-wider">
-                          Create New Syllabus Unit
-                        </h2>
-                        <button 
-                          onClick={() => setIsAddDrawerOpen(false)}
-                          className="p-1 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600"
-                        >
-                          <X className="w-5 h-5" />
-                        </button>
-                      </div>
-
-                      <form onSubmit={handleSaveUnit} className="space-y-4">
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Unit Name</label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="e.g. Grammar Punctuation Part 2"
-                            value={newUnitName}
-                            onChange={(e) => setNewUnitName(e.target.value)}
-                            className="w-full border border-[#E2E0D8] rounded-[8px] p-2.5 text-xs focus:outline-none focus:border-[#000099] font-medium"
-                          />
-                        </div>
-
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Unit Type</label>
-                          <select
-                            value={newUnitType}
-                            onChange={(e) => setNewUnitType(e.target.value as any)}
-                            className="w-full border border-[#E2E0D8] bg-white rounded-[8px] p-2.5 text-xs focus:outline-none focus:border-[#000099] font-medium"
-                          >
-                            <option value="Course Book">Course Book</option>
-                            <option value="Workbook">Workbook</option>
-                            <option value="Writing">Writing</option>
-                            <option value="Grammar">Grammar</option>
-                            <option value="Activity">Activity</option>
-                            <option value="Poem">Poem</option>
-                          </select>
-                        </div>
-
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Term</label>
-                          <div className="flex gap-4 pt-1">
-                            <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
-                              <input
-                                type="radio"
-                                name="term"
-                                checked={newUnitTerm === 'Term 1'}
-                                onChange={() => setNewUnitTerm('Term 1')}
-                                className="accent-[#000099]"
-                              />
-                              Term 1
-                            </label>
-                            <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
-                              <input
-                                type="radio"
-                                name="term"
-                                checked={newUnitTerm === 'Term 2'}
-                                onChange={() => setNewUnitTerm('Term 2')}
-                                className="accent-[#000099]"
-                              />
-                              Term 2
-                            </label>
-                          </div>
-                        </div>
-
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Estimated Sessions</label>
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => setNewUnitSessions(Math.max(1, newUnitSessions - 1))}
-                              className="w-8 h-8 rounded-[8px] bg-slate-100 border border-[#E2E0D8] text-sm font-bold flex items-center justify-center hover:bg-slate-200"
-                            >
-                              -
-                            </button>
-                            <span className="w-12 text-center text-xs font-extrabold text-slate-800">{newUnitSessions}</span>
-                            <button
-                              type="button"
-                              onClick={() => setNewUnitSessions(newUnitSessions + 1)}
-                              className="w-8 h-8 rounded-[8px] bg-slate-100 border border-[#E2E0D8] text-sm font-bold flex items-center justify-center hover:bg-slate-200"
-                            >
-                              +
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Assessment Tag</label>
-                          <select
-                            value={newUnitAssessment}
-                            onChange={(e) => setNewUnitAssessment(e.target.value as any)}
-                            className="w-full border border-[#E2E0D8] bg-white rounded-[8px] p-2.5 text-xs focus:outline-none focus:border-[#000099] font-medium"
-                          >
-                            <option value="FA1">FA1</option>
-                            <option value="SA1">SA1</option>
-                            <option value="FA3">FA3</option>
-                            <option value="SA2">SA2</option>
-                            <option value="Not Assessed">Not Assessed</option>
-                          </select>
-                        </div>
-                      </form>
-                    </div>
-
-                    <div className="border-t border-[#E2E0D8] pt-4 flex gap-3">
-                      <button
-                        onClick={() => setIsAddDrawerOpen(false)}
-                        className="flex-1 border border-[#E2E0D8] hover:bg-slate-50 text-slate-700 text-xs font-bold py-2.5 rounded-[8px] transition-colors"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={handleSaveUnit}
-                        className="flex-1 bg-[#FF9A01] hover:bg-[#e08800] text-white text-xs font-bold py-2.5 rounded-[8px] shadow-sm transition-colors"
-                      >
-                        Save Unit
-                      </button>
-                    </div>
-
-                  </div>
-                </div>
-              )}
 
             </div>
           )}
@@ -2407,62 +2422,11 @@ export default function LessonPlan() {
                       </div>
 
                       <div className="flex items-center gap-4 flex-wrap text-slate-700">
-                        {isEditingMlpBuffer ? (
-                          <div className="flex items-center gap-2 bg-white px-2.5 py-1 rounded-[6px] border border-[#E2E0D8] shadow-inner">
-                            <span className="text-slate-500 font-bold text-[10px] uppercase">Configured Buffer:</span>
-                            <button
-                              type="button"
-                              onClick={() => setTempBufferVal(prev => Math.max(0, prev - 1))}
-                              className="w-5 h-5 bg-slate-100 border border-[#E2E0D8] text-xs font-bold flex items-center justify-center rounded-[4px] hover:bg-slate-200 cursor-pointer"
-                            >
-                              -
-                            </button>
-                            <span className="w-5 text-center font-black text-[#000099]">{tempBufferVal}</span>
-                            <button
-                              type="button"
-                              onClick={() => setTempBufferVal(prev => prev + 1)}
-                              className="w-5 h-5 bg-slate-100 border border-[#E2E0D8] text-xs font-bold flex items-center justify-center rounded-[4px] hover:bg-slate-200 cursor-pointer"
-                            >
-                              +
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setBufferConfig(prev => ({ ...prev, [activeMlpMonth]: tempBufferVal }));
-                                setIsEditingMlpBuffer(false);
-                                showToast(`Buffer updated for ${activeMlpMonth}`);
-                              }}
-                              className="p-0.5 hover:bg-emerald-50 rounded-[4px] cursor-pointer ml-1"
-                              title="Save Buffer"
-                            >
-                              <Check className="w-4 h-4 text-emerald-600" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setIsEditingMlpBuffer(false)}
-                              className="p-0.5 hover:bg-red-50 rounded-[4px] cursor-pointer"
-                              title="Cancel"
-                            >
-                              <X className="w-4 h-4 text-red-500" />
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-slate-500 font-bold text-[10px] uppercase">
-                              Configured Buffer: <strong className="text-[#000099] font-black">{configuredBuffer} days</strong>
-                            </span>
-                            <button
-                              onClick={() => {
-                                setTempBufferVal(configuredBuffer);
-                                setIsEditingMlpBuffer(true);
-                              }}
-                              className="p-1 hover:bg-slate-100 rounded-[4px] text-slate-400 hover:text-[#000099] cursor-pointer animate-pulse"
-                              title="Edit Buffer"
-                            >
-                              <Edit2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        )}
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-slate-500 font-bold text-[10px] uppercase">
+                            Configured Buffer: <strong className="text-[#000099] font-black">{configuredBuffer} days</strong>
+                          </span>
+                        </div>
 
                         <span className="border-l border-slate-200 pl-4 text-slate-500 font-bold text-[10px] uppercase">
                           Available Buffer: <strong className="text-[#000099] font-black">{availableBuffer} session(s)</strong>
@@ -3990,57 +3954,189 @@ export default function LessonPlan() {
                           )}
                         </div>
 
-                        {/* Right: Add new chapter form */}
+                        {/* Right: Add new chapter form or Create with AI (Iris Mentor) */}
                         <div className="bg-white border border-[#E2E0D8] p-5 rounded-[10px] shadow-sm space-y-4">
-                          <div>
-                            <h4 className="font-bold text-[#000099] text-xs uppercase tracking-wider">Create New Chapter</h4>
-                            <p className="text-[11px] text-slate-400 font-semibold mt-0.5">Add a new unit to the {selectedSyllabusSubject} plan.</p>
-                          </div>
-                          <div className="space-y-3.5">
-                            <div className="space-y-1">
-                              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Chapter Name</label>
-                              <input
-                                type="text"
-                                placeholder="e.g. Chapter 5: Multiplication"
-                                value={newChapterName}
-                                onChange={(e) => setNewChapterName(e.target.value)}
-                                className="w-full text-xs border border-[#E2E0D8] rounded-[8px] p-2.5 bg-white focus:outline-none focus:border-[#000099] font-medium shadow-sm"
-                              />
-                            </div>
-
-                            <div className="space-y-1">
-                              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Planned Periods</label>
-                              <input
-                                type="number"
-                                min="1"
-                                value={newChapterPeriods}
-                                onChange={(e) => setNewChapterPeriods(parseInt(e.target.value) || 1)}
-                                className="w-full text-xs border border-[#E2E0D8] rounded-[8px] p-2.5 bg-white focus:outline-none focus:border-[#000099] font-medium shadow-sm"
-                              />
-                            </div>
-
-                            <div className="space-y-1">
-                              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Assessment Tag</label>
-                              <select
-                                value={newChapterAssessment}
-                                onChange={(e) => setNewChapterAssessment(e.target.value)}
-                                className="w-full text-xs border border-[#E2E0D8] bg-white rounded-[8px] p-2.5 focus:outline-none focus:border-[#000099] font-bold text-slate-600 cursor-pointer shadow-sm"
-                              >
-                                <option value="FA1">FA1</option>
-                                <option value="SA1">SA1</option>
-                                <option value="FA3">FA3</option>
-                                <option value="SA2">SA2</option>
-                                <option value="Not Assessed">Not Assessed</option>
-                              </select>
-                            </div>
-
+                          {/* Tab Switcher inside the card */}
+                          <div className="flex border border-[#E2E0D8] rounded-[8px] overflow-hidden bg-slate-50 shadow-inner">
                             <button
-                              onClick={() => handleAddChapter(selectedSyllabusSubject)}
-                              className="w-full bg-[#FF9A01] hover:bg-[#e08800] text-white text-xs font-bold py-2.5 rounded-[8px] shadow-sm transition-colors cursor-pointer mt-2"
+                              onClick={() => setSyllabusInputMode('manual')}
+                              className={`flex-1 py-2 text-[10px] font-black uppercase transition-all tracking-wider ${
+                                syllabusInputMode === 'manual'
+                                  ? 'bg-[#000099] text-white shadow-sm'
+                                  : 'text-slate-500 hover:text-slate-800 bg-transparent'
+                              }`}
                             >
-                              Create Chapter
+                              Manual Mode
+                            </button>
+                            <button
+                              onClick={() => setSyllabusInputMode('ai')}
+                              className={`flex-1 py-2 text-[10px] font-black uppercase transition-all tracking-wider flex items-center justify-center gap-1 ${
+                                syllabusInputMode === 'ai'
+                                  ? 'bg-purple-700 text-white shadow-sm'
+                                  : 'text-slate-500 hover:text-purple-700 bg-transparent'
+                              }`}
+                            >
+                              <Sparkles className="w-3 h-3 text-amber-300 fill-amber-300 animate-pulse" /> Iris Mentor AI
                             </button>
                           </div>
+
+                          {syllabusInputMode === 'manual' ? (
+                            <div className="space-y-3.5">
+                              <div>
+                                <h4 className="font-bold text-[#000099] text-xs uppercase tracking-wider">Create New Chapter</h4>
+                                <p className="text-[11px] text-slate-400 font-semibold mt-0.5">Add a new unit to the {selectedSyllabusSubject} plan.</p>
+                              </div>
+                              <div className="space-y-3.5">
+                                <div className="space-y-1">
+                                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Chapter Name</label>
+                                  <input
+                                    type="text"
+                                    placeholder="e.g. Chapter 5: Multiplication"
+                                    value={newChapterName}
+                                    onChange={(e) => setNewChapterName(e.target.value)}
+                                    className="w-full text-xs border border-[#E2E0D8] rounded-[8px] p-2.5 bg-white focus:outline-none focus:border-[#000099] font-medium shadow-sm"
+                                  />
+                                </div>
+
+                                <div className="space-y-1">
+                                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Planned Periods</label>
+                                  <input
+                                    type="number"
+                                    min="1"
+                                    value={newChapterPeriods}
+                                    onChange={(e) => setNewChapterPeriods(parseInt(e.target.value) || 1)}
+                                    className="w-full text-xs border border-[#E2E0D8] rounded-[8px] p-2.5 bg-white focus:outline-none focus:border-[#000099] font-medium shadow-sm"
+                                  />
+                                </div>
+
+                                <div className="space-y-1">
+                                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Assessment Tag</label>
+                                  <select
+                                    value={newChapterAssessment}
+                                    onChange={(e) => setNewChapterAssessment(e.target.value)}
+                                    className="w-full text-xs border border-[#E2E0D8] bg-white rounded-[8px] p-2.5 focus:outline-none focus:border-[#000099] font-bold text-slate-600 cursor-pointer shadow-sm"
+                                  >
+                                    <option value="FA1">FA1</option>
+                                    <option value="SA1">SA1</option>
+                                    <option value="FA3">FA3</option>
+                                    <option value="SA2">SA2</option>
+                                    <option value="Not Assessed">Not Assessed</option>
+                                  </select>
+                                </div>
+
+                                <button
+                                  onClick={() => handleAddChapter(selectedSyllabusSubject)}
+                                  className="w-full bg-[#FF9A01] hover:bg-[#e08800] text-white text-xs font-bold py-2.5 rounded-[8px] shadow-sm transition-colors cursor-pointer mt-2"
+                                >
+                                  Create Chapter
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="space-y-3.5">
+                              <div className="border-b border-slate-100 pb-2">
+                                <h4 className="font-bold text-purple-800 text-xs uppercase tracking-wider flex items-center gap-1">
+                                  <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                                  Iris Mentor AI Planner
+                                </h4>
+                                <p className="text-[11px] text-slate-400 font-semibold mt-0.5">Generate a complete structured plan based on core syllabus outline.</p>
+                              </div>
+
+                              <div className="space-y-1">
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Chapter List Outline (Optional)</label>
+                                <textarea
+                                  rows={4}
+                                  placeholder="e.g. Fractions&#10;Decimals&#10;Ratio and Proportion&#10;Algebraic Expressions&#10;(Leave empty for Iris Mentor to suggest chapters)"
+                                  value={aiOutlineText}
+                                  onChange={(e) => setAiOutlineText(e.target.value)}
+                                  className="w-full text-xs border border-[#E2E0D8] rounded-[8px] p-2 bg-white focus:outline-none focus:border-purple-600 font-semibold shadow-sm resize-none"
+                                />
+                              </div>
+
+                              <div className="space-y-1">
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Learning Focus & Flow</label>
+                                <select
+                                  value={aiFocusPath}
+                                  onChange={(e) => setAiFocusPath(e.target.value)}
+                                  className="w-full text-xs border border-[#E2E0D8] bg-white rounded-[8px] p-2 focus:outline-none focus:border-purple-600 font-bold text-slate-600 cursor-pointer shadow-sm animate-none"
+                                >
+                                  <option value="Standard Aligned">Standard Aligned (CBSE / NCERT)</option>
+                                  <option value="Activity & NEP Compliant">Activity & NEP Compliant</option>
+                                  <option value="Concept-First with Buffer">Concept-First with Buffer</option>
+                                  <option value="Accelerated Fast-Track">Accelerated Fast-Track</option>
+                                </select>
+                              </div>
+
+                              <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1">
+                                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Target Weeks</label>
+                                  <input
+                                    type="number"
+                                    min="4"
+                                    max="40"
+                                    value={aiTotalWeeks}
+                                    onChange={(e) => setAiTotalWeeks(parseInt(e.target.value) || 16)}
+                                    className="w-full text-xs border border-[#E2E0D8] rounded-[8px] p-2 bg-white focus:outline-none focus:border-purple-600 font-semibold shadow-sm"
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Periods / Week</label>
+                                  <input
+                                    type="number"
+                                    min="1"
+                                    max="10"
+                                    value={aiPeriodsPerWeek}
+                                    onChange={(e) => setAiPeriodsPerWeek(parseInt(e.target.value) || 5)}
+                                    className="w-full text-xs border border-[#E2E0D8] rounded-[8px] p-2 bg-white focus:outline-none focus:border-purple-600 font-semibold shadow-sm"
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="bg-slate-50 border p-2.5 rounded-lg text-[10.5px] font-semibold text-slate-500 flex flex-col gap-1 leading-normal">
+                                <div className="flex justify-between">
+                                  <span>Total Period Budget:</span>
+                                  <strong className="text-purple-700">{aiTotalWeeks * aiPeriodsPerWeek} periods</strong>
+                                </div>
+                                <div className="flex justify-between border-t pt-1">
+                                  <span>Subject Scope:</span>
+                                  <strong>{selectedSyllabusSubject} Plan</strong>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  id="syncCal"
+                                  checked={aiSyncCalendar}
+                                  onChange={(e) => setAiSyncCalendar(e.target.checked)}
+                                  className="rounded border-slate-300 text-purple-600 focus:ring-purple-500 w-3.5 h-3.5"
+                                />
+                                <label htmlFor="syncCal" className="text-[11px] text-slate-500 font-semibold cursor-pointer">
+                                  Sync buffer days dynamically
+                                </label>
+                              </div>
+
+                              {isAiGenerating ? (
+                                <div className="space-y-2 py-1">
+                                  <div className="flex items-center gap-2 text-xs font-bold text-purple-700 animate-pulse">
+                                    <div className="w-3.5 h-3.5 border-2 border-purple-700 border-t-transparent rounded-full animate-spin shrink-0" />
+                                    <span>{aiGenerationStep}</span>
+                                  </div>
+                                  <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                    <div className="bg-purple-600 h-full rounded-full animate-pulse" style={{ width: '60%' }} />
+                                  </div>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={handleTriggerIrisGeneration}
+                                  className="w-full bg-gradient-to-r from-purple-800 to-indigo-900 hover:from-purple-900 hover:to-indigo-950 text-white text-xs font-bold py-2.5 rounded-[8px] shadow-md transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                                >
+                                  <Sparkles className="w-3.5 h-3.5 text-yellow-300 fill-yellow-300 animate-pulse" />
+                                  Generate Plan with Iris Mentor
+                                </button>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                     ) : (
@@ -4945,6 +5041,86 @@ export default function LessonPlan() {
                 className="bg-[#000099] hover:bg-blue-900 text-white font-bold px-4 py-2 rounded-[8px] text-xs transition-colors cursor-pointer"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL: IRIS MENTOR AI GENERATED PREVIEW ──────────────────── */}
+      {aiGeneratedChapters && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white border border-[#E2E0D8] rounded-2xl shadow-2xl max-w-2xl w-full mx-4 overflow-hidden transform transition-all duration-300 scale-100 flex flex-col max-h-[85vh]">
+            <div className="bg-slate-50 border-b border-slate-200 py-4 px-6 flex justify-between items-center shrink-0">
+              <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                Iris Mentor AI Syllabus Draft: {selectedSyllabusSubject}
+              </h3>
+              <button onClick={() => setAiGeneratedChapters(null)} className="text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer">×</button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto space-y-4">
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                <div className="space-y-1">
+                  <span className="text-[10px] text-slate-400 font-black uppercase tracking-wider block">Course Summary</span>
+                  <span className="text-sm font-bold text-slate-800 block">
+                    {selectedSyllabusSubject} Plan · {aiTotalWeeks} Weeks Plan
+                  </span>
+                  <span className="text-xs text-slate-500 block font-semibold">
+                    Focus: <strong className="text-purple-700">{aiFocusPath}</strong> · {aiTotalWeeks * aiPeriodsPerWeek} Total Periods
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 shrink-0 bg-yellow-50 border border-yellow-250 text-yellow-800 text-[10px] font-black uppercase px-2.5 py-1 rounded-lg">
+                  <Sparkles className="w-3.5 h-3.5 fill-yellow-500 text-yellow-500" />
+                  Iris Mentor Optimized
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Proposed Chapter & Subtopic Breakdown</span>
+                <div className="space-y-3">
+                  {aiGeneratedChapters.map((ch, idx) => (
+                    <div key={idx} className="border border-slate-250 rounded-xl p-3 bg-white space-y-2">
+                      <div className="flex justify-between items-start gap-2 flex-wrap pb-1.5 border-b border-slate-100">
+                        <div>
+                          <span className="text-xs font-bold text-slate-800 block">{ch.name}</span>
+                          <span className="text-[9px] text-slate-400 font-semibold block mt-0.5">
+                            Target Date: {ch.targetDate} · Buffer: {ch.bufferDays} Days
+                          </span>
+                        </div>
+                        <span className="text-[9px] bg-slate-100 border border-slate-200 text-slate-600 px-2 py-0.5 rounded font-black uppercase">
+                          {ch.plannedPeriods} Periods
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {ch.subtopics.map((sub, sIdx) => (
+                          <div key={sIdx} className="flex items-center gap-1.5 text-[11px] text-slate-600 font-semibold">
+                            <div className="w-1.5 h-1.5 rounded-full bg-purple-700 shrink-0" />
+                            <span className="truncate">{sub.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-slate-50 border-t border-slate-200 py-3 px-6 flex gap-3 justify-end shrink-0">
+              <button
+                type="button"
+                onClick={() => setAiGeneratedChapters(null)}
+                className="px-4 py-2 border border-slate-200 hover:border-slate-350 bg-white text-slate-600 text-xs font-bold rounded-lg transition-colors cursor-pointer"
+              >
+                Discard & Close
+              </button>
+              <button
+                type="button"
+                onClick={handleApplyAiGeneratedPlan}
+                className="px-4 py-2 bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shadow"
+              >
+                <Check className="w-4 h-4" />
+                Approve & Apply Syllabus
               </button>
             </div>
           </div>

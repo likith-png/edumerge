@@ -850,6 +850,382 @@ function initTables() {
       }
     });
 
+    // Academic Groups Table
+    db.run(`CREATE TABLE IF NOT EXISTS academic_groups (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      uuid TEXT UNIQUE NOT NULL,
+      name TEXT NOT NULL,
+      class_year TEXT NOT NULL,
+      academic_year TEXT NOT NULL,
+      students TEXT NOT NULL, -- JSON array of student objects: [{id, name}]
+      teachers TEXT NOT NULL, -- JSON array of teacher ids/names
+      is_active INTEGER DEFAULT 1,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    // Academic Communications Table
+    db.run(`CREATE TABLE IF NOT EXISTS academic_communications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      uuid TEXT UNIQUE NOT NULL,
+      type TEXT NOT NULL, -- homework | classwork
+      title TEXT NOT NULL,
+      description TEXT,
+      subject TEXT NOT NULL,
+      sender_id TEXT NOT NULL,
+      sender_name TEXT NOT NULL,
+      recipient_groups TEXT NOT NULL, -- JSON array of group objects
+      sent_time TEXT NOT NULL,
+      deadline TEXT NOT NULL,
+      read_by TEXT NOT NULL, -- JSON array of student read info: [{studentId, readTime}]
+      is_archived INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    // Academic Config Table
+    db.run(`CREATE TABLE IF NOT EXISTS academic_config (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+    // Seed groups
+    db.get("SELECT count(*) as count FROM academic_groups", (err, row: any) => {
+      if (!err && row.count === 0) {
+        console.log("Seeding academic groups...");
+        const stmt = db.prepare(`INSERT INTO academic_groups (uuid, name, class_year, academic_year, students, teachers) VALUES (?, ?, ?, ?, ?, ?)`);
+        
+        const generateStudents = (className: string, count: number) => {
+          const arr = [];
+          for (let i = 1; i <= count; i++) {
+            arr.push({ id: `stu-${className.toLowerCase()}-${i}`, name: `Student ${i} (${className})` });
+          }
+          return JSON.stringify(arr);
+        };
+
+        stmt.run("group-10a", "Class 10-A", "10", "2026-27", generateStudents("10-A", 45), JSON.stringify(["emp-001", "hod-001"]));
+        stmt.run("group-10b", "Class 10-B", "10", "2026-27", generateStudents("10-B", 42), JSON.stringify(["emp-001", "hod-001"]));
+        stmt.run("group-10c", "Class 10-C", "10", "2026-27", generateStudents("10-C", 38), JSON.stringify(["hod-001"]));
+        stmt.run("group-9a", "Class 9-A", "9", "2026-27", generateStudents("9-A", 40), JSON.stringify(["emp-001"]));
+        stmt.run("group-9b", "Class 9-B", "9", "2026-27", generateStudents("9-B", 42), JSON.stringify(["emp-001"]));
+        
+        stmt.finalize();
+      }
+    });
+
+    // Seed config
+    db.get("SELECT count(*) as count FROM academic_config WHERE key = 'one_time_send'", (err, row: any) => {
+      if (!err && (!row || row.count === 0)) {
+        console.log("Seeding academic config...");
+        db.run(`INSERT INTO academic_config (key, value) VALUES ('one_time_send', ?)`, JSON.stringify({
+          oneTimeSendEnabled: false,
+          sendTime: "19:00",
+          appliesTo: ["homework", "classwork"]
+        }));
+      }
+    });
+
+    // Seed communications
+    db.get("SELECT count(*) as count FROM academic_communications", (err, row: any) => {
+      if (!err && row.count === 0) {
+        console.log("Seeding academic communications...");
+        const stmt = db.prepare(`INSERT INTO academic_communications (uuid, type, title, description, subject, sender_id, sender_name, recipient_groups, sent_time, deadline, read_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+        
+        const readBy1 = [];
+        for (let i = 1; i <= 73; i++) {
+          readBy1.push({ studentId: `stu-10a-${i}`, readTime: "2026-06-10T15:30:00.000Z" });
+        }
+        
+        const readBy2 = [];
+        for (let i = 1; i <= 20; i++) {
+          readBy2.push({ studentId: `stu-10a-${i}`, readTime: "2026-06-09T18:00:00.000Z" });
+        }
+
+        stmt.run(
+          "comm-1",
+          "homework",
+          "Solve exercises 5.1 to 5.10",
+          "Solve all exercises from textbook chapter 5. Submit by tomorrow at 5 PM. Show all steps.",
+          "Mathematics",
+          "emp-001",
+          "John Faculty",
+          JSON.stringify([
+            { groupId: "group-10a", groupName: "Class 10-A", studentCount: 45 },
+            { groupId: "group-10b", groupName: "Class 10-B", studentCount: 42 }
+          ]),
+          "2026-06-10T14:30:00.000Z",
+          "2026-06-11T17:00:00.000Z",
+          JSON.stringify(readBy1)
+        );
+
+        stmt.run(
+          "comm-2",
+          "classwork",
+          "Complete assignment on fractions",
+          "Complete worksheet 3 on fractions. Turn it in before leaving class.",
+          "Mathematics",
+          "emp-001",
+          "John Faculty",
+          JSON.stringify([
+            { groupId: "group-10a", groupName: "Class 10-A", studentCount: 45 }
+          ]),
+          "2026-06-09T10:15:00.000Z",
+          "2026-06-10T15:00:00.000Z",
+          JSON.stringify(readBy2)
+        );
+
+        stmt.run(
+          "comm-3",
+          "homework",
+          "Physics Lab Report - Optics",
+          "Draw ray diagrams for concave and convex mirrors. Record focal lengths and write conclusions.",
+          "Science",
+          "hod-001",
+          "Dr. Rajesh (HOD)",
+          JSON.stringify([
+            { groupId: "group-10b", groupName: "Class 10-B", studentCount: 42 },
+            { groupId: "group-10c", groupName: "Class 10-C", studentCount: 38 }
+          ]),
+          "2026-06-08T16:45:00.000Z",
+          "2026-06-12T17:00:00.000Z",
+          JSON.stringify([])
+        );
+
+        stmt.finalize();
+      }
+    });
+
+    // ─── Resource Reservation Tables ───────────────────────────────────────────
+    db.run(`CREATE TABLE IF NOT EXISTS resources (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      type TEXT NOT NULL,
+      capacity INTEGER NOT NULL,
+      is_splittable INTEGER DEFAULT 0,
+      internal_only INTEGER DEFAULT 0,
+      buffer_minutes INTEGER DEFAULT 0,
+      approval_flow TEXT DEFAULT '["HOD", "Admin Office", "Principal"]'
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS resource_sections (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      resource_id INTEGER NOT NULL,
+      name TEXT NOT NULL,
+      FOREIGN KEY (resource_id) REFERENCES resources (id)
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS rate_cards (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      resource_id INTEGER UNIQUE NOT NULL,
+      hourly_rate REAL DEFAULT 0,
+      daily_rate REAL DEFAULT 0,
+      security_deposit REAL DEFAULT 0,
+      FOREIGN KEY (resource_id) REFERENCES resources (id)
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS reservations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      resource_id INTEGER NOT NULL,
+      section_id INTEGER,
+      requester_type TEXT NOT NULL,
+      requester_name TEXT NOT NULL,
+      requester_email TEXT NOT NULL,
+      start_ts TEXT NOT NULL,
+      end_ts TEXT NOT NULL,
+      recurrence TEXT NOT NULL,
+      status TEXT NOT NULL,
+      payment_mode TEXT,
+      group_id TEXT,
+      FOREIGN KEY (resource_id) REFERENCES resources (id),
+      FOREIGN KEY (section_id) REFERENCES resource_sections (id)
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS approval_steps (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      reservation_id INTEGER NOT NULL,
+      level INTEGER NOT NULL,
+      approver_role TEXT NOT NULL,
+      status TEXT NOT NULL,
+      comments TEXT,
+      FOREIGN KEY (reservation_id) REFERENCES reservations (id)
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS collection_demands (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      reservation_id INTEGER NOT NULL,
+      demand_no TEXT UNIQUE NOT NULL,
+      amount REAL NOT NULL,
+      status TEXT DEFAULT 'Raised',
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (reservation_id) REFERENCES reservations (id)
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS override_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      reservation_id INTEGER NOT NULL,
+      reason_code TEXT NOT NULL,
+      reason_text TEXT NOT NULL,
+      cancelled_by TEXT NOT NULL,
+      timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (reservation_id) REFERENCES reservations (id)
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS event_refs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      reservation_id INTEGER NOT NULL,
+      event_id TEXT NOT NULL,
+      event_title TEXT NOT NULL,
+      FOREIGN KEY (reservation_id) REFERENCES reservations (id)
+    )`);
+
+    // Seed Resources and RateCards if empty
+    db.get("SELECT count(*) as count FROM resources", (err, row: any) => {
+      if (!err && row.count === 0) {
+        console.log("Seeding resource reservation modules...");
+        
+        // Seed resources
+        const resStmt = db.prepare("INSERT INTO resources (name, type, capacity, is_splittable, internal_only, buffer_minutes, approval_flow) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        resStmt.run("Seminar Hall A", "Seminar Hall", 150, 0, 0, 30, '["HOD", "Admin Office", "Principal"]'); // id = 1
+        resStmt.run("Main Auditorium", "Auditorium", 500, 0, 0, 60, '["HOD", "Admin Office", "Principal"]'); // id = 2
+        resStmt.run("Sports Ground", "Sports Ground", 1000, 0, 0, 45, '["HOD", "Admin Office", "Principal"]'); // id = 3
+        resStmt.run("Computer Lab 1", "Lab", 60, 1, 1, 15, '["HOD", "Admin Office", "Principal"]'); // id = 4 (splittable)
+        resStmt.run("Classroom 301", "Classroom", 40, 0, 1, 10, '["HOD", "Admin Office", "Principal"]'); // id = 5
+        resStmt.run("Classroom 302", "Classroom", 40, 0, 1, 10, '["HOD", "Admin Office", "Principal"]'); // id = 6
+        resStmt.finalize();
+
+        // Seed resource sections for Computer Lab 1 (resource_id = 4)
+        const secStmt = db.prepare("INSERT INTO resource_sections (resource_id, name) VALUES (?, ?)");
+        secStmt.run(4, "Computer Lab 1 - Section A"); // id = 1
+        secStmt.run(4, "Computer Lab 1 - Section B"); // id = 2
+        secStmt.finalize();
+
+        // Seed rate cards
+        const rateStmt = db.prepare("INSERT INTO rate_cards (resource_id, hourly_rate, daily_rate, security_deposit) VALUES (?, ?, ?, ?)");
+        rateStmt.run(1, 1500, 10000, 5000);
+        rateStmt.run(2, 5000, 35000, 15000);
+        rateStmt.run(3, 2000, 15000, 10000);
+        rateStmt.run(4, 800, 5000, 2000);
+        rateStmt.run(5, 300, 2000, 500);
+        rateStmt.run(6, 300, 2000, 500);
+        rateStmt.finalize();
+
+        // Seed reservations (15 to 20 across both flows)
+        const resvStmt = db.prepare("INSERT INTO reservations (resource_id, section_id, requester_type, requester_name, requester_email, start_ts, end_ts, recurrence, status, payment_mode, group_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        
+        // 1. Internal - Approved - Seminar Hall A
+        resvStmt.run(1, null, "internal", "Dr. A. K. Sen", "sen@example.com", "2026-06-25T10:00:00.000Z", "2026-06-25T12:00:00.000Z", "none", "Approved", "Notional", "grp-1");
+        // 2. Internal - Pending (Admin Office) - Main Auditorium
+        resvStmt.run(2, null, "internal", "Mrs. L. Nair", "nair@example.com", "2026-06-26T14:00:00.000Z", "2026-06-26T17:00:00.000Z", "none", "Pending", "Notional", "grp-2");
+        // 3. Internal - Approved - Computer Lab 1 Section A
+        resvStmt.run(4, 1, "internal", "Mr. Edwin Vimal", "edwin@example.com", "2026-06-25T09:00:00.000Z", "2026-06-25T11:00:00.000Z", "none", "Approved", "Notional", "grp-3");
+        // 4. Internal - Pending (HOD) - Computer Lab 1 Section B
+        resvStmt.run(4, 2, "internal", "Ms. Reshma Prasad", "reshma@example.com", "2026-06-27T11:00:00.000Z", "2026-06-27T13:00:00.000Z", "none", "Pending", "Notional", "grp-4");
+        // 5. Internal - Approved - Classroom 301
+        resvStmt.run(5, null, "internal", "Dr. Ranjita Saikia", "ranjita@example.com", "2026-06-25T08:30:00.000Z", "2026-06-25T09:30:00.000Z", "none", "Approved", "Notional", "grp-5");
+        // 6. Internal - Approved - Classroom 302
+        resvStmt.run(6, null, "internal", "Mr. Manjit Singh", "manjit@example.com", "2026-06-25T14:00:00.000Z", "2026-06-25T15:00:00.000Z", "none", "Approved", "Notional", "grp-6");
+        // 7. Internal - Rejected - Seminar Hall A
+        resvStmt.run(1, null, "internal", "Prof. Jenkins", "jenkins@example.com", "2026-06-24T09:00:00.000Z", "2026-06-24T11:00:00.000Z", "none", "Rejected", "Notional", "grp-7");
+        // 8. Internal - Pending - Classroom 302
+        resvStmt.run(6, null, "internal", "Dr. Sedhunivas", "sedhunivas@example.com", "2026-06-28T09:00:00.000Z", "2026-06-28T10:00:00.000Z", "none", "Pending", "Notional", "grp-8");
+        // 9. Internal Weekly Recurring - Approved - Seminar Hall A
+        resvStmt.run(1, null, "internal", "Dr. A. K. Sen", "sen@example.com", "2026-06-29T10:00:00.000Z", "2026-06-29T11:30:00.000Z", "weekly", "Approved", "Notional", "grp-9");
+        
+        // 10. External - Approved Paid - Main Auditorium (Demand raised & collected)
+        resvStmt.run(2, null, "external", "Infotech Solutions", "info@infotech.com", "2026-07-02T09:00:00.000Z", "2026-07-02T17:00:00.000Z", "none", "Approved", "Card", "grp-10");
+        // 11. External - Approved Paid - Sports Ground (Demand raised only)
+        resvStmt.run(3, null, "external", "Acme Sports Club", "contact@acme.com", "2026-07-04T08:00:00.000Z", "2026-07-04T18:00:00.000Z", "none", "Approved", "UPI", "grp-11");
+        // 12. External - Cancelled - Sports Ground (With Override Log)
+        resvStmt.run(3, null, "external", "Gupta Events", "gupta@events.com", "2026-06-20T10:00:00.000Z", "2026-06-20T22:00:00.000Z", "none", "Cancelled", "UPI", "grp-12");
+        // 13. External - Approved Paid - Seminar Hall A (Demand raised)
+        resvStmt.run(1, null, "external", "Rotary Club Bangalore", "rotary@blr.org", "2026-07-05T10:00:00.000Z", "2026-07-05T14:00:00.000Z", "none", "Approved", "UPI", "grp-13");
+        // 14. External - Pending - Classroom 301 (Pending HOD)
+        resvStmt.run(5, null, "external", "Bright Coding Academy", "bright@coding.com", "2026-07-01T17:00:00.000Z", "2026-07-01T20:00:00.000Z", "none", "Pending", "NetBanking", "grp-14");
+        // 15. External - Approved Paid - Classroom 302 (Demand raised)
+        resvStmt.run(6, null, "external", "Apex Tutors", "apex@tutors.org", "2026-06-30T16:00:00.000Z", "2026-06-30T19:00:00.000Z", "none", "Approved", "NetBanking", "grp-15");
+        resvStmt.finalize();
+
+        // Seed approval steps for internal flow & external bookings
+        const appvStmt = db.prepare("INSERT INTO approval_steps (reservation_id, level, approver_role, status, comments) VALUES (?, ?, ?, ?, ?)");
+        
+        // Step details for Reservation 1 (Approved internal)
+        appvStmt.run(1, 1, "HOD", "Approved", "Recommended for the guest lecture.");
+        appvStmt.run(1, 2, "Admin Office", "Approved", "Space verified.");
+        appvStmt.run(1, 3, "Principal", "Approved", "Approved.");
+
+        // Step details for Reservation 2 (Pending Admin, HOD approved)
+        appvStmt.run(2, 1, "HOD", "Approved", "Recommended.");
+        appvStmt.run(2, 2, "Admin Office", "Pending", null);
+        appvStmt.run(2, 3, "Principal", "Pending", null);
+
+        // Step details for Reservation 3 (Approved internal)
+        appvStmt.run(3, 1, "HOD", "Approved", "Verified.");
+        appvStmt.run(3, 2, "Admin Office", "Approved", "Verified.");
+        appvStmt.run(3, 3, "Principal", "Approved", "Verified.");
+
+        // Step details for Reservation 4 (Pending HOD)
+        appvStmt.run(4, 1, "HOD", "Pending", null);
+        appvStmt.run(4, 2, "Admin Office", "Pending", null);
+        appvStmt.run(4, 3, "Principal", "Pending", null);
+
+        // Step details for Reservation 5 (Approved internal)
+        appvStmt.run(5, 1, "HOD", "Approved", "Approved.");
+        appvStmt.run(5, 2, "Admin Office", "Approved", "Approved.");
+        appvStmt.run(5, 3, "Principal", "Approved", "Approved.");
+
+        // Step details for Reservation 6 (Approved internal)
+        appvStmt.run(6, 1, "HOD", "Approved", "Approved.");
+        appvStmt.run(6, 2, "Admin Office", "Approved", "Approved.");
+        appvStmt.run(6, 3, "Principal", "Approved", "Approved.");
+
+        // Step details for Reservation 7 (Rejected internal by Principal)
+        appvStmt.run(7, 1, "HOD", "Approved", "Recommended.");
+        appvStmt.run(7, 2, "Admin Office", "Approved", "Space ok.");
+        appvStmt.run(7, 3, "Principal", "Rejected", "Conflict with state audit window.");
+
+        // Step details for Reservation 8 (Pending HOD)
+        appvStmt.run(8, 1, "HOD", "Pending", null);
+        appvStmt.run(8, 2, "Admin Office", "Pending", null);
+        appvStmt.run(8, 3, "Principal", "Pending", null);
+
+        // Step details for Reservation 9 (Approved weekly)
+        appvStmt.run(9, 1, "HOD", "Approved", "Approved.");
+        appvStmt.run(9, 2, "Admin Office", "Approved", "Approved.");
+        appvStmt.run(9, 3, "Principal", "Approved", "Approved.");
+
+        // External bookings (Reservations 10, 11, 12, 13, 14, 15)
+        appvStmt.run(10, 1, "Admin Office", "Approved", "Payment confirmed.");
+        appvStmt.run(11, 1, "Admin Office", "Approved", "Demand generated.");
+        appvStmt.run(12, 1, "Admin Office", "Approved", "Cancelled due to ground work.");
+        appvStmt.run(13, 1, "Admin Office", "Approved", "Demand generated.");
+        appvStmt.run(14, 1, "Admin Office", "Pending", null);
+        appvStmt.run(15, 1, "Admin Office", "Approved", "Demand generated.");
+        appvStmt.finalize();
+
+        // Seed collection demands for paid external reservations (10, 11, 12, 13, 15)
+        const colStmt = db.prepare("INSERT INTO collection_demands (reservation_id, demand_no, amount, status) VALUES (?, ?, ?, ?)");
+        colStmt.run(10, "DEMAND-2026-001", 35000, "Collected");
+        colStmt.run(11, "DEMAND-2026-002", 15000, "Raised");
+        colStmt.run(12, "DEMAND-2026-003", 15000, "Cancelled");
+        colStmt.run(13, "DEMAND-2026-004", 6000, "Raised");
+        colStmt.run(15, "DEMAND-2026-005", 900, "Raised");
+        colStmt.finalize();
+
+        // Seed override logs for cancelled reservation 12
+        const ovrStmt = db.prepare("INSERT INTO override_logs (reservation_id, reason_code, reason_text, cancelled_by) VALUES (?, ?, ?, ?)");
+        ovrStmt.run(12, "MAINTENANCE", "Emergency soil treatment and field leveling.", "Registrar");
+        ovrStmt.finalize();
+
+        // Seed event refs for reservation 10 (Main Auditorium event link)
+        const evStmt = db.prepare("INSERT INTO event_refs (reservation_id, event_id, event_title) VALUES (?, ?, ?)");
+        evStmt.run(10, "EVT-8821", "Infotech National Tech Conclave 2026");
+        evStmt.run(12, "EVT-9901", "Grand Wedding Reception - Gupta Family");
+        evStmt.finalize();
+
+        console.log("Resource reservation database seed completed.");
+      }
+    });
+
   });
 }
 

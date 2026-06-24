@@ -813,14 +813,7 @@ const StaffPortfolioDetail: React.FC = () => {
                             <BookOpen className="h-5 w-5 text-indigo-600" />
                             Research Output
                         </CardTitle>
-                        <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="bg-white hover:bg-slate-50 text-indigo-600 border-slate-200 font-bold text-[10px] uppercase tracking-wider gap-2 rounded-lg h-10 px-6 shadow-sm"
-                            onClick={() => navigate('/research-publication')}
-                        >
-                            <ExternalLink className="w-4 h-4" /> Global Repository
-                        </Button>
+
                     </CardHeader>
                     <CardContent className="p-8">
                         {isResearchLoading ? (
@@ -879,7 +872,6 @@ const StaffPortfolioDetail: React.FC = () => {
                             <div className="py-16 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
                                 <Sparkles className="w-12 h-12 text-slate-200 mx-auto mb-4" />
                                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Research synchronizing...</p>
-                                <Button variant="link" onClick={() => navigate('/research-publication')} className="text-indigo-600 font-bold text-[10px] uppercase mt-2 tracking-wider">Global Repository</Button>
                             </div>
                         )}
                     </CardContent>
