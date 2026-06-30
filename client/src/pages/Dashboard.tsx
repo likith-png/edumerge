@@ -56,7 +56,7 @@ const categories = [
     {
         name: "Academics",
         icon: BookOpen,
-        color: "indigo",
+        color: "blue",
         modules: [
             {
                 title: "Lesson Plan & Curriculum",
@@ -130,7 +130,7 @@ const categories = [
     {
         name: "Talent Cycle",
         icon: TrendingUp,
-        color: "indigo",
+        color: "blue",
         modules: [
             {
                 title: "Policy & Guides",
@@ -197,7 +197,7 @@ const categories = [
     {
         name: "Governance & Strategy",
         icon: Network,
-        color: "slate",
+        color: "orange",
         modules: [
             {
                 title: "Group Board",
@@ -258,7 +258,7 @@ const categories = [
     {
         name: "Operations",
         icon: Truck,
-        color: "cyan",
+        color: "orange",
         modules: [
             {
                 title: "Vehicle Management",
@@ -277,7 +277,7 @@ const categories = [
     {
         name: "Reports",
         icon: PieChart,
-        color: "emerald",
+        color: "blue",
         modules: [
             {
                 title: "Reports",
@@ -458,26 +458,33 @@ const Dashboard: React.FC = () => {
                 <EmployeeDashboard user={user} />
             ) : isManager ? (
                 <ManagerTeamDashboard />
-            ) : (
-                <div className="space-y-8 pb-10">
+            ) : (                <div className="space-y-8 pb-10 relative overflow-hidden">
+                    {/* Vibrant radial background blobs for dashboard overlay */}
+                    <div className="absolute top-[-10%] left-[-15%] w-[600px] h-[600px] rounded-full bg-blue-500/5 blur-[120px] pointer-events-none z-0"></div>
+                    <div className="absolute bottom-[10%] right-[-15%] w-[700px] h-[700px] rounded-full bg-orange-500/5 blur-[150px] pointer-events-none z-0"></div>
+
                     {/* Welcome Banner */}
-                    <div className={`border rounded-xl p-8 shadow-sm transition-all duration-500 ${viewMode === 'ai' ? 'bg-gradient-to-r from-white via-purple-50/10 to-indigo-50/20 border-purple-200 shadow-purple-100/50' : viewMode === 'college' ? 'bg-gradient-to-r from-white via-orange-50/10 to-amber-50/20 border-orange-200 shadow-orange-100/50' : 'bg-white border-slate-200 shadow-sm'}`}>
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="relative overflow-hidden bg-gradient-to-br from-[#000099] via-[#1E293B] to-[#FF9A01] text-white rounded-2xl p-8 shadow-xl border border-slate-800 z-10 animate-fade-in duration-500">
+                        {/* Glow effect lines */}
+                        <div className="absolute top-[-50%] right-[-20%] w-[350px] h-[350px] rounded-full bg-orange-500/10 blur-[80px] pointer-events-none"></div>
+                        <div className="absolute bottom-[-50%] left-[-10%] w-[400px] h-[400px] rounded-full bg-blue-500/10 blur-[90px] pointer-events-none"></div>
+
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
                             <div className="flex-1">
                                 <div className="flex items-center gap-3">
-                                    <h2 className="text-2xl font-bold text-slate-900">Welcome back, Admin</h2>
+                                    <h2 className="text-2xl font-black text-white tracking-tight">Welcome back, Admin</h2>
                                     {viewMode === 'ai' && (
-                                        <span className="px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider bg-purple-100 text-purple-700 border border-purple-200 rounded-full animate-pulse">
+                                        <span className="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-purple-500/20 text-purple-200 border border-purple-400/30 rounded-full animate-pulse">
                                             AI Innovations Active
                                         </span>
                                     )}
                                     {viewMode === 'college' && (
-                                        <span className="px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider bg-orange-100 text-orange-700 border border-orange-200 rounded-full animate-pulse">
+                                        <span className="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-orange-500/20 text-orange-200 border border-orange-400/30 rounded-full animate-pulse">
                                             College Suite Active
                                         </span>
                                     )}
                                 </div>
-                                <p className="text-slate-500 mt-1">
+                                <p className="text-white/80 mt-1 text-xs">
                                     {viewMode === 'ai' 
                                         ? "Exploring the next-generation AI-driven institution command center roadmap."
                                         : viewMode === 'college'
@@ -487,12 +494,12 @@ const Dashboard: React.FC = () => {
                                 
                                 <div className="flex flex-col sm:flex-row items-center gap-3 mt-6">
                                     <div className="w-full sm:w-80 relative">
-                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" />
                                         <Input
                                             placeholder="Search modules..."
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="pl-10 h-10 border-slate-200 focus:ring-blue-500 rounded-lg bg-white"
+                                            className="pl-10 h-10 border-white/20 focus:ring-[#FF9A01] focus:border-white/40 rounded-lg bg-white/10 text-white placeholder-white/50"
                                         />
                                     </div>
                                     <div className="w-full sm:w-64">
@@ -500,19 +507,19 @@ const Dashboard: React.FC = () => {
                                             value={viewMode}
                                             onValueChange={(val: 'hrms' | 'ai' | 'college') => setViewMode(val)}
                                         >
-                                            <SelectTrigger className="h-10 border-slate-200 focus:ring-blue-500 rounded-lg bg-white text-slate-700 font-medium">
+                                            <SelectTrigger className="h-10 border-white/20 focus:ring-[#FF9A01] focus:border-white/40 rounded-lg bg-white/10 text-white font-semibold">
                                                 <SelectValue placeholder="Select Module Suite" />
                                             </SelectTrigger>
-                                            <SelectContent>
+                                            <SelectContent className="bg-white/95 border-slate-200 shadow-xl rounded-lg">
                                                 <SelectItem value="hrms" className="text-slate-700">
                                                     <span className="flex items-center gap-2">
-                                                        <Network className="h-4 w-4 text-blue-500" />
+                                                        <Network className="h-4 w-4 text-blue-600" />
                                                         HRMS Platform
                                                     </span>
                                                 </SelectItem>
                                                 <SelectItem value="ai" className="text-slate-700">
                                                     <span className="flex items-center gap-2">
-                                                        <Brain className="h-4 w-4 text-purple-500 animate-pulse" />
+                                                        <Brain className="h-4 w-4 text-purple-600 animate-pulse" />
                                                         AI - Innovations & Roadmap
                                                     </span>
                                                 </SelectItem>
@@ -529,9 +536,8 @@ const Dashboard: React.FC = () => {
                             </div>
                             
                             <Button
-                                variant="outline"
                                 onClick={() => setShowPinModal(true)}
-                                className="border-slate-200 text-slate-600 hover:bg-slate-50 gap-2 shrink-0 self-start md:self-center"
+                                className="bg-white/10 border border-white/20 text-white hover:bg-white/20 hover:border-white/30 gap-2 shrink-0 self-start md:self-center rounded-lg h-10 transition-all font-semibold"
                             >
                                 <Settings2 className="w-4 h-4" /> Configuration
                             </Button>
@@ -540,53 +546,76 @@ const Dashboard: React.FC = () => {
 
                     {/* Module Categories */}
                     {filteredCategories.length === 0 ? (
-                        <div className="text-center py-20 bg-white border border-dashed border-slate-200 rounded-xl">
+                        <div className="text-center py-20 bg-white/70 backdrop-blur-sm border border-dashed border-slate-200 rounded-xl relative z-10">
                             <Network className="w-10 h-10 text-slate-300 mx-auto mb-4" />
                             <h4 className="font-semibold text-slate-900">No modules found</h4>
                             <p className="text-sm text-slate-500 mt-1">Try a different search query</p>
                         </div>
-                    ) : filteredCategories.map((category) => (
-                        <div key={category.name} className="space-y-4">
-                            <div className="flex items-center gap-3 px-1">
-                                <div className="p-1.5 bg-slate-100 rounded-lg text-slate-600">
-                                    <category.icon className="h-4 w-4" />
+                    ) : filteredCategories.map((category) => {
+                        const isBlue = category.color === 'blue';
+                        return (
+                            <div key={category.name} className="space-y-4 relative z-10">
+                                <div className="flex items-center gap-3 px-1">
+                                    <div className={`p-1.5 rounded-lg text-white shadow-sm ${
+                                        isBlue 
+                                            ? 'bg-gradient-to-tr from-[#000099] to-[#3B82F6] shadow-blue-500/10' 
+                                            : 'bg-gradient-to-tr from-[#FF9A01] to-[#FDBA74] shadow-orange-500/10'
+                                    }`}>
+                                        <category.icon className="h-4 w-4" />
+                                    </div>
+                                    <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest">{category.name}</h3>
+                                    <div className={`flex-1 h-[2px] ml-2 bg-gradient-to-r ${
+                                        isBlue ? 'from-blue-200 to-transparent' : 'from-orange-200 to-transparent'
+                                    }`}></div>
                                 </div>
-                                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">{category.name}</h3>
-                                <div className="flex-1 h-px bg-slate-200 ml-2"></div>
-                            </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                {category.modules.map((module) => (
-                                    <Card
-                                        key={module.path}
-                                        className="hover:border-blue-300 hover:shadow-md transition-all cursor-pointer group border-slate-200"
-                                        onClick={() => {
-                                            if (module.path.endsWith('.html')) {
-                                                window.location.href = module.path;
-                                            } else {
-                                                navigate(module.path);
-                                            }
-                                        }}
-                                    >
-                                        <CardContent className="p-5">
-                                            <div className="flex items-start gap-4">
-                                                <div className="p-2.5 rounded-xl bg-slate-50 group-hover:bg-blue-50 text-slate-600 group-hover:text-blue-600 transition-colors">
-                                                    <module.icon className="h-5 w-5" />
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    {category.modules.map((module) => (
+                                        <Card
+                                            key={module.path}
+                                            className={`hover:shadow-md transition-all duration-300 cursor-pointer group border-slate-200/80 bg-white/80 hover:bg-white backdrop-blur-sm ${
+                                                isBlue 
+                                                    ? 'hover:border-blue-400 hover:shadow-blue-100/30' 
+                                                    : 'hover:border-orange-400 hover:shadow-orange-100/30'
+                                            }`}
+                                            onClick={() => {
+                                                if (module.path.endsWith('.html')) {
+                                                    window.location.href = module.path;
+                                                } else {
+                                                    navigate(module.path);
+                                                }
+                                            }}
+                                        >
+                                            <CardContent className="p-5">
+                                                <div className="flex items-start gap-4">
+                                                    <div className={`p-2.5 rounded-xl transition-all duration-300 ${
+                                                        isBlue 
+                                                            ? 'bg-blue-50 text-blue-600 group-hover:bg-[#000099] group-hover:text-white' 
+                                                            : 'bg-orange-50 text-orange-600 group-hover:bg-[#FF9A01] group-hover:text-white'
+                                                    }`}>
+                                                        <module.icon className="h-5 w-5" />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <h4 className={`font-bold text-slate-850 transition-colors truncate text-sm ${
+                                                            isBlue 
+                                                                ? 'group-hover:text-[#000099]' 
+                                                                : 'group-hover:text-[#CC7A00]'
+                                                        }`}>{module.title}</h4>
+                                                        <p className="text-xs text-slate-500 line-clamp-2 mt-1 leading-relaxed">
+                                                            {module.description}
+                                                        </p>
+                                                    </div>
+                                                    <ChevronRight className={`h-4 w-4 text-slate-400 group-hover:translate-x-1 transition-transform self-center ${
+                                                        isBlue ? 'group-hover:text-blue-600' : 'group-hover:text-orange-500'
+                                                    }`} />
                                                 </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <h4 className="font-bold text-slate-900 group-hover:text-blue-700 transition-colors truncate">{module.title}</h4>
-                                                    <p className="text-xs text-slate-500 line-clamp-2 mt-1">
-                                                        {module.description}
-                                                    </p>
-                                                </div>
-                                                <ChevronRight className="h-4 w-4 text-slate-400 group-hover:translate-x-1 transition-transform self-center" />
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                ))}
+                                            </CardContent>
+                                        </Card>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
 
