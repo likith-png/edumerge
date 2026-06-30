@@ -62,6 +62,7 @@ import AutoTimetableModule from './pages/AutoTimetableModule';
 import GroupBoard from './pages/GroupBoard';
 import DegreeAwardingSystem from './pages/DegreeAwardingSystem';
 import ResourceReservation from './pages/ResourceReservation';
+import IrisAI from './pages/IrisAI';
 import { PersonaProvider } from './contexts/PersonaContext';
 import { StaffProvider } from './contexts/StaffContext';
 
@@ -153,6 +154,7 @@ function App() {
           <Route path="/group-board" element={<GroupBoard />} />
           <Route path="/degree-awarding" element={<DegreeAwardingSystem />} />
           <Route path="/resource-reservation" element={<ResourceReservation />} />
+          <Route path="/iris-ai" element={<IrisAI />} />
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

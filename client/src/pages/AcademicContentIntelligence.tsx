@@ -135,6 +135,25 @@ export default function AcademicContentIntelligence() {
     setGenType(type);
     setLoaderStep(0);
     
+    // Reset generated and saved states immediately for refresh/regenerate
+    if (type === 'all') {
+      setGeneratedTypes({ notes: false, quiz: false, summary: false, guide: false, ppt: false });
+      setSavedTypes({ notes: false, quiz: false, summary: false, guide: false, ppt: false });
+      // Remove all 5 types from repository
+      setRepository(prev => prev.filter(item => 
+        !(item.subject === subject && item.unit === unit && item.topic === topic)
+      ));
+    } else {
+      // Clear all generated blocks immediately to show only the loading type
+      setGeneratedTypes({ notes: false, quiz: false, summary: false, guide: false, ppt: false });
+      setSavedTypes(prev => ({ ...prev, [type]: false }));
+      // Remove specific type from repository
+      const typeLabel = type === 'notes' ? 'Notes' : type === 'quiz' ? 'Quiz Bank' : type === 'summary' ? 'Summary' : type === 'guide' ? 'Student Guide' : 'PPT Outline';
+      setRepository(prev => prev.filter(item => 
+        !(item.subject === subject && item.unit === unit && item.topic === topic && item.type === typeLabel)
+      ));
+    }
+    
     // Simulate animated loading timeline steps
     const interval = setInterval(() => {
       setLoaderStep(prev => {
@@ -145,7 +164,14 @@ export default function AcademicContentIntelligence() {
             if (type === 'all') {
               setGeneratedTypes({ notes: true, quiz: true, summary: true, guide: true, ppt: true });
             } else {
-              setGeneratedTypes(prevGen => ({ ...prevGen, [type]: true }));
+              // Only set the active type to true, keeping others false
+              setGeneratedTypes({
+                notes: type === 'notes',
+                quiz: type === 'quiz',
+                summary: type === 'summary',
+                guide: type === 'guide',
+                ppt: type === 'ppt'
+              });
             }
           }, 400);
           return 5;
@@ -354,6 +380,32 @@ export default function AcademicContentIntelligence() {
     showToast("✓ All 5 items saved to repository");
   };
 
+  const saveAssessment = () => {
+    const facultyShort = activeSubjectMeta.instructor.replace('Kumar', 'K').replace('Sharma', 'S').replace('Nair', 'N');
+    const exists = repository.some(item => 
+      item.subject === subject && 
+      item.unit === unit && 
+      item.topic === (compTitle || 'Exam Paper Outline') && 
+      item.type === 'Assessment'
+    );
+
+    if (!exists) {
+      setRepository(prev => [
+        {
+          subject: subject,
+          unit: unit,
+          topic: compTitle || 'Exam Paper Outline',
+          type: 'Assessment',
+          date: '24 May 2026',
+          status: 'Approved',
+          faculty: facultyShort
+        },
+        ...prev
+      ]);
+    }
+    showToast(`✓ Assessment "${compTitle || 'Exam Paper Outline'}" saved to repository`);
+  };
+
   // Local state for generated quiz tabs
   const [activeQuizTab, setActiveQuizTab] = useState<'mcq' | 'sa' | 'la'>('mcq');
 
@@ -375,7 +427,7 @@ export default function AcademicContentIntelligence() {
             <span className="text-[#000099] font-bold">edu</span>
             <span className="text-[#FF9A01] font-bold">merge</span>
           </div>
-          <div className="text-[10px] text-[#9E9E9E] font-semibold tracking-wider uppercase mt-1">Academic Content AI</div>
+          <div className="text-[10px] text-[#9E9E9E] font-semibold tracking-wider uppercase mt-1">Iris Guide</div>
         </div>
 
         {/* Active Context Card */}
@@ -481,13 +533,17 @@ export default function AcademicContentIntelligence() {
         <header className="h-[52px] bg-white border-b border-[#E2E2E2] flex items-center justify-between px-6 flex-shrink-0">
           <div className="flex items-center gap-3">
             <span className="text-sm font-semibold text-[#5F5F5F]">
-              {activeScreen === 'generate' && 'Academic Content Intelligence'}
+              {activeScreen === 'generate' && 'Iris Guide'}
               {activeScreen === 'repository' && 'Curriculum Repository'}
               {activeScreen === 'quiz-builder' && 'Quiz & Assessment Builder'}
               {activeScreen === 'analytics' && 'Coverage & Impact Analytics'}
             </span>
           </div>
-          <div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#E1F5EE] text-[#0F6E56] rounded-full text-[10px] font-bold tracking-wider uppercase">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#0F6E56] animate-pulse"></span>
+              AI Connected
+            </div>
             <div className="w-8 h-8 rounded-full bg-[#000099] text-white flex items-center justify-center text-xs font-semibold">
               AK
             </div>
@@ -618,7 +674,7 @@ export default function AcademicContentIntelligence() {
                   <div className="bg-white border border-[#E2E2E2] rounded-xl p-6 flex flex-col gap-3 shadow-sm">
                     <div className="font-semibold text-[#1A1A1A] text-sm flex items-center gap-3 mb-2">
                       <span className="w-4 h-4 border-2 border-slate-200 border-t-[#000099] rounded-full animate-spin inline-block"></span>
-                      <span>Academic Content AI is compiling resources...</span>
+                      <span>Iris Guide is compiling resources...</span>
                     </div>
                     <div className="flex flex-col gap-2 font-mono text-xs">
                       <div className={loaderStep >= 1 ? "text-[#0F6E56]" : "text-[#000099] font-medium"}>
@@ -757,6 +813,7 @@ export default function AcademicContentIntelligence() {
                         <div className="border-t border-[#F1F1F1] px-5 py-3 bg-[#F8F8F8] flex justify-end gap-2.5 flex-wrap">
                           {savedTypes.notes ? (
                             <>
+                              <button onClick={() => startGeneration('notes')} className="h-9 px-4 bg-transparent border border-[#000099] text-[#000099] hover:bg-[#F0F0FF] rounded-lg font-semibold text-xs transition-colors">Regenerate</button>
                               <button onClick={() => setActiveScreen('repository')} className="h-9 px-4 bg-transparent border border-[#000099] text-[#000099] hover:bg-[#F0F0FF] rounded-lg font-semibold text-xs transition-colors">View in Repository</button>
                               <button onClick={() => showToast('✓ PDF download started for Topic Notes')} className="h-9 px-4 bg-transparent border border-[#E2E2E2] text-[#5F5F5F] hover:bg-slate-100 rounded-lg font-semibold text-xs flex items-center gap-1.5 transition-colors"><Download className="w-3.5 h-3.5" /> Download PDF</button>
                             </>
@@ -866,6 +923,7 @@ export default function AcademicContentIntelligence() {
                         <div className="border-t border-[#F1F1F1] px-5 py-3 bg-[#F8F8F8] flex justify-end gap-2.5 flex-wrap">
                           {savedTypes.quiz ? (
                             <>
+                              <button onClick={() => startGeneration('quiz')} className="h-9 px-4 bg-transparent border border-[#000099] text-[#000099] hover:bg-[#F0F0FF] rounded-lg font-semibold text-xs transition-colors">Regenerate</button>
                               <button onClick={() => setActiveScreen('repository')} className="h-9 px-4 bg-transparent border border-[#000099] text-[#000099] hover:bg-[#F0F0FF] rounded-lg font-semibold text-xs transition-colors">View in Repository</button>
                               <button onClick={() => showToast('✓ PDF download started for Quiz Bank')} className="h-9 px-4 bg-transparent border border-[#E2E2E2] text-[#5F5F5F] hover:bg-slate-100 rounded-lg font-semibold text-xs flex items-center gap-1.5 transition-colors"><Download className="w-3.5 h-3.5" /> Download PDF</button>
                             </>
@@ -955,6 +1013,7 @@ export default function AcademicContentIntelligence() {
                         <div className="border-t border-[#F1F1F1] px-5 py-3 bg-[#F8F8F8] flex justify-end gap-2.5 flex-wrap">
                           {savedTypes.summary ? (
                             <>
+                              <button onClick={() => startGeneration('summary')} className="h-9 px-4 bg-transparent border border-[#000099] text-[#000099] hover:bg-[#F0F0FF] rounded-lg font-semibold text-xs transition-colors">Regenerate</button>
                               <button onClick={() => setActiveScreen('repository')} className="h-9 px-4 bg-transparent border border-[#000099] text-[#000099] hover:bg-[#F0F0FF] rounded-lg font-semibold text-xs transition-colors">View in Repository</button>
                               <button onClick={() => showToast('✓ PDF download started for Summary')} className="h-9 px-4 bg-transparent border border-[#E2E2E2] text-[#5F5F5F] hover:bg-slate-100 rounded-lg font-semibold text-xs flex items-center gap-1.5 transition-colors"><Download className="w-3.5 h-3.5" /> Download PDF</button>
                             </>
@@ -1020,6 +1079,7 @@ export default function AcademicContentIntelligence() {
                         <div className="border-t border-[#F1F1F1] px-5 py-3 bg-[#F8F8F8] flex justify-end gap-2.5 flex-wrap">
                           {savedTypes.guide ? (
                             <>
+                              <button onClick={() => startGeneration('guide')} className="h-9 px-4 bg-transparent border border-[#000099] text-[#000099] hover:bg-[#F0F0FF] rounded-lg font-semibold text-xs transition-colors">Regenerate</button>
                               <button onClick={() => setActiveScreen('repository')} className="h-9 px-4 bg-transparent border border-[#000099] text-[#000099] hover:bg-[#F0F0FF] rounded-lg font-semibold text-xs transition-colors">View in Repository</button>
                               <button onClick={() => showToast('✓ PDF download started for Student Guide')} className="h-9 px-4 bg-transparent border border-[#E2E2E2] text-[#5F5F5F] hover:bg-slate-100 rounded-lg font-semibold text-xs flex items-center gap-1.5 transition-colors"><Download className="w-3.5 h-3.5" /> Download PDF</button>
                             </>
@@ -1142,6 +1202,7 @@ export default function AcademicContentIntelligence() {
                         <div className="border-t border-[#F1F1F1] px-5 py-3 bg-[#F8F8F8] flex justify-end gap-2.5 flex-wrap">
                           {savedTypes.ppt ? (
                             <>
+                              <button onClick={() => startGeneration('ppt')} className="h-9 px-4 bg-transparent border border-[#000099] text-[#000099] hover:bg-[#F0F0FF] rounded-lg font-semibold text-xs transition-colors">Regenerate</button>
                               <button onClick={() => setActiveScreen('repository')} className="h-9 px-4 bg-transparent border border-[#000099] text-[#000099] hover:bg-[#F0F0FF] rounded-lg font-semibold text-xs transition-colors">View in Repository</button>
                               <button onClick={() => showToast('✓ PDF download started for PPT Outline')} className="h-9 px-4 bg-transparent border border-[#E2E2E2] text-[#5F5F5F] hover:bg-slate-100 rounded-lg font-semibold text-xs flex items-center gap-1.5 transition-colors"><Download className="w-3.5 h-3.5" /> Download PDF</button>
                             </>
@@ -1214,6 +1275,7 @@ export default function AcademicContentIntelligence() {
                     <option value="Summary">Summary</option>
                     <option value="Student Guide">Student Guide</option>
                     <option value="PPT Outline">PPT Outline</option>
+                    <option value="Assessment">Assessment</option>
                   </select>
                 </div>
 
@@ -1306,10 +1368,10 @@ export default function AcademicContentIntelligence() {
 
           {/* 3. QUIZ BUILDER SCREEN */}
           {activeScreen === 'quiz-builder' && (
-            <div className="grid grid-cols-1 lg:grid-cols-10 gap-5 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
               
-              {/* Left Explorer panel (4 cols) */}
-              <div className="lg:col-span-4 flex flex-col gap-3">
+              {/* Left Explorer panel (5 cols) */}
+              <div className="lg:col-span-5 flex flex-col gap-3">
                 <div className="flex justify-between items-center font-bold text-sm text-[#1A1A1A]">
                   <span>Question Bank</span>
                   <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-[#E6E6FF] text-[#000099]" id="qbank-count">
@@ -1369,8 +1431,8 @@ export default function AcademicContentIntelligence() {
                 </div>
               </div>
 
-              {/* Right Composer panel (6 cols) */}
-              <div className="lg:col-span-6 bg-white border border-[#E2E2E2] rounded-xl p-5 shadow-sm flex flex-col gap-4">
+              {/* Right Composer panel (7 cols) */}
+              <div className="lg:col-span-7 bg-white border border-[#E2E2E2] rounded-xl p-5 shadow-sm flex flex-col gap-4">
                 <h3 className="font-bold text-sm text-[#1A1A1A]">Assessment Composer</h3>
                 
                 {/* Form fields */}
@@ -1508,7 +1570,7 @@ export default function AcademicContentIntelligence() {
                       </div>
                     </div>
                     <div className="flex gap-2 mt-3">
-                      <button onClick={() => showToast('✓ Assessment saved to repository')} className="h-9 px-4 bg-transparent border border-[#000099] text-[#000099] hover:bg-[#E6E6FF] rounded-lg font-semibold text-xs flex-1 transition-colors">Save Assessment</button>
+                      <button onClick={saveAssessment} className="h-9 px-4 bg-transparent border border-[#000099] text-[#000099] hover:bg-[#E6E6FF] rounded-lg font-semibold text-xs flex-1 transition-colors">Save Assessment</button>
                       <button onClick={() => showToast('✓ Exporting assessment paper as PDF')} className="h-9 px-4 bg-transparent border border-[#E2E2E2] text-[#5F5F5F] hover:bg-slate-100 rounded-lg font-semibold text-xs flex-1 transition-colors">Export as PDF</button>
                     </div>
                   </div>

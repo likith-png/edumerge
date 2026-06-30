@@ -1,0 +1,768 @@
+/* ============================================================
+   edumerge Copilot — chat engine + frames + page
+   ============================================================ */
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/* ---------- shared nav state (Claude-app model) ---------- */
+function useNav() {
+  const [view, setView] = useState("chat");   // chat | projects | project | artifacts
+  const [projectId, setProjectId] = useState(null);
+  const [artifactId, setArtifactId] = useState(null);
+  const project = projectId ? window.PROJECTS.find((p) => p.id === projectId) : null;
+  const artifact = artifactId ? window.ARTIFACTS.find((a) => a.id === artifactId) : null;
+  const go = (v) => { setView(v); };
+  const openProject = (id) => { setProjectId(id); setView("project"); };
+  const openArtifact = (id) => { setArtifactId(id); };
+  const closeArtifact = () => setArtifactId(null);
+  return { view, setView: go, projectId, project, openProject,
+           artifactId, artifact, openArtifact, closeArtifact, setProjectId };
+}
+
+/* ---------- shared chat state hook ---------- */
+function useChat() {
+  const [messages, setMessages] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
+  const [typing, setTyping] = useState(false);
+  const [activeTitle, setActiveTitle] = useState(null);
+  const busy = useRef(false);
+  const clock = useRef({ h: 9, m: 41 });
+
+  const nextTime = () => {
+    const c = clock.current;
+    const hh = c.h % 12 === 0 ? 12 : c.h % 12;
+    const ap = c.h < 12 ? "AM" : "PM";
+    const t = `${hh}:${String(c.m).padStart(2, "0")} ${ap}`;
+    c.m += 1; if (c.m >= 60) { c.m = 0; c.h += 1; }
+    return t;
+  };
+
+  const send = useCallback(async (arg) => {
+    if (busy.current) return;
+    busy.current = true;
+    const label = arg.intent ? (window.COPILOT.INTENT_LABEL[arg.intent] || arg.text || "…") : arg.text;
+    setSuggestions([]);
+    setMessages((m) => [...m, { role: "user", kind: "text", text: label, time: nextTime(), id: Math.random() }]);
+
+    const res = window.COPILOT.resolve(arg);
+    await wait(120);
+    for (let i = 0; i < res.messages.length; i++) {
+      setTyping(true);
+      await wait(i === 0 ? 760 : 620);
+      setTyping(false);
+      setMessages((m) => [...m, { ...res.messages[i], time: nextTime(), id: Math.random() }]);
+      await wait(140);
+    }
+    setSuggestions(res.suggestions || []);
+    busy.current = false;
+  }, []);
+
+  const reset = useCallback(() => {
+    setMessages([]); setSuggestions([]); setTyping(false); setActiveTitle(null);
+    busy.current = false; clock.current = { h: 9, m: 41 };
+  }, []);
+
+  // load a chat instantly (no typing) — for existing chats (dummy history)
+  // or a new blank chat (omit opts), or a seeded intro (opts.history)
+  const loadChat = useCallback((title, opts = {}) => {
+    setTyping(false); busy.current = false; clock.current = { h: 9, m: 41 };
+    setActiveTitle(title || null);
+    setMessages(opts.history || []);
+    setSuggestions(opts.suggestions || []);
+  }, []);
+
+  return { messages, suggestions, typing, send, reset, loadChat, activeTitle,
+           setActiveTitle, started: messages.length > 0 };
+}
+
+/* build preloaded messages from a scripted intent (no animation) */
+function intentMsgs(intent) {
+  const r = window.COPILOT.RESPONSES[intent];
+  if (!r) return { msgs: [], sg: [] };
+  return { msgs: r.messages.map((m) => ({ ...m, id: Math.random(), time: "9:41 AM" })), sg: r.suggestions || [] };
+}
+/* a dummy past conversation: the question + Iris's answer */
+function dummyHistory(title, intent) {
+  const { msgs, sg } = intentMsgs(intent);
+  const q = (window.COPILOT.INTENT_LABEL[intent]) || title;
+  return { history: [{ role: "user", kind: "text", text: q, id: Math.random(), time: "9:40 AM" }, ...msgs], suggestions: sg };
+}
+/* the "create a dashboard" intro (bot prompt only, blank-ish) */
+function dashboardIntro() {
+  const { msgs, sg } = intentMsgs("newDashboard");
+  return { history: msgs, suggestions: sg };
+}
+/* which artifact a build-intent produces */
+const DASH_BUILD = { buildFeeDash: "feeDash", buildAdmDash: "admDash", buildAttDash: "attDash" };
+
+/* ---------- scrollable conversation + composer ---------- */
+function ChatPanel({ chat, name, variant, onArtifact, onOpenProject, onOpenRecent }) {
+  const { messages, suggestions, typing, send, started } = chat;
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [messages, typing, suggestions]);
+
+  // send wrapper: if a build-intent, auto-open its dashboard after the reply
+  const handleSend = (arg) => {
+    send(arg);
+    const dash = arg.intent && DASH_BUILD[arg.intent];
+    if (dash && onArtifact) setTimeout(() => onArtifact(dash), 1500);
+  };
+
+  const hasData = messages.some((m) => m.kind === "cards");
+
+  // pick a relevant dashboard from the conversation context
+  const artifactFor = () => {
+    const t = (chat.activeTitle || "") + " " + messages.map((m) => m.text || "").join(" ");
+    if (/admiss|enrol|applic/i.test(t)) return "admDash";
+    if (/attend|present|leave/i.test(t)) return "attDash";
+    return "feeDash";
+  };
+
+  return (
+    <>
+      <div className="asst-scroll" ref={scrollRef}>
+        <div className="conv-col">
+          {!started && <Welcome name={name} onPick={handleSend} onOpenProject={onOpenProject}
+            recents={RECENT_CHATS} onOpenRecent={onOpenRecent} />}
+          {started && <div className="day-sep"><span>Live · all branches</span></div>}
+          {messages.map((m) => <MessageRow key={m.id} msg={m} onAct={(a) => handleSend({ intent: a.intent })} />)}
+          {typing && <Typing />}
+          {started && !typing && hasData && onArtifact && (
+            <button className="art-cta" onClick={() => onArtifact(artifactFor())}>
+              <span className="art-cta-ic"><Icon name="grid" size={17} /></span>
+              <span className="art-cta-tx"><b>Open as live dashboard</b><small>Turn this answer into a refreshable artifact</small></span>
+              <Icon name="external" size={15} style={{ color: "var(--ink-3)", flex: "none" }} />
+            </button>
+          )}
+          {started && !typing && suggestions.length > 0 && (
+            <Chips items={suggestions} onPick={handleSend} scroller={variant === "mobile"} />
+          )}
+          <div style={{ height: 4 }} />
+        </div>
+      </div>
+      <Composer onSend={handleSend}
+        hint={<span className="byline">by <b><span className="b-edu">edu</span><span className="b-merge">merge</span></b></span>} />
+    </>
+  );
+}
+
+/* ---------- assistant header (shared markup, two skins) ---------- */
+function AsstHeader({ name, variant, onReset, onSettings, onMenu, online = true, title, onBack }) {
+  return (
+    <div className={"asst-head" + (variant === "web" ? " web" : "")}>
+      {variant === "mobile" && (
+        <div className="statusbar">
+          <span>9:41</span>
+          <span className="sb-right">
+            <Icon name="signal" size={17} stroke={2.2} />
+            <Icon name="wifi" size={17} stroke={2.2} />
+            <Icon name="battery" size={22} stroke={2} />
+          </span>
+        </div>
+      )}
+      <div className="asst-bar">
+        {variant === "mobile"
+          ? (onBack
+              ? <button className="icon-btn" onClick={onBack}><Icon name="arrowLeft" size={21} /></button>
+              : <button className="icon-btn" title="Menu" onClick={onMenu}><Icon name="menu" size={22} /></button>)
+          : null}
+        <div className="asst-id">
+          {title ? (
+            <div className="asst-meta"><div className="asst-name">{title}</div></div>
+          ) : (
+            <>
+              <div className="asst-avatar"><Icon name="sparkle" size={22} fill="#fff" stroke={0} /></div>
+              <div className="asst-meta">
+                <div className="asst-name">{name} <span className="badge-ai">AI</span></div>
+                <div className="asst-status">
+                  <span className={"conn-dot " + (online ? "on" : "off")}></span>
+                  {online ? "Online · sees your live data" : "Offline · reconnecting…"}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+        {variant === "mobile" ? (
+          <button className="icon-btn" title="Settings" onClick={onSettings}><Icon name="settings" size={21} /></button>
+        ) : (
+          <>
+            <button className="icon-btn" title="New chat" onClick={onReset}><Icon name="refresh" size={19} /></button>
+            <button className="icon-btn"><Icon name="more" size={20} /></button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   SHARED FEATURE COMPONENTS
+   ============================================================ */
+function Toggle({ on, onToggle }) {
+  return (
+    <button className="tog" data-on={on ? "1" : "0"} onClick={(e) => { e.stopPropagation(); onToggle(!on); }}>
+      <i></i>
+    </button>
+  );
+}
+
+const USAGE = { used: 18420, total: 50000, queries: 312, month: "June" };
+function UsageMeter({ card }) {
+  const pct = Math.round((USAGE.used / USAGE.total) * 100);
+  return (
+    <div className={card ? "usage-card" : "ws-usage"}>
+      <div className="ws-usage-top">
+        <Icon name="bolt" size={15} style={{ color: "var(--accent-deep)" }} />
+        AI usage <span className="u-month">{USAGE.month}</span>
+      </div>
+      <div className="prog"><span style={{ width: pct + "%" }}></span></div>
+      <div className="ws-usage-meta"><b>{USAGE.used.toLocaleString()}</b> / {USAGE.total.toLocaleString()} credits · {USAGE.queries} queries</div>
+    </div>
+  );
+}
+
+function SheetRow({ icon, color, title, desc, value, toggle, on, onToggle, onClick }) {
+  return (
+    <div className="srow" onClick={onClick}>
+      <div className="srow-ic" style={tint(color || "orange")}><Icon name={icon} size={18} /></div>
+      <div className="srow-tx">
+        <div className="srow-t">{title}</div>
+        {desc && <div className="srow-d">{desc}</div>}
+      </div>
+      {toggle ? <Toggle on={on} onToggle={onToggle} />
+        : value ? <div className="srow-val">{value}<Icon name="chevronRight" size={16} /></div>
+        : <Icon name="chevronRight" size={17} style={{ color: "var(--ink-3)" }} />}
+    </div>
+  );
+}
+
+function SettingsSheet({ onClose, onNewChat }) {
+  const [voice, setVoice] = useState(true);
+  const [notif, setNotif] = useState(true);
+  const [proactive, setProactive] = useState(true);
+  return (
+    <>
+      <div className="sheet-scrim" onClick={onClose}></div>
+      <div className="sheet">
+        <div className="sheet-grab"></div>
+        <div className="sheet-head">
+          <div className="sheet-title">Iris</div>
+          <button className="icon-btn" onClick={onClose}><Icon name="x" size={20} /></button>
+        </div>
+        <div className="sheet-body">
+          <UsageMeter card />
+          <div className="sheet-label">Assistant</div>
+          <div className="sheet-group">
+            <SheetRow icon="plus" color="orange" title="New chat" desc="Start a fresh conversation" onClick={() => { onNewChat(); onClose(); }} />
+            <SheetRow icon="clock" color="blue" title="Chat history" value="14" />
+            <SheetRow icon="bookmark" color="purple" title="Saved insights" value="6" />
+          </div>
+          <div className="sheet-label">Preferences</div>
+          <div className="sheet-group">
+            <SheetRow icon="bolt" color="amber" title="Proactive alerts" desc="Notify me when something needs attention" toggle on={proactive} onToggle={setProactive} />
+            <SheetRow icon="mic" color="teal" title="Voice replies" toggle on={voice} onToggle={setVoice} />
+            <SheetRow icon="bell" color="red" title="Push notifications" toggle on={notif} onToggle={setNotif} />
+          </div>
+          <div className="sheet-label">Connected data</div>
+          <div className="sheet-group">
+            <SheetRow icon="calendar" color="green" title="Attendance" value={<span className="srow-on"><span className="dot-live"></span>Live</span>} />
+            <SheetRow icon="wallet" color="blue" title="Fees & payments" value={<span className="srow-on"><span className="dot-live"></span>Live</span>} />
+            <SheetRow icon="doc" color="amber" title="Examinations" value={<span className="srow-on"><span className="dot-live"></span>Live</span>} />
+            <SheetRow icon="database" color="purple" title="Manage sources" desc="3 more available" />
+          </div>
+          <div className="sheet-label">About</div>
+          <div className="sheet-group">
+            <SheetRow icon="shield" color="teal" title="Privacy & data" />
+            <SheetRow icon="chat" color="blue" title="Help & feedback" />
+            <SheetRow icon="settings" color="orange" title="All settings" />
+          </div>
+          <div className="sheet-foot"><span className="byline">by <b><span className="b-edu">edu</span><span className="b-merge">merge</span></b></span><span>Iris AI · v1.0</span></div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+/* ---------- mobile slide-in drawer ---------- */
+function MobileDrawer({ nav, chat, onClose, onNewChat, onSettings }) {
+  const goto = (v) => { nav.setView(v); onClose(); };
+  return (
+    <>
+      <div className="drawer-scrim" onClick={onClose}></div>
+      <div className="drawer">
+        <div className="drawer-brand">
+          <div className="asst-avatar sm"><Icon name="sparkle" size={18} fill="#fff" stroke={0} /></div>
+          <div><div className="asst-name">Iris <span className="badge-ai">AI</span></div>
+            <div className="ws-brand-sub">School assistant</div></div>
+        </div>
+        <button className="ws-newchat" onClick={() => { onNewChat(); onClose(); }}><Icon name="plus" size={17} stroke={2.4} /> New chat</button>
+        <div className="ws-nav top">
+          <button className={"ws-item" + (nav.view === "projects" || nav.view === "project" ? " active" : "")} onClick={() => goto("projects")}>
+            <span className="it-ic"><Icon name="folder" size={17} /></span><span className="it-t">Projects</span><span className="ws-badge">{window.PROJECTS.length}</span>
+          </button>
+          <button className={"ws-item" + (nav.view === "artifacts" ? " active" : "")} onClick={() => goto("artifacts")}>
+            <span className="it-ic"><Icon name="grid" size={17} /></span><span className="it-t">Artifacts</span><span className="ws-badge">{window.ARTIFACTS.length}</span>
+          </button>
+        </div>
+        <div className="ws-sec">Recent</div>
+        <div className="ws-list">
+          {RECENT_CHATS.map((c, i) => (
+            <button key={i} className="ws-item" onClick={() => { chat.loadChat(c.title, dummyHistory(c.title, c.intent)); goto("chat"); }}>
+              <span className="it-ic"><Icon name={c.icon} size={16} /></span><span className="it-t">{c.title}</span>
+            </button>
+          ))}
+        </div>
+        <div className="ws-spacer"></div>
+        <UsageMeter />
+        <div className="ws-nav">
+          <button className="ws-item" onClick={() => { onSettings(); onClose(); }}><span className="it-ic"><Icon name="settings" size={16} /></span><span className="it-t">Settings</span></button>
+        </div>
+        <div className="ws-account">
+          <div className="lrow-ava" style={tile("blue")}>R</div>
+          <div className="ws-account-tx"><div className="ws-account-name">Rao Vidya Niketan</div><div className="ws-account-role">Administrator</div></div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+/* ============================================================
+   VARIANT 1 — Mobile in-app assistant
+   ============================================================ */
+function MobileVariant({ name }) {
+  const chat = useChat();
+  const nav = useNav();
+  const [settings, setSettings] = useState(false);
+  const [drawer, setDrawer] = useState(false);
+  const [newProj, setNewProj] = useState(false);
+  const [online, setOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
+  useEffect(() => {
+    const up = () => setOnline(true);
+    const down = () => setOnline(false);
+    window.addEventListener("online", up);
+    window.addEventListener("offline", down);
+    return () => { window.removeEventListener("online", up); window.removeEventListener("offline", down); };
+  }, []);
+
+  const startNew = () => { chat.reset(); nav.setView("chat"); };
+
+  // header config per view
+  let header;
+  if (nav.view === "chat") header = <AsstHeader name={name} variant="mobile" online={online} onMenu={() => setDrawer(true)} onSettings={() => setSettings(true)} />;
+  else if (nav.view === "projects") header = <AsstHeader variant="mobile" title="Projects" onMenu={() => setDrawer(true)} onSettings={() => setSettings(true)} />;
+  else if (nav.view === "artifacts") header = <AsstHeader variant="mobile" title="Artifacts" onMenu={() => setDrawer(true)} onSettings={() => setSettings(true)} />;
+  else if (nav.view === "project") header = <AsstHeader variant="mobile" title={nav.project?.name} onBack={() => nav.setView("projects")} onSettings={() => setSettings(true)} />;
+
+  return (
+    <div className="phone">
+      <div className="dynamic-island"></div>
+      <div className="phone-screen">
+        <div className="asst">
+          {header}
+          {nav.view === "chat" && <ChatPanel chat={chat} name={name} variant="mobile" onArtifact={nav.openArtifact} onOpenProject={nav.openProject} onOpenRecent={(c) => chat.loadChat(c.title, dummyHistory(c.title, c.intent))} />}
+          {nav.view === "projects" && <div className="m-scroll"><ProjectsView onOpen={nav.openProject} onNew={() => setNewProj(true)} /></div>}
+          {nav.view === "project" && nav.project && <div className="m-scroll"><ProjectHome project={nav.project}
+            onBack={() => nav.setView("projects")}
+            onNewChat={() => { chat.loadChat("New chat · " + nav.project.name); nav.setView("chat"); }}
+            onOpenChat={(p, c) => { chat.loadChat(c.title, dummyHistory(c.title, c.intent)); nav.setView("chat"); }} /></div>}
+          {nav.view === "artifacts" && <div className="m-scroll"><ArtifactsView onOpen={nav.openArtifact} onCreate={() => { chat.loadChat("New dashboard", dashboardIntro()); nav.setView("chat"); }} /></div>}
+          <div className="home-ind"></div>
+
+          {nav.artifact && (
+            <div className="m-artifact">
+              <div className="asst-head"><div className="asst-bar">
+                <button className="icon-btn" onClick={nav.closeArtifact}><Icon name="arrowLeft" size={21} /></button>
+                <div className="asst-id"><div className="art-panel-ic" style={tint(nav.artifact.color)}><Icon name={nav.artifact.icon} size={17} /></div>
+                  <div className="asst-meta"><div className="asst-name" style={{ fontSize: 16 }}>{nav.artifact.title}</div>
+                  <div className="asst-status" style={{ fontSize: 11 }}>{nav.artifact.project} · dashboard</div></div></div>
+              </div></div>
+              <div className="m-artifact-body"><Dashboard artifact={nav.artifact} compact /></div>
+            </div>
+          )}
+
+          {drawer && <MobileDrawer nav={nav} chat={chat} onClose={() => setDrawer(false)} onNewChat={startNew} onSettings={() => setSettings(true)} />}
+          {settings && <SettingsSheet onClose={() => setSettings(false)} onNewChat={startNew} />}
+      {newProj && <NewProjectSheet onClose={() => setNewProj(false)} onPick={(tpl) => { setNewProj(false); const ex = window.PROJECTS.find((p) => p.id === tpl.id); if (ex) nav.openProject(ex.id); }} />}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   VARIANT 2 — Web ERP with docked copilot
+   ============================================================ */
+function ErpBackdrop() {
+  const nav = [
+    { ic: "grad", t: "Dashboard", active: true },
+    { ic: "users", t: "Students" },
+    { ic: "calendar", t: "Attendance" },
+    { ic: "doc", t: "Examinations" },
+    { ic: "wallet", t: "Fees" },
+    { ic: "layers", t: "Admissions" },
+  ];
+  const bars = [62, 78, 54, 88, 70, 95, 48, 82, 66, 90, 58, 74];
+  return (
+    <>
+      <div className="erp-side">
+        <div className="erp-brand">
+          <div className="erp-brand-mark">e</div>
+          <div className="erp-brand-tx">edumerge</div>
+        </div>
+        <div className="erp-nav-label">School</div>
+        {nav.map((n, i) => (
+          <div key={i} className={"erp-nav" + (n.active ? " active" : "")}>
+            <span className="ni"><Icon name={n.ic} size={18} /></span>{n.t}
+          </div>
+        ))}
+      </div>
+      <div className="erp-main">
+        <div className="erp-top">
+          <h2>Dashboard</h2>
+          <div className="spacer"></div>
+          <div className="erp-search"><Icon name="search" size={15} />Search students, fees…</div>
+        </div>
+        <div className="erp-content">
+          <div className="erp-kpis">
+            <div className="kpi"><div className="kpi-k">Attendance today</div><div className="kpi-v">94.2%</div><div className="kpi-d down">−1.1% vs avg</div></div>
+            <div className="kpi"><div className="kpi-k">Fees collected</div><div className="kpi-v">₹3.82L</div><div className="kpi-d up">+18% today</div></div>
+            <div className="kpi"><div className="kpi-k">Overdue</div><div className="kpi-v">₹2.4L</div><div className="kpi-d down">+5 accounts</div></div>
+            <div className="kpi"><div className="kpi-k">Students flagged</div><div className="kpi-v">9</div><div className="kpi-d down">+3 this week</div></div>
+          </div>
+          <div className="erp-panel-block">
+            <h3>Fee collection · last 12 days</h3>
+            <div className="erp-bars">
+              {bars.map((b, i) => <div key={i} className="b" style={{ height: b + "%" }} />)}
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function WebVariant({ name }) {
+  const chat = useChat();
+  const nav = useNav();
+  const [folded, setFolded] = useState(false);
+  const [newProj, setNewProj] = useState(false);
+  const [settings, setSettings] = useState(false);
+  const startNewChat = () => { chat.reset(); nav.setView("chat"); };
+  const topTitle = nav.view === "projects" ? "Projects" : nav.view === "artifacts" ? "Artifacts"
+    : nav.view === "project" ? nav.project?.name : (chat.activeTitle || "New chat");
+  return (
+    <div className="erp">
+      <div className="browserbar">
+        <div className="lights"><i></i><i></i><i></i></div>
+        <div className="urlbar"><Icon name="shield" size={13} />app.edumerge.com/iris</div>
+      </div>
+      <div className="ws-embed">
+        <WebSidebar folded={folded} onToggle={() => setFolded((f) => !f)} nav={nav} chat={chat} onNewChat={startNewChat} onSettings={() => setSettings(true)} />
+        <div className="ws-main">
+          <div className="ws-top">
+            <button className="icon-btn" title="Toggle sidebar" onClick={() => setFolded((f) => !f)}><Icon name="menu" size={20} /></button>
+            <div className="ws-top-title">{topTitle}</div>
+            <div className="spacer"></div>
+            {nav.view === "chat" && <div className="ws-chip"><span className="conn-dot on"></span>Connected to live data</div>}
+            <button className="icon-btn bordered" title="Refresh" onClick={() => window.location.reload()}><Icon name="refresh" size={18} /></button>
+          </div>
+          <div className="ws-body">
+            <div className="ws-canvas">
+              {nav.view === "chat" && <div className="asst ws-asst"><ChatPanel chat={chat} name={name} variant="web" onArtifact={nav.openArtifact} onOpenProject={nav.openProject} onOpenRecent={(c) => chat.loadChat(c.title, dummyHistory(c.title, c.intent))} /></div>}
+              {nav.view === "projects" && <div className="ws-scrollview"><ProjectsView onOpen={nav.openProject} onNew={() => setNewProj(true)} /></div>}
+              {nav.view === "project" && nav.project && <div className="ws-scrollview"><ProjectHome project={nav.project}
+                onBack={() => nav.setView("projects")}
+                onNewChat={() => { chat.loadChat("New chat · " + nav.project.name); nav.setView("chat"); }}
+                onOpenChat={(p, c) => { chat.loadChat(c.title, dummyHistory(c.title, c.intent)); nav.setView("chat"); }} /></div>}
+              {nav.view === "artifacts" && <div className="ws-scrollview"><ArtifactsView onOpen={nav.openArtifact} onCreate={() => { chat.loadChat("New dashboard", dashboardIntro()); nav.setView("chat"); }} /></div>}
+            </div>
+            {nav.artifact && (
+              <div className="art-panel">
+                <div className="art-panel-head">
+                  <div className="art-panel-id">
+                    <div className="art-panel-ic" style={tint(nav.artifact.color)}><Icon name={nav.artifact.icon} size={17} /></div>
+                    <div><div className="art-panel-title">{nav.artifact.title}</div><div className="art-panel-sub">{nav.artifact.project} · dashboard</div></div>
+                  </div>
+                  <button className="icon-btn" onClick={nav.closeArtifact}><Icon name="x" size={19} /></button>
+                </div>
+                <div className="art-panel-body"><Dashboard artifact={nav.artifact} /></div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      {settings && <SettingsSheet onClose={() => setSettings(false)} onNewChat={startNewChat} />}
+      {newProj && <NewProjectSheet onClose={() => setNewProj(false)} onPick={(tpl) => { setNewProj(false); const ex = window.PROJECTS.find((p) => p.id === tpl.id); if (ex) nav.openProject(ex.id); }} />}
+    </div>
+  );
+}
+
+/* ============================================================
+   TWEAKS
+   ============================================================ */
+const ASSISTANT_NAME = "Iris";
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accent": "#000098",
+  "corners": 20,
+  "font": "jakarta",
+  "dark": false
+}/*EDITMODE-END*/;
+
+const ACCENTS = {
+  "#000098": { deep: "#00007A", soft: "#E4E4F7", softDark: "#1C1C50" },
+  "#FC9C00": { deep: "#E08300", soft: "#FFF0D6", softDark: "#3A2A0C" },
+};
+const FONTS = {
+  jakarta: '"Plus Jakarta Sans", system-ui, sans-serif',
+  manrope: '"Manrope", system-ui, sans-serif',
+  system:  '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif',
+};
+
+function useApplyTweaks() {
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  useEffect(() => {
+    const root = document.documentElement;
+    const acc = ACCENTS[t.accent] || ACCENTS["#000098"];
+    root.style.setProperty("--accent", t.accent);
+    root.style.setProperty("--accent-deep", acc.deep);
+    root.style.setProperty("--accent-soft", t.dark ? acc.softDark : acc.soft);
+    root.style.setProperty("--bubble-radius", t.corners + "px");
+    root.style.setProperty("--card-radius", Math.max(8, t.corners - 2) + "px");
+    root.style.setProperty("--font", FONTS[t.font] || FONTS.jakarta);
+    root.setAttribute("data-theme", t.dark ? "dark" : "light");
+  }, [t]);
+  return [t, setTweak];
+}
+
+function TweakControls({ t, setTweak }) {
+  return (
+    <TweaksPanel>
+      <TweakSection label="Brand" />
+      <TweakColor label="Accent" value={t.accent}
+        options={["#000098", "#FC9C00"]}
+        onChange={(v) => setTweak("accent", v)} />
+      <TweakSection label="Style" />
+      <TweakSlider label="Corner radius" value={t.corners} min={6} max={26} step={1} unit="px"
+        onChange={(v) => setTweak("corners", v)} />
+      <TweakSelect label="Typeface" value={t.font}
+        options={[{ value: "jakarta", label: "Plus Jakarta" }, { value: "manrope", label: "Manrope" }, { value: "system", label: "System" }]}
+        onChange={(v) => setTweak("font", v)} />
+      <TweakToggle label="Dark mode" value={t.dark} onChange={(v) => setTweak("dark", v)} />
+    </TweaksPanel>
+  );
+}
+
+/* ============================================================
+   STANDALONE EXPERIENCE — Mobile only (auto-scaled phone)
+   ============================================================ */
+function MobileStage() {
+  const [t, setTweak] = useApplyTweaks();
+  const [scale, setScale] = useState(1);
+  useEffect(() => {
+    const fit = () => {
+      const s = Math.min(1, (window.innerHeight - 40) / 818, (window.innerWidth - 24) / 412);
+      setScale(s > 0.3 ? s : 0.3);
+    };
+    fit();
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, []);
+  return (
+    <div className="stage-mobile">
+      <div style={{ width: 390 * scale, height: 818 * scale, flex: "none" }}>
+        <div style={{ transform: `scale(${scale})`, transformOrigin: "top left" }}>
+          <MobileVariant name={ASSISTANT_NAME} />
+        </div>
+      </div>
+      <TweakControls t={t} setTweak={setTweak} />
+    </div>
+  );
+}
+
+/* ============================================================
+   STANDALONE EXPERIENCE — Web only (full-screen Iris workspace)
+   ============================================================ */
+const RECENT_CHATS = [
+  { icon: "wallet", title: "Fee collection across branches", intent: "feeStatus", active: true },
+  { icon: "grad", title: "Admissions this year", intent: "admissions" },
+  { icon: "users", title: "Student strength", intent: "students" },
+  { icon: "calendar", title: "Student attendance today", intent: "studentAtt" },
+  { icon: "layers", title: "Branch performance", intent: "branchRank" },
+];
+
+function WebSidebar({ folded, onToggle, nav, chat, onNewChat, onSettings }) {
+  const navItem = (v, icon, label, badge) => (
+    <button className={"ws-item" + (nav.view === v ? " active" : "")} title={label} onClick={() => { nav.setView(v); }}>
+      <span className="it-ic"><Icon name={icon} size={16} /></span>
+      <span className="it-t">{label}</span>
+      {badge != null && <span className="ws-badge">{badge}</span>}
+    </button>
+  );
+  return (
+    <div className={"ws-side" + (folded ? " folded" : "")} style={{ flex: folded ? "0 0 76px" : "0 0 290px" }}>
+      <div className="ws-brand">
+        <div className="asst-avatar"><Icon name="sparkle" size={20} fill="#fff" stroke={0} /></div>
+        <div className="ws-brand-tx">
+          <div className="ws-brand-name">Iris <span className="badge-ai">AI</span></div>
+          <div className="ws-brand-sub">School assistant</div>
+        </div>
+        <button className="ws-fold" onClick={onToggle} title={folded ? "Expand" : "Collapse"}>
+          <Icon name={folded ? "chevronRight" : "chevronLeft"} size={17} />
+        </button>
+      </div>
+      <button className="ws-newchat" onClick={onNewChat} title="New chat"><Icon name="plus" size={17} stroke={2.4} /> <span className="nc-t">New chat</span></button>
+
+      <div className="ws-nav top">
+        {navItem("projects", "folder", "Projects", window.PROJECTS.length)}
+        {navItem("artifacts", "grid", "Artifacts", window.ARTIFACTS.length)}
+      </div>
+
+      <div className="ws-sec">Recent</div>
+      <div className="ws-list">
+        {RECENT_CHATS.map((c, i) => (
+          <button key={i} className={"ws-item" + (nav.view === "chat" && chat.activeTitle === c.title ? " active" : "")} title={c.title}
+            onClick={() => chat.loadChat(c.title, dummyHistory(c.title, c.intent))}>
+            <span className="it-ic"><Icon name={c.icon} size={16} /></span>
+            <span className="it-t">{c.title}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="ws-spacer"></div>
+
+      <UsageMeter />
+      <div className="ws-usage-mini" title="AI usage · 18,420 / 50,000 credits"><Icon name="bolt" size={17} style={{ color: "var(--accent-deep)" }} /></div>
+      <div className="ws-nav">
+        <div className="ws-item" title="Saved insights"><span className="it-ic"><Icon name="bookmark" size={16} /></span><span className="it-t">Saved insights</span></div>
+        <div className="ws-item" onClick={onSettings} title="Settings"><span className="it-ic"><Icon name="settings" size={16} /></span><span className="it-t">Settings</span></div>
+      </div>
+      <div className="ws-account">
+        <div className="lrow-ava" style={tile("blue")}>R</div>
+        <div className="ws-account-tx">
+          <div className="ws-account-name">Rao Vidya Niketan</div>
+          <div className="ws-account-role">Administrator</div>
+        </div>
+        <Icon name="logout" size={17} style={{ color: "var(--ink-3)" }} />
+      </div>
+    </div>
+  );
+}
+
+function WebStage() {
+  const [t, setTweak] = useApplyTweaks();
+  const chat = useChat();
+  const nav = useNav();
+  const [folded, setFolded] = useState(false);
+  const [newProj, setNewProj] = useState(false);
+  const [settings, setSettings] = useState(false);
+
+  const startNewChat = () => { chat.reset(); nav.setView("chat"); };
+
+  const topTitle = nav.view === "projects" ? "Projects"
+    : nav.view === "artifacts" ? "Artifacts"
+    : nav.view === "project" ? nav.project?.name
+    : (chat.activeTitle || "New chat");
+
+  return (
+    <div className="ws">
+      <WebSidebar folded={folded} onToggle={() => setFolded((f) => !f)} nav={nav} chat={chat}
+        onNewChat={startNewChat} onSettings={() => setSettings(true)} />
+      <div className="ws-main">
+        <div className="ws-top">
+          <button className="icon-btn" title="Toggle sidebar" onClick={() => setFolded((f) => !f)}><Icon name="menu" size={20} /></button>
+          <div className="ws-top-title">{topTitle}</div>
+          <div className="spacer"></div>
+          {nav.view === "chat" && <div className="ws-chip"><span className="conn-dot on"></span>Connected to live data</div>}
+          <button className="icon-btn bordered" title="Refresh" onClick={() => window.location.reload()}><Icon name="refresh" size={18} /></button>
+        </div>
+
+        <div className="ws-body">
+          <div className="ws-canvas">
+            {nav.view === "chat" && (
+              <div className="asst ws-asst"><ChatPanel chat={chat} name={ASSISTANT_NAME} variant="web" onArtifact={nav.openArtifact} onOpenProject={nav.openProject} onOpenRecent={(c) => chat.loadChat(c.title, dummyHistory(c.title, c.intent))} /></div>
+            )}
+            {nav.view === "projects" && (
+              <div className="ws-scrollview"><ProjectsView onOpen={nav.openProject} onNew={() => setNewProj(true)} /></div>
+            )}
+            {nav.view === "project" && nav.project && (
+              <div className="ws-scrollview"><ProjectHome project={nav.project}
+                onBack={() => nav.setView("projects")}
+                onNewChat={() => { chat.loadChat("New chat · " + nav.project.name); nav.setView("chat"); }}
+                onOpenChat={(p, c) => { chat.loadChat(c.title, dummyHistory(c.title, c.intent)); nav.setView("chat"); }} /></div>
+            )}
+            {nav.view === "artifacts" && (
+              <div className="ws-scrollview"><ArtifactsView onOpen={nav.openArtifact} onCreate={() => { chat.loadChat("New dashboard", dashboardIntro()); nav.setView("chat"); }} /></div>
+            )}
+          </div>
+
+          {nav.artifact && (
+            <div className="art-panel">
+              <div className="art-panel-head">
+                <div className="art-panel-id">
+                  <div className="art-panel-ic" style={tint(nav.artifact.color)}><Icon name={nav.artifact.icon} size={17} /></div>
+                  <div>
+                    <div className="art-panel-title">{nav.artifact.title}</div>
+                    <div className="art-panel-sub">{nav.artifact.project} · dashboard</div>
+                  </div>
+                </div>
+                <button className="icon-btn" onClick={nav.closeArtifact}><Icon name="x" size={19} /></button>
+              </div>
+              <div className="art-panel-body"><Dashboard artifact={nav.artifact} /></div>
+            </div>
+          )}
+        </div>
+      </div>
+      {settings && <SettingsSheet onClose={() => setSettings(false)} onNewChat={startNewChat} />}
+      {newProj && <NewProjectSheet onClose={() => setNewProj(false)} onPick={(tpl) => {
+        setNewProj(false);
+        const existing = window.PROJECTS.find((p) => p.id === tpl.id);
+        if (existing) nav.openProject(existing.id);
+        else nav.setView("projects");
+      }} />}
+      <TweakControls t={t} setTweak={setTweak} />
+    </div>
+  );
+}
+
+/* ============================================================
+   SHOWROOM — both surfaces side by side
+   ============================================================ */
+function App() {
+  const [t, setTweak] = useApplyTweaks();
+  return (
+    <div className="page">
+      <div className="page-head">
+        <span className="page-eyebrow"><Icon name="sparkle" size={13} fill="currentColor" stroke={0} /> edumerge · AI Copilot</span>
+        <h1 className="page-title">Meet Iris — the edumerge copilot</h1>
+        <p className="page-sub">Iris is the in-app assistant for edumerge. Ask her about the six numbers that run your institution — fee collection, admissions, student & staff strength, and student & staff attendance — and get straight, real-time facts every time. Two surfaces, one assistant. Tap a card or type a question to try it.</p>
+      </div>
+      <div className="variants">
+        <div className="variant">
+          <div className="variant-label">
+            <div className="variant-num">1</div>
+            <div className="variant-name">In-app assistant · Mobile</div>
+            <div className="variant-desc">Full-screen conversational surface inside the edumerge mobile app, with rich cards, voice input and quick suggestions.</div>
+          </div>
+          <MobileVariant name={ASSISTANT_NAME} />
+        </div>
+        <div className="variant">
+          <div className="variant-label">
+            <div className="variant-num">2</div>
+            <div className="variant-name">Full-screen workspace · Web</div>
+            <div className="variant-desc">Iris as a dedicated web app — foldable sidebar with recent chats, AI-usage meter and connected data sources, plus a focused conversation canvas.</div>
+          </div>
+          <WebVariant name={ASSISTANT_NAME} />
+        </div>
+      </div>
+      <TweakControls t={t} setTweak={setTweak} />
+    </div>
+  );
+}
+
+const __MODE = (typeof window !== "undefined" && window.__EXPERIENCE) || "showroom";
+const Root = __MODE === "mobile" ? MobileStage : __MODE === "web" ? WebStage : App;
+ReactDOM.createRoot(document.getElementById("root")).render(<Root />);

@@ -1,0 +1,845 @@
+/* ============================================================
+   edumerge · Iris — Phase-1 Q&A
+   Landing: six categories — Fee collection, Admissions,
+   Student strength, Staff strength, Student attendance,
+   Staff attendance. Fees & Admissions drill into the CFO
+   multi-branch finance answers. Figures are illustrative
+   (January 2025). Six branches.
+   ============================================================ */
+(function () {
+  // Branches (user-supplied names)
+  // HSR · Banashankari · Arkavathi · Hennur · Nagarbavi · Hyderabad
+
+  // Landing categories — "Ask me about"
+  const CAPABILITIES = [
+    { intent: "feeStatus",  icon: "wallet",    color: "green", project: "fees",
+      title: "Fee collection",     desc: "Collected, pending & overdue across branches" },
+    { intent: "admissions", icon: "grad",      color: "purple", project: "adm",
+      title: "Admissions",         desc: "New admissions, applications & seats" },
+    { intent: "students",   icon: "users",     color: "blue",
+      title: "Student strength",   desc: "Total students by class & gender" },
+    { intent: "staff",      icon: "briefcase", color: "teal",
+      title: "Staff strength",     desc: "Teaching & non-teaching headcount" },
+    { intent: "studentAtt", icon: "calendar",  color: "orange", project: "att",
+      title: "Student attendance", desc: "Today's present, absent & on leave" },
+    { intent: "staffAtt",   icon: "clock",     color: "amber", project: "att",
+      title: "Staff attendance",   desc: "Today's staff present & on leave" },
+  ];
+
+  const WELCOME_SUGGEST = [
+    { label: "Fee collection", intent: "feeStatus" },
+    { label: "Admissions", intent: "admissions" },
+    { label: "Move a candidate's stage", intent: "admMoveStage" },
+    { label: "Send a broadcast + reminder", intent: "commBroadcast" },
+    { label: "Approve a leave request", intent: "leaveApprove" },
+  ];
+
+  const RESPONSES = {
+    /* ═══ FEE COLLECTION — multi-branch ═══ */
+    feeStatus: {
+      messages: [
+        { role: "bot", kind: "text", text: "<strong>Fee collection — January 2025 · all 6 branches</strong>" },
+        { role: "bot", kind: "cards", cards: [
+          { c: "stat", color: "green", icon: "wallet", kicker: "Total collected · Jan 2025",
+            num: "₹45.67L", delta: { text: "83.6% rate · +2.3% vs Dec", dir: "up" },
+            metrics: [
+              { k: "Collected", v: "₹45.67L" },
+              { k: "Pending", v: "₹8.92L" },
+              { k: "Overdue", v: "₹2.34L" },
+              { k: "Collection rate", v: "83.6%" },
+            ] },
+          { c: "list", color: "blue", icon: "layers", kicker: "Branch breakdown", title: "Collected by branch",
+            rows: [
+              { ava: "H", avaColor: "blue", name: "HSR", sub: "86.2% collection", val: "₹18.50L", valColor: "ink" },
+              { ava: "B", avaColor: "teal", name: "Banashankari", sub: "85.5% collection", val: "₹14.77L", valColor: "ink" },
+              { ava: "A", avaColor: "purple", name: "Arkavathi", sub: "80.1% collection", val: "₹12.40L", valColor: "ink" },
+              { ava: "He", avaColor: "amber", name: "Hennur", sub: "81.4% collection", val: "₹9.10L", valColor: "ink" },
+              { ava: "Hy", avaColor: "green", name: "Hyderabad", sub: "79.8% collection", val: "₹8.95L", valColor: "ink" },
+              { ava: "N", avaColor: "orange", name: "Nagarbavi", sub: "78.2% collection", val: "₹8.90L", valColor: "amber" },
+            ] },
+          { c: "kv", color: "green", icon: "doc", kicker: "Status summary", title: "Where the money sits",
+            rows: [
+              { k: "Collected", v: "₹45.67L", dot: "green" },
+              { k: "Pending (not due)", v: "₹5.10L", dot: "blue" },
+              { k: "Due (1–30 days)", v: "₹2.58L", dot: "amber" },
+              { k: "Overdue (30+ days)", v: "₹2.34L", dot: "red" },
+            ] },
+        ]},
+      ],
+      suggestions: [
+        { label: "Branch performance", intent: "branchRank" },
+        { label: "Apply a sibling discount", intent: "feeDiscount" },
+        { label: "Admissions", intent: "admissions" },
+      ],
+    },
+
+    branchRank: {
+      messages: [
+        { role: "bot", kind: "text", text: "<strong>Branch performance — fee collection, January 2025</strong>" },
+        { role: "bot", kind: "cards", cards: [
+          { c: "list", color: "blue", icon: "layers", kicker: "Ranking · collection rate", title: "All 6 branches",
+            rows: [
+              { ava: "1", avaColor: "green", name: "HSR", sub: "Top performer", val: "86.2%", valColor: "green" },
+              { ava: "2", avaColor: "green", name: "Banashankari", sub: "Top performer", val: "85.5%", valColor: "green" },
+              { ava: "3", avaColor: "blue", name: "Hennur", sub: "On track", val: "81.4%", valColor: "ink" },
+              { ava: "4", avaColor: "blue", name: "Arkavathi", sub: "On track", val: "80.1%", valColor: "ink" },
+              { ava: "5", avaColor: "blue", name: "Hyderabad", sub: "On track", val: "79.8%", valColor: "ink" },
+              { ava: "6", avaColor: "orange", name: "Nagarbavi", sub: "Red zone · needs attention", val: "78.2%", valColor: "amber" },
+            ] },
+          { c: "kv", color: "orange", icon: "alert", kicker: "Nagarbavi · quick facts", title: "Why it's lagging",
+            rows: [
+              { k: "Overdue (30+ days)", v: "₹65,000", dot: "red" },
+              { k: "Collections team", v: "2 members" },
+              { k: "Jan 2024 rate", v: "82.0%" },
+              { k: "Main reason", v: "Holiday delays + new admits" },
+            ] },
+        ]},
+      ],
+      suggestions: [
+        { label: "Collection summary", intent: "feeStatus" },
+        { label: "Year-over-year", intent: "feeYoY" },
+      ],
+    },
+
+    feeYoY: {
+      messages: [
+        { role: "bot", kind: "text", text: "<strong>Year-over-year — January 2024 vs January 2025</strong>" },
+        { role: "bot", kind: "cards", cards: [
+          { c: "compare", color: "teal", icon: "trendUp", kicker: "Collection performance",
+            left: { label: "Jan 2024", value: "₹42.10L", sub: "81.3% rate" },
+            right: { label: "Jan 2025", value: "₹45.67L", sub: "83.6% rate" },
+            growth: { text: "+₹3.57L  ·  +8.5%", dir: "up" } },
+          { c: "kv", color: "green", icon: "layers", kicker: "Growth by category", title: "Where it came from",
+            rows: [
+              { k: "New admissions revenue", v: "+₹1.85L  (+25.2%)", dot: "green" },
+              { k: "Continuing students", v: "+₹1.72L  (+5.1%)", dot: "green" },
+            ] },
+          { c: "compare", color: "blue", icon: "wallet", kicker: "Pending comparison",
+            left: { label: "Jan 2024", value: "₹10.15L", sub: "pending" },
+            right: { label: "Jan 2025", value: "₹8.92L", sub: "pending" },
+            growth: { text: "Better by ₹1.23L", dir: "up" } },
+        ]},
+      ],
+      suggestions: [
+        { label: "Collection summary", intent: "feeStatus" },
+        { label: "Branch performance", intent: "branchRank" },
+        { label: "Admission revenue YoY", intent: "admRevYoY" },
+      ],
+    },
+
+    /* ═══ ADMISSIONS — overview ═══ */
+    admissions: {
+      messages: [
+        { role: "bot", kind: "cards", cards: [
+          { c: "stat", color: "purple", icon: "grad", kicker: "Admissions · 2025–26",
+            num: "284", delta: { text: "+12% vs last year", dir: "up" },
+            metrics: [
+              { k: "Applications", v: "412" },
+              { k: "Confirmed", v: "284" },
+              { k: "Seats left", v: "66" },
+              { k: "Conversion", v: "69%" },
+            ] },
+          { c: "list", color: "purple", icon: "grad", kicker: "New admissions", title: "By class",
+            rows: [
+              { ava: "11", avaColor: "teal", name: "Class 11", sub: "Science · Commerce · Arts", val: "78", valColor: "ink" },
+              { ava: "1", avaColor: "orange", name: "Class 1", sub: "Primary intake", val: "64", valColor: "ink" },
+              { ava: "9", avaColor: "purple", name: "Class 9", sub: "Secondary", val: "41", valColor: "ink" },
+              { ava: "6", avaColor: "blue", name: "Class 6", sub: "Middle", val: "33", valColor: "ink" },
+            ] },
+        ]},
+      ],
+      suggestions: [
+        { label: "Move a candidate's stage", intent: "admMoveStage" },
+        { label: "Revenue from new admissions", intent: "admRevShare" },
+        { label: "Student strength", intent: "students" },
+      ],
+    },
+
+    admRevShare: {
+      messages: [
+        { role: "bot", kind: "text", text: "<strong>Admission revenue analysis — January 2025</strong>" },
+        { role: "bot", kind: "cards", cards: [
+          { c: "split", color: "purple", icon: "grad", kicker: "Revenue breakdown · total ₹45.45L",
+            parts: [
+              { label: "New admissions", value: "₹18.50L", pct: 38, color: "purple" },
+              { label: "Continuing students", value: "₹26.95L", pct: 62, color: "blue" },
+            ] },
+          { c: "kv", color: "teal", icon: "trendUp", kicker: "New-admission share · last 3 months", title: "Rising trend",
+            rows: [
+              { k: "November 2024", v: "32%" },
+              { k: "December 2024", v: "35%" },
+              { k: "January 2025", v: "38%", dot: "green" },
+            ] },
+          { c: "kv", color: "blue", icon: "users", kicker: "Average fee per student", title: "New vs continuing",
+            rows: [
+              { k: "New admission avg", v: "₹41,111" },
+              { k: "Continuing avg", v: "₹45,892" },
+              { k: "Difference", v: "−₹4,781  (10.4%)", dot: "amber" },
+            ] },
+          { c: "kv", color: "green", icon: "wallet", kicker: "Full-year projection · 2025", title: "Expected revenue",
+            rows: [
+              { k: "Total expected", v: "₹1.87 Cr", dot: "green" },
+              { k: "Growth vs 2024", v: "+₹22L  (+13.3%)", dot: "green" },
+            ] },
+        ]},
+      ],
+      suggestions: [
+        { label: "Admission revenue YoY", intent: "admRevYoY" },
+        { label: "New vs continuing", intent: "newVsCont" },
+        { label: "Fee collection", intent: "feeStatus" },
+      ],
+    },
+
+    admRevYoY: {
+      messages: [
+        { role: "bot", kind: "text", text: "<strong>Admission revenue — Jan 2024 vs Jan 2025 (new students)</strong>" },
+        { role: "bot", kind: "cards", cards: [
+          { c: "compare", color: "amber", icon: "wallet", kicker: "Admission revenue · new students",
+            left: { label: "Jan 2024", value: "₹15.20L", sub: "38 students" },
+            right: { label: "Jan 2025", value: "₹18.50L", sub: "45 students" },
+            growth: { text: "+₹3.30L  ·  +21.7%", dir: "up" } },
+          { c: "table", color: "purple", icon: "grad", kicker: "Class-wise admission revenue", title: "2024 → 2025",
+            cols: ["Class", "2024", "2025", "Growth"],
+            align: ["left", "right", "right", "right"],
+            rows: [
+              ["LKG", "₹6.00L", "₹7.20L", "+20.0%"],
+              ["Class 1", "₹5.60L", "₹6.40L", "+14.3%"],
+              ["Class 2", "₹2.40L", "₹2.80L", "+16.7%"],
+              ["Class 3", "₹1.20L", "₹1.60L", "+33.3%"],
+            ],
+            foot: ["Total", "₹15.20L", "₹18.50L", "+21.7%"] },
+          { c: "kv", color: "teal", icon: "trendUp", kicker: "Full-year projection", title: "Admission revenue",
+            rows: [
+              { k: "2024 (full year)", v: "₹1.82 Cr" },
+              { k: "2025 (projected)", v: "₹2.15 Cr", dot: "green" },
+              { k: "Expected growth", v: "+₹33L  (+18.1%)", dot: "green" },
+            ] },
+        ]},
+      ],
+      suggestions: [
+        { label: "Revenue from new admissions", intent: "admRevShare" },
+        { label: "New vs continuing", intent: "newVsCont" },
+        { label: "Year-over-year collection", intent: "feeYoY" },
+      ],
+    },
+
+    newVsCont: {
+      messages: [
+        { role: "bot", kind: "text", text: "<strong>Payment behaviour — new vs continuing students, Jan 2025</strong>" },
+        { role: "bot", kind: "cards", cards: [
+          { c: "split", color: "orange", icon: "users", kicker: "Revenue · total ₹45.45L",
+            parts: [
+              { label: "New admissions", value: "₹18.50L", pct: 38, color: "orange" },
+              { label: "Continuing students", value: "₹26.95L", pct: 62, color: "blue" },
+            ] },
+          { c: "kv", color: "green", icon: "doc", kicker: "Collection rate", title: "How well each pays",
+            rows: [
+              { k: "New admissions", v: "84.4%  (45 / 52)", dot: "green" },
+              { k: "Continuing", v: "83.8%  (1,500 / 1,790)", dot: "green" },
+            ] },
+          { c: "kv", color: "blue", icon: "wallet", kicker: "Overdue & average fee", title: "30+ days and per-student",
+            rows: [
+              { k: "New admissions overdue", v: "0 students  (0%)", dot: "green" },
+              { k: "Continuing overdue", v: "42 students  ·  ₹1.58L", dot: "red" },
+              { k: "New admission avg fee", v: "₹41,111" },
+              { k: "Continuing avg fee", v: "₹45,892" },
+            ] },
+        ]},
+      ],
+      suggestions: [
+        { label: "Revenue from new admissions", intent: "admRevShare" },
+        { label: "Admission revenue YoY", intent: "admRevYoY" },
+        { label: "Fee collection", intent: "feeStatus" },
+      ],
+    },
+
+    /* ═══ STUDENT STRENGTH ═══ */
+    students: {
+      messages: [
+        { role: "bot", kind: "cards", cards: [
+          { c: "stat", color: "blue", icon: "users", kicker: "Student strength · all branches",
+            num: "1,278", delta: { text: "+5.6% YoY", dir: "up" },
+            metrics: [
+              { k: "Boys", v: "668" },
+              { k: "Girls", v: "610" },
+              { k: "Classes", v: "12" },
+              { k: "Sections", v: "34" },
+            ] },
+          { c: "list", color: "blue", icon: "users", kicker: "Strength", title: "By class",
+            rows: [
+              { ava: "9", avaColor: "blue", name: "Class 9", sub: "4 sections", val: "148", valColor: "ink" },
+              { ava: "10", avaColor: "orange", name: "Class 10", sub: "4 sections", val: "142", valColor: "ink" },
+              { ava: "8", avaColor: "teal", name: "Class 8", sub: "3 sections", val: "131", valColor: "ink" },
+              { ava: "11", avaColor: "purple", name: "Class 11", sub: "3 streams", val: "124", valColor: "ink" },
+            ] },
+        ]},
+      ],
+      suggestions: [
+        { label: "Student information & seats", intent: "studentInfo" },
+        { label: "Student attendance", intent: "studentAtt" },
+        { label: "Staff strength", intent: "staff" },
+      ],
+    },
+
+    /* ═══ STAFF STRENGTH ═══ */
+    staff: {
+      messages: [
+        { role: "bot", kind: "cards", cards: [
+          { c: "stat", color: "teal", icon: "briefcase", kicker: "Staff strength · all branches",
+            num: "96", delta: { text: "+7 this year", dir: "up" },
+            metrics: [
+              { k: "Teaching", v: "72" },
+              { k: "Non-teaching", v: "24" },
+              { k: "Student : teacher", v: "18 : 1" },
+              { k: "Departments", v: "9" },
+            ] },
+        ]},
+        { role: "bot", kind: "text", text: "Student–teacher ratio is <strong>18:1</strong>, within the recommended range. Want today's staff attendance?" },
+      ],
+      suggestions: [
+        { label: "Staff information & joiners", intent: "staffInfo" },
+        { label: "Staff attendance", intent: "staffAtt" },
+        { label: "Student strength", intent: "students" },
+      ],
+    },
+
+    /* ═══ STUDENT ATTENDANCE ═══ */
+    studentAtt: {
+      messages: [
+        { role: "bot", kind: "cards", cards: [
+          { c: "stat", color: "orange", icon: "calendar", kicker: "Student attendance · Today",
+            num: "94.2%", delta: { text: "−1.1% vs avg", dir: "down" },
+            metrics: [
+              { k: "Present", v: "1,184" },
+              { k: "Absent", v: "73" },
+              { k: "On leave", v: "21" },
+              { k: "Late", v: "14" },
+            ] },
+          { c: "list", color: "orange", icon: "calendar", kicker: "Attendance today", title: "By class",
+            rows: [
+              { ava: "12", avaColor: "green", name: "Class 12", sub: "118 / 120 present", val: "98%", valColor: "green" },
+              { ava: "8", avaColor: "blue", name: "Class 8", sub: "125 / 131 present", val: "95%", valColor: "ink" },
+              { ava: "10", avaColor: "orange", name: "Class 10", sub: "133 / 142 present", val: "94%", valColor: "ink" },
+              { ava: "9", avaColor: "amber", name: "Class 9", sub: "134 / 148 present", val: "91%", valColor: "amber" },
+            ] },
+        ]},
+      ],
+      suggestions: [
+        { label: "Leave: pending & on leave", intent: "leaveReport" },
+        { label: "Student strength", intent: "students" },
+        { label: "Fee collection", intent: "feeStatus" },
+      ],
+    },
+
+    /* ═══ STAFF ATTENDANCE ═══ */
+    staffAtt: {
+      messages: [
+        { role: "bot", kind: "cards", cards: [
+          { c: "stat", color: "amber", icon: "clock", kicker: "Staff attendance · Today",
+            num: "97.9%", delta: { text: "+0.4% vs avg", dir: "up" },
+            metrics: [
+              { k: "Present", v: "94" },
+              { k: "On leave", v: "2" },
+              { k: "Late", v: "1" },
+              { k: "Subs arranged", v: "2" },
+            ] },
+        ]},
+        { role: "bot", kind: "text", text: "All classes are covered — <strong>2 substitutions</strong> arranged for staff on leave. Want staff strength figures?" },
+      ],
+      suggestions: [
+        { label: "Staff strength", intent: "staff" },
+        { label: "Student attendance", intent: "studentAtt" },
+        { label: "Fee collection", intent: "feeStatus" },
+      ],
+    },
+  };
+
+  /* ════════════════════════════════════════════════════════
+     AGENTIC UPDATES (write actions) — the "agentic patch".
+     Guardrail pattern: show the record → confirm → act + notify.
+     Data exposure: counts & IDs reach the AI; raw PII stays hidden.
+     ════════════════════════════════════════════════════════ */
+
+  /* 1 · Admission — move a candidate across stages + email parent */
+  RESPONSES.admMoveStage = {
+    messages: [
+      { role: "bot", kind: "text", text: "Here's the candidate. Review, then confirm and I'll update the stage and email the parent." },
+      { role: "bot", kind: "cards", cards: [
+        { c: "kv", color: "purple", icon: "grad", kicker: "Admission · AD-2026-0341", title: "Likith Kumar",
+          rows: [
+            { k: "Current stage", v: "Registration", dot: "amber" },
+            { k: "New stage", v: "Shortlisted", dot: "green" },
+            { k: "Class applied", v: "Class 6 · HSR" },
+            { k: "Parent contact", v: "On file · hidden" },
+          ] },
+        { c: "action", color: "blue", icon: "shield", kicker: "Confirm write · 2 tasks",
+          title: "Update stage + notify parent",
+          lines: [
+            "Move <strong>Likith Kumar</strong> from <strong>Registration → Shortlisted</strong>.",
+            "Email the parent the shortlist confirmation.",
+          ],
+          acts: [
+            { label: "Confirm & update", icon: "check", primary: true, intent: "admMoveStageDone" },
+            { label: "Cancel", icon: "x", intent: "admissions" },
+          ] },
+      ]},
+    ],
+    suggestions: [ { label: "Show admissions overview", intent: "admissions" } ],
+  };
+  RESPONSES.admMoveStageDone = {
+    messages: [
+      { role: "bot", kind: "text", text: "✓ Done. <strong>Likith Kumar</strong> is now <strong>Shortlisted</strong> and the parent has been emailed." },
+      { role: "bot", kind: "cards", cards: [
+        { c: "kv", color: "green", icon: "check", kicker: "Completed · just now", title: "What changed",
+          rows: [
+            { k: "Stage", v: "Registration → Shortlisted", dot: "green" },
+            { k: "Parent email", v: "Sent ✓", dot: "green" },
+            { k: "Audit log", v: "#AL-77421 · admin" },
+          ] },
+      ]},
+    ],
+    suggestions: [ { label: "Admissions overview", intent: "admissions" }, { label: "Today's admission update", intent: "admissions" } ],
+  };
+
+  /* 2 · Fee — apply approved discount + send revised receipt */
+  RESPONSES.feeDiscount = {
+    messages: [
+      { role: "bot", kind: "text", text: "Found the fee record. Confirm to apply the sibling discount and send the revised receipt." },
+      { role: "bot", kind: "cards", cards: [
+        { c: "kv", color: "green", icon: "wallet", kicker: "Student · ST-2026-0112", title: "Fee record · Term 1",
+          rows: [
+            { k: "Current demand", v: "₹48,000" },
+            { k: "Sibling discount", v: "−₹6,000 (12.5%)", dot: "amber" },
+            { k: "Revised demand", v: "₹42,000", dot: "green" },
+            { k: "Approval", v: "Sanctioned · #DS-118" },
+          ] },
+        { c: "action", color: "blue", icon: "shield", kicker: "Confirm write · 2 tasks",
+          title: "Adjust fee + send receipt",
+          lines: [
+            "Apply <strong>sibling discount −₹6,000</strong> to ST-2026-0112.",
+            "Email the <strong>revised receipt</strong> to the parent.",
+          ],
+          acts: [
+            { label: "Confirm & apply", icon: "check", primary: true, intent: "feeDiscountDone" },
+            { label: "Cancel", icon: "x", intent: "feeStatus" },
+          ] },
+      ]},
+    ],
+    suggestions: [ { label: "Fee collection", intent: "feeStatus" } ],
+  };
+  RESPONSES.feeDiscountDone = {
+    messages: [
+      { role: "bot", kind: "text", text: "✓ Done. Discount applied and the revised receipt has been emailed." },
+      { role: "bot", kind: "cards", cards: [
+        { c: "kv", color: "green", icon: "check", kicker: "Completed · just now", title: "What changed",
+          rows: [
+            { k: "Demand", v: "₹48,000 → ₹42,000", dot: "green" },
+            { k: "Revised receipt", v: "Sent ✓", dot: "green" },
+            { k: "Audit log", v: "#AL-77422 · admin" },
+          ] },
+      ]},
+    ],
+    suggestions: [ { label: "Fee collection", intent: "feeStatus" }, { label: "Branch performance", intent: "branchRank" } ],
+  };
+
+  /* 3 · Communication — send broadcast now + schedule a reminder */
+  RESPONSES.commBroadcast = {
+    messages: [
+      { role: "bot", kind: "text", text: "Here's the audience and both drafts. Confirm to send now and schedule Friday's reminder." },
+      { role: "bot", kind: "cards", cards: [
+        { c: "kv", color: "blue", icon: "send", kicker: "Audience · Grade 10 parents", title: "PTM broadcast",
+          rows: [
+            { k: "Recipients", v: "142 parents" },
+            { k: "Send now", v: "PTM · Sat 10:00 AM", dot: "blue" },
+            { k: "Scheduled", v: "Reminder · Fri 8:00 AM", dot: "amber" },
+            { k: "Channels", v: "App + SMS" },
+          ] },
+        { c: "action", color: "blue", icon: "shield", kicker: "Confirm write · 2 tasks",
+          title: "Send now + schedule reminder",
+          lines: [
+            "Broadcast the <strong>PTM notice</strong> to 142 Grade 10 parents now.",
+            "Schedule a <strong>reminder</strong> for Friday 8:00 AM.",
+          ],
+          acts: [
+            { label: "Confirm & send", icon: "check", primary: true, intent: "commBroadcastDone" },
+            { label: "Cancel", icon: "x", intent: "commReport" },
+          ] },
+      ]},
+    ],
+    suggestions: [ { label: "This week's broadcasts", intent: "commReport" } ],
+  };
+  RESPONSES.commBroadcastDone = {
+    messages: [
+      { role: "bot", kind: "text", text: "✓ Sent to 142 parents. The Friday reminder is scheduled." },
+      { role: "bot", kind: "cards", cards: [
+        { c: "kv", color: "green", icon: "check", kicker: "Completed · just now", title: "What happened",
+          rows: [
+            { k: "Sent now", v: "142 / 142 delivered", dot: "green" },
+            { k: "Reminder", v: "Scheduled · Fri 8:00 AM", dot: "blue" },
+            { k: "Audit log", v: "#AL-77423 · admin" },
+          ] },
+      ]},
+    ],
+    suggestions: [ { label: "This week's broadcasts", intent: "commReport" } ],
+  };
+
+  /* 4 · Leave — approve a request + notify */
+  RESPONSES.leaveApprove = {
+    messages: [
+      { role: "bot", kind: "text", text: "Here's Anitha's request and balance. Confirm to approve and notify her." },
+      { role: "bot", kind: "cards", cards: [
+        { c: "kv", color: "teal", icon: "calendar", kicker: "Leave request · LR-2026-0207", title: "Anitha R · Maths",
+          rows: [
+            { k: "Dates", v: "26–27 June (2 days)", dot: "blue" },
+            { k: "Type", v: "Casual leave" },
+            { k: "Balance after", v: "6 of 12 left", dot: "green" },
+            { k: "Cover", v: "Substitute available" },
+          ] },
+        { c: "action", color: "blue", icon: "shield", kicker: "Confirm write · 2 tasks",
+          title: "Approve + notify",
+          lines: [
+            "Approve <strong>Anitha's leave</strong> for 26–27 June.",
+            "Notify her of the approval.",
+          ],
+          acts: [
+            { label: "Approve", icon: "check", primary: true, intent: "leaveApproveDone" },
+            { label: "Cancel", icon: "x", intent: "leaveReport" },
+          ] },
+      ]},
+    ],
+    suggestions: [ { label: "Pending approvals", intent: "leaveReport" } ],
+  };
+  RESPONSES.leaveApproveDone = {
+    messages: [
+      { role: "bot", kind: "text", text: "✓ Approved. Anitha has been notified and a substitute is arranged." },
+      { role: "bot", kind: "cards", cards: [
+        { c: "kv", color: "green", icon: "check", kicker: "Completed · just now", title: "What changed",
+          rows: [
+            { k: "Status", v: "Pending → Approved", dot: "green" },
+            { k: "Notification", v: "Sent ✓", dot: "green" },
+            { k: "Audit log", v: "#AL-77424 · admin" },
+          ] },
+      ]},
+    ],
+    suggestions: [ { label: "Pending approvals", intent: "leaveReport" }, { label: "Who's on leave today", intent: "leaveReport" } ],
+  };
+
+  /* 5 · Staff Information — update a staff record + audit log */
+  RESPONSES.staffUpdate = {
+    messages: [
+      { role: "bot", kind: "text", text: "Here's Nikhil's current record. Confirm to apply the two field changes." },
+      { role: "bot", kind: "cards", cards: [
+        { c: "kv", color: "teal", icon: "briefcase", kicker: "Staff · EMP-2024-0061", title: "Nikhil S · Science",
+          rows: [
+            { k: "Date of birth", v: "— → 21 Feb 1999", dot: "amber" },
+            { k: "Gender", v: "— → Male", dot: "amber" },
+            { k: "Department", v: "Science (unchanged)" },
+          ] },
+        { c: "action", color: "blue", icon: "shield", kicker: "Confirm write · profile fields",
+          title: "Update record",
+          lines: [
+            "Set <strong>date of birth</strong> to 21 Feb 1999.",
+            "Set <strong>gender</strong> to Male.",
+          ],
+          acts: [
+            { label: "Confirm & update", icon: "check", primary: true, intent: "staffUpdateDone" },
+            { label: "Cancel", icon: "x", intent: "staffInfo" },
+          ] },
+      ]},
+    ],
+    suggestions: [ { label: "Staff information", intent: "staffInfo" } ],
+  };
+  RESPONSES.staffUpdateDone = {
+    messages: [
+      { role: "bot", kind: "text", text: "✓ Updated Nikhil's record. Both fields are saved and logged." },
+      { role: "bot", kind: "cards", cards: [
+        { c: "kv", color: "green", icon: "check", kicker: "Completed · just now", title: "What changed",
+          rows: [
+            { k: "Date of birth", v: "21 Feb 1999", dot: "green" },
+            { k: "Gender", v: "Male", dot: "green" },
+            { k: "Audit log", v: "#AL-77425 · admin" },
+          ] },
+      ]},
+    ],
+    suggestions: [ { label: "Staff information", intent: "staffInfo" }, { label: "Staff strength", intent: "staff" } ],
+  };
+
+  /* 6 · Student Information — section change + inform parent */
+  RESPONSES.studentUpdate = {
+    messages: [
+      { role: "bot", kind: "text", text: "Here's the student record. Confirm to move the section and inform the parent." },
+      { role: "bot", kind: "cards", cards: [
+        { c: "kv", color: "blue", icon: "users", kicker: "Student · ST-2026-0098", title: "Section change",
+          rows: [
+            { k: "Current section", v: "6A", dot: "amber" },
+            { k: "New section", v: "6B", dot: "green" },
+            { k: "Seats in 6B", v: "3 open" },
+            { k: "Parent contact", v: "On file · hidden" },
+          ] },
+        { c: "action", color: "blue", icon: "shield", kicker: "Confirm write · 2 tasks",
+          title: "Update section + notify",
+          lines: [
+            "Move <strong>ST-2026-0098</strong> from <strong>6A → 6B</strong>.",
+            "Inform the parent of the section change.",
+          ],
+          acts: [
+            { label: "Confirm & move", icon: "check", primary: true, intent: "studentUpdateDone" },
+            { label: "Cancel", icon: "x", intent: "studentInfo" },
+          ] },
+      ]},
+    ],
+    suggestions: [ { label: "Student information", intent: "studentInfo" } ],
+  };
+  RESPONSES.studentUpdateDone = {
+    messages: [
+      { role: "bot", kind: "text", text: "✓ Done. Student moved to 6B and the parent has been informed." },
+      { role: "bot", kind: "cards", cards: [
+        { c: "kv", color: "green", icon: "check", kicker: "Completed · just now", title: "What changed",
+          rows: [
+            { k: "Section", v: "6A → 6B", dot: "green" },
+            { k: "Parent notice", v: "Sent ✓", dot: "green" },
+            { k: "Audit log", v: "#AL-77426 · admin" },
+          ] },
+      ]},
+    ],
+    suggestions: [ { label: "Student information", intent: "studentInfo" }, { label: "Student strength", intent: "students" } ],
+  };
+
+  /* ════════════════════════════════════════════════════════
+     MODULE REPORTS (read) — catalog modules not yet covered.
+     ════════════════════════════════════════════════════════ */
+
+  /* Communication broadcast — this week */
+  RESPONSES.commReport = {
+    messages: [
+      { role: "bot", kind: "text", text: "<strong>Broadcasts sent this week · all branches</strong>" },
+      { role: "bot", kind: "cards", cards: [
+        { c: "stat", color: "blue", icon: "send", kicker: "Broadcasts · this week",
+          num: "7", delta: { text: "78% avg open rate", dir: "up" },
+          metrics: [
+            { k: "Sent", v: "7" },
+            { k: "Recipients", v: "4,120" },
+            { k: "Opened", v: "3,214" },
+            { k: "Scheduled", v: "2" },
+          ] },
+        { c: "list", color: "blue", icon: "send", kicker: "Sent this week", title: "Opens by broadcast",
+          rows: [
+            { ava: "P", avaColor: "blue", name: "PTM — Grade 10", sub: "142 sent", val: "88%", valColor: "green" },
+            { ava: "F", avaColor: "green", name: "Fee due reminder", sub: "1,180 sent", val: "81%", valColor: "ink" },
+            { ava: "H", avaColor: "amber", name: "Holiday notice", sub: "2,140 sent", val: "74%", valColor: "ink" },
+            { ava: "E", avaColor: "purple", name: "Exam timetable", sub: "658 sent", val: "69%", valColor: "amber" },
+          ] },
+      ]},
+    ],
+    suggestions: [
+      { label: "Send a broadcast + reminder", intent: "commBroadcast" },
+      { label: "Student attendance", intent: "studentAtt" },
+    ],
+  };
+
+  /* Leave management — pending + on leave today */
+  RESPONSES.leaveReport = {
+    messages: [
+      { role: "bot", kind: "text", text: "<strong>Leave · today and pending your approval</strong>" },
+      { role: "bot", kind: "cards", cards: [
+        { c: "stat", color: "teal", icon: "calendar", kicker: "Leave · today",
+          num: "5", delta: { text: "3 pending approval", dir: "down" },
+          metrics: [
+            { k: "On leave today", v: "5" },
+            { k: "Pending", v: "3" },
+            { k: "Approved", v: "11" },
+            { k: "Subs arranged", v: "5" },
+          ] },
+        { c: "list", color: "amber", icon: "userAlert", kicker: "Pending your approval", title: "Awaiting action",
+          rows: [
+            { ava: "A", avaColor: "teal", name: "Anitha R · Maths", sub: "26–27 Jun · casual", val: "2d", valColor: "ink" },
+            { ava: "S", avaColor: "blue", name: "Suresh K · Admin", sub: "28 Jun · casual", val: "1d", valColor: "ink" },
+            { ava: "M", avaColor: "purple", name: "Meera J · Science", sub: "30 Jun–1 Jul · sick", val: "2d", valColor: "ink" },
+          ] },
+      ]},
+    ],
+    suggestions: [
+      { label: "Approve Anitha's leave", intent: "leaveApprove" },
+      { label: "Staff attendance", intent: "staffAtt" },
+    ],
+  };
+
+  /* Staff information — headcount & joiners */
+  RESPONSES.staffInfo = {
+    messages: [
+      { role: "bot", kind: "text", text: "<strong>Staff information · headcount and joiners this month</strong>" },
+      { role: "bot", kind: "cards", cards: [
+        { c: "stat", color: "teal", icon: "briefcase", kicker: "Teaching staff · by department",
+          num: "72", delta: { text: "+3 joiners this month", dir: "up" },
+          metrics: [
+            { k: "Joined this month", v: "3" },
+            { k: "Exits", v: "1" },
+            { k: "Docs pending", v: "4" },
+            { k: "Departments", v: "9" },
+          ] },
+        { c: "list", color: "teal", icon: "users", kicker: "Headcount", title: "By department",
+          rows: [
+            { ava: "Sc", avaColor: "teal", name: "Science", sub: "incl. 1 joiner", val: "16", valColor: "ink" },
+            { ava: "Ma", avaColor: "blue", name: "Mathematics", sub: "stable", val: "12", valColor: "ink" },
+            { ava: "En", avaColor: "purple", name: "English", sub: "incl. 1 joiner", val: "11", valColor: "ink" },
+            { ava: "So", avaColor: "orange", name: "Social Studies", sub: "stable", val: "9", valColor: "ink" },
+          ] },
+      ]},
+    ],
+    suggestions: [
+      { label: "Update a staff record", intent: "staffUpdate" },
+      { label: "Staff strength", intent: "staff" },
+    ],
+  };
+
+  /* Student information — new vs regular + capacity */
+  RESPONSES.studentInfo = {
+    messages: [
+      { role: "bot", kind: "text", text: "<strong>Student information · new vs regular and seat capacity</strong>" },
+      { role: "bot", kind: "cards", cards: [
+        { c: "stat", color: "blue", icon: "users", kicker: "Students · capacity",
+          num: "1,278", delta: { text: "182 open seats", dir: "up" },
+          metrics: [
+            { k: "New", v: "284" },
+            { k: "Regular", v: "994" },
+            { k: "Capacity", v: "1,460" },
+            { k: "Occupied", v: "1,278" },
+          ] },
+        { c: "table", color: "blue", icon: "list", kicker: "Class-wise · new vs regular", title: "Seats by class",
+          cols: ["Class", "New", "Regular", "Open"],
+          align: ["left", "right", "right", "right"],
+          rows: [
+            ["Class 6", "33", "98", "9"],
+            ["Class 9", "41", "107", "12"],
+            ["Class 10", "22", "120", "18"],
+            ["Class 11", "78", "46", "16"],
+          ],
+          foot: ["Total", "284", "994", "182"] },
+      ]},
+    ],
+    suggestions: [
+      { label: "Move a student's section", intent: "studentUpdate" },
+      { label: "Student strength", intent: "students" },
+    ],
+  };
+
+  /* ═══ Artifacts → New dashboard: ideate-and-build flow ═══ */
+  RESPONSES.newDashboard = {
+    messages: [
+      { role: "bot", kind: "text", text: "Let's build a dashboard together. Tell me what you'd like to track — a module, a metric, a branch — or start from one of these:" },
+    ],
+    suggestions: [
+      { label: "Fee collection dashboard", intent: "buildFeeDash" },
+      { label: "Admissions funnel", intent: "buildAdmDash" },
+      { label: "Attendance pulse", intent: "buildAttDash" },
+    ],
+  };
+  RESPONSES.buildFeeDash = {
+    messages: [
+      { role: "bot", kind: "text", text: "✓ Built the <strong>Fee Collection Dashboard</strong> from your live data — total collected, branch split and a 12-day trend. It's open on the side; hit <strong>Refresh data</strong> any time to pull the latest." },
+    ],
+    suggestions: [ { label: "Add an admissions funnel", intent: "buildAdmDash" }, { label: "Add attendance pulse", intent: "buildAttDash" } ],
+  };
+  RESPONSES.buildAdmDash = {
+    messages: [
+      { role: "bot", kind: "text", text: "✓ Built the <strong>Admissions Funnel</strong> dashboard — applications, confirmations, seats left and admission revenue, with a 12-week trend. Opening it now." },
+    ],
+    suggestions: [ { label: "Add a fee dashboard", intent: "buildFeeDash" }, { label: "Add attendance pulse", intent: "buildAttDash" } ],
+  };
+  RESPONSES.buildAttDash = {
+    messages: [
+      { role: "bot", kind: "text", text: "✓ Built the <strong>Attendance Pulse</strong> dashboard — today's student & staff attendance with a 12-day trend. Opening it now." },
+    ],
+    suggestions: [ { label: "Add a fee dashboard", intent: "buildFeeDash" }, { label: "Add admissions funnel", intent: "buildAdmDash" } ],
+  };
+
+  const FALLBACK = {
+    messages: [
+      { role: "bot", kind: "text", text: "I answer six things for now — <strong>fee collection, admissions, student strength, staff strength, student attendance and staff attendance.</strong> Pick one:" },
+    ],
+    suggestions: [
+      { label: "Fee collection", intent: "feeStatus" },
+      { label: "Admissions", intent: "admissions" },
+      { label: "Student strength", intent: "students" },
+      { label: "Staff strength", intent: "staff" },
+      { label: "Student attendance", intent: "studentAtt" },
+      { label: "Staff attendance", intent: "staffAtt" },
+    ],
+  };
+
+  function routeText(raw) {
+    const t = (raw || "").toLowerCase();
+    /* ── agentic writes (verbs first) ── */
+    if (/(move|change|shift|shortlist).*(stage|registration|candidate|likith)|(stage|candidate).*(move|change)/.test(t)) return "admMoveStage";
+    if (/(apply|give).*(discount|sibling|concession)|discount.*(apply|sibling)/.test(t)) return "feeDiscount";
+    if (/(draft|send|broadcast|message|notify).*(parent|grade|ptm)|broadcast.*(send|schedule)/.test(t)) return "commBroadcast";
+    if (/(approve|reject|sanction).*(leave|anitha)|leave.*(approve|reject)/.test(t)) return "leaveApprove";
+    if (/(update|change|correct|set).*(staff|nikhil|date of birth|dob|gender|designation)/.test(t)) return "staffUpdate";
+    if (/(move|change|update).*(section|6a|6b)|(section).*(change|move)/.test(t)) return "studentUpdate";
+    /* ── module reports ── */
+    if (/(broadcast|communicat|message sent|open rate|notice)/.test(t)) return "commReport";
+    if (/(leave).*(pending|today|approv|who)|who is on leave|pending.*approv/.test(t)) return "leaveReport";
+    if (/(headcount|joiner|department|designation).*(staff)|staff.*(headcount|joiner|department|record|info)/.test(t)) return "staffInfo";
+    if (/(new and regular|new vs regular|capacity|occupied|open seat|seats)/.test(t)) return "studentInfo";
+    if (/(dashboard|widget|chart|track|monitor|visuali|build me|create)/.test(t)) {
+      if (/(admission|enrol|applic|seat|intake)/.test(t)) return "buildAdmDash";
+      if (/(attend|present|leave|absent)/.test(t)) return "buildAttDash";
+      if (/(fee|collect|payment|revenue|due)/.test(t)) return "buildFeeDash";
+      return "newDashboard";
+    }
+    if (/(staff|teacher|employee|faculty).*(attend|present|leave)|(attend|present|leave).*(staff|teacher)/.test(t)) return "staffAtt";
+    if (/(student|pupil|kid).*(attend|present|absent)|attend|present|absent/.test(t)) return "studentAtt";
+    if (/(staff|teacher|employee|faculty)/.test(t)) return "staff";
+    if (/(branch|school).*(perform|struggl|best|worst|rank|well)/.test(t)) return "branchRank";
+    if (/(last year|year.over|yoy|same month|more or less)/.test(t)) return "feeYoY";
+    if (/(new.*(vs|versus|compared).*continu|old.*(vs|new)|which group|pays better)/.test(t)) return "newVsCont";
+    if (/(percent|%|share).*(admission|new)|admission.*(percent|%|share|revenue)/.test(t)) return "admRevShare";
+    if (/(student|pupil|enrol|strength|headcount)/.test(t)) return "students";
+    if (/(admission|applicant|application|seat|intake|enquir)/.test(t)) return "admissions";
+    if (/(total|collect|pending|overdue|status|how much)/.test(t)) return "feeStatus";
+    if (/(fee|payment|revenue|money)/.test(t)) return "feeStatus";
+    return null;
+  }
+
+  function resolve(arg) {
+    if (arg.intent) return RESPONSES[arg.intent] || FALLBACK;
+    const intent = routeText(arg.text);
+    return intent ? RESPONSES[intent] : FALLBACK;
+  }
+
+  const INTENT_LABEL = {
+    feeStatus: "Total fees collected this month across all branches? How much is pending?",
+    branchRank: "Which branch is performing well and which is struggling?",
+    feeYoY: "Last year same month vs this month — are we collecting more or less?",
+    admissions: "How many admissions this year? Applications and seats left?",
+    admRevShare: "What % of total fee revenue came from new admission students?",
+    admRevYoY: "How much did we earn from admissions last year vs this year?",
+    newVsCont: "New vs continuing students — which group pays better?",
+    students: "What is our total student strength?",
+    staff: "What is our staff strength?",
+    studentAtt: "What's today's student attendance?",
+    staffAtt: "What's today's staff attendance?",
+    admMoveStage: "Change Likith from Registration to Shortlisted and inform the parent.",
+    admMoveStageDone: "Confirm — update the stage and email the parent.",
+    feeDiscount: "Apply the sibling discount to student ST-2026-0112 and send the revised receipt.",
+    feeDiscountDone: "Confirm — apply the discount and send the receipt.",
+    commBroadcast: "Send a message to all Grade 10 parents about Saturday's PTM, and schedule a Friday reminder.",
+    commBroadcastDone: "Confirm — send now and schedule the reminder.",
+    leaveApprove: "Approve Anitha's leave for 26 and 27 June.",
+    leaveApproveDone: "Confirm — approve and notify.",
+    staffUpdate: "Update Nikhil's date of birth to 21 February 1999 and gender to Male.",
+    staffUpdateDone: "Confirm — update the record.",
+    studentUpdate: "Move student ST-2026-0098 from 6A to 6B and inform the parent.",
+    studentUpdateDone: "Confirm — move the section and notify the parent.",
+    commReport: "List the broadcasts we sent this week and how many parents opened each.",
+    leaveReport: "Who is on leave today and what is pending my approval?",
+    staffInfo: "How many teaching staff per department and who joined this month?",
+    studentInfo: "Class-wise new and regular students, with capacity, occupied and open seats.",
+    newDashboard: "Create a dashboard",
+    buildFeeDash: "Build a fee collection dashboard",
+    buildAdmDash: "Build an admissions funnel",
+    buildAttDash: "Build an attendance pulse dashboard",
+  };
+
+  window.COPILOT = { WELCOME_SUGGEST, CAPABILITIES, RESPONSES, resolve, INTENT_LABEL };
+})();

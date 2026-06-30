@@ -1,0 +1,447 @@
+/* ============================================================
+   edumerge · Iris — Phase-1 Q&A
+   Landing: six categories — Fee collection, Admissions,
+   Student strength, Staff strength, Student attendance,
+   Staff attendance. Fees & Admissions drill into the CFO
+   multi-branch finance answers. Figures are illustrative
+   (January 2025). Six branches.
+   ============================================================ */
+(function () {
+  // Branches (user-supplied names)
+  // HSR · Banashankari · Arkavathi · Hennur · Nagarbavi · Hyderabad
+
+  // Landing categories — "Ask me about"
+  const CAPABILITIES = [
+    { intent: "feeStatus",  icon: "wallet",    color: "green", project: "fees",
+      title: "Fee collection",     desc: "Collected, pending & overdue across branches" },
+    { intent: "admissions", icon: "grad",      color: "purple", project: "adm",
+      title: "Admissions",         desc: "New admissions, applications & seats" },
+    { intent: "students",   icon: "users",     color: "blue",
+      title: "Student strength",   desc: "Total students by class & gender" },
+    { intent: "staff",      icon: "briefcase", color: "teal",
+      title: "Staff strength",     desc: "Teaching & non-teaching headcount" },
+    { intent: "studentAtt", icon: "calendar",  color: "orange", project: "att",
+      title: "Student attendance", desc: "Today's present, absent & on leave" },
+    { intent: "staffAtt",   icon: "clock",     color: "amber", project: "att",
+      title: "Staff attendance",   desc: "Today's staff present & on leave" },
+  ];
+
+  const WELCOME_SUGGEST = [
+    { label: "Fee collection", intent: "feeStatus" },
+    { label: "Admissions", intent: "admissions" },
+    { label: "Student strength", intent: "students" },
+    { label: "Student attendance", intent: "studentAtt" },
+  ];
+
+  const RESPONSES = {
+    /* ═══ FEE COLLECTION — multi-branch ═══ */
+    feeStatus: {
+      messages: [
+        { role: "bot", kind: "text", text: "<strong>Fee collection — January 2025 · all 6 branches</strong>" },
+        { role: "bot", kind: "cards", cards: [
+          { c: "stat", color: "green", icon: "wallet", kicker: "Total collected · Jan 2025",
+            num: "₹45.67L", delta: { text: "83.6% rate · +2.3% vs Dec", dir: "up" },
+            metrics: [
+              { k: "Collected", v: "₹45.67L" },
+              { k: "Pending", v: "₹8.92L" },
+              { k: "Overdue", v: "₹2.34L" },
+              { k: "Collection rate", v: "83.6%" },
+            ] },
+          { c: "list", color: "blue", icon: "layers", kicker: "Branch breakdown", title: "Collected by branch",
+            rows: [
+              { ava: "H", avaColor: "blue", name: "HSR", sub: "86.2% collection", val: "₹18.50L", valColor: "ink" },
+              { ava: "B", avaColor: "teal", name: "Banashankari", sub: "85.5% collection", val: "₹14.77L", valColor: "ink" },
+              { ava: "A", avaColor: "purple", name: "Arkavathi", sub: "80.1% collection", val: "₹12.40L", valColor: "ink" },
+              { ava: "He", avaColor: "amber", name: "Hennur", sub: "81.4% collection", val: "₹9.10L", valColor: "ink" },
+              { ava: "Hy", avaColor: "green", name: "Hyderabad", sub: "79.8% collection", val: "₹8.95L", valColor: "ink" },
+              { ava: "N", avaColor: "orange", name: "Nagarbavi", sub: "78.2% collection", val: "₹8.90L", valColor: "amber" },
+            ] },
+          { c: "kv", color: "green", icon: "doc", kicker: "Status summary", title: "Where the money sits",
+            rows: [
+              { k: "Collected", v: "₹45.67L", dot: "green" },
+              { k: "Pending (not due)", v: "₹5.10L", dot: "blue" },
+              { k: "Due (1–30 days)", v: "₹2.58L", dot: "amber" },
+              { k: "Overdue (30+ days)", v: "₹2.34L", dot: "red" },
+            ] },
+        ]},
+      ],
+      suggestions: [
+        { label: "Branch performance", intent: "branchRank" },
+        { label: "Year-over-year", intent: "feeYoY" },
+        { label: "Admissions", intent: "admissions" },
+      ],
+    },
+
+    branchRank: {
+      messages: [
+        { role: "bot", kind: "text", text: "<strong>Branch performance — fee collection, January 2025</strong>" },
+        { role: "bot", kind: "cards", cards: [
+          { c: "list", color: "blue", icon: "layers", kicker: "Ranking · collection rate", title: "All 6 branches",
+            rows: [
+              { ava: "1", avaColor: "green", name: "HSR", sub: "Top performer", val: "86.2%", valColor: "green" },
+              { ava: "2", avaColor: "green", name: "Banashankari", sub: "Top performer", val: "85.5%", valColor: "green" },
+              { ava: "3", avaColor: "blue", name: "Hennur", sub: "On track", val: "81.4%", valColor: "ink" },
+              { ava: "4", avaColor: "blue", name: "Arkavathi", sub: "On track", val: "80.1%", valColor: "ink" },
+              { ava: "5", avaColor: "blue", name: "Hyderabad", sub: "On track", val: "79.8%", valColor: "ink" },
+              { ava: "6", avaColor: "orange", name: "Nagarbavi", sub: "Red zone · needs attention", val: "78.2%", valColor: "amber" },
+            ] },
+          { c: "kv", color: "orange", icon: "alert", kicker: "Nagarbavi · quick facts", title: "Why it's lagging",
+            rows: [
+              { k: "Overdue (30+ days)", v: "₹65,000", dot: "red" },
+              { k: "Collections team", v: "2 members" },
+              { k: "Jan 2024 rate", v: "82.0%" },
+              { k: "Main reason", v: "Holiday delays + new admits" },
+            ] },
+        ]},
+      ],
+      suggestions: [
+        { label: "Collection summary", intent: "feeStatus" },
+        { label: "Year-over-year", intent: "feeYoY" },
+      ],
+    },
+
+    feeYoY: {
+      messages: [
+        { role: "bot", kind: "text", text: "<strong>Year-over-year — January 2024 vs January 2025</strong>" },
+        { role: "bot", kind: "cards", cards: [
+          { c: "compare", color: "teal", icon: "trendUp", kicker: "Collection performance",
+            left: { label: "Jan 2024", value: "₹42.10L", sub: "81.3% rate" },
+            right: { label: "Jan 2025", value: "₹45.67L", sub: "83.6% rate" },
+            growth: { text: "+₹3.57L  ·  +8.5%", dir: "up" } },
+          { c: "kv", color: "green", icon: "layers", kicker: "Growth by category", title: "Where it came from",
+            rows: [
+              { k: "New admissions revenue", v: "+₹1.85L  (+25.2%)", dot: "green" },
+              { k: "Continuing students", v: "+₹1.72L  (+5.1%)", dot: "green" },
+            ] },
+          { c: "compare", color: "blue", icon: "wallet", kicker: "Pending comparison",
+            left: { label: "Jan 2024", value: "₹10.15L", sub: "pending" },
+            right: { label: "Jan 2025", value: "₹8.92L", sub: "pending" },
+            growth: { text: "Better by ₹1.23L", dir: "up" } },
+        ]},
+      ],
+      suggestions: [
+        { label: "Collection summary", intent: "feeStatus" },
+        { label: "Branch performance", intent: "branchRank" },
+        { label: "Admission revenue YoY", intent: "admRevYoY" },
+      ],
+    },
+
+    /* ═══ ADMISSIONS — overview ═══ */
+    admissions: {
+      messages: [
+        { role: "bot", kind: "cards", cards: [
+          { c: "stat", color: "purple", icon: "grad", kicker: "Admissions · 2025–26",
+            num: "284", delta: { text: "+12% vs last year", dir: "up" },
+            metrics: [
+              { k: "Applications", v: "412" },
+              { k: "Confirmed", v: "284" },
+              { k: "Seats left", v: "66" },
+              { k: "Conversion", v: "69%" },
+            ] },
+          { c: "list", color: "purple", icon: "grad", kicker: "New admissions", title: "By class",
+            rows: [
+              { ava: "11", avaColor: "teal", name: "Class 11", sub: "Science · Commerce · Arts", val: "78", valColor: "ink" },
+              { ava: "1", avaColor: "orange", name: "Class 1", sub: "Primary intake", val: "64", valColor: "ink" },
+              { ava: "9", avaColor: "purple", name: "Class 9", sub: "Secondary", val: "41", valColor: "ink" },
+              { ava: "6", avaColor: "blue", name: "Class 6", sub: "Middle", val: "33", valColor: "ink" },
+            ] },
+        ]},
+      ],
+      suggestions: [
+        { label: "Revenue from new admissions", intent: "admRevShare" },
+        { label: "Admission revenue YoY", intent: "admRevYoY" },
+        { label: "Student strength", intent: "students" },
+      ],
+    },
+
+    admRevShare: {
+      messages: [
+        { role: "bot", kind: "text", text: "<strong>Admission revenue analysis — January 2025</strong>" },
+        { role: "bot", kind: "cards", cards: [
+          { c: "split", color: "purple", icon: "grad", kicker: "Revenue breakdown · total ₹45.45L",
+            parts: [
+              { label: "New admissions", value: "₹18.50L", pct: 38, color: "purple" },
+              { label: "Continuing students", value: "₹26.95L", pct: 62, color: "blue" },
+            ] },
+          { c: "kv", color: "teal", icon: "trendUp", kicker: "New-admission share · last 3 months", title: "Rising trend",
+            rows: [
+              { k: "November 2024", v: "32%" },
+              { k: "December 2024", v: "35%" },
+              { k: "January 2025", v: "38%", dot: "green" },
+            ] },
+          { c: "kv", color: "blue", icon: "users", kicker: "Average fee per student", title: "New vs continuing",
+            rows: [
+              { k: "New admission avg", v: "₹41,111" },
+              { k: "Continuing avg", v: "₹45,892" },
+              { k: "Difference", v: "−₹4,781  (10.4%)", dot: "amber" },
+            ] },
+          { c: "kv", color: "green", icon: "wallet", kicker: "Full-year projection · 2025", title: "Expected revenue",
+            rows: [
+              { k: "Total expected", v: "₹1.87 Cr", dot: "green" },
+              { k: "Growth vs 2024", v: "+₹22L  (+13.3%)", dot: "green" },
+            ] },
+        ]},
+      ],
+      suggestions: [
+        { label: "Admission revenue YoY", intent: "admRevYoY" },
+        { label: "New vs continuing", intent: "newVsCont" },
+        { label: "Fee collection", intent: "feeStatus" },
+      ],
+    },
+
+    admRevYoY: {
+      messages: [
+        { role: "bot", kind: "text", text: "<strong>Admission revenue — Jan 2024 vs Jan 2025 (new students)</strong>" },
+        { role: "bot", kind: "cards", cards: [
+          { c: "compare", color: "amber", icon: "wallet", kicker: "Admission revenue · new students",
+            left: { label: "Jan 2024", value: "₹15.20L", sub: "38 students" },
+            right: { label: "Jan 2025", value: "₹18.50L", sub: "45 students" },
+            growth: { text: "+₹3.30L  ·  +21.7%", dir: "up" } },
+          { c: "table", color: "purple", icon: "grad", kicker: "Class-wise admission revenue", title: "2024 → 2025",
+            cols: ["Class", "2024", "2025", "Growth"],
+            align: ["left", "right", "right", "right"],
+            rows: [
+              ["LKG", "₹6.00L", "₹7.20L", "+20.0%"],
+              ["Class 1", "₹5.60L", "₹6.40L", "+14.3%"],
+              ["Class 2", "₹2.40L", "₹2.80L", "+16.7%"],
+              ["Class 3", "₹1.20L", "₹1.60L", "+33.3%"],
+            ],
+            foot: ["Total", "₹15.20L", "₹18.50L", "+21.7%"] },
+          { c: "kv", color: "teal", icon: "trendUp", kicker: "Full-year projection", title: "Admission revenue",
+            rows: [
+              { k: "2024 (full year)", v: "₹1.82 Cr" },
+              { k: "2025 (projected)", v: "₹2.15 Cr", dot: "green" },
+              { k: "Expected growth", v: "+₹33L  (+18.1%)", dot: "green" },
+            ] },
+        ]},
+      ],
+      suggestions: [
+        { label: "Revenue from new admissions", intent: "admRevShare" },
+        { label: "New vs continuing", intent: "newVsCont" },
+        { label: "Year-over-year collection", intent: "feeYoY" },
+      ],
+    },
+
+    newVsCont: {
+      messages: [
+        { role: "bot", kind: "text", text: "<strong>Payment behaviour — new vs continuing students, Jan 2025</strong>" },
+        { role: "bot", kind: "cards", cards: [
+          { c: "split", color: "orange", icon: "users", kicker: "Revenue · total ₹45.45L",
+            parts: [
+              { label: "New admissions", value: "₹18.50L", pct: 38, color: "orange" },
+              { label: "Continuing students", value: "₹26.95L", pct: 62, color: "blue" },
+            ] },
+          { c: "kv", color: "green", icon: "doc", kicker: "Collection rate", title: "How well each pays",
+            rows: [
+              { k: "New admissions", v: "84.4%  (45 / 52)", dot: "green" },
+              { k: "Continuing", v: "83.8%  (1,500 / 1,790)", dot: "green" },
+            ] },
+          { c: "kv", color: "blue", icon: "wallet", kicker: "Overdue & average fee", title: "30+ days and per-student",
+            rows: [
+              { k: "New admissions overdue", v: "0 students  (0%)", dot: "green" },
+              { k: "Continuing overdue", v: "42 students  ·  ₹1.58L", dot: "red" },
+              { k: "New admission avg fee", v: "₹41,111" },
+              { k: "Continuing avg fee", v: "₹45,892" },
+            ] },
+        ]},
+      ],
+      suggestions: [
+        { label: "Revenue from new admissions", intent: "admRevShare" },
+        { label: "Admission revenue YoY", intent: "admRevYoY" },
+        { label: "Fee collection", intent: "feeStatus" },
+      ],
+    },
+
+    /* ═══ STUDENT STRENGTH ═══ */
+    students: {
+      messages: [
+        { role: "bot", kind: "cards", cards: [
+          { c: "stat", color: "blue", icon: "users", kicker: "Student strength · all branches",
+            num: "1,278", delta: { text: "+5.6% YoY", dir: "up" },
+            metrics: [
+              { k: "Boys", v: "668" },
+              { k: "Girls", v: "610" },
+              { k: "Classes", v: "12" },
+              { k: "Sections", v: "34" },
+            ] },
+          { c: "list", color: "blue", icon: "users", kicker: "Strength", title: "By class",
+            rows: [
+              { ava: "9", avaColor: "blue", name: "Class 9", sub: "4 sections", val: "148", valColor: "ink" },
+              { ava: "10", avaColor: "orange", name: "Class 10", sub: "4 sections", val: "142", valColor: "ink" },
+              { ava: "8", avaColor: "teal", name: "Class 8", sub: "3 sections", val: "131", valColor: "ink" },
+              { ava: "11", avaColor: "purple", name: "Class 11", sub: "3 streams", val: "124", valColor: "ink" },
+            ] },
+        ]},
+      ],
+      suggestions: [
+        { label: "Student attendance", intent: "studentAtt" },
+        { label: "Staff strength", intent: "staff" },
+        { label: "Admissions", intent: "admissions" },
+      ],
+    },
+
+    /* ═══ STAFF STRENGTH ═══ */
+    staff: {
+      messages: [
+        { role: "bot", kind: "cards", cards: [
+          { c: "stat", color: "teal", icon: "briefcase", kicker: "Staff strength · all branches",
+            num: "96", delta: { text: "+7 this year", dir: "up" },
+            metrics: [
+              { k: "Teaching", v: "72" },
+              { k: "Non-teaching", v: "24" },
+              { k: "Student : teacher", v: "18 : 1" },
+              { k: "Departments", v: "9" },
+            ] },
+        ]},
+        { role: "bot", kind: "text", text: "Student–teacher ratio is <strong>18:1</strong>, within the recommended range. Want today's staff attendance?" },
+      ],
+      suggestions: [
+        { label: "Staff attendance", intent: "staffAtt" },
+        { label: "Student strength", intent: "students" },
+        { label: "Admissions", intent: "admissions" },
+      ],
+    },
+
+    /* ═══ STUDENT ATTENDANCE ═══ */
+    studentAtt: {
+      messages: [
+        { role: "bot", kind: "cards", cards: [
+          { c: "stat", color: "orange", icon: "calendar", kicker: "Student attendance · Today",
+            num: "94.2%", delta: { text: "−1.1% vs avg", dir: "down" },
+            metrics: [
+              { k: "Present", v: "1,184" },
+              { k: "Absent", v: "73" },
+              { k: "On leave", v: "21" },
+              { k: "Late", v: "14" },
+            ] },
+          { c: "list", color: "orange", icon: "calendar", kicker: "Attendance today", title: "By class",
+            rows: [
+              { ava: "12", avaColor: "green", name: "Class 12", sub: "118 / 120 present", val: "98%", valColor: "green" },
+              { ava: "8", avaColor: "blue", name: "Class 8", sub: "125 / 131 present", val: "95%", valColor: "ink" },
+              { ava: "10", avaColor: "orange", name: "Class 10", sub: "133 / 142 present", val: "94%", valColor: "ink" },
+              { ava: "9", avaColor: "amber", name: "Class 9", sub: "134 / 148 present", val: "91%", valColor: "amber" },
+            ] },
+        ]},
+      ],
+      suggestions: [
+        { label: "Staff attendance", intent: "staffAtt" },
+        { label: "Student strength", intent: "students" },
+        { label: "Fee collection", intent: "feeStatus" },
+      ],
+    },
+
+    /* ═══ STAFF ATTENDANCE ═══ */
+    staffAtt: {
+      messages: [
+        { role: "bot", kind: "cards", cards: [
+          { c: "stat", color: "amber", icon: "clock", kicker: "Staff attendance · Today",
+            num: "97.9%", delta: { text: "+0.4% vs avg", dir: "up" },
+            metrics: [
+              { k: "Present", v: "94" },
+              { k: "On leave", v: "2" },
+              { k: "Late", v: "1" },
+              { k: "Subs arranged", v: "2" },
+            ] },
+        ]},
+        { role: "bot", kind: "text", text: "All classes are covered — <strong>2 substitutions</strong> arranged for staff on leave. Want staff strength figures?" },
+      ],
+      suggestions: [
+        { label: "Staff strength", intent: "staff" },
+        { label: "Student attendance", intent: "studentAtt" },
+        { label: "Fee collection", intent: "feeStatus" },
+      ],
+    },
+  };
+
+  /* ═══ Artifacts → New dashboard: ideate-and-build flow ═══ */
+  RESPONSES.newDashboard = {
+    messages: [
+      { role: "bot", kind: "text", text: "Let's build a dashboard together. Tell me what you'd like to track — a module, a metric, a branch — or start from one of these:" },
+    ],
+    suggestions: [
+      { label: "Fee collection dashboard", intent: "buildFeeDash" },
+      { label: "Admissions funnel", intent: "buildAdmDash" },
+      { label: "Attendance pulse", intent: "buildAttDash" },
+    ],
+  };
+  RESPONSES.buildFeeDash = {
+    messages: [
+      { role: "bot", kind: "text", text: "✓ Built the <strong>Fee Collection Dashboard</strong> from your live data — total collected, branch split and a 12-day trend. It's open on the side; hit <strong>Refresh data</strong> any time to pull the latest." },
+    ],
+    suggestions: [ { label: "Add an admissions funnel", intent: "buildAdmDash" }, { label: "Add attendance pulse", intent: "buildAttDash" } ],
+  };
+  RESPONSES.buildAdmDash = {
+    messages: [
+      { role: "bot", kind: "text", text: "✓ Built the <strong>Admissions Funnel</strong> dashboard — applications, confirmations, seats left and admission revenue, with a 12-week trend. Opening it now." },
+    ],
+    suggestions: [ { label: "Add a fee dashboard", intent: "buildFeeDash" }, { label: "Add attendance pulse", intent: "buildAttDash" } ],
+  };
+  RESPONSES.buildAttDash = {
+    messages: [
+      { role: "bot", kind: "text", text: "✓ Built the <strong>Attendance Pulse</strong> dashboard — today's student & staff attendance with a 12-day trend. Opening it now." },
+    ],
+    suggestions: [ { label: "Add a fee dashboard", intent: "buildFeeDash" }, { label: "Add admissions funnel", intent: "buildAdmDash" } ],
+  };
+
+  const FALLBACK = {
+    messages: [
+      { role: "bot", kind: "text", text: "I answer six things for now — <strong>fee collection, admissions, student strength, staff strength, student attendance and staff attendance.</strong> Pick one:" },
+    ],
+    suggestions: [
+      { label: "Fee collection", intent: "feeStatus" },
+      { label: "Admissions", intent: "admissions" },
+      { label: "Student strength", intent: "students" },
+      { label: "Staff strength", intent: "staff" },
+      { label: "Student attendance", intent: "studentAtt" },
+      { label: "Staff attendance", intent: "staffAtt" },
+    ],
+  };
+
+  function routeText(raw) {
+    const t = (raw || "").toLowerCase();
+    if (/(dashboard|widget|chart|track|monitor|visuali|build me|create)/.test(t)) {
+      if (/(admission|enrol|applic|seat|intake)/.test(t)) return "buildAdmDash";
+      if (/(attend|present|leave|absent)/.test(t)) return "buildAttDash";
+      if (/(fee|collect|payment|revenue|due)/.test(t)) return "buildFeeDash";
+      return "newDashboard";
+    }
+    if (/(staff|teacher|employee|faculty).*(attend|present|leave)|(attend|present|leave).*(staff|teacher)/.test(t)) return "staffAtt";
+    if (/(student|pupil|kid).*(attend|present|absent)|attend|present|absent/.test(t)) return "studentAtt";
+    if (/(staff|teacher|employee|faculty)/.test(t)) return "staff";
+    if (/(branch|school).*(perform|struggl|best|worst|rank|well)/.test(t)) return "branchRank";
+    if (/(last year|year.over|yoy|same month|more or less)/.test(t)) return "feeYoY";
+    if (/(new.*(vs|versus|compared).*continu|old.*(vs|new)|which group|pays better)/.test(t)) return "newVsCont";
+    if (/(percent|%|share).*(admission|new)|admission.*(percent|%|share|revenue)/.test(t)) return "admRevShare";
+    if (/(student|pupil|enrol|strength|headcount)/.test(t)) return "students";
+    if (/(admission|applicant|application|seat|intake|enquir)/.test(t)) return "admissions";
+    if (/(total|collect|pending|overdue|status|how much)/.test(t)) return "feeStatus";
+    if (/(fee|payment|revenue|money)/.test(t)) return "feeStatus";
+    return null;
+  }
+
+  function resolve(arg) {
+    if (arg.intent) return RESPONSES[arg.intent] || FALLBACK;
+    const intent = routeText(arg.text);
+    return intent ? RESPONSES[intent] : FALLBACK;
+  }
+
+  const INTENT_LABEL = {
+    feeStatus: "Total fees collected this month across all branches? How much is pending?",
+    branchRank: "Which branch is performing well and which is struggling?",
+    feeYoY: "Last year same month vs this month — are we collecting more or less?",
+    admissions: "How many admissions this year? Applications and seats left?",
+    admRevShare: "What % of total fee revenue came from new admission students?",
+    admRevYoY: "How much did we earn from admissions last year vs this year?",
+    newVsCont: "New vs continuing students — which group pays better?",
+    students: "What is our total student strength?",
+    staff: "What is our staff strength?",
+    studentAtt: "What's today's student attendance?",
+    staffAtt: "What's today's staff attendance?",
+    newDashboard: "Create a dashboard",
+    buildFeeDash: "Build a fee collection dashboard",
+    buildAdmDash: "Build an admissions funnel",
+    buildAttDash: "Build an attendance pulse dashboard",
+  };
+
+  window.COPILOT = { WELCOME_SUGGEST, CAPABILITIES, RESPONSES, resolve, INTENT_LABEL };
+})();

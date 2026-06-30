@@ -71,7 +71,7 @@ const categories = [
                 path: "/academic-guide"
             },
             {
-                title: "Academic Content Intelligence",
+                title: "Academic Content AI",
                 description: "AI-powered curriculum content generation system mapped to course outcomes and syllabus units.",
                 icon: Brain,
                 path: "/academic-content-intelligence"
@@ -246,6 +246,12 @@ const categories = [
                 description: "AI-predicted billing collections, cash flow anomaly detection, fee aging analysis, and proactive recovery modeling.",
                 icon: TrendingUp,
                 path: "/finance-intelligence"
+            },
+            {
+                title: "Iris AI Copilot",
+                description: "Conversational assistant for real-time institutional metrics across fee collection, admissions, attendance, and strength.",
+                icon: Brain,
+                path: "/iris-ai"
             }
         ]
     },
@@ -325,8 +331,9 @@ const Dashboard: React.FC = () => {
         "Compliance & NAAC",
         "Finance Intelligence",
         "Mentor Management",
-        "Academic Content Intelligence",
-        "AI Question Paper Generator"
+        "Academic Content AI",
+        "AI Question Paper Generator",
+        "Iris AI Copilot"
     ], []);
 
     const enableAllAiModules = () => {
@@ -396,8 +403,9 @@ const Dashboard: React.FC = () => {
             "Compliance & NAAC",
             "Finance Intelligence",
             "Mentor Management",
-            "Academic Content Intelligence",
-            "AI Question Paper Generator"
+            "Academic Content AI",
+            "AI Question Paper Generator",
+            "Iris AI Copilot"
         ];
 
         return categories

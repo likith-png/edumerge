@@ -1,0 +1,305 @@
+/* ============================================================
+   edumerge · Iris — Projects + Artifacts (Claude-app concept)
+   Adds: project workspaces (module-based or custom) and
+   refreshable dashboard artifacts.
+   ============================================================ */
+
+/* ---------- number formatters (for refreshable dashboards) ---------- */
+const fmtINRL = (n) => "₹" + (n / 100000).toFixed(2) + "L";
+const fmtINR  = (n) => "₹" + Math.round(n).toLocaleString("en-IN");
+const fmtPct  = (n) => n.toFixed(1) + "%";
+const fmtInt  = (n) => Math.round(n).toLocaleString("en-IN");
+const FMT = { inrL: fmtINRL, inr: fmtINR, pct: fmtPct, int: fmtInt };
+const jitter = (n, amt = 0.02) => n * (1 + (Math.random() * 2 - 1) * amt);
+
+/* ============================================================
+   PROJECTS  (module-based come pre-wired with that domain)
+   ============================================================ */
+const PROJECTS = [
+  { id: "fees", type: "module", name: "Fee Management", icon: "wallet", color: "orange",
+    desc: "Collections, dues, refunds and reconciliation across all 6 branches.",
+    chats: [
+      { id: "f1", title: "January collection vs target", when: "2h ago", intent: "feeStatus" },
+      { id: "f2", title: "Which branch is lagging?", when: "Yesterday", intent: "branchRank" },
+      { id: "f3", title: "Overdue follow-up list", when: "2 days ago", intent: "feeStatus" },
+      { id: "f4", title: "Year-over-year collection", when: "Apr 12", intent: "feeYoY" },
+    ] },
+  { id: "adm", type: "module", name: "Admissions", icon: "grad", color: "blue",
+    desc: "Enquiries, applications, seat allotment and admission revenue.",
+    chats: [
+      { id: "a1", title: "New admissions this year", when: "5h ago", intent: "admissions" },
+      { id: "a2", title: "Revenue from new admits", when: "Yesterday", intent: "admRevShare" },
+      { id: "a3", title: "New vs continuing students", when: "Apr 28", intent: "newVsCont" },
+    ] },
+  { id: "att", type: "module", name: "Attendance", icon: "calendar", color: "blue",
+    desc: "Daily student and staff attendance, leaves and substitutions.",
+    chats: [
+      { id: "t1", title: "Today's student attendance", when: "1h ago", intent: "studentAtt" },
+      { id: "t2", title: "Staff attendance today", when: "3h ago", intent: "staffAtt" },
+    ] },
+  { id: " q3", type: "custom", name: "Q3 Board Review", icon: "folder", color: "orange",
+    desc: "Custom workspace — pulling numbers for the quarterly board meeting.",
+    chats: [
+      { id: "q1", title: "Fee + admission revenue mix", when: "Yesterday", intent: "admRevShare" },
+      { id: "q2", title: "Branch performance ranking", when: "2 days ago", intent: "branchRank" },
+    ] },
+];
+
+/* templates offered in the "New project" sheet */
+const PROJECT_TEMPLATES = [
+  { id: "fees", name: "Fee Management", icon: "wallet", color: "orange", desc: "Collections, dues & refunds" },
+  { id: "adm", name: "Admissions", icon: "grad", color: "blue", desc: "Enquiries to enrolment" },
+  { id: "att", name: "Attendance", icon: "calendar", color: "blue", desc: "Students & staff, daily" },
+  { id: "exam", name: "Examinations", icon: "doc", color: "orange", desc: "Marks, results & analysis" },
+  { id: "staff", name: "Staff & HR", icon: "briefcase", color: "blue", desc: "Headcount, payroll & leave" },
+  { id: "custom", name: "Custom project", icon: "plus", color: "orange", desc: "Start from a blank workspace" },
+];
+
+/* ============================================================
+   ARTIFACTS  (dashboards — refreshable)
+   ============================================================ */
+const ARTIFACTS = [
+  { id: "feeDash", title: "Fee Collection Dashboard", icon: "grid", color: "orange",
+    desc: "Live collection, branch split and 12-day trend.",
+    project: "Fee Management",
+    widgets: [
+      { type: "kpi", k: "Collected (MTD)", base: 4567000, fmt: "inrL", delta: "+8.5% YoY", dir: "up" },
+      { type: "kpi", k: "Pending", base: 892000, fmt: "inrL", delta: "−12% MoM", dir: "up" },
+      { type: "kpi", k: "Overdue (30+d)", base: 234000, fmt: "inrL", delta: "+5 accts", dir: "down" },
+      { type: "kpi", k: "Collection rate", base: 83.6, fmt: "pct", delta: "+2.3 pts", dir: "up" },
+      { type: "bars", label: "Daily collection · last 12 days",
+        bars: [62, 78, 54, 88, 70, 95, 48, 82, 66, 90, 58, 74] },
+      { type: "split", label: "Revenue mix",
+        parts: [ { label: "New admissions", base: 1850000, fmt: "inrL", color: "orange", pct: 38 },
+                 { label: "Continuing", base: 2695000, fmt: "inrL", color: "blue", pct: 62 } ] },
+      { type: "rows", label: "Top branches",
+        rows: [ { name: "HSR", base: 1850000, fmt: "inrL" },
+                { name: "Banashankari", base: 1477000, fmt: "inrL" },
+                { name: "Arkavathi", base: 1240000, fmt: "inrL" } ] },
+    ] },
+  { id: "admDash", title: "Admissions Funnel", icon: "grid", color: "blue",
+    desc: "Enquiries → applications → confirmed, with seats left.",
+    project: "Admissions",
+    widgets: [
+      { type: "kpi", k: "Applications", base: 412, fmt: "int", delta: "+12% YoY", dir: "up" },
+      { type: "kpi", k: "Confirmed", base: 284, fmt: "int", delta: "69% conv.", dir: "up" },
+      { type: "kpi", k: "Seats left", base: 66, fmt: "int", delta: "across grades", dir: "down" },
+      { type: "kpi", k: "Adm. revenue", base: 1850000, fmt: "inrL", delta: "+21.7%", dir: "up" },
+      { type: "bars", label: "Applications · last 12 weeks",
+        bars: [40, 52, 48, 63, 58, 71, 66, 80, 74, 88, 82, 95] },
+      { type: "rows", label: "Admissions by class",
+        rows: [ { name: "Class 11", base: 78, fmt: "int" },
+                { name: "Class 1", base: 64, fmt: "int" },
+                { name: "Class 9", base: 41, fmt: "int" } ] },
+    ] },
+  { id: "attDash", title: "Attendance Pulse", icon: "grid", color: "blue",
+    desc: "Today's student & staff attendance at a glance.",
+    project: "Attendance",
+    widgets: [
+      { type: "kpi", k: "Student present", base: 94.2, fmt: "pct", delta: "−1.1% vs avg", dir: "down" },
+      { type: "kpi", k: "Staff present", base: 97.9, fmt: "pct", delta: "+0.4% vs avg", dir: "up" },
+      { type: "kpi", k: "Absent", base: 73, fmt: "int", delta: "students", dir: "down" },
+      { type: "kpi", k: "On leave", base: 21, fmt: "int", delta: "students", dir: "up" },
+      { type: "bars", label: "Attendance % · last 12 days",
+        bars: [92, 94, 91, 95, 93, 96, 90, 94, 92, 95, 93, 94] },
+    ] },
+];
+
+/* ---------- one refreshable dashboard ---------- */
+function Dashboard({ artifact, compact }) {
+  const seed = React.useRef(0);
+  const [tick, setTick] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+  const [secs, setSecs] = useState(0);
+
+  useEffect(() => {
+    const iv = setInterval(() => setSecs((s) => s + 1), 1000);
+    return () => clearInterval(iv);
+  }, []);
+
+  const refresh = () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    setTimeout(() => { seed.current += 1; setTick((t) => t + 1); setSecs(0); setRefreshing(false); }, 850);
+  };
+
+  const rel = secs < 3 ? "just now" : secs < 60 ? secs + "s ago" : Math.floor(secs / 60) + "m ago";
+  // recompute jittered values whenever tick changes
+  const val = (base, fmt) => FMT[fmt](seed.current === 0 ? base : jitter(base));
+
+  return (
+    <div className="dash">
+      <div className="dash-bar">
+        <div className="dash-bar-tx">
+          <span className="dash-live"><span className="conn-dot on"></span>Live data</span>
+          <span className="dash-upd">Updated {rel}</span>
+        </div>
+        <button className={"dash-refresh" + (refreshing ? " busy" : "")} onClick={refresh}>
+          <Icon name="refresh" size={15} stroke={2.2} />{refreshing ? "Refreshing…" : "Refresh data"}
+        </button>
+      </div>
+      <div className={"dash-grid" + (compact ? " compact" : "")} key={tick}>
+        {artifact.widgets.map((w, i) => {
+          if (w.type === "kpi") return (
+            <div className="dash-kpi" key={i}>
+              <div className="dk-k">{w.k}</div>
+              <div className="dk-v">{val(w.base, w.fmt)}</div>
+              <div className={"dk-d " + (w.dir === "down" ? "down" : "up")}>
+                <Icon name={w.dir === "down" ? "trendDown" : "trendUp"} size={13} />{w.delta}
+              </div>
+            </div>
+          );
+          if (w.type === "bars") return (
+            <div className="dash-wide" key={i}>
+              <div className="dw-label">{w.label}</div>
+              <div className="dw-bars">
+                {w.bars.map((b, j) => {
+                  const h = seed.current === 0 ? b : Math.max(12, Math.min(100, jitter(b, 0.12)));
+                  return <span key={j} style={{ height: h + "%" }}></span>;
+                })}
+              </div>
+            </div>
+          );
+          if (w.type === "split") return (
+            <div className="dash-wide" key={i}>
+              <div className="dw-label">{w.label}</div>
+              <div className="split-bar" style={{ marginTop: 10 }}>
+                {w.parts.map((p, j) => <span key={j} style={{ width: p.pct + "%", background: `var(--tile-${p.color})` }}></span>)}
+              </div>
+              <div className="split-legend" style={{ marginTop: 10 }}>
+                {w.parts.map((p, j) => (
+                  <div className="split-item" key={j}>
+                    <span className="split-key"><span className="kv-dot" style={{ background: `var(--tile-${p.color})` }}></span>{p.label}</span>
+                    <span className="split-val">{val(p.base, p.fmt)} <small>· {p.pct}%</small></span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+          if (w.type === "rows") return (
+            <div className="dash-wide" key={i}>
+              <div className="dw-label">{w.label}</div>
+              <div className="dw-rows">
+                {w.rows.map((r, j) => (
+                  <div className="dw-row" key={j}><span>{r.name}</span><b>{val(r.base, r.fmt)}</b></div>
+                ))}
+              </div>
+            </div>
+          );
+          return null;
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ---------- empty-state / list helpers ---------- */
+function SectionHead({ title, sub, action, onAction }) {
+  return (
+    <div className="sec-head">
+      <div>
+        <div className="sec-title">{title}</div>
+        {sub && <div className="sec-sub">{sub}</div>}
+      </div>
+      {action && <button className="sec-action" onClick={onAction}><Icon name="plus" size={15} stroke={2.4} />{action}</button>}
+    </div>
+  );
+}
+
+/* ---------- Projects: library grid ---------- */
+function ProjectsView({ onOpen, onNew }) {
+  return (
+    <div className="lib">
+      <SectionHead title="Projects" sub="Organise chats by module or your own workspace" action="New project" onAction={onNew} />
+      <div className="proj-grid">
+        {PROJECTS.map((p) => (
+          <button className="proj-card" key={p.id} onClick={() => onOpen(p.id)}>
+            <div className="proj-top">
+              <div className="proj-ic" style={tint(p.color)}><Icon name={p.icon} size={20} /></div>
+              <span className={"proj-tag " + p.type}>{p.type === "module" ? "Module" : "Custom"}</span>
+            </div>
+            <div className="proj-name">{p.name}</div>
+            <div className="proj-desc">{p.desc}</div>
+            <div className="proj-foot"><Icon name="message" size={13} />{p.chats.length} chats</div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Project home: its chats + new chat ---------- */
+function ProjectHome({ project, onOpenChat, onNewChat, onBack }) {
+  return (
+    <div className="lib">
+      <button className="back-link" onClick={onBack}><Icon name="arrowLeft" size={16} />All projects</button>
+      <div className="proj-hero">
+        <div className="proj-hero-ic" style={tint(project.color)}><Icon name={project.icon} size={26} /></div>
+        <div className="proj-hero-tx">
+          <div className="proj-hero-name">{project.name} <span className={"proj-tag " + project.type}>{project.type === "module" ? "Module" : "Custom"}</span></div>
+          <div className="proj-hero-desc">{project.desc}</div>
+        </div>
+      </div>
+      <button className="proj-newchat" onClick={() => onNewChat(project)}>
+        <Icon name="plus" size={17} stroke={2.4} /> New chat in {project.name}
+      </button>
+      <div className="sec-title sm">Chats in this project</div>
+      <div className="chat-list">
+        {project.chats.map((c) => (
+          <button className="chat-item" key={c.id} onClick={() => onOpenChat(project, c)}>
+            <div className="ci-ic"><Icon name="message" size={16} /></div>
+            <div className="ci-tx"><div className="ci-t">{c.title}</div><div className="ci-w">Last message {c.when}</div></div>
+            <Icon name="chevronRight" size={16} style={{ color: "var(--ink-3)", flex: "none" }} />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Artifacts: library grid ---------- */
+function ArtifactsView({ onOpen, onCreate }) {
+  return (
+    <div className="lib">
+      <SectionHead title="Artifacts" sub="Dashboards you've created — refreshable any time" action="New dashboard" onAction={onCreate} />
+      <div className="art-grid">
+        {ARTIFACTS.map((a) => (
+          <button className="art-card" key={a.id} onClick={() => onOpen(a.id)}>
+            <div className="art-ic" style={tint(a.color)}><Icon name={a.icon} size={20} /></div>
+            <div className="art-name">{a.title}</div>
+            <div className="art-desc">{a.desc}</div>
+            <div className="art-foot"><span className="conn-dot on"></span>Live · {a.project}</div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ---------- New-project picker sheet ---------- */
+function NewProjectSheet({ onClose, onPick }) {
+  return (
+    <div className="modal-scrim" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-head">
+          <div className="modal-title">New project</div>
+          <button className="icon-btn" onClick={onClose}><Icon name="x" size={20} /></button>
+        </div>
+        <div className="modal-sub">Start from a module — pre-wired with its live data — or a blank custom workspace.</div>
+        <div className="tpl-grid">
+          {PROJECT_TEMPLATES.map((t) => (
+            <button className="tpl-card" key={t.id} onClick={() => onPick(t)}>
+              <div className="tpl-ic" style={tint(t.color)}><Icon name={t.icon} size={19} /></div>
+              <div className="tpl-tx"><div className="tpl-name">{t.name}</div><div className="tpl-desc">{t.desc}</div></div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, {
+  PROJECTS, PROJECT_TEMPLATES, ARTIFACTS,
+  Dashboard, ProjectsView, ProjectHome, ArtifactsView, NewProjectSheet, SectionHead,
+});
